@@ -8,7 +8,6 @@
 // threshold (it can never fire again), which is the characteristic failure mode
 // of the minimal loop (lateral inhibition starves losers; nothing recruits them).
 
-const N_OUT = 8;
 const N_PIX = 9;   // 3x3 grid
 
 export class ReceptiveFields {
@@ -23,6 +22,8 @@ export class ReceptiveFields {
 
   build() {
     if (this.built) return;
+    const nOut = (this.store.topology?.neurons || [])
+      .filter(n => n.layer === 'L2' && n.type === 'excitatory').length;
     // Signed-input reference grid.
     this.inputEl.innerHTML = '';
     this.inputCells = [];
@@ -35,7 +36,7 @@ export class ReceptiveFields {
     // One card per L2E neuron.
     this.grid.innerHTML = '';
     this.cards = [];
-    for (let j = 0; j < N_OUT; j++) {
+    for (let j = 0; j < nOut; j++) {
       const root = document.createElement('div');
       root.className = 'rf-card';
       const title = document.createElement('div');
@@ -74,7 +75,7 @@ export class ReceptiveFields {
     }
 
     const winner = dyn && dyn.winner;   // e.g. "L2E3"
-    for (let j = 0; j < N_OUT; j++) {
+    for (let j = 0; j < this.cards.length; j++) {
       const card = this.cards[j];
       const vals = [];
       for (let i = 0; i < N_PIX; i++) {

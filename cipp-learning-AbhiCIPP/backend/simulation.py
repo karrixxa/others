@@ -97,28 +97,26 @@ from neuron_flexible import UNIT, LEAK_SCALE         # noqa: E402  fixed-point c
 
 
 PATTERNS = {
-    'row 0':    [1, 1, 1, 0, 0, 0, 0, 0, 0],
     'row 1':    [0, 0, 0, 1, 1, 1, 0, 0, 0],
-    'row 2':    [0, 0, 0, 0, 0, 0, 1, 1, 1],
-    'col 0':    [1, 0, 0, 1, 0, 0, 1, 0, 0],
     'col 1':    [0, 1, 0, 0, 1, 0, 0, 1, 0],
-    'col 2':    [0, 0, 1, 0, 0, 1, 0, 0, 1],
     'diag \\':  [1, 0, 0, 0, 1, 0, 0, 0, 1],
     'diag /':   [0, 0, 1, 0, 1, 0, 1, 0, 0],
 }
 
-# 3D layout for the 8 L2 output neurons — evenly spaced ring in the XY plane.
+# Number of competing L2 cells follows the active recognition task.
+N_PIX = 9
+N_OUT = len(PATTERNS)
+
+# 3D layout for the L2 output neurons — evenly spaced ring in the XY plane.
 import math as _math
 _R, _Z = 3.2, 4.0
 L2_HOMES = [
-    (round(_R * _math.cos(k * _math.pi / 4), 4),
-     round(_R * _math.sin(k * _math.pi / 4), 4),
+    (round(_R * _math.cos(k * 2 * _math.pi / N_OUT), 4),
+     round(_R * _math.sin(k * 2 * _math.pi / N_OUT), 4),
      _Z)
-    for k in range(8)
+    for k in range(N_OUT)
 ]
 
-N_PIX = 9
-N_OUT = 8
 GRID = 2.2
 L2E_FANIN = 1 + N_PIX     # [local_I_placeholder, *pixels]
 FREQ_WINDOW = 40
@@ -834,7 +832,7 @@ class SimulationEngine:
             n.distance_min = p['distance_min']
 
         self.l1i_hold = np.zeros(N_PIX)   # L1I spike latch: held until next volley
-        self.input_vec = np.array(PATTERNS['row 0'], dtype=float)
+        self.input_vec = np.array(PATTERNS['row 1'], dtype=float)
         self.timestep = 0
         self.spiked = defaultdict(bool)
         self.freq = {nid: deque(maxlen=FREQ_WINDOW) for nid in self.neurons}
@@ -888,7 +886,7 @@ class SimulationEngine:
         self.inh_decay = self.params['inh_decay']
         self.inh_boost = self.params['inh_boost_frac'] * self.params['threshold_l2']
         self.l2_inh_field = 0.0
-        self.current_pattern = 'row 0'            # name backing self.input_vec
+        self.current_pattern = 'row 1'            # name backing self.input_vec
         self.auto_cycle = False
         self.visit_steps = max(1, self.params['cycle_period'])   # steps per pattern visit
         self.trained_streak = 3                   # consecutive same-winner ROUNDS = trained
