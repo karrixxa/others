@@ -9,7 +9,7 @@
 // coalesced to one per animation frame.
 
 const MARGIN = 66;        // pinned left gutter: id label + rate bar
-const AXIS = 16;          // top axis strip
+const AXIS = 28;          // top strip: summary plus pattern labels
 const HISTORY = 1500;     // timesteps retained
 
 export class Raster {
@@ -23,6 +23,7 @@ export class Raster {
     this.order = [];
     this.spike = [];       // Uint8Array per timestep: 1 = spiked
     this.times = [];
+    this.patterns = [];    // active input-pattern name per timestep
     this.rate = new Map();
     this.showL1 = true;
     this.colW = 6;
@@ -56,7 +57,7 @@ export class Raster {
   build(topo) {
     this.order = (topo?.neurons ?? []).map(n => ({ id: n.id, type: n.type, group: n.layer + n.type }));
     this.index = new Map(this.order.map((n, i) => [n.id, i]));
-    this.spike = []; this.times = [];
+    this.spike = []; this.times = []; this.patterns = [];
     this.built = true;
   }
 
@@ -67,8 +68,12 @@ export class Raster {
       const i = this.index.get(n.id);
       if (i != null && n.spiked) spk[i] = 1;
     }
-    this.spike.push(spk); this.times.push(dyn.timestep);
-    while (this.spike.length > HISTORY) { this.spike.shift(); this.times.shift(); }
+    this.spike.push(spk);
+    this.times.push(dyn.timestep);
+    this.patterns.push(dyn.autocycle?.pattern ?? 'manual');
+    while (this.spike.length > HISTORY) {
+      this.spike.shift(); this.times.shift(); this.patterns.shift();
+    }
     this.rate = new Map(dyn.neurons.map(n => [n.id, n.freq ?? 0]));
     this._schedule();
   }
@@ -135,6 +140,7 @@ export class Raster {
     const cLine = css.getPropertyValue('--line').trim() || '#242b3a';
     const cTxt = css.getPropertyValue('--txt-1').trim() || '#c7d0e0';
     const cMut = css.getPropertyValue('--txt-2').trim() || '#5f6b82';
+    const cAccent = css.getPropertyValue('--accent').trim() || '#5eead4';
 
     const laneH = (vh - AXIS) / n;
     const y0 = AXIS;
@@ -144,6 +150,23 @@ export class Raster {
     const cTo = Math.min(cols, Math.ceil((scrollX - MARGIN + vw) / this.colW) + 1);
     const xOf = (c) => MARGIN + (c * this.colW - scrollX);
     const tickH = Math.min(laneH - 2, Math.max(3, laneH * 0.6));
+
+    // Presentation boundaries come from the engine's active pattern. This
+    // captures both manual pattern changes and auto-cycle visits without a
+    // second UI-side clock.
+    ctx.font = '9px ui-monospace, monospace';
+    ctx.textBaseline = 'top';
+    for (let c = cFrom; c < cTo; c++) {
+      const changed = c === 0 || this.patterns[c] !== this.patterns[c - 1];
+      if (!changed) continue;
+      const x = xOf(c) + 0.5;
+      ctx.strokeStyle = cAccent;
+      ctx.globalAlpha = 0.5;
+      ctx.beginPath(); ctx.moveTo(x, AXIS); ctx.lineTo(x, vh); ctx.stroke();
+      ctx.globalAlpha = 1;
+      ctx.fillStyle = cAccent;
+      ctx.fillText(this.patterns[c] || 'pattern', x + 3, 14);
+    }
 
     // Group stripes + separators.
     let gi = 0;
@@ -180,7 +203,7 @@ export class Raster {
       ctx.fillRect(MARGIN - 15, cy - 1.5, 12 * f, 3); ctx.globalAlpha = 1;
     }
     ctx.strokeStyle = cLine; ctx.beginPath(); ctx.moveTo(MARGIN + .5, 0); ctx.lineTo(MARGIN + .5, vh); ctx.stroke();
-    ctx.clearRect(MARGIN, 0, vw - MARGIN, AXIS);
+    ctx.clearRect(MARGIN, 0, vw - MARGIN, 13);
     ctx.fillStyle = cMut; ctx.font = '10px ui-monospace, monospace'; ctx.textBaseline = 'top';
     if (cols) ctx.fillText(`spikes only · ${cols} steps · ${this.colW.toFixed(0)} px/step · newest →`, MARGIN + 6, 3);
   }
