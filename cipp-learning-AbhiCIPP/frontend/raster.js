@@ -26,6 +26,10 @@ export class Raster {
     this.patterns = [];    // active input-pattern name per timestep
     this.rate = new Map();
     this.showL1 = true;
+    // Most neurons are silent for a held 3-pixel pattern. Collapse those empty
+    // rows by default so the meaningful spikes are not separated by large gaps;
+    // the checkbox can restore the complete topology whenever needed.
+    this.hideSilent = true;
     this.colW = 6;
     this.follow = true;
     this.built = false;
@@ -38,6 +42,8 @@ export class Raster {
     document.getElementById('raster-zoom-out')?.addEventListener('click', () => this._zoom(1 / 1.5));
     const l1 = document.getElementById('raster-l1');
     l1?.addEventListener('change', () => { this.showL1 = l1.checked; this._schedule(); });
+    const quiet = document.getElementById('raster-hide-silent');
+    quiet?.addEventListener('change', () => { this.hideSilent = quiet.checked; this._schedule(); });
     this.scroll?.addEventListener('scroll', () => {
       const s = this.scroll;
       this.follow = s.scrollLeft + s.clientWidth >= s.scrollWidth - 6;
@@ -71,6 +77,8 @@ export class Raster {
     this.spike.push(spk);
     this.times.push(dyn.timestep);
     this.patterns.push(dyn.autocycle?.pattern ?? 'manual');
+    const patternLabel = document.getElementById('raster-current-pattern');
+    if (patternLabel) patternLabel.textContent = this.patterns[this.patterns.length - 1];
     while (this.spike.length > HISTORY) {
       this.spike.shift(); this.times.shift(); this.patterns.shift();
     }
@@ -103,7 +111,14 @@ export class Raster {
     this._draw();
   }
 
-  _lanes() { return this.showL1 ? this.order : this.order.filter(n => !n.group.startsWith('L1')); }
+  _lanes() {
+    let lanes = this.showL1 ? this.order : this.order.filter(n => !n.group.startsWith('L1'));
+    if (!this.hideSilent || !this.spike.length) return lanes;
+    return lanes.filter(n => {
+      const idx = this.index.get(n.id);
+      return this.spike.some(frame => frame[idx]);
+    });
+  }
 
   _draw() {
     if (!this._open() || !this.built) return;
@@ -150,6 +165,23 @@ export class Raster {
     const cTo = Math.min(cols, Math.ceil((scrollX - MARGIN + vw) / this.colW) + 1);
     const xOf = (c) => MARGIN + (c * this.colW - scrollX);
     const tickH = Math.min(laneH - 2, Math.max(3, laneH * 0.6));
+
+    // Light time grid every 25 recorded steps, with the engine timestep shown in
+    // the axis strip. This remains useful when a single pattern is held and there
+    // are therefore no pattern-change boundaries in the visible window.
+    ctx.font = '9px ui-monospace, monospace';
+    ctx.textBaseline = 'top';
+    for (let c = cFrom; c < cTo; c++) {
+      const t = this.times[c];
+      if (t == null || t % 25 !== 0) continue;
+      const x = xOf(c) + 0.5;
+      ctx.strokeStyle = cLine;
+      ctx.globalAlpha = 0.55;
+      ctx.beginPath(); ctx.moveTo(x, AXIS); ctx.lineTo(x, vh); ctx.stroke();
+      ctx.globalAlpha = 1;
+      ctx.fillStyle = cMut;
+      ctx.fillText(String(t), x + 2, 14);
+    }
 
     // Presentation boundaries come from the engine's active pattern. This
     // captures both manual pattern changes and auto-cycle visits without a

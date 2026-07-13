@@ -391,6 +391,7 @@ class SimulationEngine:
                  inhibitory_flow_rate: bool = False,
                  inh_trace_decay: float = 0.8,
                  inh_trace_normalized: bool = True,
+                 allow_subrest_inhibition: bool = False,
                  # Inhibitory-gate plasticity rule (see Neuron.apply_inhibition).
                  # inhibitory_delta_rule False = legacy saturating rule (every L2I->L2E
                  # gate converges to the same ceiling sqrt(w_max) -> uniform). True
@@ -536,6 +537,7 @@ class SimulationEngine:
                            inhibitory_flow_rate=inhibitory_flow_rate,
                            inh_trace_decay=inh_trace_decay,
                            inh_trace_normalized=inh_trace_normalized,
+                           allow_subrest_inhibition=allow_subrest_inhibition,
                            inhibitory_delta_rule=inhibitory_delta_rule,
                            inhibitory_rule_mode=inhibitory_rule_mode,
                            inhibitory_eta_up=inhibitory_eta_up,
@@ -694,6 +696,7 @@ class SimulationEngine:
                 else:
                     n.inhibitory_weight_cap = L2_GATE_WMAX
                 n.inhibitory_learning_rate = p['l2_gate_eta']   # Phase 1: gate plasticity eta
+                n.allow_subrest_inhibition = p['allow_subrest_inhibition']
                 # Charge-based excitatory rule (see Neuron._update_weights);
                 # eta scaled to this neuron's own weight_cap -- see ETA_FRAC note.
                 # Phase 1: L2E feedforward learning uses its own l2e_lr_frac.
@@ -951,7 +954,8 @@ class SimulationEngine:
                'signed_spike_learning', 'seed', 'l2_charge_chunks',
                'l1i_immediate_relay', 'excitatory_flow_rate', 'exc_trace_decay',
                'exc_trace_normalized', 'inhibitory_flow_rate', 'inh_trace_decay',
-               'inh_trace_normalized', 'inhibitory_delta_rule', 'inhibitory_rule_mode',
+               'inh_trace_normalized', 'allow_subrest_inhibition',
+               'inhibitory_delta_rule', 'inhibitory_rule_mode',
                'inhibitory_eta_up', 'inhibitory_eta_down', 'inhibitory_p_max',
                'inhibitory_margin_frac', 'inhibitory_delta_eta',
                'distance_weighting', 'distance_power', 'distance_ref', 'distance_min',

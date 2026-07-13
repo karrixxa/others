@@ -179,6 +179,22 @@ def test_inhibitory_event_dynamics_and_learning():
     print("PASS: inhibitory event applies V=V-w and strengthens the gate by eta*p*(1-w^2/w_max)")
 
 
+def test_subrest_inhibition_is_opt_in():
+    """Baseline inhibition stops at rest; the diagnostic flag may hyperpolarize."""
+    n = Neuron(n_inputs=1, threshold=2.0, weight_cap=1.0, leak_rate=0.0,
+               inhibitory_learning_rate=0.0)
+    n.weights = np.array([-0.5])
+    n.potential = 0.2
+    n.apply_inhibition(np.array([1]))
+    assert np.isclose(n.potential, n.resting_potential)
+
+    n.allow_subrest_inhibition = True
+    n.potential = 0.2
+    n.apply_inhibition(np.array([1]))
+    assert np.isclose(n.potential, -0.3)
+    print("PASS: sub-rest inhibition is available for experiments but off by default")
+
+
 def test_inhibitory_learning_prefers_near_threshold():
     """The gate strengthens more for a neuron that was closer to firing."""
     near = Neuron(n_inputs=1, threshold=1.0, weight_cap=1.0, leak_rate=0.0, inhibitory_learning_rate=0.2)
@@ -405,6 +421,7 @@ if __name__ == "__main__":
     test_charge_based_excitatory_exact_numeric()
     test_dynamic_fanin_excitatory_rule()
     test_inhibitory_event_dynamics_and_learning()
+    test_subrest_inhibition_is_opt_in()
     test_inhibitory_learning_prefers_near_threshold()
     test_inhibitory_saturation_at_wmax()
     test_inhibitory_refractory_gate()

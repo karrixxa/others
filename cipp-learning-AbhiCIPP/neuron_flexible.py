@@ -187,6 +187,11 @@ class Neuron:
         self.weight_cap = weight_cap        # Maximum absolute value for weights (also w_max for inhibition)
         self.leak_rate = leak_rate          # stored as integer numerator self._leak_num (see property)
         self.inhibitory_learning_rate = inhibitory_learning_rate  # eta for inhibitory plasticity
+        # Experimental IPSP policy. The baseline floors a one-shot inhibitory
+        # discharge at rest. When enabled, inhibition may hyperpolarize below
+        # rest, preserving gate-magnitude differences instead of mapping every
+        # sufficiently large discharge to the same zero-voltage result.
+        self.allow_subrest_inhibition = False
         # Saturation ceiling (w_max) for inhibitory gates, kept separate from the
         # feedforward weight_cap (defaults to weight_cap when None). See apply_inhibition.
         self.inhibitory_weight_cap = inhibitory_weight_cap
@@ -489,9 +494,11 @@ class Neuron:
                 self.inh_trace += w * (1.0 - self.inh_trace_decay) if self.inh_trace_normalized else w
                 v_post = v_pre
             else:
-                # Linear one-shot discharge FLOORED at rest:
-                # inhibition cannot push the membrane below resting potential.
-                self.potential = max(self.potential - w, self.resting_potential)
+                # Linear one-shot discharge. Baseline behavior floors at rest;
+                # the opt-in sub-rest experiment preserves hyperpolarization.
+                discharged = self.potential - w
+                self.potential = (discharged if self.allow_subrest_inhibition
+                                  else max(discharged, self.resting_potential))
                 v_post = float(self.potential)
             # Normalized closeness to firing, clamped to [0, 1] (saturating rule).
             p = min(max(v_pre / theta, 0.0), 1.0) if theta > 0 else 0.0
