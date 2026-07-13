@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SNN · Neural Simulation Dashboard</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><circle cx='8' cy='8' r='5' fill='%235eead4'/></svg>" />
+  <link rel="stylesheet" href="style.css" />
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+      }
+    }
+  </script>
+</head>
+<body>
+  <!-- ───────────────────────── Top navigation ───────────────────────── -->
+  <header class="topbar">
+    <div class="brand">
+      <span class="logo"></span>
+      <div>
+        <div class="brand-title">Spiking Neural Network</div>
+        <div class="brand-sub">8-line recognition · 3×3 grid</div>
+      </div>
+    </div>
+
+    <div class="status-cluster">
+      <div class="stat-pill"><span class="k">Status</span><span class="v" id="st-status">—</span></div>
+      <div class="stat-pill"><span class="k">Timestep</span><span class="v" id="st-timestep">0</span></div>
+      <div class="stat-pill"><span class="k">Speed</span><span class="v" id="st-speed">— /s</span></div>
+      <div class="stat-pill"><span class="k">Winner</span><span class="v" id="st-winner">—</span></div>
+      <div class="stat-pill"><span class="k">FPS</span><span class="v" id="st-fps">0</span></div>
+      <div class="conn" id="st-conn"><span class="dot"></span><span id="st-conn-label">connecting…</span></div>
+    </div>
+
+    <div class="global-controls">
+      <button class="btn primary" id="g-start">▶ Start</button>
+      <button class="btn" id="g-pause">⏸ Pause</button>
+      <button class="btn" id="g-step">⏭ Step</button>
+      <button class="btn danger" id="g-reset">⟲ Reset</button>
+    </div>
+  </header>
+
+  <!-- ───────────────────────── Main workspace ───────────────────────── -->
+  <main class="layout">
+    <!-- Left sidebar -->
+    <aside class="sidebar left" id="sidebar-left">
+      <section class="panel" data-section>
+        <header class="panel-head"><span>Experiment</span><span class="chev"></span></header>
+        <div class="panel-body">
+          <div class="btn-row">
+            <button class="btn sm primary" id="x-start">Start</button>
+            <button class="btn sm" id="x-pause">Pause</button>
+            <button class="btn sm" id="x-resume">Resume</button>
+          </div>
+          <div class="btn-row">
+            <button class="btn sm" id="x-step">Step</button>
+            <button class="btn sm danger" id="x-reset">Reset</button>
+          </div>
+          <label class="field">
+            <span>Speed <b id="speed-val">12</b> steps/s</span>
+            <input type="range" id="speed" min="1" max="120" value="12" />
+          </label>
+        </div>
+      </section>
+
+      <section class="panel" data-section>
+        <header class="panel-head"><span>Pattern Selection</span><span class="chev"></span></header>
+        <div class="panel-body">
+          <div class="pixel-grid" id="pixel-grid"></div>
+          <div class="pattern-buttons" id="pattern-buttons"></div>
+          <div class="btn-row">
+            <button class="btn sm" id="p-random">Random</button>
+            <button class="btn sm" id="p-clear">Clear</button>
+            <button class="btn sm" id="p-noise">Noise</button>
+          </div>
+          <div class="autocycle">
+            <label class="check"><input type="checkbox" id="ac-enable" /> Auto-cycle patterns</label>
+            <label class="field">
+              <span>Trained after <b id="ac-streak-val">3</b> stable rounds</span>
+              <input type="range" id="ac-streak" min="1" max="10" step="1" value="3" />
+            </label>
+            <p class="config-desc">Rotates through all patterns, a short visit each. A pattern is
+              "trained" once the same L2E neuron wins it for N rounds in a row; the cycle stops when
+              all are trained. (Sitting on one pattern can't train — the pool round-robins.)</p>
+            <div class="ac-status" id="ac-status">idle</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel" data-section>
+        <header class="panel-head"><span>Manual Firing</span><span class="chev"></span></header>
+        <div class="panel-body">
+          <label class="field">
+            <span>Neuron</span>
+            <select id="mf-neuron"></select>
+          </label>
+          <label class="field">
+            <span>Magnitude <b id="mf-mag-val">1.0</b></span>
+            <input type="range" id="mf-mag" min="0.1" max="3" step="0.1" value="1" />
+          </label>
+          <div class="btn-row">
+            <button class="btn sm primary" id="mf-pulse">Single Pulse</button>
+            <button class="btn sm" id="mf-hold" data-on="0">Continuous</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel" data-section>
+        <header class="panel-head"><span>Model Config</span><span class="chev"></span></header>
+        <div class="panel-body">
+          <p class="config-note">Applying rebuilds the network and restarts learning from fresh weights.</p>
+          <div id="config-controls"></div>
+          <div class="btn-row">
+            <button class="btn sm primary" id="config-apply">Apply &amp; Restart</button>
+            <button class="btn sm" id="config-reset-defaults">Defaults</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel" data-section>
+        <header class="panel-head"><span>Display Filters</span><span class="chev"></span></header>
+        <div class="panel-body filters">
+          <label class="check"><input type="checkbox" id="f-active" /> Only active neurons</label>
+          <label class="check"><input type="checkbox" id="f-weak" checked /> Hide weak synapses</label>
+          <label class="check"><input type="checkbox" id="f-assembly" /> Isolate winning assembly</label>
+          <label class="check"><input type="checkbox" id="f-l1" checked /> Show Layer 1</label>
+          <label class="check"><input type="checkbox" id="f-l2" checked /> Show Layer 2</label>
+          <label class="check"><input type="checkbox" id="f-inh" checked /> Show inhibitory</label>
+        </div>
+      </section>
+    </aside>
+
+    <!-- Center viewport -->
+    <section class="viewport">
+      <div id="scene"></div>
+      <div class="legend">
+        <div><span class="sw exc"></span>excitatory</div>
+        <div><span class="sw inh"></span>inhibitory</div>
+        <div><span class="sw win"></span>winner</div>
+        <div><span class="ln ff"></span>feedforward</div>
+        <div><span class="ln in"></span>inhibition</div>
+        <div><span class="ln ex"></span>excitation</div>
+        <div><span class="ln fb"></span>feedback (E2→I1)</div>
+      </div>
+      <div class="view-hint">drag to orbit · scroll to zoom · right-drag to pan · click a neuron</div>
+    </section>
+
+    <!-- Right inspector -->
+    <aside class="sidebar right" id="inspector">
+      <div class="inspector-empty" id="insp-empty">
+        <div class="big-dot"></div>
+        <p>Select a neuron in the viewport to inspect it.</p>
+      </div>
+      <div id="insp-body" hidden></div>
+    </aside>
+  </main>
+
+  <!-- ───────────────────────── Bottom panel ─────────────────────────── -->
+  <footer class="bottom">
+    <div class="resize-handle" id="bottom-resize" title="drag to resize"></div>
+    <nav class="tabs" id="tabs">
+      <button class="tab active" data-tab="activity">Activity</button>
+      <button class="tab" data-tab="rf">Receptive Fields</button>
+      <button class="tab" data-tab="raster">Spike Raster ⤢</button>
+      <button class="tab" data-tab="charge">Charge / time ⤢</button>
+      <button class="tab" data-tab="weights">Weights / time ⤢</button>
+      <button class="tab" data-tab="log">Event Log</button>
+    </nav>
+
+    <div class="tab-panels">
+      <div class="tab-panel active" data-panel="activity">
+        <div class="card">
+          <div class="card-title">Layer 2 heat map — firing rate per L2E (winner highlighted)</div>
+          <div class="heatmap" id="heatmap"></div>
+          <div class="card-foot">winner: <b id="hm-winner">—</b> · open <b>Spike Raster</b>,
+            <b>Charge / time</b>, or <b>Weights / time</b> (⤢) for the full-screen debug views.</div>
+        </div>
+      </div>
+
+      <div class="tab-panel" data-panel="rf">
+        <div class="rf-wrap">
+          <div class="rf-head">
+            <div class="rf-input-card">
+              <div class="card-title">Signed input</div>
+              <div class="rf-cells rf-input" id="rf-input"></div>
+              <div class="rf-input-legend"><span class="pm plus">+1</span> active&nbsp;·&nbsp;<span class="pm minus">−1</span> inactive</div>
+            </div>
+            <p class="rf-note">Signed-spike learning: on each L2E fire, its <b>active</b> pixels
+              (+1) potentiate and its <b>inactive</b> pixels (−1) depress —
+              <code>dw = η·p·(1−(w/w_cap)²)·signal</code>, no weight budget. Each 3×3 grid below is
+              one L2E neuron's feedforward receptive field (weight ÷ cap). A ring marks the current
+              winner; units that can no longer reach threshold are flagged <b>dead</b>.</p>
+          </div>
+          <div class="rf-grid" id="rf-grid"></div>
+        </div>
+      </div>
+
+      <div class="tab-panel" data-panel="log">
+        <div class="event-log" id="event-log"></div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ───────────────── Full-screen spike raster (spikes only) ────────── -->
+  <div class="viz-overlay" id="raster-overlay" hidden>
+    <div class="viz-bar">
+      <span class="viz-title">Spike Raster · discrete spikes only</span>
+      <label class="check"><input type="checkbox" id="raster-l1" checked /> Layer 1</label>
+      <span class="viz-zoom">Zoom
+        <button class="btn sm" id="raster-zoom-out" title="zoom out">−</button>
+        <button class="btn sm" id="raster-zoom-in" title="zoom in">＋</button>
+      </span>
+      <span class="viz-legend"><span class="sw exc"></span>excitatory <span class="sw inh"></span>inhibitory · left bar = firing rate</span>
+      <span class="viz-hint">wheel = zoom · shift+wheel ↔ pan · pause to hold · Esc to close</span>
+      <span class="viz-transport" role="group" aria-label="playback">
+        <button class="btn sm" id="raster-play" title="Play — run the simulation">▶</button>
+        <button class="btn sm" id="raster-pause" title="Pause — hold, keep state">⏸</button>
+        <button class="btn sm danger" id="raster-stop" title="Stop — reset the simulation (wipes learned weights)">⏹</button>
+      </span>
+      <button class="btn sm danger" id="raster-close">✕ Close</button>
+    </div>
+    <div class="viz-scroll" id="raster-scroll">
+      <div class="viz-spacer" id="raster-spacer"></div>
+      <canvas id="raster-canvas"></canvas>
+    </div>
+  </div>
+
+  <!-- ───────────────── Full-screen charge-over-time ──────────────────── -->
+  <div class="viz-overlay" id="charge-overlay" hidden>
+    <div class="viz-bar">
+      <span class="viz-title">Charge over time · V ÷ θ per neuron</span>
+      <label class="check"><input type="checkbox" id="charge-l1" checked /> Layer 1</label>
+      <span class="viz-zoom">Zoom
+        <button class="btn sm" id="charge-zoom-out" title="zoom out">−</button>
+        <button class="btn sm" id="charge-zoom-in" title="zoom in">＋</button>
+      </span>
+      <span class="viz-legend">bar = charge · dashed line = threshold · full-height = spike</span>
+      <span class="viz-hint">wheel = zoom · shift+wheel ↔ pan · pause to hold · Esc to close</span>
+      <span class="viz-transport" role="group" aria-label="playback">
+        <button class="btn sm" id="charge-play" title="Play — run the simulation">▶</button>
+        <button class="btn sm" id="charge-pause" title="Pause — hold, keep state">⏸</button>
+        <button class="btn sm danger" id="charge-stop" title="Stop — reset the simulation (wipes learned weights)">⏹</button>
+      </span>
+      <button class="btn sm danger" id="charge-close">✕ Close</button>
+    </div>
+    <div class="viz-scroll" id="charge-scroll">
+      <div class="viz-spacer" id="charge-spacer"></div>
+      <canvas id="charge-canvas"></canvas>
+    </div>
+  </div>
+
+  <!-- ───────────────── Full-screen weights-over-time ─────────────────── -->
+  <div class="viz-overlay" id="weights-overlay" hidden>
+    <div class="viz-bar">
+      <span class="viz-title">Weights over time · <b id="weights-target">L2E0</b></span>
+      <span class="viz-legend">L1E→L2E feedforward (green) ÷ cap · L2I→L2E gate (red) ÷ cap · dashed = cap</span>
+      <span class="viz-hint">pick a neuron: click an L2E in the 3D view · full training history, newest right · Esc to close</span>
+      <span class="viz-transport" role="group" aria-label="playback">
+        <button class="btn sm" id="weights-play" title="Play — run the simulation">▶</button>
+        <button class="btn sm" id="weights-pause" title="Pause — hold, keep state">⏸</button>
+        <button class="btn sm danger" id="weights-stop" title="Stop — reset the simulation (wipes learned weights)">⏹</button>
+      </span>
+      <button class="btn sm danger" id="weights-close">✕ Close</button>
+    </div>
+    <div class="viz-scroll" id="weights-scroll"><canvas id="weights-canvas"></canvas></div>
+  </div>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>
