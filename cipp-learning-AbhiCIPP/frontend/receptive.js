@@ -15,6 +15,7 @@ export class ReceptiveFields {
     this.store = store;
     this.grid = document.getElementById('rf-grid');
     this.inputEl = document.getElementById('rf-input');
+    this.legendEl = document.getElementById('rf-pattern-legend');
     this.cards = [];        // per-L2E { root, cells[9], badge }
     this.inputCells = [];
     this.built = false;
@@ -22,14 +23,35 @@ export class ReceptiveFields {
 
   build() {
     if (this.built) return;
+    // NOTE: the backend's topology neurons use type: 'E' / 'I' (see
+    // backend/simulation.py's _register_neurons), not the words
+    // 'excitatory'/'inhibitory' -- matches how raster.js and every other
+    // consumer of topology.neurons reads this field.
     const nOut = (this.store.topology?.neurons || [])
-      .filter(n => n.layer === 'L2' && n.type === 'excitatory').length;
+      .filter(n => n.layer === 'L2' && n.type === 'E').length;
     // Signed-input reference grid.
     this.inputEl.innerHTML = '';
     this.inputCells = [];
+    this._buildPatternLegend();
     for (let i = 0; i < N_PIX; i++) {
       const c = document.createElement('div');
       c.className = 'rf-cell';
+      const members = this._pixelMembership?.[i] || [];
+      const sign = document.createElement('span');
+      sign.className = 'rf-sign';
+      c.appendChild(sign);
+      if (members.length) {
+        c.title = `pixel ${i}: ${members.join(', ')}`;
+        const dots = document.createElement('div');
+        dots.className = 'rf-pixel-dots';
+        for (const m of members) {
+          const d = document.createElement('span');
+          d.className = 'rf-pixel-dot';
+          d.style.background = this._patternColors.get(m) || '#5eead4';
+          dots.appendChild(d);
+        }
+        c.appendChild(dots);
+      }
       this.inputEl.appendChild(c);
       this.inputCells.push(c);
     }
@@ -59,6 +81,24 @@ export class ReceptiveFields {
     this.built = true;
   }
 
+  // Precomputes, from the topology's pattern_vectors, which pattern(s) include
+  // each of the 9 sensory pixels, and assigns each pattern a stable color. All
+  // four center-crossing patterns share pixel 4; the rest belong to exactly
+  // one pattern each. Purely a static legend -- no engine state.
+  _buildPatternLegend() {
+    const vectors = this.store.topology?.pattern_vectors || {};
+    const names = Object.keys(vectors);
+    const palette = ['#5eead4', '#f0788c', '#f5c26b', '#9d8cf5', '#6bc6f5', '#f57ba3'];
+    this._patternColors = new Map(names.map((nm, i) => [nm, palette[i % palette.length]]));
+    this._pixelMembership = Array.from({ length: N_PIX }, (_, i) =>
+      names.filter(nm => (vectors[nm]?.[i] ?? 0) > 0));
+    if (this.legendEl) {
+      this.legendEl.innerHTML = names.map(nm =>
+        `<span class="swatch"><span class="dot" style="background:${this._patternColors.get(nm)}"></span>${nm}</span>`
+      ).join('');
+    }
+  }
+
   update(dyn) {
     if (!this.built) this.build();
     const s = this.store;
@@ -71,7 +111,8 @@ export class ReceptiveFields {
       const c = this.inputCells[i];
       c.classList.toggle('sig-plus', on);
       c.classList.toggle('sig-minus', !on);
-      c.textContent = on ? '+' : '−';
+      const sign = c.querySelector('.rf-sign');
+      if (sign) sign.textContent = on ? '+' : '−';
     }
 
     const winner = dyn && dyn.winner;   // e.g. "L2E3"

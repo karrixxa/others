@@ -275,7 +275,9 @@ canvas.chart, #histogram { width: 100%; display: block; }
 .rf-badge { font-size: 10px; text-transform: uppercase; letter-spacing: .5px; color: var(--inh); border: 1px solid var(--inh); border-radius: 4px; padding: 0 4px; }
 
 .rf-cells { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3px; }
-.rf-cell { aspect-ratio: 1 / 1; border-radius: 4px; border: 1px solid var(--line); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: var(--txt-2); }
+.rf-cell { aspect-ratio: 1 / 1; border-radius: 4px; border: 1px solid var(--line); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: var(--txt-2); position: relative; }
+.rf-pixel-dots { position: absolute; bottom: 2px; left: 0; right: 0; display: flex; justify-content: center; gap: 2px; }
+.rf-pixel-dots .rf-pixel-dot { width: 5px; height: 5px; border-radius: 50%; display: inline-block; }
 .rf-input { width: 84px; }
 .rf-cell.sig-plus { background: rgba(69,212,131,.18); color: var(--ok); border-color: rgba(69,212,131,.5); }
 .rf-cell.sig-minus { background: transparent; color: var(--inh); border-color: var(--line); }
@@ -301,6 +303,35 @@ canvas.chart, #histogram { width: 100%; display: block; }
 .viz-transport { display: flex; align-items: center; gap: 6px; }
 .viz-transport .btn { flex: 0 0 auto; margin: 0; min-width: 34px; }
 .viz-scroll { flex: 1; overflow-x: auto; overflow-y: hidden; position: relative; background: var(--bg-2); }
+
+.raster-tooltip {
+  position: absolute; z-index: 5; pointer-events: none;
+  background: rgba(10, 14, 22, 0.92); border: 1px solid var(--line);
+  color: var(--txt-1); font: 11px ui-monospace, monospace;
+  padding: 3px 7px; border-radius: 4px; white-space: nowrap;
+}
+
+.rf-pattern-legend { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; font-size: 11px; color: var(--txt-2); }
+.rf-pattern-legend .swatch { display: inline-flex; align-items: center; gap: 4px; }
+.rf-pattern-legend .dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
+
+.iw-heatmap { display: grid; gap: 2px; margin: 10px 0; }
+.iw-heatmap .iw-row { display: grid; grid-auto-flow: column; gap: 2px; align-items: center; }
+.iw-heatmap .iw-rowlabel { font: 10px ui-monospace, monospace; color: var(--txt-2); width: 34px; text-align: right; padding-right: 6px; }
+.iw-heatmap .iw-cell { height: 22px; border-radius: 3px; position: relative; }
+.iw-heatmap .iw-cell span { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font: 9px ui-monospace, monospace; color: rgba(0,0,0,0.65); }
+.iw-heatmap .iw-collabel { font: 10px ui-monospace, monospace; color: var(--txt-2); text-align: center; }
+.iw-budgets { display: flex; flex-direction: column; gap: 6px; margin-top: 6px; }
+.iw-budgets .iw-budget-row { display: flex; align-items: center; gap: 8px; font: 11px ui-monospace, monospace; color: var(--txt-2); }
+.iw-budgets .iw-budget-track { flex: 1; height: 8px; border-radius: 4px; background: rgba(255,255,255,0.06); overflow: hidden; }
+.iw-budgets .iw-budget-fill { height: 100%; background: var(--exc); }
+.iw-budgets .iw-budget-label { width: 46px; }
+.iw-budgets .iw-budget-value { width: 64px; text-align: right; }
+
+.story-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 18px; font: 12px ui-monospace, monospace; }
+.story-fields .story-key { color: var(--txt-2); }
+.story-fields .story-val { color: var(--txt-1); font-weight: 600; }
+.story-fields .story-row { display: flex; justify-content: space-between; border-bottom: 1px solid var(--line); padding: 3px 0; }
 .viz-spacer { position: absolute; top: 0; left: 0; height: 1px; pointer-events: none; }
 /* Raster & charge canvases are viewport-sized and pinned; only the visible time
    window is drawn (virtualized), so the backing store stays small no matter how

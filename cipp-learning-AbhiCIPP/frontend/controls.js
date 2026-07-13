@@ -114,6 +114,7 @@ export class Controls {
     bind(['g-pause', 'x-pause', 'raster-pause', 'charge-pause', 'weights-pause'],
          () => this.api.post('/api/pause'));
     bind(['g-step', 'x-step'], () => this.api.post('/api/step'));
+    bind(['raster-step'], async () => { await this.api.post('/api/pause'); await this.api.post('/api/step'); });
     bind(['g-reset', 'x-reset'], () => this.api.post('/api/reset'));
     // Overlay Stop = reset: halts AND rebuilds the network from fresh weights, so
     // it wipes all learned state -- confirm before firing.

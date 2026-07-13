@@ -164,6 +164,8 @@
     <nav class="tabs" id="tabs">
       <button class="tab active" data-tab="activity">Activity</button>
       <button class="tab" data-tab="rf">Receptive Fields</button>
+      <button class="tab" data-tab="inweights">Input Weights</button>
+      <button class="tab" data-tab="story">Causal Story</button>
       <button class="tab" data-tab="raster">Spike Raster ⤢</button>
       <button class="tab" data-tab="charge">Charge / time ⤢</button>
       <button class="tab" data-tab="weights">Weights / time ⤢</button>
@@ -187,6 +189,7 @@
               <div class="card-title">Signed input</div>
               <div class="rf-cells rf-input" id="rf-input"></div>
               <div class="rf-input-legend"><span class="pm plus">+1</span> active&nbsp;·&nbsp;<span class="pm minus">−1</span> inactive</div>
+              <div class="rf-pattern-legend" id="rf-pattern-legend"></div>
             </div>
             <p class="rf-note">Signed-spike learning: on each L2E fire, its <b>active</b> pixels
               (+1) potentiate and its <b>inactive</b> pixels (−1) depress —
@@ -195,6 +198,27 @@
               winner; units that can no longer reach threshold are flagged <b>dead</b>.</p>
           </div>
           <div class="rf-grid" id="rf-grid"></div>
+        </div>
+      </div>
+
+      <div class="tab-panel" data-panel="inweights">
+        <div class="card">
+          <div class="card-title">L1E → L2E feedforward weights (÷ cap) and per-L2E resource use</div>
+          <div class="iw-heatmap" id="iw-heatmap"></div>
+          <div class="iw-budgets" id="iw-budgets"></div>
+          <div class="card-foot">Rows = L1E pixels 0–8, columns = L2E neurons. Darker/brighter cell
+            = closer to the feedforward weight cap. Budget bars (when the engine exposes a resource
+            budget for a neuron) show how much of its capacity is already committed.</div>
+        </div>
+      </div>
+
+      <div class="tab-panel" data-panel="story">
+        <div class="card">
+          <div class="card-title">Causal Story — this presentation, from values the engine exposes</div>
+          <div class="story-fields" id="story-fields"></div>
+          <div class="card-foot">Derived only from the live topology/dynamic stream (winner, autocycle,
+            per-neuron spikes/activation) and the raster's own recorded history — nothing here is
+            invented or assumed.</div>
         </div>
       </div>
 
@@ -221,6 +245,7 @@
       <span class="viz-transport" role="group" aria-label="playback">
         <button class="btn sm" id="raster-play" title="Play — run the simulation">▶</button>
         <button class="btn sm" id="raster-pause" title="Pause — hold, keep state">⏸</button>
+        <button class="btn sm" id="raster-step" title="Step — advance exactly one engine step (pauses first)">⏭ Step</button>
         <button class="btn sm danger" id="raster-stop" title="Stop — reset the simulation (wipes learned weights)">⏹</button>
       </span>
       <button class="btn sm danger" id="raster-close">✕ Close</button>
@@ -228,6 +253,7 @@
     <div class="viz-scroll" id="raster-scroll">
       <div class="viz-spacer" id="raster-spacer"></div>
       <canvas id="raster-canvas"></canvas>
+      <div class="raster-tooltip" id="raster-tooltip" hidden></div>
     </div>
   </div>
 

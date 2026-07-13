@@ -54,6 +54,9 @@ export class Raster {
     const charge = document.getElementById('raster-show-charge');
     charge?.addEventListener('change', () => { this.showCharge = charge.checked; this._schedule(); });
     this.canvas.addEventListener('click', (e) => this._onClick(e));
+    this.tooltip = document.getElementById('raster-tooltip');
+    this.canvas.addEventListener('mousemove', (e) => this._onHover(e));
+    this.canvas.addEventListener('mouseleave', () => { if (this.tooltip) this.tooltip.hidden = true; });
     this.scroll?.addEventListener('scroll', () => {
       const s = this.scroll;
       this.follow = s.scrollLeft + s.clientWidth >= s.scrollWidth - 6;
@@ -287,6 +290,30 @@ export class Raster {
   // elsewhere in the dashboard (3D view, inspector, and -- for an L2E -- the
   // Weights-over-time chart), so you can jump from "this lane looks
   // interesting" straight to its weight trajectory without hunting for it.
+  // Hover readout: reports the exact V/theta value (and spike/no-spike) for
+  // whichever neuron lane and timestep column sit under the cursor, so you
+  // don't have to eyeball fill height against the dashed threshold line.
+  _onHover(e) {
+    if (!this.tooltip || !this._laneRects.length || !this.spike.length) return;
+    const rect = this.canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left, y = e.clientY - rect.top;
+    if (x < MARGIN) { this.tooltip.hidden = true; return; }
+    const lane = this._laneRects.find(r => y >= r.y && y < r.y + r.h);
+    if (!lane) { this.tooltip.hidden = true; return; }
+    const scrollX = this.scroll.scrollLeft;
+    const c = Math.round((x - MARGIN + scrollX) / this.colW);
+    if (c < 0 || c >= this.spike.length) { this.tooltip.hidden = true; return; }
+    const idx = this.index.get(lane.id);
+    const t = this.times[c];
+    const a = this.charge[c][idx];
+    const spiked = this.spike[c][idx];
+    this.tooltip.hidden = false;
+    this.tooltip.textContent = `${lane.id} · t=${t} · V/θ=${a.toFixed(3)}${spiked ? ' · SPIKE' : ''}`;
+    const left = Math.min(x + 12, this.scroll.clientWidth - this.tooltip.offsetWidth - 8);
+    this.tooltip.style.left = `${Math.max(MARGIN, left)}px`;
+    this.tooltip.style.top = `${Math.max(0, y - 24)}px`;
+  }
+
   _onClick(e) {
     if (!this.onSelect || !this._laneRects.length) return;
     const rect = this.canvas.getBoundingClientRect();

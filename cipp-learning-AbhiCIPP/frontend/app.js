@@ -10,6 +10,8 @@ import { ReceptiveFields } from './receptive.js';
 import { Raster } from './raster.js';
 import { ChargeChart } from './charge.js';
 import { WeightsChart } from './weights.js';
+import { InputWeightsOverview } from './input_weights.js';
+import { CausalStory } from './causal_story.js';
 
 const api = {
   async post(path, body) {
@@ -40,6 +42,8 @@ const receptive = new ReceptiveFields(store);
 const raster = new Raster(store, { onSelect: (id) => select(id) });
 const chargeChart = new ChargeChart(store);
 const weightsChart = new WeightsChart(store);
+const inputWeights = new InputWeightsOverview(store);
+const causalStory = new CausalStory(store);
 
 function select(id) { inspector.select(id); renderer.select(id); weightsChart.setTarget(id); }
 
@@ -68,6 +72,8 @@ function onMessage(msg) {
     raster.build(topo);
     chargeChart.build(topo);
     weightsChart.build();
+    inputWeights.build();
+    causalStory.build();
   } else if (msg.type === 'dynamic') {
     const dyn = msg.data;
     store.dynamic = dyn;
@@ -81,6 +87,8 @@ function onMessage(msg) {
     raster.update(dyn);
     chargeChart.update(dyn);
     weightsChart.update(dyn);
+    inputWeights.update(dyn);
+    causalStory.update(dyn);
     inspector.refresh();   // re-renders if a neuron was already selected
     controls.onDynamic(dyn);
     updateTopbar(dyn, fps);
