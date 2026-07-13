@@ -18,7 +18,7 @@ So the metric here is measured PER VISIT, not per cycle:
     consistency(P) = fraction of P's visits that the owner won.
 
 Reports pattern->owner, per-pattern consistency, mean consistency, distinct
-owners/8, collisions (owners shared by >1 pattern), and -- secondary only --
+owners/N_OUT, collisions (owners shared by >1 pattern), and -- secondary only --
 dead L2E (never won any visit).
 
 The model uses NO labels and NO pattern->winner table; ownership is read out
@@ -151,7 +151,7 @@ def _print_condition(tag, results):
     for m in results:
         per = "  ".join(f"{n}->L2E{m['owner'][n]}:{m['consistency'][n]:.2f}"
                         for n in m['owner'])
-        print(f"  seed {m['seed']}: distinct={m['distinct']}/8  "
+        print(f"  seed {m['seed']}: distinct={m['distinct']}/{N_OUT}  "
               f"mean_consistency={m['mean_cons']:.3f}  "
               f"collisions={m['collisions']}  dead={m['dead']}  "
               f"peak_V={m['peak_mean']:.2f}x/{m['peak_max']:.2f}x thr")
@@ -160,7 +160,7 @@ def _print_condition(tag, results):
     agg = {k: sum(m[k] for m in results) / n
            for k in ('distinct', 'mean_cons', 'collisions', 'dead',
                      'peak_mean', 'peak_max')}
-    print(f"  MEAN: distinct={agg['distinct']:.2f}/8  consistency={agg['mean_cons']:.3f}  "
+    print(f"  MEAN: distinct={agg['distinct']:.2f}/{N_OUT}  consistency={agg['mean_cons']:.3f}  "
           f"collisions={agg['collisions']:.2f}  dead={agg['dead']:.2f}  "
           f"peak_V(mean/max)={agg['peak_mean']:.2f}x/{agg['peak_max']:.2f}x thr")
     return agg
@@ -186,7 +186,7 @@ def main():
     print(f"  {'condition':<30} {'distinct':>9} {'consist':>8} "
           f"{'collis':>7} {'dead':>5} {'peakV(mn/mx)':>16}")
     for tag, a in summary:
-        print(f"  {tag:<30} {a['distinct']:>7.2f}/8 {a['mean_cons']:>8.3f} "
+        print(f"  {tag:<30} {a['distinct']:>7.2f}/{N_OUT} {a['mean_cons']:>8.3f} "
               f"{a['collisions']:>7.2f} {a['dead']:>5.2f} "
               f"{a['peak_mean']:>7.2f}x/{a['peak_max']:.2f}x")
 

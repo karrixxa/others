@@ -61,18 +61,18 @@ def test_no_single_winner_collapse():
 
     distinct_fired = len([k for k in fired if fired[k] > 0])
     distinct_winners = len(set(final.values()))
-    print(f"  distinct L2E that fired: {distinct_fired}/8")
+    print(f"  distinct L2E that fired: {distinct_fired}/{N_OUT}")
     print(f"  spikes per neuron: {dict(sorted(fired.items()))}")
     print(f"  pattern -> winner: {final}")
-    print(f"  distinct winners across 8 patterns: {distinct_winners}")
+    print(f"  distinct winners across {len(PATTERNS)} patterns: {distinct_winners}")
     print(f"  L2I spikes (competition driver): {l2i_spikes}")
     print(f"  L2 gate discharge events: {gate_discharges}")
     print(f"  learned gate magnitudes: {[round(g, 2) for g in gates]}")
 
-    # 1. The collapse is gone: many neurons participate (was 1/8).
-    assert distinct_fired >= 4, f"expected broad participation, got {distinct_fired}/8"
+    # 1. The collapse is gone only if every neuron participates in this four-cell pool.
+    assert distinct_fired >= N_OUT, f"expected broad participation, got {distinct_fired}/{N_OUT}"
     # 2. Patterns no longer converge to a single neuron (was 1 distinct winner).
-    assert distinct_winners >= 4, f"expected pattern differentiation, got {distinct_winners}"
+    assert distinct_winners >= N_OUT, f"expected pattern differentiation, got {distinct_winners}"
     # 3. Competition is actually mediated by the inhibitory neuron, not a reset.
     assert l2i_spikes > 0, "L2I never fired -- competition is not inhibition-driven"
     assert gate_discharges > 0, "no L2 gate discharges -- inhibition not routed through the synapse"
@@ -91,7 +91,7 @@ def test_robust_across_seeds():
         _, fired, final, _, _, _ = train_and_measure(seed=seed)
         df = len([k for k in fired if fired[k] > 0])
         dw = len(set(final.values()))
-        print(f"  seed {seed}: fired={df}/8  distinct_winners={dw}")
+        print(f"  seed {seed}: fired={df}/{N_OUT}  distinct_winners={dw}")
         assert df >= 3 and dw >= 3, f"seed {seed} collapsed: fired={df}, winners={dw}"
     print("  PASS: no seed collapses to a single winner\n")
 

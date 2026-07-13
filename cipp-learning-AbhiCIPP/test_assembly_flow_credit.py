@@ -117,7 +117,7 @@ def test_integration_l2i_comes_alive():
             l2i_threshold_frac=1 / 7, l1i_threshold_frac=1 / 3,
             l2e_lr_frac=0.02, ei_sat_mult=4.0, seed=1,
         )
-        eng.set_pattern('row 0')
+        eng.set_pattern('row 1')
         l2i = eng.l2.inhibitory_neuron
         fires = late = 0
         for t in range(6000):

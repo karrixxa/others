@@ -133,7 +133,7 @@ def test_flow_builds_charge_smoothly():
     assert e.l1.excitatory_neurons[0].excitatory_flow_rate is False
     assert e.l2.excitatory_neurons[0].excitatory_flow_rate is True
     assert e.l2.inhibitory_neuron.excitatory_flow_rate is True
-    e.set_pattern('row 0')
+    e.set_pattern('row 1')
     Vs = []
     for _ in range(10):
         e.step()
@@ -151,7 +151,7 @@ def test_flow_can_cross_threshold_without_new_input():
     a timestep with no new L1E input (t not on an input-arrival boundary)."""
     e = SimulationEngine(seed=1, excitatory_flow_rate=True, exc_trace_decay=0.8)
     ip = e.params['input_period']
-    e.set_pattern('row 0')
+    e.set_pattern('row 1')
     off_input_fires = 0
     for _ in range(400):
         e.step()
@@ -178,7 +178,7 @@ def test_trace_is_lazy():
 # 4. Chunking interaction
 # ---------------------------------------------------------------------------
 def _winner_chunks(engine, steps=200):
-    engine.set_pattern('row 0')
+    engine.set_pattern('row 1')
     seen = set()
     for _ in range(steps):
         engine.step()

@@ -33,7 +33,7 @@ def _sabotage_l1i(engine):
         inh.threshold = 1e12
 
 
-def _run_to_first_l2e_winner(engine, pattern='row 0', max_steps=300):
+def _run_to_first_l2e_winner(engine, pattern='row 1', max_steps=300):
     """Step (holding one pattern) until any L2E fires; record, per step, whether
     any L2E fired and how many L1I fired. Returns (winner_step, per_step_l1i_counts,
     l2e_fired_flags)."""

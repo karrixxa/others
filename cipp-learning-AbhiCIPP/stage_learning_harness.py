@@ -63,11 +63,10 @@ MINIMAL = dict(
 )
 
 STAGES = [
-    ("1: one pattern",            ["row 0"]),
-    ("2: two disjoint patterns",  ["row 0", "row 2"]),
-    ("3: rows only",              ["row 0", "row 1", "row 2"]),
-    ("4: rows + columns",         ["row 0", "row 1", "row 2", "col 0", "col 1", "col 2"]),
-    ("5: all eight",              list(PATTERNS.keys())),
+    ("1: one orientation",        ["row 1"]),
+    ("2: center axes",            ["row 1", "col 1"]),
+    ("3: axes + one diagonal",    ["row 1", "col 1", "diag \\"]),
+    ("4: all center patterns",    list(PATTERNS.keys())),
 ]
 
 DWELLS = [1, 2, 4, 8, 16, 40]
@@ -79,7 +78,7 @@ SEEDS = (1, 2, 3, 4)
 def _ff(engine, j):
     """Owner j's feedforward (pixel) weight vector -- afferent indices 1.. (index
     0 is the L2I->L2E inhibitory gate)."""
-    return engine.l2.excitatory_neurons[j]._weights_array[1:1 + len(PATTERNS['row 0'])]
+    return engine.l2.excitatory_neurons[j]._weights_array[1:1 + len(next(iter(PATTERNS.values())))]
 
 
 def _rf_match(engine, j, pattern_name):

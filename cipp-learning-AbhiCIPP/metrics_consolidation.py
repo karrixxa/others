@@ -109,13 +109,13 @@ def main():
             m = measure(seed, consolidation)
             dsum += m['distinct']; psum += m['preserved']
             conf_str = "[" + " ".join(f"{c:.2f}" for c in m['max_conf']) + "]"
-            print(f"  seed {seed}: distinct_winners={m['distinct']}/8  "
+            print(f"  seed {seed}: distinct_winners={m['distinct']}/{N_OUT}  "
                   f"within_pattern_dominance={m['dominance']:.2f}  "
                   f"never_fired={m['never_fired']}  "
                   f"old_preserved={m['preserved']}/{m['n_old']}  "
                   f"loser_depressions={m['loss_events']}")
             print(f"           max_feedforward_confidence per L2E {conf_str}")
-        print(f"  mean distinct winners: {dsum/len(seeds):.2f}/8   "
+        print(f"  mean distinct winners: {dsum/len(seeds):.2f}/{N_OUT}   "
               f"mean old-pattern preservation: {psum/len(seeds):.2f}/4")
 
 
