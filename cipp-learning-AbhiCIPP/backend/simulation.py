@@ -467,10 +467,19 @@ class SimulationEngine:
                  # bounded to [min_positive_weight, weight_cap], NO budget. Intended
                  # to be run with the compensating mechanisms off and refractory=0
                  # (the "minimal experiment"). L2E only. DEFAULT ON: this is now the
-                 # project's canonical L2E learning rule. When on it takes over
-                 # _update_weights entirely (returns early), so l2e_budget,
-                 # confidence_consolidation, loser_depression and signed_depression
-                 # are all bypassed for L2E regardless of their own defaults.
+                 # project's canonical L2E learning rule. When on, it takes over
+                 # the FEEDFORWARD update in _update_weights entirely (that method
+                 # returns early), so l2e_budget, confidence_consolidation, and
+                 # signed_depression are all bypassed for L2E regardless of their
+                 # own defaults -- but loser_depression/eta_loss is NOT bypassed:
+                 # it is invoked from apply_inhibition() (a real inhibitory-
+                 # discharge event on THIS neuron, i.e. it was suppressed as a
+                 # near-winner), an entirely separate code path from
+                 # _update_weights' postsynaptic-fire branch. So under
+                 # signed_spike_learning=True, loser depression still runs and
+                 # eta_loss still has an effect -- confirmed by the eta_loss A/B
+                 # comparison (0.01 vs 2 vs 10, all with signed_spike_learning=True)
+                 # in single_pattern_diagnostic.py.
                  signed_spike_learning: bool = True,
                  # Capacity rule for the minimal experiment (see the prompt's
                  # "Threshold, Cap, Floor" section). l2e_weight_cap_frac sets each

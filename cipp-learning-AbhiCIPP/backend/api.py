@@ -19,6 +19,7 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 from .simulation import SimulationEngine
+from .presets import DASHBOARD_ENGINE_OVERRIDES
 from neuron_flexible import UNIT   # fixed-point scale (potentials/thresholds run at * UNIT)
 from .serializer import topology_message, full_state
 from .websocket import ConnectionManager, SimulationRunner
@@ -29,7 +30,7 @@ app = FastAPI(title="SNN Dashboard")
 # Dashboard config: homeostasis OFF so the fixed weight_budget (= threshold_l2)
 # governs each L2E's total feedforward weight -- receptive fields concentrate to
 # large, visible values instead of being shrunk by homeostatic scaling. A faster
-# L2E learning rate sharpens them. Edit these lines to change what you observe.
+# L2E learning rate sharpens them.
 # The dashboard runs the MINIMAL SIGNED-SPIKE experiment by default (see
 # Claude_Minimal_Signed_Spike_Learning_Prompt.md and the README section). The
 # feedforward rule is the signed one -- on fire, active inputs (+1) potentiate and
@@ -38,36 +39,14 @@ app = FastAPI(title="SNN Dashboard")
 # see: charge -> fire -> local signed update -> learned L2I lateral inhibition ->
 # L1I feedback inhibition -> repeat. refractory=0 (inhibition, not a hard lockout,
 # regulates frequency). Toggle any of these live in the "Model Config" panel.
-engine = SimulationEngine(
-    signed_spike_learning=True,   # signed +1/-1 feedforward learning (the algorithm)
-    l2e_budget=False,             # no positive-weight budget; -1 signal supplies down-pressure
-    confidence_consolidation=False,
-    # Consolidation stack: loser depression breaks the feed-forward symmetry so one
-    # L2E owns a held pattern; assembly-flow credit then lets that habitual winner's
-    # L2E->L2I synapse climb to self-sufficiency so L2I fires in rhythm (it removes
-    # the last-volley-only credit that stalled the E->I synapse below threshold --
-    # the L2I firing deadlock). Both run off the SAME event (L2I's discharge), so
-    # they share one clock: no boolean gate. Validated on held 'row 0' -- one L2E
-    # specialist + L2I firing on a ~16-step rhythm with the winner's E->I synapse
-    # matured to threshold; legacy last-volley credit stalls it at ~0.55*thr and L2I
-    # stays silent. Keep the default l2i_lr_frac (0.01): a faster E->I rate makes L2I
-    # over-inhibit early and destabilizes it. See Inhibition_And_Consolidation_State.md.
-    loser_depression=True,
-    eta_loss=10.0,                # symmetry-breaker strength (0.01 default is far too weak)
-    assembly_flow_credit=True,    # flow-proportional E->I credit on L2I/L1I fire
-    signed_depression=False,      # superseded by the unified signed rule
-    homeostasis=False,
-    refractory=0,                 # inhibition regulates frequency, not a hard lockout
-    # Capacity rule: per-afferent cap = thr/3 so three strong active afferents reach
-    # threshold (3-pixel lines); positive floor = 1; each I threshold = its E's / 3.
-    l2e_weight_cap_frac=1 / 3,
-    pos_weight_floor=1,
-    l2i_threshold_frac=1 / 7,     # L2I threshold = threshold_l2 / 3
-    l1i_threshold_frac=1 / 3,     # L1I threshold = threshold / 3
-    l2e_lr_frac=0.02,             # L2E feedforward learning rate (fraction of the cap)
-    ei_sat_mult=4.0,              # push E->I saturation above the clip so L2E->L2I reaches
-                                  # the cap and L2I can sharpen into a single-source relay.
-)
+#
+# The exact override values now live in backend/presets.py
+# (DASHBOARD_ENGINE_OVERRIDES) so this module and single_pattern_diagnostic.py
+# cannot drift apart -- see that module's docstring and test_presets.py for the
+# identity guarantee. Consolidation-stack rationale (loser depression + assembly
+# flow credit sharing one clock off L2I's own discharge; l2i_lr_frac kept at its
+# default 0.01 since a faster E->I rate destabilizes L2I) is documented there.
+engine = SimulationEngine(**DASHBOARD_ENGINE_OVERRIDES)
 manager = ConnectionManager()
 runner = SimulationRunner(engine, manager)
 
