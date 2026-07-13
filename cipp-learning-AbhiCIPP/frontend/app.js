@@ -37,7 +37,7 @@ const inspector = new Inspector(store);
 const charts = new Charts(store);
 const controls = new Controls(store, renderer, api);
 const receptive = new ReceptiveFields(store);
-const raster = new Raster(store);
+const raster = new Raster(store, { onSelect: (id) => select(id) });
 const chargeChart = new ChargeChart(store);
 const weightsChart = new WeightsChart(store);
 

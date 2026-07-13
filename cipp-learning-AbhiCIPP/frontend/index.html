@@ -207,14 +207,15 @@
   <!-- ───────────────── Full-screen spike raster (spikes only) ────────── -->
   <div class="viz-overlay" id="raster-overlay" hidden>
     <div class="viz-bar">
-      <span class="viz-title">Spike Raster · discrete spikes only</span>
+      <span class="viz-title">Spike Raster · spikes + charge buildup</span>
       <label class="check"><input type="checkbox" id="raster-l1" checked /> Layer 1</label>
       <label class="check"><input type="checkbox" id="raster-hide-silent" checked /> Hide silent lanes</label>
+      <label class="check"><input type="checkbox" id="raster-show-charge" checked /> Show charge</label>
       <span class="viz-zoom">Zoom
         <button class="btn sm" id="raster-zoom-out" title="zoom out">−</button>
         <button class="btn sm" id="raster-zoom-in" title="zoom in">＋</button>
       </span>
-      <span class="viz-legend"><span class="sw exc"></span>excitatory <span class="sw inh"></span>inhibitory · vertical line = pattern change · left bar = firing rate</span>
+      <span class="viz-legend"><span class="sw exc"></span>excitatory <span class="sw inh"></span>inhibitory · vertical line = pattern change · left bar = firing rate · click label = select</span>
       <span class="viz-current">Pattern: <b id="raster-current-pattern">—</b></span>
       <span class="viz-hint">wheel = zoom · shift+wheel ↔ pan · pause to hold · Esc to close</span>
       <span class="viz-transport" role="group" aria-label="playback">

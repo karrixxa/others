@@ -1,7 +1,9 @@
 // Full-screen spike raster: every neuron gets its own labeled lane, stacked on a
-// shared time axis. Marks are DISCRETE SPIKES ONLY -- no charge/membrane trace
-// (that lives in the separate Charge-over-time view). If a neuron did not spike
-// at a timestep, its lane shows nothing there.
+// shared time axis. Discrete spike ticks are drawn in front; a dim charge-buildup
+// fill (V/theta, the same activation value the separate Charge-over-time view
+// uses) is drawn behind each lane so accumulation toward threshold, resets, and
+// inhibition discharges are visible on the SAME timeline as the spikes, without
+// switching tabs. Toggle with "Show charge".
 //
 // PERFORMANCE: the canvas is sized to the VIEWPORT, not the whole history. A
 // spacer gives the scroll container its virtual width, and only the visible time
@@ -11,10 +13,12 @@
 const MARGIN = 66;        // pinned left gutter: id label + rate bar
 const AXIS = 28;          // top strip: summary plus pattern labels
 const HISTORY = 1500;     // timesteps retained
+const CHARGE_CAP = 2.0;   // V/theta at the top of a lane's charge zone (matches charge.js)
 
 export class Raster {
-  constructor(store) {
+  constructor(store, opts = {}) {
     this.store = store;
+    this.onSelect = opts.onSelect || null;
     this.overlay = document.getElementById('raster-overlay');
     this.scroll = document.getElementById('raster-scroll');
     this.spacer = document.getElementById('raster-spacer');
@@ -22,6 +26,7 @@ export class Raster {
     this.ctx = this.canvas.getContext('2d');
     this.order = [];
     this.spike = [];       // Uint8Array per timestep: 1 = spiked
+    this.charge = [];      // Float32Array per timestep: activation (V/theta)
     this.times = [];
     this.patterns = [];    // active input-pattern name per timestep
     this.rate = new Map();
@@ -30,11 +35,13 @@ export class Raster {
     // rows by default so the meaningful spikes are not separated by large gaps;
     // the checkbox can restore the complete topology whenever needed.
     this.hideSilent = true;
+    this.showCharge = true;
     this.colW = 6;
     this.follow = true;
     this.built = false;
     this._raf = 0;
     this._cw = this._ch = 0;
+    this._laneRects = [];   // [{id, y, h}] for the currently drawn gutter, for click-to-select
 
     document.querySelector('.tab[data-tab="raster"]')?.addEventListener('click', () => this.open());
     document.getElementById('raster-close')?.addEventListener('click', () => this.close());
@@ -44,6 +51,9 @@ export class Raster {
     l1?.addEventListener('change', () => { this.showL1 = l1.checked; this._schedule(); });
     const quiet = document.getElementById('raster-hide-silent');
     quiet?.addEventListener('change', () => { this.hideSilent = quiet.checked; this._schedule(); });
+    const charge = document.getElementById('raster-show-charge');
+    charge?.addEventListener('change', () => { this.showCharge = charge.checked; this._schedule(); });
+    this.canvas.addEventListener('click', (e) => this._onClick(e));
     this.scroll?.addEventListener('scroll', () => {
       const s = this.scroll;
       this.follow = s.scrollLeft + s.clientWidth >= s.scrollWidth - 6;
@@ -63,24 +73,28 @@ export class Raster {
   build(topo) {
     this.order = (topo?.neurons ?? []).map(n => ({ id: n.id, type: n.type, group: n.layer + n.type }));
     this.index = new Map(this.order.map((n, i) => [n.id, i]));
-    this.spike = []; this.times = []; this.patterns = [];
+    this.spike = []; this.charge = []; this.times = []; this.patterns = [];
     this.built = true;
   }
 
   update(dyn) {
     if (!this.built || !dyn || !dyn.neurons) return;
     const spk = new Uint8Array(this.order.length);
+    const chg = new Float32Array(this.order.length);
     for (const n of dyn.neurons) {
       const i = this.index.get(n.id);
-      if (i != null && n.spiked) spk[i] = 1;
+      if (i == null) continue;
+      if (n.spiked) spk[i] = 1;
+      chg[i] = n.activation ?? 0;
     }
     this.spike.push(spk);
+    this.charge.push(chg);
     this.times.push(dyn.timestep);
     this.patterns.push(dyn.autocycle?.pattern ?? 'manual');
     const patternLabel = document.getElementById('raster-current-pattern');
     if (patternLabel) patternLabel.textContent = this.patterns[this.patterns.length - 1];
     while (this.spike.length > HISTORY) {
-      this.spike.shift(); this.times.shift(); this.patterns.shift();
+      this.spike.shift(); this.charge.shift(); this.times.shift(); this.patterns.shift();
     }
     this.rate = new Map(dyn.neurons.map(n => [n.id, n.freq ?? 0]));
     this._schedule();
@@ -214,6 +228,32 @@ export class Raster {
       }
     }
 
+    // Charge buildup (dim fill, same activation values as the Charge-over-time
+    // view) drawn BEHIND the spike ticks, on the identical time/lane geometry --
+    // so accumulation, resets, and inhibition discharges read on the same
+    // timeline as the discrete spikes instead of a separate tab.
+    if (this.showCharge) {
+      const zone = laneH * 0.82;
+      const thrFrac = 1 / CHARGE_CAP;
+      for (let i = 0; i < n; i++) {
+        const idx = this.index.get(lanes[i].id);
+        const baseY = y0 + (i + 1) * laneH - 1;
+        ctx.strokeStyle = 'rgba(255,255,255,0.10)'; ctx.setLineDash([3, 3]);
+        const ty = Math.round(baseY - thrFrac * zone) + .5;
+        ctx.beginPath(); ctx.moveTo(MARGIN, ty); ctx.lineTo(vw, ty); ctx.stroke(); ctx.setLineDash([]);
+        ctx.fillStyle = lanes[i].type === 'E' ? cExc : cInh;
+        ctx.globalAlpha = 0.22;
+        for (let c = cFrom; c < cTo; c++) {
+          if (this.spike[c][idx]) continue;
+          const a = this.charge[c][idx];
+          if (a <= 0.02) continue;
+          const h = Math.min(a / CHARGE_CAP, 1) * zone;
+          ctx.fillRect(xOf(c), baseY - h, barW, h);
+        }
+        ctx.globalAlpha = 1;
+      }
+    }
+
     // Spikes (discrete marks), lane-outer so fillStyle is set once per lane.
     for (let i = 0; i < n; i++) {
       const idx = this.index.get(lanes[i].id);
@@ -226,6 +266,7 @@ export class Raster {
     ctx.clearRect(0, AXIS, MARGIN, vh - AXIS);
     const labelPx = Math.max(8, Math.min(11, laneH - 4));
     ctx.textBaseline = 'middle';
+    this._laneRects = [];
     for (let i = 0; i < n; i++) {
       const cy = y0 + (i + 0.5) * laneH;
       ctx.font = `${labelPx}px ui-monospace, monospace`;
@@ -233,10 +274,26 @@ export class Raster {
       const f = Math.max(0, Math.min(1, this.rate.get(lanes[i].id) ?? 0));
       ctx.fillStyle = lanes[i].type === 'E' ? cExc : cInh; ctx.globalAlpha = 0.5;
       ctx.fillRect(MARGIN - 15, cy - 1.5, 12 * f, 3); ctx.globalAlpha = 1;
+      this._laneRects.push({ id: lanes[i].id, y: y0 + i * laneH, h: laneH });
     }
     ctx.strokeStyle = cLine; ctx.beginPath(); ctx.moveTo(MARGIN + .5, 0); ctx.lineTo(MARGIN + .5, vh); ctx.stroke();
     ctx.clearRect(MARGIN, 0, vw - MARGIN, 13);
     ctx.fillStyle = cMut; ctx.font = '10px ui-monospace, monospace'; ctx.textBaseline = 'top';
-    if (cols) ctx.fillText(`spikes only · ${cols} steps · ${this.colW.toFixed(0)} px/step · newest →`, MARGIN + 6, 3);
+    const chargeNote = this.showCharge ? 'spikes + charge (dim fill, dashed = threshold)' : 'spikes only';
+    if (cols) ctx.fillText(`${chargeNote} · ${cols} steps · ${this.colW.toFixed(0)} px/step · newest →`, MARGIN + 6, 3);
+  }
+
+  // Clicking a lane's id label (in the pinned gutter) selects that neuron
+  // elsewhere in the dashboard (3D view, inspector, and -- for an L2E -- the
+  // Weights-over-time chart), so you can jump from "this lane looks
+  // interesting" straight to its weight trajectory without hunting for it.
+  _onClick(e) {
+    if (!this.onSelect || !this._laneRects.length) return;
+    const rect = this.canvas.getBoundingClientRect();
+    const y = e.clientY - rect.top;
+    const x = e.clientX - rect.left;
+    if (x > MARGIN) return;   // clicks over the timeline itself are not lane selection
+    const hit = this._laneRects.find(r => y >= r.y && y < r.y + r.h);
+    if (hit) this.onSelect(hit.id);
   }
 }
