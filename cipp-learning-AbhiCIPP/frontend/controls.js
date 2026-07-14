@@ -30,7 +30,8 @@ export class Controls {
     this.configInputs = {};
 
     box.innerHTML = '';
-    for (const s of cfg.spec) {
+    // Build one control element (and register its value getter in configInputs).
+    const makeItem = (s) => {
       const item = document.createElement('div');
       item.className = 'config-item';
       const val = cfg.values[s.key];
@@ -62,7 +63,23 @@ export class Controls {
       desc.className = 'config-desc';
       desc.textContent = s.desc;
       item.appendChild(desc);
-      box.appendChild(item);
+      return item;
+    };
+
+    // Primary (active-experiment) controls render directly; everything else goes
+    // into a collapsed "Advanced" disclosure to cut clutter. Both groups still
+    // register their getters, so apply/reset send every parameter unchanged.
+    const main = cfg.spec.filter(s => !s.advanced);
+    const advanced = cfg.spec.filter(s => s.advanced);
+    for (const s of main) box.appendChild(makeItem(s));
+    if (advanced.length) {
+      const details = document.createElement('details');
+      details.className = 'config-advanced';
+      const summary = document.createElement('summary');
+      summary.textContent = `Advanced / archived (${advanced.length})`;
+      details.appendChild(summary);
+      for (const s of advanced) details.appendChild(makeItem(s));
+      box.appendChild(details);
     }
 
     document.getElementById('config-apply')?.addEventListener('click', () => {
@@ -115,6 +132,12 @@ export class Controls {
          () => this.api.post('/api/pause'));
     bind(['g-step', 'x-step'], () => this.api.post('/api/step'));
     bind(['g-reset', 'x-reset'], () => this.api.post('/api/reset'));
+    // Reseed = randomized reset: fresh random initial weights under the same
+    // config. Wipes learned state (like Reset), so confirm before firing.
+    bind(['g-reseed', 'x-reseed'], () => {
+      if (window.confirm('Reseed draws new random initial weights and wipes all learned state. Continue?'))
+        this.api.post('/api/reseed');
+    });
     // Overlay Stop = reset: halts AND rebuilds the network from fresh weights, so
     // it wipes all learned state -- confirm before firing.
     bind(['raster-stop', 'charge-stop', 'weights-stop'], () => {

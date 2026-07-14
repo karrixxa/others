@@ -67,7 +67,17 @@ def _concentration(x):
     return float((p * p).sum())
 
 
-class Neuron:
+# Object decomposition (REFACTOR_PLAN.md). Imported AFTER the fixed-point constants
+# above so snn.membrane can read LEAK_SCALE / leak_num without a circular-import
+# failure. Neuron composes these and forwards to them via properties below.
+from snn.entity import NeuralEntity      # noqa: E402
+from snn.synapses import SynapseBank    # noqa: E402
+from snn.membrane import Membrane        # noqa: E402
+from snn.rules import (select_excitatory_rule, select_inhibitory_rule,  # noqa: E402
+                       select_delivery, effective_weights, bounded_signed_update)
+
+
+class Neuron(NeuralEntity):
     """
     A flexible spiking neuron model that allows dynamic specification of 
     input connections during layer construction, then locks connections 
@@ -108,22 +118,23 @@ class Neuron:
             homeostasis, ca_rate, ca_target, ca_band, homeo_up, homeo_down,
             homeo_budget_min, homeo_budget_max: homeostatic synaptic scaling.
         """
-        # Neuron properties
-        self.threshold = threshold          # Firing threshold (constant)
-        self.resting_potential = 0.0        # Resting potential at 0
-        self.refractory_period = refractory_period  # Refractory period
-        self.refractory_timer = 0           # Counts down refractory period
-        self.potential = self.resting_potential     # Current membrane potential
-        
-        # Weight properties - stored as list during construction, numpy array after
-        self._weights_list = []        # List of synaptic weights during construction
-        self._weights_array = None     # Numpy array after finalization
-        self._trace = None             # Per-synapse eligibility trace (set at finalize)
-        # Confidence state. Allocated at finalize once the
-        # fan-in is known; seeded at confidence_init and updated by the active
-        # confidence-consolidation system.
-        self._confidence = None
+        super().__init__()   # NeuralEntity contract (entity_id)
+        # Membrane scalars (potential, threshold, resting, refractory timer/period,
+        # fixed-point leak numerator, v_sat, spike bookkeeping) live on a Membrane
+        # sub-object; Neuron forwards to it via properties below so every existing
+        # `self.potential` / `self.threshold` / ... site is unchanged. leak_rate and
+        # v_sat are seeded here; the later `self.leak_rate = ...` / `self.v_sat = ...`
+        # lines were removed as redundant.
+        self._membrane = Membrane(threshold, 0.0, refractory_period, leak_rate,
+                                  v_sat=None)
+
+        # Vectorized afferent bank: owns the weight/trace/confidence/distance/
+        # last-input arrays and the staged construction path. Neuron forwards to it
+        # through the _weights_array/_trace/... properties below, so every existing
+        # read/write site (internal and external) is unchanged. confidence_init is
+        # set first because the bank reads it (via this owner) when allocating.
         self.confidence_init = float(confidence_init)
+        self._bank = SynapseBank(self)
         self.last_excitatory_event = {}
         # Confidence-gated consolidation (opt-in; see
         # Claude_Confidence_Consolidation_Plan.md). All flags off by default so
@@ -164,12 +175,41 @@ class Neuron:
         # global weight budget. Replaces the whole potentiation / OFF-depression /
         # confidence / budget stack with a single equation. Default OFF.
         self.signed_spike_learning = False
+        # Structural free-energy plasticity gate (opt-in; EXCITATORY postsynaptic
+        # neurons only; see _structural_free_energy_gate and _update_weights). When
+        # on, the signed-spike learning rate is scaled by a STRUCTURAL maturity
+        # signal derived only from this neuron's own accumulated positive afferent
+        # weight vs its threshold -- NOT from membrane voltage, rivals, or labels.
+        # maturity = clamp(sum_positive_afferent_weights / threshold, 0, 1);
+        # gate = max(eta_floor, 1 - maturity). An under-built neuron stays fully
+        # plastic; one whose excitatory support already explains a threshold
+        # crossing slows down (it is "minimizing free energy"), so a consolidated
+        # specialist resists being reshaped when it fires during a later pattern.
+        # This REPLACES the voltage closeness term p in the signed rule (the point
+        # is to make the consolidation brake structural, not input/voltage-state
+        # dependent). Default OFF -> signed rule uses p exactly as before.
+        self.structural_free_energy = False
+        self.structural_fe_eta_floor = 0.02    # plasticity floor for a mature neuron
         # Reset-by-subtraction on fire (opt-in; see fire()). Default OFF reproduces
         # the full reset-to-rest. When ON, a fired neuron keeps its residual
         # overshoot above threshold (standard LIF), floored at rest -- this attacks
         # the discharge asymmetry vs partially-inhibited losers (a fully-reset
         # winner would otherwise be overtaken by losers that ratcheted charge up).
         self.subtractive_reset = False
+        # Hard-reset inhibition (opt-in; see apply_inhibition and
+        # Hard_Reset_Inhibition_Plan.md). Default OFF reproduces the small
+        # subtractive/flow gate. When ON, a real inhibitory discharge (events
+        # non-empty) clamps the loser's membrane back to rest AFTER the inhibitory
+        # plasticity rule has read its pre-reset charge -- so the loser's
+        # accumulated charge is consumed by local learning, then cleared. This
+        # attacks loser charge carryover directly: unlike the winner (which resets
+        # on fire), partially-inhibited losers keep charge and start the next race
+        # ahead; a hard reset returns every non-winner to the same baseline so the
+        # best-matched integrator rebuilds charge fastest and wins repeatedly.
+        # hard_reset_clear_traces also zeroes the excitatory/inhibitory current
+        # traces so no residual flow refills the membrane after the reset.
+        self.l2i_hard_reset_losers = False
+        self.hard_reset_clear_traces = True
         # Homeostatic synaptic scaling (third local system).
         self.homeostasis = homeostasis
         self.ca_rate = ca_rate
@@ -185,7 +225,6 @@ class Neuron:
         self.min_positive_weight = None  # optional floor for positive weights (see _apply_budget_and_cap)
         self.learning_rate = learning_rate  # Weight increase amount when neuron fires (excitatory)
         self.weight_cap = weight_cap        # Maximum absolute value for weights (also w_max for inhibition)
-        self.leak_rate = leak_rate          # stored as integer numerator self._leak_num (see property)
         self.inhibitory_learning_rate = inhibitory_learning_rate  # eta for inhibitory plasticity
         # Saturation ceiling (w_max) for inhibitory gates, kept separate from the
         # feedforward weight_cap (defaults to weight_cap when None). See apply_inhibition.
@@ -202,8 +241,8 @@ class Neuron:
         # what lets the (small, capped) inhibitory gate actually regulate firing
         # frequency -- against a membrane pinned near threshold a ~0.15*theta
         # discharge is meaningful; against a 3*theta pile-up it is not. Local and
-        # per-neuron; see receive_input. Off by default so the baseline is intact.
-        self.v_sat = None
+        # per-neuron; see receive_input. Off by default so the baseline is intact
+        # (seeded to None on the Membrane in __init__; forwards there).
         # Sparse excitatory FLOW-RATE accumulation (opt-in; see receive_input,
         # advance_trace, and Current_Implementation_Methodology_Equations.md).
         # Default OFF -> instantaneous V += dot(weights, spikes) baseline. When on,
@@ -264,70 +303,129 @@ class Neuron:
         self.distance_ref = 1.0
         self.distance_min = 1.0
         self._distance = None               # per-afferent d_i (set at finalize)
-        self._connections_finalized = False  # Flag to prevent changes after finalization
         self.last_inhibitory_events = []    # debug records from the most recent apply_inhibition()
-        
-        # Spike tracking
-        self.last_spike_time = -np.inf      # Time of last spike
-        self.spiked = False                 # Did neuron spike in current step?
+        # (last_spike_time / spiked live on the Membrane, seeded in its constructor;
+        # Neuron forwards to them via the properties below.)
 
         if n_inputs is not None:
             weights = np.random.uniform(weight_init_range[0], weight_init_range[1], int(n_inputs))
             self._set_weights(weights, finalized=True)
 
+    # --- Membrane forwarding (Phase 1) ----------------------------------------
+    # The membrane scalars live on self._membrane; these properties keep every
+    # existing `self.potential` / `self.threshold` / `self._leak_num` / ... site
+    # (internal and external) working unchanged. leak_rate stays the fixed-point
+    # accessor, now backed by the Membrane's integer numerator.
+    @property
+    def potential(self): return self._membrane.potential
+    @potential.setter
+    def potential(self, v): self._membrane.potential = v
+
+    @property
+    def threshold(self): return self._membrane.threshold
+    @threshold.setter
+    def threshold(self, v): self._membrane.threshold = v
+
+    @property
+    def resting_potential(self): return self._membrane.resting_potential
+    @resting_potential.setter
+    def resting_potential(self, v): self._membrane.resting_potential = v
+
+    @property
+    def refractory_period(self): return self._membrane.refractory_period
+    @refractory_period.setter
+    def refractory_period(self, v): self._membrane.refractory_period = v
+
+    @property
+    def refractory_timer(self): return self._membrane.refractory_timer
+    @refractory_timer.setter
+    def refractory_timer(self, v): self._membrane.refractory_timer = v
+
+    @property
+    def v_sat(self): return self._membrane.v_sat
+    @v_sat.setter
+    def v_sat(self, v): self._membrane.v_sat = v
+
+    @property
+    def spiked(self): return self._membrane.spiked
+    @spiked.setter
+    def spiked(self, v): self._membrane.spiked = v
+
+    @property
+    def last_spike_time(self): return self._membrane.last_spike_time
+    @last_spike_time.setter
+    def last_spike_time(self, v): self._membrane.last_spike_time = v
+
+    @property
+    def _leak_num(self): return self._membrane._leak_num
+    @_leak_num.setter
+    def _leak_num(self, v): self._membrane._leak_num = v
+
     @property
     def leak_rate(self):
-        """Leak fraction per step, backed by the integer numerator
-        self._leak_num over LEAK_SCALE (fixed-point leak control; see
-        the fixed-point module constants above)."""
-        return self._leak_num / LEAK_SCALE
+        """Leak fraction per step, backed by the Membrane's integer numerator
+        over LEAK_SCALE (fixed-point leak control)."""
+        return self._membrane.leak_rate
 
     @leak_rate.setter
     def leak_rate(self, value):
-        self._leak_num = leak_num(value)
+        self._membrane.leak_rate = value
+
+    # --- SynapseBank forwarding (Phase 1) -------------------------------------
+    # The afferent arrays and construction state live on self._bank; these
+    # properties keep every existing `self._weights_array` / `self._trace` / ...
+    # site (and external `n._weights_array = ...` callers) working unchanged. The
+    # getters return the bank's actual array objects, so in-place index mutation
+    # (`self._weights_array[active] = ...`) still writes through to the bank.
+    @property
+    def _weights_array(self): return self._bank.weights_array
+    @_weights_array.setter
+    def _weights_array(self, v): self._bank.weights_array = v
+
+    @property
+    def _trace(self): return self._bank.trace
+    @_trace.setter
+    def _trace(self, v): self._bank.trace = v
+
+    @property
+    def _confidence(self): return self._bank.confidence
+    @_confidence.setter
+    def _confidence(self, v): self._bank.confidence = v
+
+    @property
+    def _distance(self): return self._bank.distance
+    @_distance.setter
+    def _distance(self, v): self._bank.distance = v
+
+    @property
+    def _last_input_spikes(self): return self._bank.last_input_spikes
+    @_last_input_spikes.setter
+    def _last_input_spikes(self, v): self._bank.last_input_spikes = v
+
+    @property
+    def _connections_finalized(self): return self._bank.connections_finalized
+    @_connections_finalized.setter
+    def _connections_finalized(self, v): self._bank.connections_finalized = v
+
+    @property
+    def _weights_list(self): return self._bank.weights_list
+    @_weights_list.setter
+    def _weights_list(self, v): self._bank.weights_list = v
 
     def add_input_connection(self, weight):
-        """
-        Add an input connection with the specified weight.
-        Can only be called before connections are finalized.
-        
-        Args:
-            weight (float): Weight of the connection (positive for excitatory, 
-                          negative for inhibitory)
-        """
-        if self._connections_finalized:
-            raise RuntimeError("Cannot add connections after finalization. "
-                             "Call finalize_connections() to lock connections.")
-        
-        self._weights_list.append(float(weight))
-        
+        """Add an input connection (positive excitatory / negative inhibitory).
+        Only valid before finalization. Delegates to the SynapseBank."""
+        self._bank.add_input_connection(weight)
+
     def finalize_connections(self):
-        """
-        Lock the connections after all have been added.
-        Converts weights list to numpy array and prepares for simulation.
-        Must be called before running simulation.
-        """
-        if not self._connections_finalized:
-            weights = self._weights_list if self._weights_list else []
-            self._set_weights(weights, finalized=True)
+        """Lock connections and materialize the arrays. Delegates to the bank."""
+        self._bank.finalize()
 
     def _set_weights(self, weights, finalized=None):
-        """Replace the afferent weight vector and resize aligned local state."""
-        arr = np.asarray(weights, dtype=float)
-        self._weights_array = np.clip(arr, -self.weight_cap, self.weight_cap)
-        n = len(self._weights_array)
-        self._trace = np.zeros(n)
-        if self._confidence is None or len(self._confidence) != n:
-            self._confidence = np.full(n, self.confidence_init)
-        # Per-afferent delivery distance; default 1.0 (no attenuation). Preserved
-        # across weight re-assignments of the same fan-in so setting distances then
-        # weights (or vice versa) does not wipe them.
-        if self._distance is None or len(self._distance) != n:
-            self._distance = np.ones(n)
-        self._last_input_spikes = np.zeros(n)
-        if finalized is not None:
-            self._connections_finalized = finalized
-            
+        """Replace the afferent weight vector and resize aligned local state.
+        Delegates to the SynapseBank (clip uses this neuron's current weight_cap)."""
+        self._bank.set_weights(weights, finalized=finalized)
+
     def _ensure_finalized(self):
         """Internal method to check if connections are ready for simulation."""
         if not self._connections_finalized:
@@ -352,10 +450,8 @@ class Neuron:
             # closed form (1 - d^dt)/(1 - d) -> dt (its limit), which also avoids
             # the 1/(1-d) blow-up; d == 0 gives geom == 1 (contributes once).
             geom = float(dt) if abs(1.0 - d) < 1e-9 else (1.0 - d ** dt) / (1.0 - d)
-            self.potential += self.exc_trace * geom
+            self._membrane.deposit(self.exc_trace * geom)
             self.exc_trace *= d ** dt
-            if self.v_sat is not None and self.potential > self.v_sat:
-                self.potential = self.v_sat
         self.exc_trace_last_t = t
 
     def receive_input(self, input_spikes, charge_scale=1.0, t=None):
@@ -383,62 +479,12 @@ class Neuron:
             return
         input_spikes = np.asarray(input_spikes, dtype=float)
 
-        # Distance attenuation of DELIVERED drive (opt-in): scale each afferent
-        # weight by its fixed per-synapse delivery factor before it drives the
-        # membrane. factor_i = (distance_ref / max(d_i, distance_min))^distance_power.
-        # This changes ONLY the delivered amplitude (both flow-rate and
-        # instantaneous paths), never the stored weight, and it is NOT part of the
-        # trace decay/integration math. OFF leaves w_eff pointing at the stored
-        # weights (no copy) so the baseline is byte-identical.
-        if self.distance_weighting and self._distance is not None:
-            factor = (self.distance_ref / np.maximum(self._distance, self.distance_min)) ** self.distance_power
-            w_eff = self._weights_array * factor
-        else:
-            w_eff = self._weights_array
-
-        if self.excitatory_flow_rate and t is not None:
-            # Flow-rate: the spike opens a decaying excitatory current trace that is
-            # integrated into V over time, instead of depositing all charge at once.
-            d = self.exc_trace_decay
-            # 1. Advance residual current through the gap timesteps up to t-1.
-            self.advance_trace(t - 1)
-            self._dbg_v_after_advance = self.potential   # phase diagnostic (see step())
-            # 2. Inject new EXCITATORY (positive-weight) drive as current, using the
-            #    distance-attenuated effective weights (delivery, not stored weight).
-            drive = float(np.dot(np.maximum(w_eff, 0.0), input_spikes)) * charge_scale
-            self.exc_trace += drive * (1.0 - d) if self.exc_trace_normalized else drive
-            # 3. Same-timestep contribution: one integration step at t (inject then
-            #    integrate, so a fresh spike still moves V this timestep).
-            self.potential += self.exc_trace
-            self.exc_trace *= d
-            self.exc_trace_last_t = t
-            if self.v_sat is not None and self.potential > self.v_sat:
-                self.potential = self.v_sat
-            # Only a REAL input volley refreshes the participation mask; residual-
-            # flow steps (no spike) leave it, so a neuron that crosses threshold on
-            # a later no-input timestep still learns the volley that drove it.
-            if input_spikes.any():
-                self._trace += input_spikes * charge_scale
-                self._last_input_spikes = input_spikes
-            return
-
-        # Instantaneous baseline: V += dot(weights, spikes) (distance-attenuated
-        # effective weights when distance weighting is on; not entangled with
-        # chunking -- charge_scale = 1/K still just scales the resulting drive).
-        input_current = np.dot(w_eff, input_spikes) * charge_scale
-        self.potential += input_current
-        # Saturating membrane: bound accumulated charge at a finite ceiling so it
-        # can't ratchet far past threshold (keeps the membrane in a range where the
-        # inhibitory gate can regulate it).
-        if self.v_sat is not None and self.potential > self.v_sat:
-            self.potential = self.v_sat
-        # ARCHIVED: no longer read by _update_weights. Kept only so anything still
-        # inspecting ._trace keeps working.
-        self._trace += input_spikes * charge_scale
-        # Instantaneous participation signal for the charge-based excitatory rule
-        # -- see _update_weights. Stays BINARY (unscaled) so chunked delivery does
-        # not corrupt the participation mask.
-        self._last_input_spikes = input_spikes
+        # Delivery is a strategy (Phase 3c): distance attenuates the delivered
+        # amplitude (never the stored weight), then flow-rate vs instantaneous
+        # integrates it into the membrane. select_delivery matches the original
+        # `excitatory_flow_rate and t is not None` guard.
+        w_eff = effective_weights(self)
+        select_delivery(self, t).deliver(self, input_spikes, charge_scale, t, w_eff)
 
     def apply_inhibition(self, inhibitory_spikes):
         """
@@ -493,39 +539,13 @@ class Neuron:
                 # inhibition cannot push the membrane below resting potential.
                 self.potential = max(self.potential - w, self.resting_potential)
                 v_post = float(self.potential)
-            # Normalized closeness to firing, clamped to [0, 1] (saturating rule).
+            # Normalized closeness to firing, clamped to [0, 1] (saturating rule;
+            # also recorded in the event below).
             p = min(max(v_pre / theta, 0.0), 1.0) if theta > 0 else 0.0
-            if self.inhibitory_delta_rule:
-                # Differentiating rules operate on the NORMALIZED gate u = w/G, where
-                # the ceiling G = sqrt(w_max) is the same sub-threshold scale the
-                # saturating rule converges to (so switching rules doesn't jump the
-                # gate scale, and l2_gate_eq_frac still sets it). All variables are
-                # LOCAL to this event: this synapse's w, this target's v_pre/theta,
-                # the arriving spike. No averages, no global rank/winner identity.
-                G = w_max ** 0.5 if w_max > 0 else 0.0
-                if self.inhibitory_rule_mode == "margin":
-                    # Diagnostic: relax toward the magnitude that brings the target to
-                    # a fixed post-inhibition level target_post = margin_frac*theta.
-                    target_post = self.inhibitory_margin_frac * theta
-                    s = min(max(v_pre - target_post, 0.0), G)
-                    dw = self.inhibitory_delta_eta * (s - w)
-                else:
-                    # Default TURNOVER: event-local strengthen (charge-driven, larger
-                    # for high v_pre and small u) minus size-proportional turnover.
-                    # Frequently high-charge rivals accumulate a stronger gate; weak/
-                    # dead targets drift down -- with NO desired post-inhibition
-                    # voltage and NO stored average.
-                    u = w / G if G > 0 else 0.0
-                    p_t = min(max(v_pre / theta, 0.0), self.inhibitory_p_max) if theta > 0 else 0.0
-                    du = self.inhibitory_eta_up * p_t * (1.0 - u) - self.inhibitory_eta_down * u
-                    dw = du * G
-                w_new = min(max(w + dw, 0.0), G)
-            elif w_max > 0:
-                dw = self.inhibitory_learning_rate * p * (1.0 - (w * w) / w_max)
-                w_new = min(max(w + dw, 0.0), w_max)   # clip to the finite ceiling
-            else:
-                dw = 0.0
-                w_new = w
+            # Per-discharge gate learning is a strategy (Phase 3b): saturating vs
+            # differentiating turnover/margin, selected by the neuron's flags. All
+            # inputs are local to this event; it returns the new gate magnitude.
+            w_new = select_inhibitory_rule(self).new_magnitude(self, w, v_pre, w_max, theta, p)
             self._weights_array[idx] = -w_new      # keep the inhibitory sign
             events.append(dict(index=int(idx), v_pre=v_pre, v_post=v_post,
                                theta=theta, p=p, w_before=w,
@@ -535,6 +555,17 @@ class Neuron:
         # feedforward gates that made it one. Opt-in; see _depress_losers.
         if self.loser_depression and events:
             self._depress_losers(v_entry)
+        # Hard reset: AFTER the inhibitory plasticity rule (and loser depression)
+        # have consumed the loser's pre-reset charge, clamp the membrane back to
+        # rest so no charge carries into the next race. Ordering matters -- the
+        # learning above already read v_pre; only the transient charge is cleared,
+        # never the weights. Optionally zero the current traces so residual
+        # excitatory/inhibitory flow can't refill the membrane after the reset.
+        if self.l2i_hard_reset_losers and events:
+            self.potential = self.resting_potential
+            if self.hard_reset_clear_traces:
+                self.exc_trace = 0.0
+                self.inh_trace = 0.0
         return events
 
     def _depress_losers(self, v_pre_loss):
@@ -565,6 +596,69 @@ class Neuron:
         self.loser_depression_events += 1
         self._apply_budget_and_cap()
 
+    def apply_competitive_reset(self):
+        """Unweighted L2I competitive-reset event on a LOSING L2E neuron
+        (L2_Hard_Reset_Competitive_Depression_Spec). This REPLACES the learned
+        L2I->L2E negative gate: there is no inhibitory magnitude and no negative
+        afferent involved. The event has two effects:
+
+          - structural: depress only the POSITIVE feedforward weights whose L1E
+            sources participated in this response (weight > 0 AND last input spike),
+            using the shared direction-aware bounded kernel with direction -1 and
+            gain = learning_rate * structural_gate * p_loss, where
+            p_loss = clamp(V_pre / theta, 0, 1). OFF (non-participating) afferents
+            are NEVER touched -- depressing them would potentiate absent pixels.
+            Only runs when loser_depression is enabled; a zero-charge loser (p_loss
+            == 0) learns nothing.
+          - transient: UNCONDITIONALLY reset the membrane to rest and clear the
+            pending excitatory/inhibitory current traces (when hard_reset_clear_traces).
+
+        The reset is unconditional even under a refractory timer (which is left
+        untouched): the guarantee is zero membrane/current state after the event.
+        Does NOT call apply_inhibition and needs no negative synapse. Returns a
+        diagnostic record (v_pre, v_post, theta, p_loss, depressed_indices,
+        weights_before, delta_weights, weights_after)."""
+        self._ensure_finalized()
+        theta = self.threshold
+        v_pre = float(self.potential)
+        p_loss = min(max(v_pre / theta, 0.0), 1.0) if theta > 0 else 0.0
+
+        depressed_indices: list[int] = []
+        weights_before = np.zeros(0)
+        delta_weights = np.zeros(0)
+        weights_after = np.zeros(0)
+        if (self.loser_depression and p_loss > 0.0 and self.weight_cap > 0
+                and self._weights_array is not None and len(self._weights_array) > 0):
+            participating = self._last_input_spikes > 0.5
+            eligible = np.nonzero((self._weights_array > 0) & participating)[0]
+            if eligible.size > 0:
+                w_before = self._weights_array[eligible].astype(float).copy()
+                w_min = self.min_positive_weight if self.min_positive_weight is not None else 0.0
+                gate = (self._structural_free_energy_gate()
+                        if self.structural_free_energy else 1.0)
+                gain = self.learning_rate * gate * p_loss
+                signal = np.full(eligible.size, -1.0)
+                w_after = bounded_signed_update(w_before, w_min, self.weight_cap,
+                                                gain, signal)
+                self._weights_array[eligible] = w_after
+                depressed_indices = eligible.tolist()
+                weights_before = w_before
+                weights_after = w_after
+                delta_weights = w_after - w_before
+                self.loser_depression_events += 1
+
+        # Unconditional hard reset: zero the membrane and pending current traces.
+        # The refractory timer is deliberately left untouched.
+        self.potential = self.resting_potential
+        if self.hard_reset_clear_traces:
+            self.exc_trace = 0.0
+            self.inh_trace = 0.0
+        v_post = float(self.potential)
+        return dict(v_pre=v_pre, v_post=v_post, theta=theta, p_loss=p_loss,
+                    depressed_indices=depressed_indices,
+                    weights_before=weights_before, delta_weights=delta_weights,
+                    weights_after=weights_after)
+
     def update(self):
         """
         Update neuron state for next time step.
@@ -580,18 +674,11 @@ class Neuron:
         if self.confidence_consolidation:
             self._decay_confidence()
 
-        # Handle refractory period
-        if self.refractory_timer > 0:
-            self.refractory_timer -= 1
-            # Clamp potential to resting during refractory period
-            self.potential = self.resting_potential
-        else:
-            # Apply leak: potential decays toward resting potential. Fixed-point
-            # leak control -- the leak amount is the integer numerator
-            # self._leak_num over the integer LEAK_SCALE, so no float leak
-            # constant enters here.
-            # (Potential itself is still float on this scope's deferred path.)
-            self.potential += self._leak_num * (self.resting_potential - self.potential) / LEAK_SCALE
+        # Membrane leak + refractory countdown (fixed-point leak on the Membrane).
+        # Returns True on a non-refractory (leak) step, where the eligibility-trace
+        # decay and inhibitory-current drain -- which touch bank/neuron state, not
+        # just the membrane -- also run.
+        if self._membrane.leak_and_countdown():
             # Decay the eligibility trace with the same leak fraction.
             self._trace *= (1.0 - self._leak_num / LEAK_SCALE)
             # Inhibitory FLOW: drain the pending inhibitory current out of the
@@ -618,11 +705,7 @@ class Neuron:
             bool: True if neuron fires, False otherwise
         """
         self._ensure_finalized()
-
-        # Only check threshold if not in refractory period
-        if self.refractory_timer <= 0 and self.potential >= self.threshold:
-            return True
-        return False
+        return self._membrane.check_threshold()
     
     def fire(self):
         """
@@ -631,28 +714,14 @@ class Neuron:
         """
         self._ensure_finalized()
 
-        # Record spike time
-        self.last_spike_time = 0  # Current time step
-
         # Capture charge BEFORE discharging (mirrors apply_inhibition's V_pre).
         # Weight learning below uses this v_pre unchanged, so reset semantics do
         # not alter what the fire teaches -- only the post-fire membrane state.
         v_pre = float(self.potential)
 
-        # Discharge: reset potential after firing. Default is a full reset to
-        # rest; with subtractive_reset (opt-in) reset by SUBTRACTION instead --
-        # leave the residual overshoot above threshold (standard LIF), floored at
-        # rest so inhibition/leak conventions still hold.
-        if self.subtractive_reset:
-            self.potential = max(self.potential - self.threshold, self.resting_potential)
-        else:
-            self.potential = self.resting_potential
-
-        # Start refractory period
-        self.refractory_timer = self.refractory_period
-
-        # Mark that we spiked this time step
-        self.spiked = True
+        # Membrane discharge on spike: reset (full or subtractive), arm refractory,
+        # record spike time, mark spiked. See Membrane.fire_reset.
+        self._membrane.fire_reset(self.subtractive_reset)
 
         # Flow-rate: discharge the excitatory current trace along with the membrane,
         # so no residual current keeps re-charging a just-fired neuron (and none
@@ -684,92 +753,35 @@ class Neuron:
         """
         if self._weights_array is None or len(self._weights_array) == 0:
             return
+        # Polymorphic dispatch over the one active excitatory rule (Phase 3a). The
+        # signed-spike / assembly-flow / charge-based branches now live as strategy
+        # objects in snn/rules/excitatory.py; the selector encodes the old mutual
+        # exclusivity (signed and assembly took precedence; charge is the default).
+        select_excitatory_rule(self).on_fire(self, v_pre)
+
+    def _positive_afferent_weight_sum(self):
+        """Total learned excitatory support: the sum of this neuron's POSITIVE
+        afferent weights (negative inhibitory gates such as L2I->L2E contribute 0).
+        Input/label independent -- it is the whole positive weight vector, not only
+        the currently-active afferents, so the structural brake below is a property
+        of what the neuron HAS learned, not of the current input event."""
+        if self._weights_array is None or len(self._weights_array) == 0:
+            return 0.0
+        return float(np.maximum(self._weights_array, 0.0).sum())
+
+    def _structural_free_energy_gate(self):
+        """Structural free-energy plasticity gate in [eta_floor, 1] (see __init__).
+        maturity = clamp(sum_positive_afferent_weights / threshold, 0, 1);
+        gate = max(eta_floor, 1 - maturity). Uses ONLY this neuron's own positive
+        weights and its own threshold -- no membrane voltage, no rivals, no labels.
+        An under-built neuron (sum << theta) gates ~1 (fully plastic); a neuron whose
+        excitatory support already covers a threshold crossing (sum >= theta) gates
+        at the floor (consolidated/stable)."""
         theta = self.threshold
-        p = min(max(theta / v_pre, 0.0), 1.0) if v_pre > 0 else 0.0
-        participating = self._last_input_spikes > 0.5
-
-        # Minimal signed-spike feedforward rule (opt-in). Every POSITIVE synapse
-        # updates with a signed local signal -- +1 if its input participated in
-        # this firing volley, -1 if not -- through the same saturating term
-        # written with a LINEAR cap: dw = eta * p * (1 - (w/w_cap)^2) * signal.
-        # Active inputs potentiate toward the cap; inactive inputs depress toward
-        # the floor. No weight budget: the -1 signal on inactive inputs supplies
-        # the downward pressure the budget used to impose. Bounded locally to
-        # [min_positive_weight, weight_cap]. Negative inhibitory gates are NOT
-        # touched here (they learn only via apply_inhibition). This fully replaces
-        # the confidence / OFF-depression / budget path below, so return early.
-        if self.signed_spike_learning:
-            pos = self._weights_array > 0
-            if pos.any() and self.weight_cap > 0:
-                w = self._weights_array[pos]
-                signal = np.where(participating[pos], 1.0, -1.0)
-                dw = self.learning_rate * p * (1.0 - (w / self.weight_cap) ** 2) * signal
-                w_min = self.min_positive_weight if self.min_positive_weight is not None else 0.0
-                self._weights_array[pos] = np.clip(w + dw, w_min, self.weight_cap)
-            return
-
-        # Flow-proportional assembly credit (opt-in; the E->I integrators L2I/L1I).
-        # On this neuron's OWN fire, split credit across the incoming positive
-        # synapses by the flow each delivered over the retention window -- the
-        # per-synapse leaky _trace, which decays at this neuron's own leak so it
-        # spans exactly the same window its membrane integrates. Normalizing by the
-        # MAX flow (not the sum) gives the dominant driver the full learning rate,
-        # so a habitual winner's synapse climbs to self-sufficiency instead of the
-        # last spike to cross threshold taking all the credit. Synapses that
-        # delivered no flow are depressed toward the floor. This is the whole fix
-        # for the L2I firing deadlock; it replaces the last-volley path below.
-        if self.assembly_flow_credit:
-            pos = self._weights_array > 0
-            w_max = self.excitatory_saturation_cap if self.excitatory_saturation_cap is not None else self.weight_cap
-            if pos.any() and w_max > 0 and self._trace is not None:
-                w = self._weights_array[pos]
-                flow = self._trace[pos]
-                fmax = float(flow.max())
-                w_min = self.min_positive_weight if self.min_positive_weight is not None else 0.0
-                if fmax > 0.0:
-                    fhat = flow / fmax                      # dominant driver -> 1.0
-                    contributed = flow > 0.0
-                    # Contributors potentiate toward the cap, scaled by flow share;
-                    # non-contributors decelerate into the floor (down-pressure).
-                    dw = np.where(
-                        contributed,
-                        self.learning_rate * p * fhat * (1.0 - (w * w) / w_max),
-                        -self.learning_rate * p * self.assembly_decay_frac * (w - w_min),
-                    )
-                    self._weights_array[pos] = np.clip(w + dw, w_min, self.weight_cap)
-            return
-
-        active = np.nonzero((self._weights_array > 0) & participating)[0]
-        w_max = self.excitatory_saturation_cap if self.excitatory_saturation_cap is not None else self.weight_cap
-        if w_max > 0 and active.size > 0:
-            w = self._weights_array[active]
-            if self.confidence_consolidation:
-                # Confidence-gated potentiation: mature (confident) gates learn
-                # less, with a floor eta_min so no gate freezes.
-                C = self._confidence[active]
-                eta = self.learning_rate * (self.eta_min + (1.0 - self.eta_min) * (1.0 - C))
-                self._weights_array[active] = w + eta * p * (1.0 - (w * w) / w_max)
-                # Mature confidence toward local instantaneous maturity of the
-                # (pre-update) gate; only active gates (x_i = 1) move.
-                self._confidence[active] = C + self.conf_beta * (self._maturity(w) - C)
-            else:
-                dw = self.learning_rate * p * (1.0 - (w * w) / w_max)
-                self._weights_array[active] = w + dw
-        # Signed-spike depression ("4a"): OFF pixels (positive gates whose input
-        # did NOT spike this fire) are pushed down. Confidence-gated when
-        # consolidation is on (mature gates resist via (1 - C_i)); shaped by
-        # (w_i - w_min) so a gate decelerates into the min_positive_weight floor
-        # applied by _apply_budget_and_cap() -- it never goes deaf or negative.
-        # Same event closeness p as potentiation.
-        if self.signed_depression and self.eta_off > 0.0:
-            inactive = np.nonzero((self._weights_array > 0) & ~participating)[0]
-            if inactive.size > 0:
-                w_off = self._weights_array[inactive]
-                w_min = self.min_positive_weight if self.min_positive_weight is not None else 0.0
-                gate = (1.0 - self._confidence[inactive]) if self.confidence_consolidation else 1.0
-                self._weights_array[inactive] = w_off - self.eta_off * p * gate * (w_off - w_min)
-                self.signed_depression_events += 1
-        self._apply_budget_and_cap()
+        if theta <= 0:
+            return 1.0
+        maturity = min(max(self._positive_afferent_weight_sum() / theta, 0.0), 1.0)
+        return max(self.structural_fe_eta_floor, 1.0 - maturity)
 
     def _maturity(self, w):
         """Local instantaneous maturity m in [0,1] of positive gate weights w:
