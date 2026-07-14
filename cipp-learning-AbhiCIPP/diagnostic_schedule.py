@@ -39,6 +39,7 @@ from __future__ import annotations
 import argparse
 import copy
 import statistics as stats
+from collections import Counter
 
 from backend.simulation import SimulationEngine, N_OUT, N_PIX
 from backend.presets import DASHBOARD_PRESET
@@ -141,8 +142,22 @@ def run_diagnostic(seed, engine_kwargs=None, cycles=DEFAULT_CYCLES,
 
 # ------------------------------------------------------------------- report
 def _modal(values):
+    """Most-common non-None value. Deterministic even on an exact count tie:
+    `max(set(...), key=count)` (the original form) breaks ties by set
+    iteration order, which depends on Python's per-process string hash
+    randomization (PYTHONHASHSEED) -- two runs of the identical seed/cycles
+    could report a different "owner" label on a genuine tie, purely from hash
+    seed, with no change in the underlying spike counts. Sorting the tied
+    candidates before picking removes that dependency; found and fixed during
+    Phase 6 validation (col 1 at seed=1 has an exact 7-7 first-spiker tie
+    between L2E3/L2E4 -- a real, reproducible tie in the data, not a bug in
+    counting)."""
     non_none = [v for v in values if v is not None]
-    return max(set(non_none), key=non_none.count) if non_none else None
+    if not non_none:
+        return None
+    counts = Counter(non_none)
+    top = max(counts.values())
+    return min(v for v, c in counts.items() if c == top)
 
 
 def summarize(run) -> dict:

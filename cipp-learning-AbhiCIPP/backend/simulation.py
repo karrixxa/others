@@ -238,13 +238,20 @@ FREQ_WINDOW = 40
 WEIGHT_EPS = 1e-6
 LOG_MAX = 400
 
-# Episode-based competition window (interpretation only -- see _update_episode).
-# An episode groups the L2 spikes produced across one or more volley bursts, and
-# the "winner" is resolved from that spike history only when the episode ends,
-# instead of an instantaneous per-step argmax. These two knobs are the episode
-# end conditions; neither touches learning, WTA, or membrane dynamics.
-EPISODE_QUIET_K = 5    # Condition A: end after this many consecutive L2-silent steps (spec: 3-5)
-EPISODE_MAX_LEN = 12   # Condition B: hard cap on episode length in steps (spec: 8-12)
+# ---- Phase 6: representation candidate == first physical L2E threshold
+# crossing (brief SS8-9). RETIRED (was here through Phase 5): the "episode"
+# window (EPISODE_QUIET_K/EPISODE_MAX_LEN, _update_episode/_resolve_episode)
+# that resolved self.winner via LATEST-spike-wins from grouped spike history.
+# That was the Phase 1 audit's headline conflict with the brief ("the
+# dashboard's exposed winner is latest-spike-wins, not first-spike-wins").
+# self.winner is now set directly in _track_presentation() the moment the
+# presentation's first physical L2E spike occurs (never re-derived by argmax/
+# index/charge/geometry/UI logic), and stays None for the rest of that
+# presentation if that first response was a same-step tie (earliestResponseSet
+# has >1 member) -- an ambiguous same-step set gets no winner-specific credit.
+# Nothing else depended on the episode fields (confirmed: not read by any
+# test, script, or frontend file), so they were removed rather than left
+# as unused dead code alongside the new mechanism.
 
 # L2 lateral inhibition ("adaptive gate") parameters. Competition in L2 is
 # produced by the shared inhibitory neuron L2I suppressing near-winners through
@@ -1150,15 +1157,15 @@ class SimulationEngine:
         self.l2_drive: dict[str, float] = {}          # PRE-WTA snapshot (peak/margin)
         self.l2_charge: dict[str, float] = {}         # POST-inhibition, pre-update diagnostic
         self.l2_inh_phase_debug: list[dict] = []      # per-inhibited-L2E phase record (see step())
+        # Phase 6: the exposed "representation candidate" -- the presentation's
+        # first physical L2E threshold crossing, or None until one occurs, or
+        # None for the rest of the presentation if that first response was a
+        # same-step tie (see _track_presentation/_start_presentation). Set in
+        # EXACTLY one place (_track_presentation); never re-derived by argmax,
+        # index, hidden charge, weights, geometry, or UI logic.
         self.winner: str | None = None
         self._inh_events: list[tuple] = []   # (neuron_id, event) from this step's discharges
         self._reset_events: list[tuple] = []  # (neuron_id, record) from L2 competitive resets
-
-        # Episode-based competition window (interpretation only; see _update_episode).
-        self.episode_active = False
-        self.episode_timer = 0
-        self.episode_last_spike_time = -1
-        self.episode_l2_spikes: list[tuple] = []   # list of (timestep, neuron_id)
 
         # Auto-cycle: rotate through the patterns, showing each for a short bounded
         # VISIT, and detect training per pattern. Sitting on one pattern can't
@@ -1213,6 +1220,12 @@ class SimulationEngine:
         self._presentation_first_spiker: str | None = None
         self._presentation_first_spike_t: int | None = None
         self._presentation_tie = False
+        # Phase 6: earliestResponseSet (exact set, not just the tie boolean
+        # above), the ordered later responses, and the latency to the second
+        # DISTINCT responder -- see _track_presentation/_start_presentation.
+        self._presentation_earliest_response_set: list[str] = []
+        self._presentation_later_responses: list[tuple[int, str]] = []
+        self._presentation_latency_to_second: int | None = None
         self._presentation_l1i_first_source: str | None = None
         self._presentation_l1i_first_t: int | None = None
         self._presentation_l2i_first_source: str | None = None
@@ -1756,10 +1769,29 @@ class SimulationEngine:
         nobody crossed, so a caller running this per charge-chunk can drive L2I's
         no-winner integration exactly once after the chunk loop instead of K times.
         `t` is the current outer timestep (passed through to L2I flow-rate charge).
+
+        PHASE 6/7 NOTE -- this method's own `winner` (below) is a MECHANICAL
+        choice, not the representation candidate: when more than one L2E is
+        `eligible` in the same step, `max(eligible, key=potential)` is a LEGACY
+        immediate-reset tiebreak that decides which ONE neuron physically fires
+        and resets the rest -- it exists because the current hard-reset design
+        can only physically discharge the pool through a single firing event,
+        not because a tie should be resolved this way representationally. Phase
+        6 does NOT let this tiebreak's result stand in for an unambiguous
+        winner: the caller (_track_presentation) reads `self._last_eligible`
+        (the full eligible set, set below) and reports the response as an
+        ambiguous same-step tie -- earning no winner-specific credit -- whenever
+        that set has more than one member, regardless of which specific neuron
+        this mechanism happened to let fire. This tiebreak (and the single-
+        firing hard-reset design that requires it) is the "legacy immediate-
+        reset competition" flagged here for Phase 7 to reconsider/replace; it
+        is deliberately left unchanged in Phase 6.
         """
         eligible = [j for j, e in enumerate(l2.excitatory_neurons) if e.check_threshold()]
-        # Diagnostic only (Causal Story sameStepTie): the eligible set at the step
-        # that resolves the competition. Read, never used to pick the winner.
+        # earliestResponseSet's source (Causal Story): the FULL eligible set at
+        # the step that resolves the competition, read by _track_presentation
+        # to detect an ambiguous same-step tie. Never used here to pick the
+        # winner below -- that argmax is the legacy mechanism documented above.
         self._last_eligible = eligible
         if not eligible:
             return 0.0, [], None
@@ -2006,7 +2038,6 @@ class SimulationEngine:
         self._detect_weight_changes()
         self._detect_confidence_changes()
         self._log_inhibitory_events()
-        self._update_episode(l2e, t)
         # Auto-cycle is training-patterns-only by construction (_cycle_order is
         # built from PATTERNS.keys()); pause its ticking while a probe is up so a
         # probe's steps/current_pattern never feed the training bookkeeping.
@@ -2046,91 +2077,30 @@ class SimulationEngine:
             self.spiked[f'L2E{j}'] = bool(l2e[j]); self.freq[f'L2E{j}'].append(l2e[j])
         self.spiked['L2I'] = bool(l2i); self.freq['L2I'].append(l2i)
 
-    def _update_episode(self, l2e, t):
-        """
-        Episode-based competition interpretation. This is the ONLY thing that
-        changed relative to the old instantaneous winner readout: it decides
-        *when* competition is considered resolved and *which* neuron is reported
-        as the winner. It reads only l2e (this step's L2E spikes) and t, and
-        writes only the episode_* fields and self.winner. It never touches a
-        neuron, a weight, a potential, WTA, or the learning rule -- so LIF and
-        plasticity are byte-for-byte unchanged.
-
-        Structure:
-          - An episode STARTS on a volley tick, but only if one is not already
-            running (so a single episode can span several volleys up to T_max
-            instead of being reset every volley).
-          - While active, every L2E spike this step is appended to the history
-            and the last-spike time is updated.
-          - The episode ENDS on Condition A (K consecutive L2-silent steps) or
-            Condition B (episode_timer reaches T_max), whichever comes first.
-          - The winner is then resolved from the spike history alone
-            (latest-spike, then most-spikes tiebreak) -- no argmax over membrane
-            potentials, no global ranking.
-        """
-        volley = (t % self.params['volley_period'] == 0)
-        if volley and not self.episode_active:
-            self.episode_active = True
-            self.episode_timer = 0
-            self.episode_last_spike_time = -1
-            self.episode_l2_spikes = []
-
-        if not self.episode_active:
-            return
-
-        # Record this step's L2E spikes. WTA fires at most one L2E per step, but
-        # we record generally so any co-firing would also be captured.
-        for j in range(N_OUT):
-            if l2e[j]:
-                self.episode_l2_spikes.append((t, f'L2E{j}'))
-                self.episode_last_spike_time = t
-        self.episode_timer += 1
-
-        # Condition A: silent for K consecutive steps (counted from the last
-        # spike, or from episode start if nothing has fired yet).
-        if self.episode_last_spike_time >= 0:
-            silent = t - self.episode_last_spike_time
-        else:
-            silent = self.episode_timer - 1
-        # Condition B: episode length cap.
-        if silent >= EPISODE_QUIET_K or self.episode_timer >= EPISODE_MAX_LEN:
-            self._resolve_episode()
-            self.episode_active = False
-
-    def _resolve_episode(self):
-        """Resolve the episode winner from spike history only.
-
-        Rule 1 (primary): the neuron with the LATEST spike time wins.
-        Rule 2 (tiebreak): if several neurons share that latest spike time, the
-        one with the MOST spikes over the whole episode wins.
-        An episode with no L2 spikes leaves the previous winner untouched.
-        """
-        if not self.episode_l2_spikes:
-            return
-        latest_t = max(ts for ts, _ in self.episode_l2_spikes)
-        last_spikers = [nid for ts, nid in self.episode_l2_spikes if ts == latest_t]
-        if len(set(last_spikers)) > 1:
-            counts: dict[str, int] = {}
-            for _, nid in self.episode_l2_spikes:
-                counts[nid] = counts.get(nid, 0) + 1
-            winner = max(set(last_spikers), key=lambda n: counts[n])
-        else:
-            winner = last_spikers[0]
-        if winner != self.winner:
-            self._log('learning', f'episode winner -> {winner} '
-                                  f'(spikes={len(self.episode_l2_spikes)}, last_t={latest_t})')
-        self.winner = winner
 
     # ------------------------------------------------------- presentation / probes
     def _start_presentation(self, name: str, role: str):
         """Begin a new named presentation (a training pattern or a probe shown via
         set_pattern/present_probe). Archives the JUST-ENDED presentation's causal
-        summary (first physical L2E responder, same-step tie, first L1I/L2I
-        source, etc. -- brief-required diagnostic fields, recorded, never
-        inferred) onto presentation_log, and folds its first-responder identity
-        into the per-pattern/per-neuron evidence history used by the Causal Story
-        and the evidence-based receptive-field status. Observability only: reads
-        already-decided physical events, never mutates a neuron or a weight."""
+        summary onto presentation_log -- brief SS9's required fields, recorded,
+        never inferred -- and folds its first-responder identity into the
+        per-pattern/per-neuron evidence history used by the Causal Story and the
+        evidence-based receptive-field status, UNLESS that first response was a
+        same-step tie (Phase 6: an ambiguous same-step set gets no winner-
+        specific credit). Observability only: reads already-decided physical
+        events, never mutates a neuron or a weight.
+
+        Phase 6 field mapping (brief SS9's terms -> this engine's names):
+          physicalFirstSpiker      -> first_spiker (raw fact: recorded even
+                                       during a tie -- see self.winner for the
+                                       separate, credit-bearing concept)
+          physicalFirstSpikeStep   -> first_spike_t
+          earliestResponseSet      -> earliest_response_set (the exact set of
+                                       L2E ids eligible at the first-spike step;
+                                       sameStepTie == len(...) > 1)
+          later L2E spike order    -> later_responses ([(t, nid), ...])
+          latency to second        -> latency_to_second_response
+        """
         if self.presentation_id > 0:
             self.presentation_log.append(dict(
                 id=self.presentation_id, pattern=self.presentation_pattern,
@@ -2139,11 +2109,17 @@ class SimulationEngine:
                 first_spiker=self._presentation_first_spiker,
                 first_spike_t=self._presentation_first_spike_t,
                 same_step_tie=self._presentation_tie,
+                earliest_response_set=list(self._presentation_earliest_response_set),
+                later_responses=list(self._presentation_later_responses),
+                latency_to_second_response=self._presentation_latency_to_second,
                 l1i_first_source=self._presentation_l1i_first_source,
                 l1i_first_t=self._presentation_l1i_first_t,
                 l2i_first_source=self._presentation_l2i_first_source,
                 l2i_first_t=self._presentation_l2i_first_t))
-            if self._presentation_first_spiker is not None:
+            # No winner-specific credit for an ambiguous same-step tie: only a
+            # clean (non-tied) first response feeds the evidence history that
+            # the Causal Story / evidence-based RF status read.
+            if self._presentation_first_spiker is not None and not self._presentation_tie:
                 hist = self._pattern_first_responder_log.setdefault(
                     self.presentation_pattern, deque(maxlen=20))
                 hist.append(self._presentation_first_spiker)
@@ -2157,32 +2133,76 @@ class SimulationEngine:
         self._presentation_first_spiker = None
         self._presentation_first_spike_t = None
         self._presentation_tie = False
+        self._presentation_earliest_response_set = []
+        self._presentation_later_responses = []
+        self._presentation_latency_to_second = None
         self._presentation_l1i_first_source = None
         self._presentation_l1i_first_t = None
         self._presentation_l2i_first_source = None
         self._presentation_l2i_first_t = None
         self._presentation_last_l2_winner = None
+        # The representation candidate resets with the presentation: no
+        # carryover credit from a previous presentation before new evidence
+        # (a fresh first spike) arrives.
+        self.winner = None
+
+    def _credit_source(self, idx: int | None) -> str | None:
+        """L2E id for `idx`, UNLESS it is the presentation's own ambiguous
+        (same-step-tied) first responder -- an ambiguous same-step set gets no
+        winner-specific credit or feedback, so any L1I/L2I source attribution
+        that would otherwise point at it is reported as 'ambiguous' instead of
+        naming a specific neuron."""
+        if idx is None:
+            return None
+        nid = f'L2E{idx}'
+        if self._presentation_tie and nid == self._presentation_first_spiker:
+            return 'ambiguous'
+        return nid
 
     def _track_presentation(self, step_winner_idx: int | None, l2i_fired: bool, l1i_arr, t: int):
         """Presentation-scoped causal tracking, called once per step() from
         already-decided physical results (step_winner_idx is read off this step's
         one-hot l2e vector, l2i_fired/l1i_arr off this step's actual discharge
-        arrays) -- it decides nothing and mutates no neuron/weight/membrane."""
+        arrays) -- it decides nothing and mutates no neuron/weight/membrane.
+
+        Phase 6: self.winner (the representation candidate) is set in EXACTLY
+        one place -- right here, the instant the presentation's first physical
+        L2E threshold crossing occurs -- to that neuron's id, UNLESS
+        self._last_eligible (populated by _resolve_l2_competition/the
+        lasting_inhibition branch for the step that resolved it) names more
+        than one neuron, in which case the response is an ambiguous same-step
+        tie and self.winner stays None for the rest of this presentation. This
+        is never re-derived by argmax, index, hidden charge, weights,
+        geometry, or UI logic -- see the module comment above the (retired)
+        episode mechanism for what this replaced, and _resolve_l2_competition's
+        own docstring for the legacy immediate-reset tiebreak this still relies
+        on to decide WHICH neuron physically fires when several cross threshold
+        in the same step (kept as-is; flagged there for Phase 7)."""
         if step_winner_idx is not None:
+            nid = f'L2E{step_winner_idx}'
             self._presentation_last_l2_winner = step_winner_idx
             if self._presentation_first_spiker is None:
-                self._presentation_first_spiker = f'L2E{step_winner_idx}'
+                self._presentation_first_spiker = nid
                 self._presentation_first_spike_t = t
-                self._presentation_tie = len(self._last_eligible) > 1
+                self._presentation_earliest_response_set = [f'L2E{j}' for j in sorted(self._last_eligible)]
+                self._presentation_tie = len(self._presentation_earliest_response_set) > 1
+                self.winner = None if self._presentation_tie else nid
+            else:
+                # A later physical response (brief: "later L2E spike order"),
+                # recorded in full -- including a repeat spike from the same
+                # neuron, which is itself meaningful ("the winner fired again").
+                self._presentation_later_responses.append((t, nid))
+                if (self._presentation_latency_to_second is None
+                        and nid != self._presentation_first_spiker):
+                    self._presentation_latency_to_second = t - self._presentation_first_spike_t
         if l2i_fired and self._presentation_l2i_first_t is None:
             self._presentation_l2i_first_t = t
             self._presentation_l2i_first_source = (
-                f'L2E{step_winner_idx}' if step_winner_idx is not None else 'residual')
+                self._credit_source(step_winner_idx) if step_winner_idx is not None
+                else (self._credit_source(self._presentation_last_l2_winner) or 'residual'))
         if np.any(l1i_arr > 0.5) and self._presentation_l1i_first_t is None:
             self._presentation_l1i_first_t = t
-            self._presentation_l1i_first_source = (
-                f'L2E{self._presentation_last_l2_winner}'
-                if self._presentation_last_l2_winner is not None else None)
+            self._presentation_l1i_first_source = self._credit_source(self._presentation_last_l2_winner)
 
     def _set_plasticity_frozen(self, frozen: bool):
         self.plasticity_frozen = frozen
@@ -2419,9 +2439,6 @@ class SimulationEngine:
                     changed_confidence=self.changed_confidence,
                     emitted=self.emitted,
                     input=self.input_vec.astype(int).tolist(), winner=self.winner,
-                    episode=dict(active=self.episode_active, timer=self.episode_timer,
-                                 spikes=len(self.episode_l2_spikes),
-                                 participants=sorted({nid for _, nid in self.episode_l2_spikes})),
                     autocycle=dict(enabled=self.auto_cycle, pattern=self.current_pattern,
                                    target=self.trained_streak, visit_steps=self.visit_steps,
                                    last_winner=self._pattern_last_winner.get(self.current_pattern),
@@ -2453,9 +2470,16 @@ class SimulationEngine:
                         role=self.presentation_role,
                         start_t=self.presentation_start_t,
                         plasticity_frozen=self.plasticity_frozen,
+                        # Phase 6: physicalFirstSpiker/physicalFirstSpikeStep --
+                        # raw facts, recorded even during a same-step tie (see
+                        # `winner` above for the separate, credit-bearing
+                        # representation candidate, which is None when tied).
                         first_spiker=self._presentation_first_spiker,
                         first_spike_t=self._presentation_first_spike_t,
                         same_step_tie=self._presentation_tie,
+                        earliest_response_set=list(self._presentation_earliest_response_set),
+                        later_responses=list(self._presentation_later_responses),
+                        latency_to_second_response=self._presentation_latency_to_second,
                         l1i_first_source=self._presentation_l1i_first_source,
                         l1i_first_t=self._presentation_l1i_first_t,
                         l2i_first_source=self._presentation_l2i_first_source,

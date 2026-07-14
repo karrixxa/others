@@ -13,9 +13,11 @@
 - Phase 3 END checkpoint commit: `0e353cd` (seeded engine-owned geometry)
 - Phase 4 END checkpoint commit: `586d0f7` (connection distance/influence,
   isolated experimental behavior)
-- This update corresponds to the **Phase 5 END** checkpoint (diagnostic
-  interleaved-presentation schedule) — commit hash filled in after this
-  commit lands, see repo log.
+- Phase 5 END checkpoint commit: `ff3048f` (diagnostic interleaved-presentation
+  schedule)
+- This update corresponds to the **Phase 6 END** checkpoint (representation
+  candidate == first physical L2E threshold crossing) — commit hash filled in
+  after this commit lands, see repo log.
 - Base branch `july14` is untouched and remains the protected base.
 - `four-pattern` branch exists (checked out in a separate worktree at
   `/home/charisxiong/Documents/others`) and is explicitly NOT merged here —
@@ -60,24 +62,41 @@ applied **exactly once** per pathway, and none of the four new flags is
 enabled by default anywhere, so the geometry-off and legacy-distance
 baselines from Phases 2/3 are completely unaffected.
 
-**Current phase (Phase 5, complete) — Diagnostic-only equal-interleaved
-presentation schedule, per explicit user instruction:** a standalone,
-non-mutating measurement tool (`diagnostic_schedule.py`) that presents the
-four training patterns in the brief's fixed cycle (row 1 → col 1 → diag \ →
-diag / → repeat), each presentation BRIEF (never saturating one pattern first,
-brief §12), recording per presentation: presentation ID/pattern/plasticity
-state, first L2E spiker + earliest set, all later spikes + latency margin to
-the second distinct responder, L2I spikes, L1I fired positions, pre/post-
-inhibition charge, receptive fields, and weight changes. Evaluation runs on a
-disposable deep-copied engine (never the live one, if one is handed in) plus a
-further plasticity-frozen copy (reusing Phase 2's proven `_set_plasticity_frozen`)
-for a repeated-presentation consistency re-test. Reports per-pattern
-consistency/ambiguity/no-response, distinct owners, collisions, forgetting,
-silent/recruitable cells, L2I activity, and L1I selectivity across seeds. This
-phase changed **zero lines of engine/competition code** — purely additive
-(a new script + tests + a saved baseline document), confirmed by full
-regression and by `sustained_dominance.py`/`ablation_harness.py` reproducing
-the exact Phase 1 numbers, unchanged.
+**Phase 5 (complete) — Diagnostic-only equal-interleaved presentation
+schedule:** a standalone, non-mutating measurement tool (`diagnostic_schedule.py`)
+implementing the brief's fixed cycle (row 1 → col 1 → diag \ → diag / →
+repeat) with brief, non-saturating presentations, evaluated exclusively on
+disposable deep-copies (plus a plasticity-frozen re-test copy). Reports
+per-pattern consistency/ambiguity/no-response/distinct-owners/collisions/
+forgetting/silent-recruitable-cells/L2I-activity/L1I-selectivity across
+seeds. Zero engine/competition code changed — a 5-seed baseline was saved to
+`Diagnostic_Schedule_Baseline.md`.
+
+**Current phase (Phase 6, complete) — Representation candidate == first
+physical L2E threshold crossing, per explicit user instruction:** `self.winner`
+(the exposed representation candidate) is now set in EXACTLY one place — the
+instant a presentation's first physical L2E threshold crossing occurs — and
+never re-derived by argmax, index, hidden charge, weights, geometry, or UI
+logic. This retires the Phase 1 audit's headline conflict with the brief (the
+old `_resolve_episode()` "latest-spike-wins" mechanism, now fully removed —
+confirmed unused by any test, script, or frontend file). A same-step tie
+(more than one L2E eligible at the winning step) makes the response ambiguous:
+`self.winner` stays `None` for the rest of that presentation, and neither the
+evidence-crediting history nor L1I/L2I source attribution names a specific
+neuron for it (reported as `'ambiguous'` instead) — while `physicalFirstSpiker`
+itself is still recorded as a raw fact (which neuron the legacy tiebreak
+physically let fire), kept separately observable from the credit-bearing
+`self.winner`, exactly as the brief requires. New fields recorded per
+presentation: `earliest_response_set` (the exact tied set, not just a
+boolean), `later_responses` (the full ordered later-spike list), and
+`latency_to_second_response`. The legacy immediate-reset competition
+(`_resolve_l2_competition`'s argmax-over-potential tiebreak, which still
+decides which ONE neuron physically fires when several cross threshold in the
+same step) is deliberately left UNCHANGED and clearly documented in its own
+docstring as the thing Phase 7 is expected to reconsider/replace — this phase
+never touches physical dynamics (spike timing, membrane potentials, learning),
+confirmed by `sustained_dominance.py`/`ablation_harness.py` reproducing the
+exact Phase 1 numbers.
 
 ## Completed (this session)
 
@@ -138,8 +157,8 @@ untouched legacy L1E→L2E pathway, each default-off, each fully audited
 using one shared safe-by-default power law. The legacy-distance-compat shim
 and the L1E→L2E pathway it governs are completely UNCHANGED by this phase.
 
-Phase 5 (diagnostic equal-interleaved presentation schedule; see "Files
-changed" below): a standalone, non-mutating diagnostic tool implementing the
+Phase 5 (diagnostic equal-interleaved presentation schedule; see commit
+`ff3048f`): a standalone, non-mutating diagnostic tool implementing the
 brief's fixed cycle (row 1 → col 1 → diag \ → diag / → repeat) with brief,
 non-saturating presentations, evaluated exclusively on disposable deep-copies
 (plus a plasticity-frozen re-test copy) so nothing outside the tool is ever
@@ -149,15 +168,95 @@ silent-recruitable-cells/L2I-activity/L1I-selectivity across seeds. Zero
 engine/competition code changed -- purely additive, with a 5-seed baseline
 saved to `Diagnostic_Schedule_Baseline.md`.
 
+Phase 6 (representation candidate == first physical L2E threshold crossing;
+see "Files changed" below): retired the latest-spike-wins `_resolve_episode()`
+mechanism (the Phase 1 audit's headline conflict with the brief) and replaced
+it with direct, presentation-scoped tracking of the first physical L2E
+threshold crossing. Added `earliest_response_set` (exact tied set),
+`later_responses` (full ordered later-spike list), and
+`latency_to_second_response`. A same-step tie makes `self.winner` (and any
+L1I/L2I source attribution that would otherwise name the tied neuron)
+ambiguous for the whole presentation -- no winner-specific credit or feedback
+-- while `physicalFirstSpiker` itself remains a separately-recorded raw fact.
+The legacy immediate-reset competition tiebreak in `_resolve_l2_competition`
+is unchanged, clearly documented in its own docstring as a Phase 7 candidate.
+Along the way, found and fixed a latent, pre-existing non-determinism bug in
+Phase 5's `diagnostic_schedule.py::_modal()` (tie-breaking depended on
+Python's per-process string hash randomization) -- confirmed NOT a Phase 6
+regression (the underlying spike counts were identical before and after; only
+the tie-break's displayed label was unstable).
+
 ## In progress
 
-**Phase 5 (diagnostic interleaved-presentation schedule) is COMPLETE** —
-single-milestone phase, phase-end regressions run (zero engine files
-touched, so `sustained_dominance.py`/`ablation_harness.py` and the exact Phase
-1 numbers are trivially unchanged), this is the phase-end checkpoint per
-`CLAUDE.md`. No further phase is currently queued.
+**Phase 6 (representation candidate == first physical L2E threshold
+crossing) is COMPLETE** — single-milestone phase, phase-end regressions run,
+this is the phase-end checkpoint per `CLAUDE.md`. No further phase is
+currently queued.
 
-## Files changed (Phase 5 — diagnostic interleaved schedule, this checkpoint)
+## Files changed (Phase 6 — representation candidate, this checkpoint)
+
+- `backend/simulation.py`:
+  - **Retired** the entire "episode" latest-spike-wins mechanism: `EPISODE_QUIET_K`/
+    `EPISODE_MAX_LEN` constants, `self.episode_active`/`episode_timer`/
+    `episode_last_spike_time`/`episode_l2_spikes` state, `_update_episode()`/
+    `_resolve_episode()` methods, the `_update_episode(l2e, t)` call in
+    `step()`, and the `episode=dict(...)` key in `dynamic_state()`. Confirmed
+    unused by any test, script, or frontend file before removing (grepped the
+    whole repo) -- this was dead weight once decoupled from `self.winner`, not
+    kept as an unused shim.
+  - `_resolve_l2_competition()`: docstring extended with a PHASE 6/7 note
+    documenting that its `max(eligible, key=potential)` tiebreak is a LEGACY
+    immediate-reset mechanism that decides which ONE neuron physically fires
+    when several cross threshold in the same step -- deliberately unchanged,
+    flagged for Phase 7. `_last_eligible`'s comment updated to name it as
+    `earliestResponseSet`'s source.
+  - `_start_presentation()`: now also resets/archives `earliest_response_set`/
+    `later_responses`/`latency_to_second_response`; resets `self.winner = None`
+    at the start of every new presentation (no stale carryover credit); the
+    evidence-crediting history (`_pattern_first_responder_log`/
+    `_neuron_first_responder_counts`) now skips a presentation whose first
+    response was a same-step tie.
+  - `_credit_source(idx)` (new): returns the L2E id for `idx`, UNLESS it is
+    the presentation's own ambiguous same-step-tied first responder, in which
+    case it returns `'ambiguous'` -- used for both L1I and L2I first-source
+    attribution so a tie's "no winner-specific credit or feedback" extends to
+    those fields too, not just `self.winner`.
+  - `_track_presentation()`: `self.winner` is now set in EXACTLY this one
+    method, the instant `step_winner_idx` is non-None for the first time in a
+    presentation -- to that neuron's id, UNLESS `self._last_eligible` (the
+    eligible set at that exact step, already computed by
+    `_resolve_l2_competition`) has more than one member, in which case
+    `self.winner` stays `None`. Later spikes (any spike after the first,
+    including a repeat of the same neuron) are appended to
+    `_presentation_later_responses`; `_presentation_latency_to_second` is set
+    once, on the first DISTINCT later identity.
+  - `dynamic_state()`'s `causal_story`: added `earliest_response_set`,
+    `later_responses`, `latency_to_second_response`.
+- `diagnostic_schedule.py`: `_modal()` fixed to break exact count-ties
+  deterministically (sorted-first, via `Counter` + `min` over the tied
+  candidates) instead of `max(set(...), key=count)`, whose tie-break depended
+  on Python's per-process string hash randomization. No change to what is
+  counted or how consistency/ambiguity/etc. are computed -- only which label
+  is reported on a genuine exact tie is now stable across process launches.
+- `test_representation_candidate.py` (new) — 13 tests: winner equals the raw
+  first-spiker fact when not tied; a forced same-step tie produces
+  `winner=None` while `earliest_response_set`/`first_spiker` still record the
+  raw facts; the None persists for the rest of that presentation even after a
+  later unambiguous spike; no evidence credit is logged for a tied
+  presentation; L1I/L2I source attribution reports `'ambiguous'` when it would
+  otherwise credit the tied first responder; later responses are recorded in
+  chronological order; latency-to-second only counts a distinct identity;
+  winner resets to `None` at every new presentation; the retired episode
+  machinery is confirmed fully gone (`dynamic_state()` has no `episode` key,
+  the four `episode_*` attributes and both retired methods no longer exist on
+  the engine); probe non-mutation still holds (weights/confidence
+  byte-identical across a probe, real spikes still occur, a probe can still
+  report a winner while frozen); and a direct proof that reading
+  `dynamic_state()`/`winner`/`pathway_influence_report()` heavily between
+  steps has ZERO effect on spike timing or learned weights (a pure,
+  write-only-for-display side channel).
+
+### Phase 5 (prior checkpoint `ff3048f`)
 
 - `diagnostic_schedule.py` (new) — standalone script, no changes to any
   existing file. `run_diagnostic(seed, engine=None, cycles=15,
@@ -421,7 +520,65 @@ No neural equation and no preset VALUE was changed. `CLAUDE_HANDOFF.md`
 
 ## Tests
 
-### Phase 5 (this checkpoint)
+### Phase 6 (this checkpoint)
+
+- `test_representation_candidate.py` (new, focused): **13/13 passed**.
+- `pytest -q` (full suite): **194 passed, 5 failed** (181 prior + 13 new =
+  194; same 5 pre-existing failures as every prior checkpoint, untouched).
+- **Physical dynamics completely unchanged, verified three ways:**
+  1. `sustained_dominance.py`/`ablation_harness.py` (unmodified) reproduce the
+     exact Phase 1 numbers.
+  2. `test_representation_tracking_never_affects_physical_dynamics` runs two
+     identical-seed engines side by side, one read heavily
+     (`dynamic_state()`/`winner`/`pathway_influence_report()` between every
+     step) and one left alone, and asserts identical winner sequences AND
+     identical final weights — proving the representation-tracking layer is a
+     pure, write-only-for-display side channel with zero feedback into the
+     simulation.
+  3. While validating with `diagnostic_schedule.py`, found a col-1/seed-1
+     discrepancy that looked like a dynamics change but was NOT: the
+     first-spiker counts for `L2E3`/`L2E4` were an EXACT 7-7 tie, and
+     `_modal()`'s `max(set(...), key=count)` breaks such ties by Python's
+     per-process string hash randomization, not the data. Fixed to a
+     deterministic sorted tiebreak (see Files changed); re-ran three times —
+     stable now, and the underlying counts (0.47 consistency either way) were
+     identical throughout, confirming no dynamics changed.
+- **The central semantic guarantee, verified directly:**
+  `test_winner_is_none_during_a_same_step_tie` forces two L2E neurons above
+  threshold in the same step and confirms `winner is None` while
+  `earliest_response_set` correctly contains both ids and `first_spiker`
+  (the raw fact) still names whichever one the legacy tiebreak let fire;
+  `test_winner_stays_none_for_rest_of_presentation_after_a_tie` confirms a
+  LATER, unambiguous spike does not retroactively become the winner;
+  `test_no_evidence_credit_for_a_tied_first_response` confirms neither
+  `_pattern_first_responder_log` nor `_neuron_first_responder_counts` records
+  a tied presentation; `test_l1i_l2i_source_is_ambiguous_when_it_would_credit_the_tied_first_spiker`
+  confirms L1I/L2I source attribution reports `'ambiguous'` rather than
+  naming the tied neuron when the two coincide on the same step.
+- **Non-tied case:** `test_winner_equals_first_physical_spiker_when_not_tied`
+  and `test_earliest_response_set_is_singleton_when_not_tied` confirm the
+  ordinary path is exactly `winner == first_spiker` with a one-element
+  earliest-response set.
+- **Later responses / latency:** `test_later_responses_recorded_in_chronological_order`
+  and `test_latency_to_second_response_only_counts_a_distinct_identity` confirm
+  the ordered list and the distinct-identity-only latency computation.
+- **Retired mechanism confirmed gone:**
+  `test_latest_spike_wins_episode_machinery_is_fully_removed` checks
+  `dynamic_state()` has no `episode` key and that all four `episode_*`
+  attributes and both retired methods no longer exist on the engine object.
+- **Probe non-mutation preserved** (explicit instruction):
+  `test_probe_non_mutation_still_holds` re-verifies weights/confidence are
+  byte-identical across a probe presentation with real spikes still
+  occurring (Phase 2's guarantee, re-confirmed under the new winner logic);
+  `test_probe_presentation_can_still_report_a_winner_while_frozen` confirms a
+  probe can still have a representation candidate (physics stay live even
+  though plasticity is frozen).
+- **Full-stack smoke test (real server):** confirmed via a direct
+  `GET /api/state` read that `dynamic.causal_story` carries all three new
+  fields and that the `episode` key is genuinely absent from the live
+  payload, not just from unit tests.
+
+### Phase 5 (prior checkpoint `ff3048f`)
 
 - `test_diagnostic_schedule.py` (new, focused): **13/13 passed**.
 - `pytest -q` (full suite): **181 passed, 5 failed** (168 prior + 13 new =
@@ -610,6 +767,37 @@ No neural equation and no preset VALUE was changed. `CLAUDE_HANDOFF.md`
 
 ## Known problems
 
+- **The "central failure" is now measured through an honest first-spike lens,
+  and it's still unsolved.** With `self.winner` correctly tracking the first
+  physical responder (not latest-spike), re-running
+  `diagnostic_schedule.py --seeds 1 2 3 4 5` (same defaults as the saved
+  Phase 5 baseline) after this phase's change would be the natural next
+  validation step -- not yet done as a NEW saved baseline in this checkpoint
+  (the existing `Diagnostic_Schedule_Baseline.md` numbers are unaffected,
+  since that script computes `first_l2e_spiker` from its own raw stepping,
+  not from `engine.winner` -- see Files changed for the confirmation this
+  produced no change). A future phase could re-run and save an updated
+  baseline explicitly framed around `self.winner`/`causal_story` now that
+  they mean the right thing.
+- **The legacy immediate-reset competition is real and still there.**
+  `_resolve_l2_competition`'s `max(eligible, key=potential)` tiebreak still
+  uses hidden membrane charge to decide which ONE neuron physically fires
+  (and therefore gets `apply_competitive_reset()`'d as the "winner" for
+  everyone else) whenever more than one L2E crosses threshold in the same
+  step. Phase 6 does not touch this -- it only stops the REPORTING layer from
+  treating that tiebreak's result as an unambiguous representation candidate.
+  This is the "legacy immediate-reset competition" explicitly flagged for
+  Phase 7 to reconsider/replace (e.g. a design that doesn't need to pick a
+  single physical "resetter" via hidden charge at all).
+- L1I/L2I source attribution's "no winner-specific credit" guard
+  (`_credit_source`) only nulls out a source when it would otherwise name the
+  presentation's own tied FIRST responder on the exact same step it fired.
+  A later (non-first) L2E win that happens to itself be part of a same-step
+  tie at a LATER point in the presentation is not specially flagged --
+  `self.winner` is unaffected either way (it was decided once, at the first
+  spike), but a future phase could extend `same_step_tie`-style ambiguity
+  tracking to every step, not just the presentation's first one, if that
+  finer-grained signal turns out to matter.
 - **This diagnostic (Phase 5) confirms, quantitatively, that the "central
   failure" remains unsolved under the live `DASHBOARD_PRESET` config:** the
   5-seed baseline (`Diagnostic_Schedule_Baseline.md`) shows 2.20/4 mean
@@ -692,19 +880,29 @@ No neural equation and no preset VALUE was changed. `CLAUDE_HANDOFF.md`
 
 ## Next action
 
-Phase 5 is closed. No further phase is currently instructed. Candidates for a
-future phase, none started, all needing their own explicit go-ahead:
-- Use `diagnostic_schedule.py` to actually experiment with the four new
-  Phase 4 pathways ONE AT A TIME (per "do not enable every pathway
-  together"), comparing each run's `summarize()` output against
-  `Diagnostic_Schedule_Baseline.md` to see whether any pathway measurably
-  improves distinct-owner count, collisions, or consistency versus this
-  saved baseline — the infrastructure and the baseline to compare against are
-  both ready; no experiment has been run yet.
-- Revisit whether to flip `legacy_distance_compat=False` for the ORIGINAL
-  L1E→L2E pathway (the plan anticipated at the end of Phase 3) — this is the
-  one change in this whole area still expected to alter baseline dynamics
-  when it happens, so it should stay a deliberate, separately-approved step.
+Phase 6 is closed. Per explicit instruction, Phase 7 is the natural next step:
+**replace the legacy immediate-reset competition** flagged throughout this
+checkpoint (`_resolve_l2_competition`'s hidden-charge tiebreak and the
+single-firing hard-reset design that requires it) with something that doesn't
+need to silently pick one physical "resetter" via membrane charge when
+several L2E cross threshold in the same step -- this needs its own explicit
+go-ahead and careful design given brief SS9's "investigate the physical
+dynamics, do not resolve this with a software exception" guidance. Not
+started.
+
+Other candidates for a future phase, none started, all needing their own
+explicit go-ahead:
+- Re-run `diagnostic_schedule.py --seeds 1 2 3 4 5` now that `self.winner`
+  correctly tracks the first physical responder, and save an updated baseline
+  framed around it (see Known problems) -- the existing
+  `Diagnostic_Schedule_Baseline.md` numbers remain valid since they never
+  depended on `engine.winner` in the first place.
+- Use `diagnostic_schedule.py` to actually experiment with the four Phase 4
+  distance/influence pathways ONE AT A TIME (per "do not enable every pathway
+  together"), comparing each run's `summarize()` output against the saved
+  baseline to see whether any pathway measurably improves distinct-owner
+  count, collisions, or consistency — the infrastructure is ready; no
+  experiment has been run yet.
 - Revisit whether to flip `legacy_distance_compat=False` for the ORIGINAL
   L1E→L2E pathway (the plan anticipated at the end of Phase 3) — this is the
   one change in this whole area still expected to alter baseline dynamics
@@ -712,5 +910,7 @@ future phase, none started, all needing their own explicit go-ahead:
 - Whether `topology_seed` should persist across a server restart like the
   weight-init `seed` does (currently does not — see Known problems from
   Phase 3, still applicable).
-- Whether the four new pathways should get independent per-pathway power-law
-  configs instead of the current shared one.
+- Whether the four Phase 4 pathways should get independent per-pathway
+  power-law configs instead of the current shared one.
+- Whether `same_step_tie`-style ambiguity tracking should extend beyond just
+  the presentation's first response (see Known problems).
