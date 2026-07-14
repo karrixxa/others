@@ -11,9 +11,11 @@
 - Phase 2 Milestone 1 checkpoint commit: `9163da2` (backend observability core)
 - Phase 2 END checkpoint commit: `05c17a0` (frontend, phase complete)
 - Phase 3 END checkpoint commit: `0e353cd` (seeded engine-owned geometry)
-- This update corresponds to the **Phase 4 END** checkpoint (connection
-  distance/influence as isolated experimental behavior) — commit hash filled
-  in after this commit lands, see repo log.
+- Phase 4 END checkpoint commit: `586d0f7` (connection distance/influence,
+  isolated experimental behavior)
+- This update corresponds to the **Phase 5 END** checkpoint (diagnostic
+  interleaved-presentation schedule) — commit hash filled in after this
+  commit lands, see repo log.
 - Base branch `july14` is untouched and remains the protected base.
 - `four-pattern` branch exists (checked out in a separate worktree at
   `/home/charisxiong/Documents/others`) and is explicitly NOT merged here —
@@ -45,21 +47,37 @@ preserved as a selectable ablation. A temporary legacy-distance-compatibility
 shim kept `distance_weighting`'s delivered-charge numbers pinned to the legacy
 reference geometry, so that phase changed **no neural dynamics**.
 
-**Current phase (Phase 4, complete) — Connection distance/influence as
-isolated experimental behavior, per explicit user instruction:** adds FOUR
-NEW, fully independent experimental pathways — L2E→L2I, L2I→L2E, L2E→L1I,
-L1I→L1E — each with its own default-OFF ablation flag and one shared,
-configurable, safe-by-default power law (inverse-square, pure attenuation).
-L1E→L2E's existing legacy pathway (Phase 2/3, `distance_weighting`/
-`legacy_distance_compat`) is untouched. Every pathway exposes source, target,
-distance, influence, raw weight, effective transmission, and whether
-influence was actually applied, via a new `pathway_influence_report()`/
-`GET /api/pathway_influence`. Influence is applied **exactly once** per
-pathway — verified directly (delivery uses influence¹, learning always reads
-the raw, unscaled weight) — and none of the four new flags is enabled by
-default anywhere ("do not enable every pathway together"), so the
-geometry-off and legacy-distance baselines from Phases 2/3 are completely
-unaffected.
+**Phase 4 (complete) — Connection distance/influence as isolated experimental
+behavior:** adds FOUR NEW, fully independent experimental pathways —
+L2E→L2I, L2I→L2E, L2E→L1I, L1I→L1E — each with its own default-OFF ablation
+flag and one shared, configurable, safe-by-default power law (inverse-square,
+pure attenuation). L1E→L2E's existing legacy pathway (Phase 2/3,
+`distance_weighting`/`legacy_distance_compat`) is untouched. Every pathway
+exposes source, target, distance, influence, raw weight, effective
+transmission, and whether influence was actually applied, via
+`pathway_influence_report()`/`GET /api/pathway_influence`. Influence is
+applied **exactly once** per pathway, and none of the four new flags is
+enabled by default anywhere, so the geometry-off and legacy-distance
+baselines from Phases 2/3 are completely unaffected.
+
+**Current phase (Phase 5, complete) — Diagnostic-only equal-interleaved
+presentation schedule, per explicit user instruction:** a standalone,
+non-mutating measurement tool (`diagnostic_schedule.py`) that presents the
+four training patterns in the brief's fixed cycle (row 1 → col 1 → diag \ →
+diag / → repeat), each presentation BRIEF (never saturating one pattern first,
+brief §12), recording per presentation: presentation ID/pattern/plasticity
+state, first L2E spiker + earliest set, all later spikes + latency margin to
+the second distinct responder, L2I spikes, L1I fired positions, pre/post-
+inhibition charge, receptive fields, and weight changes. Evaluation runs on a
+disposable deep-copied engine (never the live one, if one is handed in) plus a
+further plasticity-frozen copy (reusing Phase 2's proven `_set_plasticity_frozen`)
+for a repeated-presentation consistency re-test. Reports per-pattern
+consistency/ambiguity/no-response, distinct owners, collisions, forgetting,
+silent/recruitable cells, L2I activity, and L1I selectivity across seeds. This
+phase changed **zero lines of engine/competition code** — purely additive
+(a new script + tests + a saved baseline document), confirmed by full
+regression and by `sustained_dominance.py`/`ablation_harness.py` reproducing
+the exact Phase 1 numbers, unchanged.
 
 ## Completed (this session)
 
@@ -111,26 +129,77 @@ byte-identical to before it while clearly labeling the pinned numbers
 wherever they're shown.
 
 Phase 4 (connection distance/influence as isolated experimental behavior; see
-"Files changed" below for full detail): rather than removing Phase 3's
-legacy-distance-compat shim (the plan anticipated at the end of that phase),
-the ACTUAL instruction for this phase was narrower and safer -- add FOUR NEW,
-independently-ablated experimental pathways (L2E→L2I, L2I→L2E, L2E→L1I,
-L1I→L1E) beside the untouched legacy L1E→L2E pathway, each default-off, each
-fully audited (source/target/distance/influence/raw weight/effective
-transmission/applied), using one shared safe-by-default power law. The
-legacy-distance-compat shim and the L1E→L2E pathway it governs are completely
-UNCHANGED by this phase.
+commit `586d0f7`): rather than removing Phase 3's legacy-distance-compat shim
+(the plan anticipated at the end of that phase), the ACTUAL instruction for
+this phase was narrower and safer -- add FOUR NEW, independently-ablated
+experimental pathways (L2E→L2I, L2I→L2E, L2E→L1I, L1I→L1E) beside the
+untouched legacy L1E→L2E pathway, each default-off, each fully audited
+(source/target/distance/influence/raw weight/effective transmission/applied),
+using one shared safe-by-default power law. The legacy-distance-compat shim
+and the L1E→L2E pathway it governs are completely UNCHANGED by this phase.
+
+Phase 5 (diagnostic equal-interleaved presentation schedule; see "Files
+changed" below): a standalone, non-mutating diagnostic tool implementing the
+brief's fixed cycle (row 1 → col 1 → diag \ → diag / → repeat) with brief,
+non-saturating presentations, evaluated exclusively on disposable deep-copies
+(plus a plasticity-frozen re-test copy) so nothing outside the tool is ever
+touched. Records every requested per-presentation field and reports
+consistency/ambiguity/no-response/distinct-owners/collisions/forgetting/
+silent-recruitable-cells/L2I-activity/L1I-selectivity across seeds. Zero
+engine/competition code changed -- purely additive, with a 5-seed baseline
+saved to `Diagnostic_Schedule_Baseline.md`.
 
 ## In progress
 
-**Phase 4 (connection distance/influence, isolated experimental behavior) is
-COMPLETE** — single-milestone phase, phase-end regressions run, this is the
-phase-end checkpoint per `CLAUDE.md`. No further phase is currently queued;
-awaiting user direction on what (if anything) comes next -- e.g. whether to
-actually experiment with one pathway at a time, or revisit the
-legacy_distance_compat shim removal originally anticipated after Phase 3.
+**Phase 5 (diagnostic interleaved-presentation schedule) is COMPLETE** —
+single-milestone phase, phase-end regressions run (zero engine files
+touched, so `sustained_dominance.py`/`ablation_harness.py` and the exact Phase
+1 numbers are trivially unchanged), this is the phase-end checkpoint per
+`CLAUDE.md`. No further phase is currently queued.
 
-## Files changed (Phase 4 — connection distance/influence, this checkpoint)
+## Files changed (Phase 5 — diagnostic interleaved schedule, this checkpoint)
+
+- `diagnostic_schedule.py` (new) — standalone script, no changes to any
+  existing file. `run_diagnostic(seed, engine=None, cycles=15,
+  presentation_steps=20, consistency_reps=5)`: builds (or deep-copies) an
+  engine, runs the fixed cycle `row 1 -> col 1 -> diag \ -> diag / -> repeat`
+  with each presentation a BRIEF 20-step window (never saturating), recording
+  every requested field per presentation via `_present_and_record()` — which
+  reads ONLY pre-existing engine state (`engine.spiked`, `engine.l2_drive`/
+  `l2_charge`, `engine.dynamic_state()['causal_story']`, `engine._all_weights()`)
+  and touches no engine internals beyond that. After the live pass, a FURTHER
+  deep copy has its plasticity frozen (`engine._set_plasticity_frozen(True)`,
+  reusing Phase 2's already-proven mechanism) and each pattern is
+  re-presented `consistency_reps` times with learning off, for a clean
+  first-responder-consistency re-test isolated from weight drift.
+  `summarize(run)` computes the full report (per-pattern consistency/
+  ambiguity/no-response, distinct owners, collisions, forgetting — first-half
+  vs. second-half modal owner within the same run, silent/recruitable cells,
+  L2I activity, L1I all-nine-sync rate, and the frozen pass's own consistency
+  + zero-weight-drift check) purely from the recorded records — no engine
+  access. `main()` provides a CLI (`--seeds`, `--cycles`,
+  `--presentation-steps`) matching the style of `ablation_harness.py`/
+  `sustained_dominance.py`.
+- `test_diagnostic_schedule.py` (new) — 13 tests: fixed cycle order, brief
+  (non-saturating) presentation length, the non-mutating-evaluation guarantee
+  (a live engine handed in is provably untouched — weights/timestep/
+  presentation_id/input all identical before and after), every requested
+  field is present and correctly typed, presentation IDs strictly increase,
+  `latency_margin_to_second` is `None` exactly when there's no second distinct
+  responder, the frozen pass shows exactly zero weight drift while the live
+  pass shows real learning, and the summary report's structure/sanity
+  (including the L1I-all-nine-sync empirical confirmation of the Phase 1
+  audit's finding).
+- `Diagnostic_Schedule_Baseline.md` (new) — the saved baseline: a 5-seed run
+  (`--seeds 1 2 3 4 5`, defaults) against `DASHBOARD_PRESET`, with full
+  per-seed tables and the aggregate findings (see Tests below for the
+  headline numbers).
+
+No file in `backend/`, `neuron_flexible.py`, `snn/`, or `frontend/` was
+touched — confirmed by `git status` showing only new, untracked files for
+this checkpoint.
+
+### Phase 4 (prior checkpoint `586d0f7`)
 
 - `neuron_flexible.py`:
   - `Neuron.competitive_reset_influence` (new, default `1.0` = neutral): the
@@ -352,7 +421,55 @@ No neural equation and no preset VALUE was changed. `CLAUDE_HANDOFF.md`
 
 ## Tests
 
-### Phase 4 (this checkpoint)
+### Phase 5 (this checkpoint)
+
+- `test_diagnostic_schedule.py` (new, focused): **13/13 passed**.
+- `pytest -q` (full suite): **181 passed, 5 failed** (168 prior + 13 new =
+  181; same 5 pre-existing failures as every prior checkpoint, untouched).
+  Zero engine files were modified this phase, so this is a trivial re-run —
+  confirmed via `git status` showing only new, untracked files.
+- **Legacy/baseline equivalence:** `sustained_dominance.py`/
+  `ablation_harness.py` (unmodified) still reproduce the exact Phase 1
+  numbers — expected and confirmed, since no engine code changed.
+- **Non-mutating evaluation, the phase's central guarantee, verified
+  directly:** `test_run_diagnostic_never_mutates_a_passed_in_live_engine`
+  builds a live engine, trains it for 40 steps, snapshots its weights/
+  timestep/presentation_id/input vector, runs a full diagnostic sweep against
+  it via `engine=live`, and asserts all four are bit-for-bit identical
+  afterward — plus a separate live manual check (outside pytest) confirming
+  the same on a `DASHBOARD_PRESET` engine.
+- **Brief, non-saturating presentations:** `PRESENTATION_STEPS=20` (asserted
+  in-range, 5-40, matching the scale of every other diagnostic in the repo);
+  `test_live_pass_visits_patterns_in_fixed_cycle_order` confirms the exact
+  `row 1 -> col 1 -> diag \ -> diag / -> repeat` sequence, never holding one
+  pattern before the others.
+- **Frozen-copy correctness:** `test_frozen_pass_produces_zero_weight_drift`
+  confirms every frozen-pass presentation has `plasticity_frozen=True` and
+  literally zero weight change, while `test_live_pass_actually_learns`
+  confirms the (non-frozen) live pass does show real weight changes
+  somewhere — together proving the freeze mechanism is doing real work, not
+  silently absent.
+- **Every requested field recorded, correctly:** presentation ID/pattern/
+  plasticity, first spiker + step, same-step tie, the full ordered spike
+  list, latency margin to the second DISTINCT responder (asserted `None`
+  exactly when fewer than 2 distinct L2E identities fired — not a bogus
+  number), L2I spike steps/count, L1I fired positions per step, pre/post-
+  inhibition charge snapshots (one per step, count matches the window),
+  receptive fields (9 values per L2E), and weight-change deltas.
+- **Report sanity:** consistency/ambiguity/no-response bounded in `[0,1]`;
+  silent and recruitable cell sets are disjoint subsets of the 8 L2E ids;
+  every reported collision is internally consistent with the owners list;
+  distinct-owner count matches the deduplicated owner set exactly.
+- **5-seed baseline saved** to `Diagnostic_Schedule_Baseline.md` (see that
+  file for full tables): distinct owners 2.20/4 mean; L1I all-nine-sync rate
+  **1.0 in every single seed with zero exceptions** — an empirical,
+  quantitative confirmation of the Phase 1 audit's L1I-lockstep finding;
+  frozen-replay zero-weight-drift confirmed in all 5 seeds, with
+  first-responder consistency high but not always 1.0 even under a fully
+  frozen network (isolating genuine physical/temporal variability from
+  weight drift).
+
+### Phase 4 (prior checkpoint `586d0f7`)
 
 - `test_influence_phase.py` (new, focused): **18/18 passed**.
 - `pytest -q` (full suite): **168 passed, 5 failed** (150 prior + 18 new =
@@ -493,6 +610,22 @@ No neural equation and no preset VALUE was changed. `CLAUDE_HANDOFF.md`
 
 ## Known problems
 
+- **This diagnostic (Phase 5) confirms, quantitatively, that the "central
+  failure" remains unsolved under the live `DASHBOARD_PRESET` config:** the
+  5-seed baseline (`Diagnostic_Schedule_Baseline.md`) shows 2.20/4 mean
+  distinct owners under the brief's own equal-interleaved schedule (not just
+  under the ad hoc windows earlier diagnostics used), with collisions in
+  every single seed and "forgetting" (a pattern's modal owner changing within
+  one run) in 3 of 5 seeds. This is a measurement, not a fix — "do not change
+  competition yet" was followed exactly (zero engine files touched).
+- **Forgetting and consistency now have a saved, reproducible baseline
+  number** to compare against for any future competition change:
+  per-pattern consistency 0.68-0.81 under brief presentations; once
+  plasticity is frozen, first-responder consistency is high (mostly 1.0) but
+  NOT always 1.0 (as low as 0.6 in a few pattern/seed combinations) — meaning
+  some of the instability is genuine physical/temporal variability at
+  presentation boundaries, not purely weight drift during training. Any
+  future competition change should be checked against BOTH numbers.
 - Per `AGENT_HANDOFF.md`/the Phase 1 audit, true one-to-one L2E ownership is
   still unsolved and NEITHER Phase 2, 3, nor 4 fix it by default — the four
   new Phase 4 pathways are all off in `DASHBOARD_PRESET`, so the live
@@ -559,12 +692,19 @@ No neural equation and no preset VALUE was changed. `CLAUDE_HANDOFF.md`
 
 ## Next action
 
-Phase 4 is closed. No further phase is currently instructed. Candidates for a
+Phase 5 is closed. No further phase is currently instructed. Candidates for a
 future phase, none started, all needing their own explicit go-ahead:
-- Actually experiment with the four new pathways one at a time (per "do not
-  enable every pathway together") and observe effects on ownership/dominance
-  metrics — the infrastructure is ready (`pathway_influence_report()`,
-  per-pathway toggles) but no experiment has been run yet.
+- Use `diagnostic_schedule.py` to actually experiment with the four new
+  Phase 4 pathways ONE AT A TIME (per "do not enable every pathway
+  together"), comparing each run's `summarize()` output against
+  `Diagnostic_Schedule_Baseline.md` to see whether any pathway measurably
+  improves distinct-owner count, collisions, or consistency versus this
+  saved baseline — the infrastructure and the baseline to compare against are
+  both ready; no experiment has been run yet.
+- Revisit whether to flip `legacy_distance_compat=False` for the ORIGINAL
+  L1E→L2E pathway (the plan anticipated at the end of Phase 3) — this is the
+  one change in this whole area still expected to alter baseline dynamics
+  when it happens, so it should stay a deliberate, separately-approved step.
 - Revisit whether to flip `legacy_distance_compat=False` for the ORIGINAL
   L1E→L2E pathway (the plan anticipated at the end of Phase 3) — this is the
   one change in this whole area still expected to alter baseline dynamics
