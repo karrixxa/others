@@ -1,0 +1,683 @@
+JULY 14 GEOMETRIC INFLUENCE, TEMPORAL WINNER, AND SELF-ORGANIZATION BRIEF
+
+PURPOSE
+
+This document summarizes the current research direction for the biologically plausible, self-organizing spiking neural architecture. It combines the July 14 transcript and handwritten LPS notes with the current raster, inhibition, weights, and geometry observations.
+
+Two important corrections from the newest material supersede earlier assumptions:
+
+1. Layer 2 excitatory neurons should not be placed in a perfect circle or perfect grid. Perfect symmetry destroys the fixed geometric variation that is supposed to help competition.
+
+2. Multiple Layer 2 excitatory neurons may fire during one pattern presentation. The critical representation is which neuron fires first, consistently, for each pattern. Later spikes are not automatically failures.
+
+
+1. OVERALL RESEARCH GOAL
+
+We are building a biologically plausible, self-organizing spiking neural system that learns spatial patterns through local neural dynamics.
+
+The system should not depend on backpropagation, software argmax, externally assigned winners, hard-coded pattern ownership, global inspection of every neuron’s internal state, permanent software locks, perfectly symmetric layouts, or fragile random initial weights as the only source of competition.
+
+The desired behavior is that several excitatory neurons may initially respond to a pattern, but stable physical differences in geometry, charge accumulation, synaptic strength, inhibition, and timing eventually cause one neuron to respond first and represent that pattern.
+
+The current experiment uses a 3x3 sensory field and four unique orientation patterns:
+
+- horizontal
+- vertical
+- diagonal down-right
+- diagonal down-left
+
+All four patterns pass through the center sensory location. Therefore, the center alone cannot identify the orientation. A Layer 2 neuron must learn the other active spatial locations that distinguish each pattern.
+
+The long-term goal is one stable Layer 2 representative for each orientation, discovered through self-organization rather than assigned in advance.
+
+
+2. PRIORITY ORDER
+
+When design choices conflict, use this priority order:
+
+1. Biological plausibility
+2. Mechanistic neural realism
+3. Local learning rules
+4. Correct dynamical behavior
+5. Reliable self-organization
+6. Computational efficiency
+7. Software convenience
+
+Do not introduce a conventional machine-learning shortcut merely because it produces cleaner classification.
+
+
+3. CURRENT ARCHITECTURE AND POPULATION MEANINGS
+
+LAYER 1 EXCITATORY SENSORY POPULATION
+
+There are nine spatial sensory excitatory neurons:
+
+L1E0  L1E1  L1E2
+L1E3  L1E4  L1E5
+L1E6  L1E7  L1E8
+
+For the col 1 pattern, the active sensory positions are:
+
+0 1 0
+0 1 0
+0 1 0
+
+Therefore, the repeatedly driven sensory neurons should be L1E1, L1E4, and L1E7. The current raster shows this correctly.
+
+LAYER 1 INHIBITORY/PREDICTIVE POPULATION
+
+There is one nine-unit Layer 1 inhibitory population, L1I0-L1I8. These are spatially indexed inhibitory/predictive units. They must not be confused with the single global Layer 2 competition neuron.
+
+Their firing should depend on the intended Layer 2 feedback and learned/predicted spatial pattern. They should not automatically be assumed to fire as one synchronized nine-neuron block.
+
+If the first Layer 2 winner predicts col 1, the mature predicted inhibitory pattern would ideally emphasize positions 1, 4, and 7. During early learning, that pattern may be incomplete, but all nine units firing identically on every event is suspicious.
+
+The synchrony could mean:
+
+- the engine broadcasts every Layer 2 feedback event to all nine L1I units;
+- feedback_selective_to_active_pixels=False is causing nonselective feedback;
+- all nine units have identical incoming weights and thresholds;
+- or the UI duplicates one inhibitory event across all nine rows.
+
+This must be audited before assuming the raster is physiologically correct.
+
+LAYER 2 EXCITATORY POPULATION
+
+There are four competing Layer 2 excitatory neurons: L2E0, L2E1, L2E2, and L2E3.
+
+They begin without assigned meanings. The system must not preassign an orientation to a neuron index. The four neurons should self-organize so that each becomes the consistent first responder for a different pattern.
+
+LAYER 2 GLOBAL INHIBITORY NEURON
+
+There is one global Layer 2 inhibitory neuron, L2I.
+
+Every vertical spike on the L2I raster row is another firing event from this same neuron. Two bars mean that one neuron fired twice, not that there are two global inhibitory neurons.
+
+The global inhibitory neuron should accumulate Layer 2 excitatory input and deliver biologically modeled inhibition back to the Layer 2 competitors. Its threshold crossing, causal source, delay, and delivery must be observable.
+
+
+4. THE CENTRAL FAILURE WE ARE TRYING TO SOLVE
+
+The system currently lacks a durable source of variation that produces stable winners.
+
+Random initial weights provide early differences, but learning rapidly overwrites those differences. Several neurons then acquire similar weights, charge at similar rates, and repeatedly alternate or tie.
+
+This can cause:
+
+- multiple neurons developing similar receptive fields;
+- two neurons learning the same pattern;
+- one early neuron dominating several patterns;
+- losing neurons becoming too specialized toward the first pattern;
+- later neurons having difficulty recruiting for new patterns;
+- strict winner-take-all training dragging every competitor toward the same pattern;
+- and same-time or nearly identical responses making physical winner selection ambiguous.
+
+The new hypothesis is that fixed geometric variation can provide a persistent, biologically grounded symmetry-breaking mechanism that learning does not erase.
+
+
+5. MAJOR CONCEPTUAL CHANGE 1: GEOMETRY MUST CREATE PERMANENT VARIATION
+
+RANDOM WEIGHTS ALONE ARE INSUFFICIENT
+
+The self-organizing system should not rely solely on small random initial weight differences. Those differences are temporary because learning updates the weights. If the same input repeatedly modifies several competitors in similar ways, their weights converge toward similar values and the initial randomness disappears.
+
+Geometric distance is different. A connection’s physical length remains fixed after the topology is created. Its influence therefore remains a stable source of variation throughout training.
+
+NEURONS NEED REAL ENGINE COORDINATES
+
+Every neuron should have fixed x, y, and z coordinates stored in the simulation engine. The renderer must read these engine coordinates. Coordinates must not exist only as cosmetic Three.js positions.
+
+The intended flow is:
+
+engine coordinates
+    -> Euclidean distance
+    -> connection influence
+    -> spike transmission and local plasticity
+    -> renderer displays the same geometry
+
+If the renderer independently chooses positions, visual distance has no neural meaning.
+
+POSITIONS ARE ASSIGNED ONCE
+
+Positions are generated during topology initialization and remain fixed for the lifetime of that topology. Influence is calculated once and cached. Training may change synapses but not neuron coordinates. Resetting membrane state must not generate new coordinates unless the user explicitly requests a new topology or seed.
+
+Use a recorded random seed so the same geometry can be recreated.
+
+
+6. GEOMETRIC PLACEMENT RULES
+
+DO NOT USE A PERFECT GRID OR CIRCLE FOR LAYER 2
+
+Perfect symmetry defeats the purpose of distance-dependent influence. If all four L2E neurons are placed at equal distances in a perfect circle around L2I, they receive nearly identical geometric influence and little symmetry breaking occurs.
+
+The earlier idea of placing all four Layer 2 neurons at equal radius should not be used for this experiment.
+
+LAYER 2 EXCITATORY PLACEMENT
+
+The four L2E neurons should be randomly placed within a bounded cortical-column region at the Layer 2 depth.
+
+Requirements:
+
+- use continuous 3D coordinates, or continuous 2D coordinates with a fixed Layer 2 z value;
+- enforce minimum separation so no neurons overlap;
+- do not place them on a perfect grid;
+- do not place them at equal angles or equal radii;
+- keep them inside defined column boundaries;
+- use a seeded layout for reproducibility;
+- preserve their positions throughout training.
+
+This random placement is not itself learning. It represents persistent anatomical variation.
+
+GLOBAL INHIBITORY PLACEMENT
+
+The single L2I neuron should remain near the center of the Layer 2 column because it is intended to influence the full competitive population. It does not need mathematical perfection, but central placement reduces extreme unfairness in global inhibition.
+
+Because the newest notes say every physical connection should have distance-based influence, the L2E->L2I and L2I->L2E paths must also be audited. Do not silently exempt inhibitory connections unless that exception is explicitly documented and tested.
+
+LAYER 1 SENSORY PLACEMENT
+
+The sensory field must preserve the topology of the 3x3 pattern, but the neurons do not need to occupy a mathematically perfect grid.
+
+A useful approach is to assign each sensory position a bounded spatial cell:
+
+cell 0 | cell 1 | cell 2
+cell 3 | cell 4 | cell 5
+cell 6 | cell 7 | cell 8
+
+Then place each sensory neuron at a seeded random position inside its assigned cell.
+
+This preserves pattern meaning while adding biological spatial variation. L1E0 must remain in region 0, L1E4 in the central region, and L1E8 in region 8, but none needs to sit exactly at the center of its cell.
+
+This is jittered geometry, not arbitrary shuffling. A neuron must not cross into another sensory region because that would change the spatial pattern being represented.
+
+LAYER 1 INHIBITORY PLACEMENT
+
+Each L1I spatial unit should have a defined relationship to its corresponding sensory region. It may be near the paired L1E unit or inside the same region with a small offset.
+
+The topology must make it possible to determine whether first-layer inhibition is locally paired, neighborhood-based, or learned predictive feedback. It should not be an unexplained broadcast duplicated nine times.
+
+
+7. DISTANCE AND INFLUENCE
+
+For connected neurons i and j, compute Euclidean distance:
+
+d_ij = sqrt((x_i-x_j)^2 + (y_i-y_j)^2 + (z_i-z_j)^2)
+
+The conceptual influence relationship is:
+
+influence_ij proportional to 1 / d_ij^2
+
+The rationale comes from the physical relationship between conductor resistance, length, and cross-sectional area:
+
+R = rho * L / A
+
+As axonal branches extend and narrow, longer paths produce greater resistance and weaker influence. The model abstracts this effect as stronger local influence and weaker distant influence.
+
+NUMERICAL SAFETY
+
+Raw 1/d^2 becomes unstable near zero. The implementation must include a minimum neuron separation, minimum effective distance, or small documented epsilon.
+
+For example:
+
+g_ij = 1 / max(d_ij, d_min)^2
+
+The scale or normalization must be explicit. Do not hide it inside unrelated constants.
+
+INFLUENCE IS A CONNECTION PROPERTY
+
+Influence belongs to each connection, not to the neuron in isolation.
+
+Store or expose:
+
+- source_id
+- target_id
+- distance
+- influence
+- raw plastic weight
+- effective transmission
+
+Influence remains fixed while the topology remains fixed. The plastic weight may change.
+
+AVOID APPLYING INFLUENCE TWICE
+
+The implementation must make clear where influence enters the equations.
+
+One consistent interpretation is:
+
+effective_input_ij = spike_i * w_ij * g_ij
+
+The plasticity rule then uses the influence-scaled presynaptic signal:
+
+delta_w_ij = LR * FE * (1 - w_ij/w_max)^2 * learn_signal * spike_i * g_ij
+
+The important constraint is that influence must not be accidentally squared within one calculation because an already influence-scaled input was multiplied by influence again.
+
+Name the quantities clearly:
+
+- raw_spike
+- distance_influence
+- effective_input
+- delta_weight
+
+The established remaining-capacity term must remain:
+
+(1 - w/w_max)^2
+
+Do not replace it with w^2, 1-w^2/w_max, or another superficially similar equation.
+
+
+8. MAJOR CONCEPTUAL CHANGE 2: WINNER MEANS FIRST RESPONDER, NOT NECESSARILY ONLY RESPONDER
+
+The newest ground truth relaxes the earlier strict interpretation of winner-take-all.
+
+The earlier interpretation was:
+
+one neuron fires -> global inhibition stops every other neuron -> no later Layer 2 neuron may fire
+
+The updated temporal interpretation is:
+
+one neuron fires first and represents the pattern -> other neurons may fire later -> the first-spike identity carries the primary representation
+
+Therefore, multiple L2E spikes during one presentation are not automatically a failure.
+
+What matters is:
+
+- which neuron fires first;
+- whether that same neuron consistently fires first for that pattern;
+- whether a different neuron fires first for each other pattern;
+- whether same-step ties are rare;
+- whether the first prediction/inhibitory feedback corresponds to the first winner.
+
+Example:
+
+Diagonal presentation:
+L2E2 fires first
+L2E0 fires later
+L2E3 fires later
+
+This can be acceptable if L2E2 consistently fires first for that diagonal and does not fire first for other patterns.
+
+It is not acceptable if the first responder changes randomly, two neurons repeatedly fire at the same earliest timestep, one neuron fires first for several patterns, or the first feedback corresponds to a later neuron instead of the first responder.
+
+Later firing neurons may encode secondary similarity or a temporal rank of alternative representations. The primary recognition signal remains the earliest physical response.
+
+
+9. CONSEQUENCES FOR INHIBITION
+
+The temporal-winner change creates an unresolved design question.
+
+If global inhibition permanently clamps every competitor after the first response, later ranked spikes cannot occur. If later responses are allowed, global inhibition should shape and delay competition rather than permanently prohibit all later firing.
+
+Do not resolve this with a software exception. Investigate the physical dynamics.
+
+A likely biologically compatible interpretation is:
+
+- the first L2E spike establishes the provisional recognition winner;
+- excitatory events accumulate in L2I;
+- L2I crosses threshold physically;
+- L2I sends a delayed conductance-like inhibitory event;
+- the inhibitory event pushes competitors back and increases temporal separation;
+- sufficiently strong later competitors may eventually recover and fire;
+- but the first responder remains stable.
+
+Keep these facts separately observable:
+
+- physicalFirstSpiker
+- physicalFirstSpikeStep
+- earliestResponseSet
+- sameStepTie
+- L2I threshold-crossing step
+- L2I threshold source
+- L2I delivery step
+- first predictive-feedback source
+- later L2E spike order
+
+Do not silently redefine the winner as the neuron that caused L2I to cross threshold. The earliest physical L2E response and the L2I threshold source may differ when L2I integrates several events. Record both.
+
+FIRST PREDICTIVE INHIBITORY PATTERN
+
+The newest notes indicate that the first Layer 1 inhibitory/predictive pattern should correspond to the winning Layer 2 neuron.
+
+If later Layer 2 neurons fire, they may create later predictions, but the first prediction must remain associated with the first Layer 2 response.
+
+Audit this causal path:
+
+first L2E responder
+    -> first L1I feedback source
+    -> spatial L1I pattern produced
+
+Seeing all nine L1I units fire identically does not prove this path is working.
+
+
+10. UPDATED INTERPRETATION OF THE CURRENT RASTER
+
+SENSORY ACTIVITY
+
+For col 1, L1E1, L1E4, and L1E7 repeatedly spike. This is consistent with the active sensory pattern.
+
+The faint teal trails are the charge overlay:
+
+- bright vertical line = actual spike
+- dim fill or trail = subthreshold membrane charge
+- drop after spike = membrane reset
+- new trail = new charge accumulation
+
+The trails are not extra spikes or weights.
+
+LAYER 1 INHIBITORY ACTIVITY
+
+The raster shows L1I0-L1I8 firing in perfect synchrony. This is an observation, not proof that the behavior is correct.
+
+Determine whether all nine engine neurons really fired, one event was serialized into nine rows, the feedback is intentionally nonselective, or every feedback connection currently has identical strength.
+
+LAYER 2 EXCITATORY ACTIVITY
+
+Several L2E neurons repeatedly fire. Under the updated temporal-winner definition, this is not automatically a failure. The correct diagnostic is presentation-by-presentation first-spike order.
+
+The raster needs clear pattern boundaries so that each presentation can answer:
+
+- Which L2E neuron fired first?
+- How much earlier was it than the second neuron?
+- Did the same neuron remain first across repeated presentations?
+
+A long continuous raster without clear presentation boundaries cannot establish ownership.
+
+GLOBAL INHIBITORY ACTIVITY
+
+Two bars on the L2I row mean that the same global neuron fired twice. The concern is whether those threshold crossings occur at the correct time and deliver effective inhibition, not whether two global neurons exist.
+
+DISAPPEARING NEURONS
+
+A neuron disappearing does not mean it learned a pattern.
+
+With Hide silent lanes enabled, a neuron disappears when it has no recent visible activity. It may have lost the current competition, become suppressed, had its weights depressed, learned a different pattern, stopped receiving input, or moved outside the visible history.
+
+Pattern ownership must be demonstrated across all four inputs.
+
+
+11. UPDATED INTERPRETATION OF THE WEIGHTS GRAPH
+
+When L2E0 is selected:
+
+- green traces are L1E->L2E0 feedforward weights;
+- the pink/red trace is the L2I->L2E0 inhibitory gate weight;
+- the dashed cap is the maximum permitted weight;
+- stair steps indicate plastic changes;
+- flat lines indicate no change;
+- overlapping weights may appear as one line.
+
+The pink inhibitory weight is not a membrane threshold. A green line crossing the pink line has no direct threshold meaning.
+
+For a mature neuron representing col 1, the expected endpoint is approximately:
+
+- large weights from L1E1, L1E4, and L1E7;
+- small weights from the other six sensory neurons.
+
+However, this orthogonal, nearly binary receptive field is a long-term endpoint, not something that must appear after training one pattern to exhaustion.
+
+The UI needs one labeled trace per sensory source, hover or click values, source IDs 0-8, current distance, current influence, raw weight, effective transmission, and a way to prevent overlapping traces from hiding each other.
+
+
+12. TRAINING SCHEDULE MUST CHANGE
+
+Training one pattern until strict winner-take-all convergence likely causes fixation.
+
+When one pattern is held too long:
+
+- the first winner strengthens;
+- competing neurons are also repeatedly modified by the same pattern;
+- many neurons become similar;
+- synapses approach saturation;
+- plasticity falls;
+- the whole population becomes rigid around the first pattern;
+- the first winner may dominate later patterns.
+
+This drags every competitor along for the ride.
+
+The updated approach is interleaved exposure:
+
+brief presentation of pattern A
+brief presentation of pattern B
+brief presentation of pattern C
+brief presentation of pattern D
+repeat
+
+Do not fully saturate one pattern before showing the others.
+
+The environment should provide diverse, repeated, brief experiences. Over many cycles, geometric differences create different early advantages, patterns push different neurons in different directions, first-spike identities stabilize, winners become less plastic as relevant weights grow, and still-plastic neurons remain available for unrepresented patterns.
+
+Learning should remain continuous. Do not permanently freeze a neuron merely because a software table says it owns a pattern.
+
+
+13. PARAMETER AND CODE ORGANIZATION
+
+All tunable parameters should be centralized in one clearly defined configuration section. All learning equations should be centralized in explicit functions.
+
+The goal is to compare implementations by replacing parameter blocks, learning rules, and controlled presets without accidentally rewriting topology or unrelated dynamics.
+
+Use consistent names across the diagnostic, dashboard, and engine. Agents must not broadly edit topology, thresholds, learning rules, and rendering simultaneously. Each phase needs a narrow scope and tests.
+
+The dashboard and command-line diagnostics must use the same shared preset. No hidden frontend overrides.
+
+
+14. REQUIRED AUDIT BEFORE IMPLEMENTATION
+
+Before changing behavior, inspect the current code and report:
+
+1. Where neuron coordinates are stored.
+2. Whether the engine or only the renderer owns those coordinates.
+3. How Layer 1 and Layer 2 neurons are currently placed.
+4. Whether positions change on reset.
+5. Whether there is a minimum-separation rule.
+6. Whether distance is currently calculated.
+7. Whether distance affects transmission, learning, both, or neither.
+8. Whether influence is accidentally applied twice.
+9. Whether perfect grids or circles make influence nearly identical.
+10. The current distribution of distances and influence values.
+11. Exact L1E->L1I, L2E->L1I, L2E->L2I, and L2I->L2E connectivity.
+12. Why all nine L1I raster rows fire simultaneously.
+13. Whether the serializer duplicates inhibitory events.
+14. How the first physical L2E response is recorded.
+15. How same-step ties are handled.
+16. Which L2E event receives credit for L2I threshold crossing.
+17. Whether the first Layer 1 prediction comes from the first responder or a later responder.
+18. Whether the scheduler overtrains one pattern before switching.
+19. Whether frontend presets differ from diagnostic presets.
+20. Whether silent-lane hiding is being mistaken for specialization.
+
+Do not implement until the audit separates confirmed engine behavior, UI artifacts, and hypotheses.
+
+
+15. PROPOSED IMPLEMENTATION SEQUENCE
+
+PHASE 1: PRESERVE A BASELINE
+
+- Record the branch, commit, seed, and preset.
+- Run the current four-pattern diagnostic.
+- Save the raster, weights, first-spike order, inhibition events, and receptive fields.
+- Do not alter existing ground-truth notes.
+
+PHASE 2: CENTRALIZE CONFIGURATION AND LEARNING RULES
+
+- Put tunable parameters in one shared configuration.
+- Put plasticity equations in named functions.
+- Ensure dashboard and diagnostics load the same preset.
+- Add unit tests for the remaining-capacity and influence terms.
+
+PHASE 3: ENGINE-OWNED GEOMETRY
+
+- Add fixed x, y, and z positions to all neurons.
+- Jitter Layer 1 neurons within their assigned spatial cells.
+- Randomly place Layer 2 excitatory neurons within the column.
+- Place global L2I near the center.
+- Enforce minimum separation.
+- Use deterministic seeds.
+- Make the renderer consume the same coordinates.
+
+PHASE 4: CONNECTION INFLUENCE
+
+- Compute and cache distance per connection.
+- Compute and cache distance-based influence.
+- Apply influence in one clearly audited manner.
+- Expose distance, influence, raw weight, and effective transmission.
+- Test close connections versus distant connections.
+- Test that influence remains constant while weights learn.
+
+PHASE 5: INTERLEAVED PATTERN EXPOSURE
+
+- Replace train-one-pattern-until-perfect behavior with brief interleaved exposures.
+- Begin with equal pattern frequency.
+- Use fixed presentation windows or another biologically defensible external schedule.
+- Do not use an oracle to assign neurons to patterns.
+- Keep plasticity local and continuous.
+
+PHASE 6: TEMPORAL-WINNER DIAGNOSTICS
+
+Record for every presentation:
+
+- pattern
+- presentation start and end
+- first L2E spiker
+- first spike step
+- all L2E spike order
+- same-step earliest set
+- latency margin to second responder
+- first L1I feedback source
+- first L1I feedback pattern
+- L2I threshold source
+- L2I threshold step
+- L2I delivery step
+- post-inhibition competitor charges
+
+PHASE 7: UI CLARIFICATION
+
+Separate raster groups visibly:
+
+- Layer 1 sensory excitation
+- Layer 1 spatial/predictive inhibition
+- Layer 2 competing excitation
+- Layer 2 global inhibition
+
+Add clear pattern boundaries, presentation numbers, current pattern labels, first-spike markers, later-spike rank, L2I threshold and delivery markers, charge/threshold legend, silent-lane toggle, weight labels 0-8, distance and influence inspection, and an explanation that multiple later spikes may be allowed.
+
+
+16. EXPERIMENTAL COMPARISON
+
+Run a controlled factorial comparison with identical pattern sequences and seeds.
+
+GEOMETRY CONDITIONS
+
+1. Current symmetric layout, influence off
+2. Random/jittered geometry, influence off
+3. Symmetric geometry, influence on
+4. Random/jittered geometry, influence on
+
+TRAINING CONDITIONS
+
+1. Long single-pattern saturation
+2. Short interleaved pattern exposure
+
+This separates the effect of geometry from the effect of the training schedule.
+
+Use multiple topology seeds. One successful seed is not proof of self-organization.
+
+
+17. REQUIRED METRICS
+
+TEMPORAL WINNER METRICS
+
+- first-spike consistency per pattern
+- same-step tie rate
+- latency margin between first and second response
+- first-responder stability over time
+- first-responder confusion matrix
+
+REPRESENTATION METRICS
+
+- number of patterns with a stable owner
+- number of neurons owning multiple patterns
+- number of patterns sharing one owner
+- number of silent or unrecruited neurons
+- one-to-one pattern coverage
+
+RECEPTIVE-FIELD METRICS
+
+- strongest input locations per L2E
+- similarity between learned weight vectors
+- overlap between neurons
+- active-pattern versus inactive-pattern weight separation
+- fraction of weights near zero or cap
+- remaining plasticity
+
+GEOMETRIC METRICS
+
+- pairwise neuron-distance distribution
+- influence distribution
+- minimum and maximum influence
+- correlation between distance and effective transmission
+- correlation between geometry and early winner advantage
+- stability of influence across training
+
+INHIBITION METRICS
+
+- L2E events per L2I spike
+- L2I threshold-crossing source
+- L2I delivery latency
+- change in competitor charge after delivery
+- first-feedback source correctness
+- fraction of all-nine synchronized L1I events
+- L1I feedback pattern selectivity
+
+
+18. SUCCESS CRITERIA
+
+The system should eventually demonstrate:
+
+- each of the four patterns has a consistent first Layer 2 responder;
+- different patterns preferably have different first responders;
+- same-step ties are rare;
+- later Layer 2 spikes may occur but do not destabilize the first-responder code;
+- the first Layer 1 predictive/inhibitory pattern corresponds to the first Layer 2 responder;
+- receptive fields gradually become distinct;
+- the system does not depend on a lucky random weight initialization;
+- geometric influence remains fixed and meaningful;
+- neurons are not permanently software-locked to patterns;
+- results reproduce across multiple seeds more reliably than baseline.
+
+Do not define success merely as only one neuron firing. Under the newest ground truth, stable temporal ordering is more important.
+
+
+19. PROHIBITED SHORTCUTS
+
+Do not:
+
+- assign patterns to neurons by index;
+- use argmax over hidden membrane charges;
+- inspect all weights to declare an owner during simulation;
+- permanently lock a neuron after it wins;
+- hardwire only the three desired inputs;
+- use a flat software winner-take-all clamp;
+- normalize weights globally to manufacture separation;
+- place Layer 2 neurons on a perfect circle;
+- regenerate positions during training;
+- use UI coordinates as if they were engine geometry;
+- train one pattern to total saturation before showing others;
+- treat every later Layer 2 spike as a failure.
+
+
+20. MOST IMPORTANT IMMEDIATE QUESTIONS
+
+The next investigation should answer:
+
+1. Are current neuron coordinates engine state or merely visual layout?
+2. Are current Layer 2 neurons placed symmetrically?
+3. Is distance influence currently doing anything numerically meaningful?
+4. Is influence used once or accidentally duplicated?
+5. Why do all nine Layer 1 inhibitory units fire together?
+6. Does the first Layer 1 prediction come from the first Layer 2 responder?
+7. Does the global L2I neuron physically delay competitors?
+8. When several Layer 2 neurons fire, is the first responder stable for repeated presentations?
+9. Are pattern exposures too long, causing all competitors to become rigid around the same input?
+10. Does interleaved training plus fixed geometric variation improve four-pattern coverage across seeds?
+
+The immediate goal is not yet the final classifier. It is to establish that the learning dynamics can produce stable, self-organized temporal representatives for all four orientation patterns without nonlocal or hard-coded ownership.
