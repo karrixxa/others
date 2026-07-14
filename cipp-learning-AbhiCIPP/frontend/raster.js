@@ -24,6 +24,13 @@ export class Raster {
     this.spike = [];       // Uint8Array per timestep: 1 = spiked
     this.times = [];
     this.rate = new Map();
+    // Presentation boundaries: {t, pattern, role} pushed whenever the backend's
+    // causal_story.presentation_id changes (read, never computed here -- see
+    // update()). Column index is derived from t - times[0] since timesteps are
+    // contiguous, so old boundaries fall out of view automatically as the
+    // rolling history shifts.
+    this.boundaries = [];
+    this._lastPresId = null;
     this.showL1 = true;
     this.colW = 6;
     this.follow = true;
@@ -56,7 +63,7 @@ export class Raster {
   build(topo) {
     this.order = (topo?.neurons ?? []).map(n => ({ id: n.id, type: n.type, group: n.layer + n.type }));
     this.index = new Map(this.order.map((n, i) => [n.id, i]));
-    this.spike = []; this.times = [];
+    this.spike = []; this.times = []; this.boundaries = []; this._lastPresId = null;
     this.built = true;
   }
 
@@ -70,8 +77,20 @@ export class Raster {
     this.spike.push(spk); this.times.push(dyn.timestep);
     while (this.spike.length > HISTORY) { this.spike.shift(); this.times.shift(); }
     this.rate = new Map(dyn.neurons.map(n => [n.id, n.freq ?? 0]));
+    // Presentation boundary: the backend's own presentation_id changed, so a new
+    // named pattern/probe started at this timestep -- record it for the marker
+    // below. Purely reactive to already-computed backend state.
+    const story = dyn.causal_story;
+    if (story && story.presentation_id !== this._lastPresId) {
+      this._lastPresId = story.presentation_id;
+      this.boundaries.push({ t: dyn.timestep, pattern: story.pattern, role: story.role });
+      if (this.boundaries.length > 200) this.boundaries.shift();
+    }
     this._schedule();
   }
+
+  // Column index for an absolute timestep, given the current rolling buffer.
+  _colForT(t) { return this.times.length ? t - this.times[0] : -1; }
 
   open() { this.overlay.hidden = false; this.follow = true; this._cw = this._ch = 0; this._draw(); }
   close() { this.overlay.hidden = true; }
@@ -165,6 +184,23 @@ export class Raster {
       ctx.fillStyle = lanes[i].type === 'E' ? cExc : cInh;
       const yc = y0 + i * laneH + (laneH - tickH) / 2;
       for (let c = cFrom; c < cTo; c++) if (this.spike[c][idx]) ctx.fillRect(xOf(c), yc, barW, tickH);
+    }
+
+    // Presentation boundaries: one vertical marker + label per named pattern/
+    // probe switch (backend-computed presentation_id, see update()). A probe
+    // gets a dashed amber line; a training pattern a solid teal line.
+    const cWin = getComputedStyle(document.documentElement).getPropertyValue('--win').trim() || '#ffce5c';
+    for (const b of this.boundaries) {
+      const c = this._colForT(b.t);
+      if (c < cFrom || c >= cTo) continue;
+      const x = xOf(c) + 0.5;
+      ctx.strokeStyle = b.role === 'probe' ? cInh : cWin;
+      ctx.setLineDash(b.role === 'probe' ? [4, 3] : []);
+      ctx.beginPath(); ctx.moveTo(x, y0); ctx.lineTo(x, vh); ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillStyle = ctx.strokeStyle;
+      ctx.font = '9px ui-monospace, monospace'; ctx.textBaseline = 'top';
+      ctx.fillText(`${b.pattern}${b.role === 'probe' ? ' (probe)' : ''}`, x + 3, y0 + 1);
     }
 
     // Pinned gutter: id labels + firing-rate bars + divider.

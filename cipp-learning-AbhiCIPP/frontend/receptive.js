@@ -6,8 +6,10 @@
 // ratio). When the simulation is PAUSED, each cell is editable: type a value and press
 // Enter to set that synapse (weight, or ratio*cap), which the backend applies (clipped
 // to the cap) so you can hand-push a neuron toward winning or losing, then step/resume
-// to watch the effect. A unit is flagged "dead" once its three strongest pixels can no
-// longer sum to threshold (it can never fire again).
+// to watch the effect. Status badges ("unrecruited" / "quiet") come straight from the
+// backend's evidence-based rf_status (SimulationEngine._l2e_status) -- built only from
+// actually-observed spikes and first-responder history, never a client-side guess at
+// whether the neuron's weights COULD sum to threshold.
 
 const N_PIX = 9;   // 3x3 grid
 
@@ -145,10 +147,8 @@ export class ReceptiveFields {
       const id = this.l2Ids[cardIndex];
       const j = Number(id.slice(3));
       const card = this.cards[cardIndex];
-      const fireRatios = [];   // w/threshold, for dead detection (independent of view mode)
       for (let i = 0; i < N_PIX; i++) {
         const w = s.weights.get(`ff${i}->${j}`) ?? 0;
-        fireRatios.push(w / thr);
         const cell = card.cells[i];
         cell.contentEditable = editable ? 'true' : 'false';
         cell.classList.toggle('rf-editable', editable);
@@ -162,15 +162,17 @@ export class ReceptiveFields {
           ? (w / cap).toFixed(3)                 // [0,1], precise enough to separate
           : (w >= 0.05 ? w.toFixed(1) : '0');    // actual weight
       }
-      // Dead = the three strongest pixels cannot sum to threshold, so the neuron can
-      // never accumulate to fire again.
-      const top3 = [...fireRatios].sort((a, b) => b - a).slice(0, 3).reduce((a, b) => a + b, 0);
-      const dead = top3 < 1.0;
-      card.badge.hidden = !dead;
-      if (dead) card.badge.textContent = 'dead';
-      card.root.classList.toggle('rf-dead', dead);
-
+      // Evidence-based status straight from the backend (rf_status; see
+      // SimulationEngine._l2e_status) -- built ONLY from actually-observed spikes
+      // and first-responder history, never from a client-side weight-sum guess
+      // at whether the neuron COULD fire (that guess could diverge from the
+      // engine's real behavior -- see the Phase 1 audit).
       const st = s.stateById.get(id);
+      const status = st?.rf_status?.status;
+      const showBadge = status === 'unrecruited' || status === 'quiet';
+      card.badge.hidden = !showBadge;
+      if (showBadge) card.badge.textContent = status;
+      card.root.classList.toggle('rf-dead', status === 'unrecruited');
       card.root.classList.toggle('rf-spike', !!(st && st.spiked));
       card.root.classList.toggle('rf-winner', winner === id);
     }

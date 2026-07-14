@@ -44,8 +44,11 @@ export class Inspector {
     for (const syn of (s.topology?.synapses ?? [])) {
       const w = s.weights.get(syn.id) ?? syn.weight ?? 0;
       const conf = s.confidence.get(syn.id) ?? syn.confidence ?? null;
-      if (syn.target === this.id) incoming.push({ ...syn, w, conf, other: syn.source });
-      if (syn.source === this.id) outgoing.push({ ...syn, w, conf, other: syn.target });
+      // Distance/influence/effective-transmission (feedforward synapses only;
+      // static per topology load -- see backend _delivery_diagnostics).
+      const dist = syn.distance ?? null, infl = syn.influence ?? null, eff = syn.effective ?? null;
+      if (syn.target === this.id) incoming.push({ ...syn, w, conf, dist, infl, eff, other: syn.source });
+      if (syn.source === this.id) outgoing.push({ ...syn, w, conf, dist, infl, eff, other: syn.target });
     }
     const strongest = [...incoming, ...outgoing].sort((a, b) => Math.abs(b.w) - Math.abs(a.w)).slice(0, 4);
     const col = meta.type === 'E' ? 'var(--exc)' : 'var(--inh)';
@@ -123,10 +126,16 @@ function synCard(title, list, self) {
     // the synapse carries one -- these are separate quantities in confidence mode.
     const conf = (sy.conf != null)
       ? `<span class="wv" title="confidence" style="color:var(--txt-2)">c ${sy.conf.toFixed(2)}</span>` : '';
+    // Distance/influence/effective transmission (feedforward only; see
+    // backend SimulationEngine._delivery_diagnostics -- brief SS7's required
+    // per-connection fields, previously absent end-to-end).
+    const delivery = (sy.dist != null)
+      ? `<span class="wv" title="engine distance -> influence -> effective transmission" style="color:var(--txt-2)">d ${sy.dist.toFixed(2)} · g ${sy.infl.toFixed(2)} · eff ${sy.eff.toFixed(1)}</span>`
+      : '';
     return `<div class="syn-row">
       <span class="name">${sy.other}</span>
       <span class="wbar"><i style="${style}"></i></span>
-      <span class="wv">${sy.w >= 0 ? '+' : ''}${sy.w.toFixed(3)}</span>${conf}</div>`;
+      <span class="wv">${sy.w >= 0 ? '+' : ''}${sy.w.toFixed(3)}</span>${conf}${delivery}</div>`;
   }).join('');
   return `<div class="icard full"><div class="lbl">${title}</div><div class="syn-list">${rows}</div></div>`;
 }

@@ -166,6 +166,27 @@ export class NeuronRenderer {
     }
   }
 
+  // Recenter/zoom the camera to the ACTUAL bounds of every neuron's engine
+  // coordinate (this.pos, built straight from topology.neurons[i].pos -- never
+  // a value this renderer invents). Preserves the default viewing angle/
+  // orientation; only distance and look-at target change.
+  fitView() {
+    if (!this.pos || !this.pos.size) return;
+    const min = new THREE.Vector3(Infinity, Infinity, Infinity);
+    const max = new THREE.Vector3(-Infinity, -Infinity, -Infinity);
+    for (const p of this.pos.values()) { min.min(p); max.max(p); }
+    const center = min.clone().add(max).multiplyScalar(0.5);
+    const radius = Math.max(max.clone().sub(min).length() / 2, 1);
+    const fovRad = THREE.MathUtils.degToRad(this.camera.fov);
+    const dist = (radius / Math.sin(fovRad / 2)) * 1.2;   // 20% padding
+    // Same relative viewing direction as the initial camera pose (11,-9,16),
+    // just re-scaled to the real bounds and re-centered on their midpoint.
+    const dir = new THREE.Vector3(11, -9, 16).normalize();
+    this.camera.position.copy(center.clone().addScaledVector(dir, dist));
+    this.controls.target.copy(center);
+    this.camera.updateProjectionMatrix();
+  }
+
   setFilters(f) { Object.assign(this.filters, f); this._applyFilters(); }
 
   _applyFilters() {

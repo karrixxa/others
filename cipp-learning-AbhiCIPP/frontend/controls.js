@@ -197,6 +197,29 @@ export class Controls {
     }
   }
 
+  // Held-out probes: never enter the training rotation (see backend PROBES).
+  // Presenting one is a distinct backend call (/api/probe) that freezes
+  // plasticity for the presentation window -- the frontend only requests it
+  // and displays what comes back; it never steps or simulates anything itself.
+  buildProbeButtons(probes) {
+    const box = document.getElementById('probe-buttons');
+    if (!box) return;
+    box.innerHTML = '';
+    this.probeBtns = {};
+    for (const name of probes) {
+      const b = document.createElement('button');
+      b.className = 'pat-btn probe-btn';
+      b.textContent = name;
+      b.title = 'Present as a held-out probe (plasticity frozen for the window)';
+      b.addEventListener('click', () => {
+        this.activePattern = null;
+        this.api.post('/api/probe', { name });
+      });
+      box.appendChild(b);
+      this.probeBtns[name] = b;
+    }
+  }
+
   // ----------------------------------------------------------- manual firing
   _wireManualFiring() {
     this.mfSelect = document.getElementById('mf-neuron');
@@ -247,6 +270,7 @@ export class Controls {
   // ------------------------------------------------------------ live updates
   onTopology(topology) {
     this.buildPatternButtons(topology.patterns);
+    this.buildProbeButtons(topology.probes || []);
     this.populateNeurons(topology.neurons);
   }
 
@@ -276,7 +300,26 @@ export class Controls {
       }
       for (const [name, b] of Object.entries(this.patBtns)) b.classList.toggle('active', name === match);
     }
+    if (this.probeBtns) {
+      const story = dyn.causal_story;
+      const activeProbe = story && story.role === 'probe' ? story.pattern : null;
+      for (const [name, b] of Object.entries(this.probeBtns)) b.classList.toggle('active', name === activeProbe);
+    }
+    this._updateProbeStatus(dyn.probe, dyn.causal_story);
     this._updateAutoCycleStatus(dyn.autocycle);
+  }
+
+  _updateProbeStatus(probe, story) {
+    const el = document.getElementById('probe-status');
+    if (!el) return;
+    if (!probe || !probe.active) {
+      el.textContent = 'no probe active — plasticity running normally';
+      el.classList.remove('frozen');
+      return;
+    }
+    el.classList.add('frozen');
+    el.textContent = `probing "${story?.pattern ?? '?'}" — plasticity FROZEN — `
+      + `${probe.steps_elapsed}/${probe.steps_total} steps`;
   }
 
   _updateAutoCycleStatus(ac) {

@@ -10,6 +10,7 @@ import { ReceptiveFields } from './receptive.js';
 import { Raster } from './raster.js';
 import { ChargeChart } from './charge.js';
 import { WeightsChart } from './weights.js';
+import { CausalStory } from './causal.js';
 
 const api = {
   async post(path, body) {
@@ -40,8 +41,11 @@ const receptive = new ReceptiveFields(store, api);
 const raster = new Raster(store);
 const chargeChart = new ChargeChart(store);
 const weightsChart = new WeightsChart(store);
+const causalStory = new CausalStory(store);
 
 function select(id) { inspector.select(id); renderer.select(id); weightsChart.setTarget(id); }
+
+document.getElementById('fit-view')?.addEventListener('click', () => renderer.fitView());
 
 // ---- FPS (simulation frames received per second) --------------------------
 let frameStamps = [];
@@ -81,6 +85,7 @@ function onMessage(msg) {
     raster.update(dyn);
     chargeChart.update(dyn);
     weightsChart.update(dyn);
+    causalStory.update(dyn);
     inspector.refresh();   // re-renders if a neuron was already selected
     controls.onDynamic(dyn);
     updateTopbar(dyn, fps);
@@ -96,6 +101,14 @@ function updateTopbar(dyn, fps) {
   el('st-speed').textContent = (dyn.speed ?? 0).toFixed(0) + ' /s';
   el('st-winner').textContent = dyn.winner || '—';
   el('st-fps').textContent = fps;
+  const story = dyn.causal_story;
+  const pres = el('st-presentation');
+  if (story && pres) {
+    const tag = story.role === 'probe' ? 'probe' : story.role;
+    pres.textContent = `#${story.presentation_id} ${story.pattern} (${tag})`
+      + (story.plasticity_frozen ? ' · frozen' : '');
+    pres.style.color = story.plasticity_frozen ? 'var(--inh)' : 'var(--txt-1)';
+  }
 }
 
 function onStatus(state) {

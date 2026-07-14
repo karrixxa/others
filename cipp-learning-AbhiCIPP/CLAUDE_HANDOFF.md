@@ -8,9 +8,10 @@
 - Phase 0 checkpoint commit: `b02cd9e` (added `CLAUDE.md` +
   `CLAUDE_HANDOFF.md`)
 - Phase 1 audit checkpoint commit: `225b8b1` (`Geometric_Influence_Temporal_Winner_Audit.md`)
-- This update corresponds to the Phase 2 (observability), Milestone 1
-  checkpoint (backend core) — commit hash filled in after this commit lands,
-  see repo log.
+- Phase 2 Milestone 1 checkpoint commit: `9163da2` (backend observability core)
+- This update corresponds to the **Phase 2 END** checkpoint (Milestone 2,
+  frontend, complete) — commit hash filled in after this commit lands, see
+  repo log.
 - Base branch `july14` is untouched and remains the protected base.
 - `four-pattern` branch exists (checked out in a separate worktree at
   `/home/charisxiong/Documents/others`) and is explicitly NOT merged here —
@@ -69,10 +70,52 @@ Phase 1 (required audit, brief §14 + §20 — read-only, no mechanisms changed)
 
 ## In progress
 
-Phase 2 (Observability), Milestone 1 of 2 — **backend core, DONE**; Milestone 2
-(frontend) is next, in the same session, no stop in between per `CLAUDE.md`.
+**Phase 2 (Observability) is COMPLETE** — both milestones done, phase-end
+regressions run, this is the phase-end checkpoint per `CLAUDE.md`. Next phase
+(seeded engine-owned geometry) is queued, per explicit user instruction
+received while this phase was wrapping up; not started yet.
 
-## Files changed (this checkpoint)
+## Files changed (Milestone 2 — frontend, this checkpoint)
+
+- `frontend/index.html` — "Presentation" top-bar stat pill; "Held-out Probes"
+  sidebar section (`#probe-buttons`, `#probe-status`); `#fit-view` button in
+  the viewport; new "Causal Story" bottom-panel tab (`#causal-current` /
+  `#causal-history`). Explicitly did **not** add an "Input Weights" tab.
+- `frontend/style.css` — styling for the above (`.probe-btn`, `.probe-status`,
+  `#fit-view`, `.causal-*`).
+- `frontend/controls.js` — `buildProbeButtons()` (mirrors
+  `buildPatternButtons()`, posts to `/api/probe`); `_updateProbeStatus()`
+  reflecting `dyn.probe`/`dyn.causal_story` (frozen state, steps elapsed).
+- `frontend/app.js` — top-bar "Presentation" readout from `dyn.causal_story`;
+  wires the new `CausalStory` module; wires `#fit-view` to `renderer.fitView()`.
+- `frontend/receptive.js` — **removed** the client-side top-3-weight-ratio
+  "dead" guess (the audit-flagged divergence risk); now reads
+  `state.rf_status.status` (`unrecruited`/`active`/`quiet`) straight from the
+  backend.
+- `frontend/raster.js` / `frontend/charge.js` — presentation-boundary vertical
+  markers (solid = training pattern, dashed = probe), driven purely by
+  watching `dyn.causal_story.presentation_id` change (backend-computed value;
+  the frontend does no detection/inference of its own, only bookkeeping of
+  already-known state). Both remain continuous rolling-history, real-spike-only
+  views (`raster.js`) and threshold-normalized-charge views (`charge.js`,
+  `activation` = V/θ) — these were already correct per the Phase 1 audit and
+  are unchanged in that respect.
+- `frontend/renderer.js` — `fitView()`: computes the actual bounding box from
+  `this.pos` (built only from `topology.neurons[i].pos`, i.e. real engine
+  coordinates — verified non-degenerate: x∈[-3.2,3.2], y∈[-3.2,3.2],
+  z∈[-2.0,6.0] across all 27 neurons on the live server), then repositions the
+  camera/target with 20% padding along the SAME default viewing direction. The
+  default camera pose and the rest of the 3D view are untouched.
+- `frontend/inspector.js` — synapse rows now show `distance`/`influence`/
+  `effective` (from `backend/_delivery_diagnostics`) when present.
+- `frontend/causal.js` (new) — pure renderer of `dyn.causal_story`; computes
+  nothing itself (no first-spike/tie/source detection client-side).
+
+All new/changed JS files pass `node --input-type=module --check` (syntax-only;
+no bundler in this project). No file in `frontend/` steps or mutates engine
+state — every action is still an HTTP POST, exactly as before.
+
+## Files changed (Milestone 1 — backend core, prior checkpoint `9163da2`)
 
 - `backend/presets.py` (new) — `DASHBOARD_PRESET`, the exact kwargs
   `backend/api.py` used to construct inline, now named/importable (no values
@@ -140,8 +183,29 @@ No neural equation and no preset VALUE was changed. `CLAUDE_HANDOFF.md`
   hashes every synapse weight and every confidence value before/after a
   25-step probe and asserts equality, while also asserting `spikes > 0`
   during the probe (physical dynamics stay live).
-- Fit View and raster-boundary accuracy are frontend (Milestone 2, not yet
-  built as of this checkpoint) — to be tested with the frontend work.
+- **Full-stack smoke test (real server, not just unit tests):** ran
+  `uvicorn backend.api:app` in the background and drove it with an actual
+  websocket client (the runner only steps while a client is connected —
+  confirmed by reading `backend/websocket.py`, pre-existing behavior, not a
+  regression). Verified over the wire:
+  - `topology`/`dynamic` messages contain `probes`, `pattern_roles`,
+    per-synapse `distance`/`influence`/`effective`, `causal_story`, `probe`,
+    `rf_status`.
+  - `POST /api/probe {"name": "col 0", "steps": 20}` → `causal_story.role`
+    flips to `probe` and `plasticity_frozen`/`probe.active` read `True` for
+    exactly the requested 20 frames, then both flip back to `False` and the
+    engine auto-restores the prior training pattern — `presentation_log`
+    history shows both presentations in order.
+  - Topology neuron positions are real, non-degenerate 3D coordinates (see
+    Fit View note above), confirming `renderer.fitView()` has genuine engine
+    geometry to compute a bounding box from.
+- Raster/charge boundary-marker *rendering* and Fit View's on-screen camera
+  motion were verified by code review + confirmed correct upstream data (the
+  `causal_story.presentation_id` transitions and real topology bounds above),
+  not by literally opening a browser (none available in this environment). If
+  the user wants a visual check, the dashboard now runs correctly
+  end-to-end (`uvicorn backend.api:app`, verified above) and can be opened at
+  `http://127.0.0.1:8000`.
 
 ## Known problems
 
@@ -159,14 +223,37 @@ No neural equation and no preset VALUE was changed. `CLAUDE_HANDOFF.md`
   event-driven/chunked-charge path (what the live dashboard actually runs);
   the legacy `lasting_inhibition`/`event_driven=False` branches are wired
   (`_last_eligible` is set in both) but not separately tested here.
+- No literal browser was opened for this phase (none available in this
+  environment); Fit View / boundary-marker visuals were verified by code
+  review plus confirmed-correct upstream data, not a screenshot. Flagged for a
+  human or a browser-capable session to eyeball if desired.
 
 ## Next action
 
-Milestone 2 (frontend, same session): probe buttons + plasticity-frozen
-indicator in `controls.js`/`index.html`; evidence-based status in
-`receptive.js` (replace the client-side weight-sum "dead" guess);
-presentation-boundary markers in `raster.js`/`charge.js`; actual-bounds Fit
-View in `renderer.js`; a new backend-driven "Causal Story" tab (no "Input
-Weights" tab); distance/influence display in `inspector.js`. Then: run/smoke
-test the dashboard, final regression pass, update this handoff again, commit,
-report, stop (per `CLAUDE.md`'s phase-end protocol).
+Phase 2 is closed. Next phase, per explicit user instruction: **seeded
+engine-owned geometry** (still observability/topology infrastructure, not a
+dynamics change) —
+- Keep `N_OUT=8`.
+- Jitter L1E within assigned 3×3 cells; place each L1I near its paired L1E.
+- Place all 8 L2E irregularly with a minimum-separation constraint; keep the
+  single L2I near the center.
+- Coordinates fixed across reset/training/probes, changing only on an
+  explicit topology reseed (distinct from the existing weight-only
+  `reseed()` — needs a decision on whether to extend it or add a new verb).
+- Renderer must consume engine coordinates (already true per the Phase 1
+  audit and this phase's `fitView()` work — no renderer-side position logic
+  exists to remove).
+- Preserve the current symmetric ring/grid layout as a selectable legacy
+  ablation (do not delete it).
+- Do NOT enable neural distance effects beyond the current baseline if doing
+  so would change it — `distance_weighting=True` is already live in
+  `backend/api.py` (Phase 1 audit finding #4); changing the geometry WILL
+  change what that live feature computes, since it already reads L2_HOMES/
+  pixel positions. This needs an explicit decision (flagged, not resolved):
+  either (a) keep `distance_weighting` on and accept baseline behavior changes
+  as the intended point of jittered geometry, or (b) temporarily pin geometry
+  distances at their CURRENT ring/grid values for the influence calculation
+  while the jittered layout is only used for placement/rendering/minimum-
+  separation, so the "no baseline change yet" instruction is honored exactly.
+  Surface this choice to the user before implementing rather than picking
+  silently.

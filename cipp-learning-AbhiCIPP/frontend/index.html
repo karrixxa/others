@@ -31,6 +31,8 @@
       <div class="stat-pill"><span class="k">Timestep</span><span class="v" id="st-timestep">0</span></div>
       <div class="stat-pill"><span class="k">Speed</span><span class="v" id="st-speed">— /s</span></div>
       <div class="stat-pill"><span class="k">Winner</span><span class="v" id="st-winner">—</span></div>
+      <div class="stat-pill" id="st-presentation-pill" title="current presentation: pattern/probe, id, plasticity state">
+        <span class="k">Presentation</span><span class="v" id="st-presentation">—</span></div>
       <div class="stat-pill"><span class="k">FPS</span><span class="v" id="st-fps">0</span></div>
       <div class="conn" id="st-conn"><span class="dot"></span><span id="st-conn-label">connecting…</span></div>
     </div>
@@ -86,9 +88,22 @@
             </label>
             <p class="config-desc">Rotates through all patterns, a short visit each. A pattern is
               "trained" once the same L2E neuron wins it for N rounds in a row; the cycle stops when
-              all are trained. (Sitting on one pattern can't train — the pool round-robins.)</p>
+              all are trained. (Sitting on one pattern can't train — the pool round-robins.)
+              Auto-cycle only ever rotates these four TRAINED patterns — never a probe below.</p>
             <div class="ac-status" id="ac-status">idle</div>
           </div>
+        </div>
+      </section>
+
+      <section class="panel" data-section>
+        <header class="panel-head"><span>Held-out Probes</span><span class="chev"></span></header>
+        <div class="panel-body">
+          <p class="config-desc">Four non-center-crossing lines the network is <b>never trained
+            on</b> (auto-cycle cannot select these). Presenting one freezes ALL plasticity for the
+            presentation window — real spikes/inhibition/resets still happen, but nothing is
+            learned — then automatically restores whatever was showing before.</p>
+          <div class="pattern-buttons" id="probe-buttons"></div>
+          <div class="probe-status" id="probe-status"></div>
         </div>
       </section>
 
@@ -138,6 +153,7 @@
     <!-- Center viewport -->
     <section class="viewport">
       <div id="scene"></div>
+      <button class="btn sm" id="fit-view" title="Recenter/zoom the camera to the actual engine-coordinate bounds of every neuron">⤢ Fit View</button>
       <div class="legend">
         <div><span class="sw exc"></span>excitatory</div>
         <div><span class="sw inh"></span>inhibitory</div>
@@ -166,6 +182,7 @@
     <nav class="tabs" id="tabs">
       <button class="tab active" data-tab="activity">Activity</button>
       <button class="tab" data-tab="rf">Receptive Fields</button>
+      <button class="tab" data-tab="causal">Causal Story</button>
       <button class="tab" data-tab="raster">Spike Raster ⤢</button>
       <button class="tab" data-tab="charge">Charge / time ⤢</button>
       <button class="tab" data-tab="weights">Weights / time ⤢</button>
@@ -194,7 +211,8 @@
               (+1) potentiate and its <b>inactive</b> pixels (−1) depress —
               <code>dw = η·p·(1−(w/w_cap)²)·signal</code>, no weight budget. Each 3×3 grid below is
               one L2E neuron's feedforward receptive field. A ring marks the current
-              winner; units that can no longer reach threshold are flagged <b>dead</b>.</p>
+              winner; status badges (<b>unrecruited</b> / <b>quiet</b>) reflect the
+              backend's actually-observed spike history, not a weight guess.</p>
             <div class="rf-controls">
               <div class="rf-toggle" id="rf-mode-toggle" role="group" aria-label="cell display">
                 <button type="button" class="rf-toggle-btn is-on" data-mode="weight">weight</button>
@@ -204,6 +222,16 @@
             </div>
           </div>
           <div class="rf-grid" id="rf-grid"></div>
+        </div>
+      </div>
+
+      <div class="tab-panel" data-panel="causal">
+        <div class="causal-wrap" id="causal-wrap">
+          <p class="config-desc">Backend-computed only — every field below is read directly off the
+            engine's own presentation tracking (never inferred or recomputed in the browser).</p>
+          <div class="causal-current" id="causal-current"></div>
+          <div class="card-title">Recent presentations (most recent first)</div>
+          <div class="causal-history" id="causal-history"></div>
         </div>
       </div>
 

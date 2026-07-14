@@ -24,6 +24,9 @@ export class ChargeChart {
     this.spike = [];       // Uint8Array per timestep
     this.inhibited = [];   // Uint8Array: L2I discharge/hard-reset reached target
     this.times = [];
+    // Presentation boundaries -- same backend-driven marker as raster.js.
+    this.boundaries = [];
+    this._lastPresId = null;
     this.showL1 = true;
     this.colW = 8;
     this.follow = true;
@@ -57,8 +60,11 @@ export class ChargeChart {
     this.order = (topo?.neurons ?? []).map(n => ({ id: n.id, type: n.type, group: n.layer + n.type }));
     this.index = new Map(this.order.map((n, i) => [n.id, i]));
     this.charge = []; this.spike = []; this.inhibited = []; this.times = [];
+    this.boundaries = []; this._lastPresId = null;
     this.built = true;
   }
+
+  _colForT(t) { return this.times.length ? t - this.times[0] : -1; }
 
   update(dyn) {
     if (!this.built || !dyn || !dyn.neurons) return;
@@ -79,6 +85,12 @@ export class ChargeChart {
     this.charge.push(chg); this.spike.push(spk); this.inhibited.push(inh); this.times.push(dyn.timestep);
     while (this.charge.length > HISTORY) {
       this.charge.shift(); this.spike.shift(); this.inhibited.shift(); this.times.shift();
+    }
+    const story = dyn.causal_story;
+    if (story && story.presentation_id !== this._lastPresId) {
+      this._lastPresId = story.presentation_id;
+      this.boundaries.push({ t: dyn.timestep, pattern: story.pattern, role: story.role });
+      if (this.boundaries.length > 200) this.boundaries.shift();
     }
     this._schedule();
   }
@@ -202,6 +214,21 @@ export class ChargeChart {
                        Math.max(2, Math.min(4, laneH * 0.18)));
         }
       }
+    }
+
+    // Presentation boundaries -- same backend-driven marker as raster.js.
+    const cWin = getComputedStyle(document.documentElement).getPropertyValue('--win').trim() || '#ffce5c';
+    for (const b of this.boundaries) {
+      const c = this._colForT(b.t);
+      if (c < cFrom || c >= cTo) continue;
+      const x = xOf(c) + 0.5;
+      ctx.strokeStyle = b.role === 'probe' ? cInh : cWin;
+      ctx.setLineDash(b.role === 'probe' ? [4, 3] : []);
+      ctx.beginPath(); ctx.moveTo(x, y0); ctx.lineTo(x, vh); ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillStyle = ctx.strokeStyle;
+      ctx.font = '9px ui-monospace, monospace'; ctx.textBaseline = 'top';
+      ctx.fillText(`${b.pattern}${b.role === 'probe' ? ' (probe)' : ''}`, x + 3, y0 + 1);
     }
 
     // Pinned gutter + axis.
