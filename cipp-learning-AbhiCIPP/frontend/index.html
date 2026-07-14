@@ -63,6 +63,9 @@
             <button class="btn sm" id="x-reseed" title="New random initial weights (same config); wipes learned state">Reseed</button>
             <button class="btn sm danger" id="x-reset">Reset</button>
           </div>
+          <div class="btn-row">
+            <button class="btn sm" id="x-reseed-topology" title="New geometry only -- redraws neuron positions from a fresh topology seed. Does NOT touch learned weights or the running pattern/probe/auto-cycle state.">Reseed Topology</button>
+          </div>
           <label class="field">
             <span>Speed <b id="speed-val">12</b> steps/s</span>
             <input type="range" id="speed" min="1" max="120" value="12" />

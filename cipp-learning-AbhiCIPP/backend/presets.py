@@ -128,4 +128,15 @@ DASHBOARD_PRESET = dict(
     l2e_lr_frac=0.02,             # L2E feedforward learning rate (fraction of the cap)
     ei_sat_mult=4.0,              # push E->I saturation above the clip so L2E->L2I reaches
                                   # the cap and L2I can sharpen into a single-source relay.
+    # Phase 3: show the new seeded/jittered/irregular geometry live in the
+    # dashboard (symmetric_geometry=False; the engine's own default stays True
+    # so every OTHER caller/test is unaffected). legacy_distance_compat=True
+    # is the TEMPORARY compatibility shim (see backend/simulation.py's module
+    # comment above L1_JITTER_FRAC): distance_weighting's delivered-charge
+    # numbers stay pinned to the legacy reference geometry, so switching the
+    # DISPLAYED geometry does not, by itself, change any neural dynamics.
+    # Phase 4 is expected to flip this to False once influence from the real
+    # geometry is intentionally activated.
+    symmetric_geometry=False,
+    legacy_distance_compat=True,
 )

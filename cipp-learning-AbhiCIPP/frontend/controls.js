@@ -138,6 +138,10 @@ export class Controls {
       if (window.confirm('Reseed draws new random initial weights and wipes all learned state. Continue?'))
         this.api.post('/api/reseed');
     });
+    // Geometry-only reseed (Phase 3): redraws neuron POSITIONS from a fresh
+    // topology seed. Does not wipe learned weights or reset the network, so
+    // no confirmation dialog (unlike the destructive Reseed/Reset above).
+    bind(['x-reseed-topology'], () => this.api.post('/api/reseed_topology'));
     // Overlay Stop = reset: halts AND rebuilds the network from fresh weights, so
     // it wipes all learned state -- confirm before firing.
     bind(['raster-stop', 'charge-stop', 'weights-stop'], () => {

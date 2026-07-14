@@ -100,6 +100,93 @@ L2_HOMES = [
 ]
 
 GRID = 2.2
+
+# ---- Phase 3: seeded, engine-owned geometry (jittered/irregular placement) ----
+# Brief SS6: a perfect L2E grid/circle gives near-identical geometric influence
+# to every neuron and defeats distance-based symmetry breaking; L1 neurons
+# should be jittered within their assigned spatial cells rather than sitting at
+# exact grid points. This adds a SEEDED alternative to the deterministic
+# ring/grid above, selectable via `symmetric_geometry` (default True: EVERY
+# existing caller/test that doesn't pass it gets the exact legacy positions,
+# byte-identical). `L2_HOMES` and the legacy pixel-grid formula are kept
+# exactly as they were -- they remain both the `symmetric_geometry=True`
+# position source AND the fixed reference geometry `legacy_distance_compat`
+# uses (see _apply_l2e_distances).
+#
+# TEMPORARY COMPATIBILITY SHIM (Phase 3 only, always on by default): even when
+# `symmetric_geometry=False` (irregular geometry is what's placed/rendered),
+# `legacy_distance_compat=True` makes the DELIVERY distances that feed
+# distance_weighting keep coming from the LEGACY ring/grid reference geometry,
+# not the real new positions -- so today's distance_weighting=True dynamics
+# stay numerically identical regardless of which geometry is on screen. This
+# is a deliberate, explicitly labeled placeholder: topology()'s `geometry`
+# block reports it so nothing presents these pinned numbers as if they were
+# computed from the visible (possibly jittered) coordinates. Phase 4 removes
+# this shim and lets distance/influence follow the real new geometry.
+L1_JITTER_FRAC = 0.30         # max L1E offset from its cell center, as a fraction of GRID
+L1I_PAIR_JITTER_FRAC = 0.12   # small additional L1I offset from its paired L1E's (x,y)
+L2E_PLACEMENT_RADIUS = 3.6    # bounding disk radius for irregular L2E placement (z fixed at _Z)
+L2E_MIN_SEPARATION = 1.3      # minimum enforced pairwise Euclidean distance between L2E homes
+L2E_PLACEMENT_MAX_TRIES = 20000     # rejection-sampling attempts per restart
+L2E_PLACEMENT_MAX_RESTARTS = 50     # full-restart budget (placement is generous; should never exhaust)
+
+
+def _legacy_l1_xy():
+    """Deterministic legacy L1E/pixel-grid (x,y) positions -- no jitter. This
+    is both the `symmetric_geometry=True` position source and the fixed
+    reference geometry `legacy_distance_compat` uses, regardless of which
+    placement mode is actually active. Returns an (N_PIX,2) array."""
+    pos = np.zeros((N_PIX, 2))
+    for i in range(N_PIX):
+        r, c = divmod(i, 3)
+        pos[i] = ((c - 1) * GRID, (1 - r) * GRID)
+    return pos
+
+
+def _jittered_l1e_xy(rng):
+    """Seeded jitter for the 9 L1E positions, each confined to its OWN 3x3
+    spatial cell (brief SS6: a neuron must not cross into another sensory
+    region, or it would change which spatial pattern it represents). Offset
+    magnitude (L1_JITTER_FRAC * GRID = 0.66) stays well inside the half-GRID
+    (1.1) cell boundary. Returns an (N_PIX,2) array."""
+    base = _legacy_l1_xy()
+    max_off = L1_JITTER_FRAC * GRID
+    return base + rng.uniform(-max_off, max_off, size=base.shape)
+
+
+def _paired_l1i_xy(rng, l1e_xy):
+    """Each L1I sits NEAR its paired L1E (same pixel index) with a small
+    independent offset (brief SS6: 'near the paired L1E unit ... with a small
+    offset', not a literal coincident overlap). The added offset
+    (L1I_PAIR_JITTER_FRAC * GRID = 0.264) keeps L1I within the same cell as
+    its L1E even at L1E's maximum jitter (0.66 + 0.264 = 0.924 < 1.1)."""
+    max_off = L1I_PAIR_JITTER_FRAC * GRID
+    return l1e_xy + rng.uniform(-max_off, max_off, size=l1e_xy.shape)
+
+
+def _irregular_l2e_xy(rng):
+    """Seeded rejection-sampling placement of the N_OUT L2E homes inside a
+    bounded disk (brief SS6: 'randomly placed within a bounded cortical-column
+    region', 'enforce minimum separation', 'do not place them ... at equal
+    angles or equal radii'). Returns an (N_OUT,2) array; raises if the
+    constants can't be satisfied (a build-time configuration error, not a
+    runtime/per-step concern)."""
+    for _restart in range(L2E_PLACEMENT_MAX_RESTARTS):
+        pts: list[np.ndarray] = []
+        tries = 0
+        while len(pts) < N_OUT and tries < L2E_PLACEMENT_MAX_TRIES:
+            tries += 1
+            r = L2E_PLACEMENT_RADIUS * np.sqrt(rng.uniform(0.0, 1.0))
+            theta = rng.uniform(0.0, 2 * np.pi)
+            cand = np.array([r * np.cos(theta), r * np.sin(theta)])
+            if all(np.linalg.norm(cand - p) >= L2E_MIN_SEPARATION for p in pts):
+                pts.append(cand)
+        if len(pts) == N_OUT:
+            return np.array(pts)
+    raise RuntimeError(
+        f"could not place {N_OUT} L2E neurons with min separation "
+        f"{L2E_MIN_SEPARATION} inside radius {L2E_PLACEMENT_RADIUS} after "
+        f"{L2E_PLACEMENT_MAX_RESTARTS} restarts -- loosen the placement constants")
 # Active L2E fan-in: exactly N_PIX pixel afferents. There is NO index-0 local-I
 # placeholder and no negative L2I->L2E gate -- L2 competition is now an unweighted
 # hard reset plus local competitive depression (see Neuron.apply_competitive_reset
@@ -576,7 +663,27 @@ class SimulationEngine:
                  # Jitter eps for the balanced init: Z[j,i] ~ Uniform(1-eps, 1+eps).
                  # eps=0 -> exactly uniform (perfect symmetry); eps>0 -> small UNBIASED
                  # differences the learning rules must amplify. Ignored in legacy mode.
-                 l2e_init_jitter: float = L2E_INIT_JITTER):
+                 l2e_init_jitter: float = L2E_INIT_JITTER,
+                 # ---- Phase 3: seeded engine-owned geometry (see the module-level
+                 # comment above L1_JITTER_FRAC). topology_seed is INDEPENDENT of
+                 # `seed` (weight init) -- geometry and learned weights vary
+                 # independently. Positions are recomputed from topology_seed on
+                 # every _build() (reset/apply_config/weight-reseed all call
+                 # _build()), so they are DETERMINISTIC and therefore fixed across
+                 # those calls; only reseed_topology() changes topology_seed.
+                 topology_seed: int = 1,
+                 # DEFAULT True: every existing caller/test that doesn't pass this
+                 # gets the EXACT legacy ring/grid positions, byte-identical. False
+                 # selects the new seeded jittered/irregular geometry. The legacy
+                 # layout stays selectable here as an ablation, not removed.
+                 symmetric_geometry: bool = True,
+                 # TEMPORARY (Phase 3 only; see module comment): when True (the
+                 # default), the DELIVERY distances distance_weighting reads are
+                 # always computed from the legacy reference geometry regardless of
+                 # `symmetric_geometry`, so switching to the new geometry cannot by
+                 # itself change any neural dynamics. Phase 4 removes this flag and
+                 # lets distance/influence follow the real geometry unconditionally.
+                 legacy_distance_compat: bool = True):
         # Decouple the SENSORY input rate from the INTRINSIC competition clock.
         # input_period: steps between external input samples. The default is 1:
         #   a held pixel supplies drive continuously, every simulation step.
@@ -654,7 +761,10 @@ class SimulationEngine:
                            l2e_weight_cap_frac=l2e_weight_cap_frac,
                            pos_weight_floor=pos_weight_floor,
                            l2e_init_mode=l2e_init_mode,
-                           l2e_init_jitter=l2e_init_jitter)
+                           l2e_init_jitter=l2e_init_jitter,
+                           topology_seed=topology_seed,
+                           symmetric_geometry=symmetric_geometry,
+                           legacy_distance_compat=legacy_distance_compat)
         self._build()
 
     # ------------------------------------------------------------------ build
@@ -1061,27 +1171,53 @@ class SimulationEngine:
         self._log('backend', f'network built (seed={p["seed"]}, immediate delivery, '
                              f'{len(self.neurons)} neurons, {len(self.synapses)} synapses)')
 
+    def _compute_geometry(self):
+        """Returns (l1e_xy, l1i_xy, l2e_xy), each an (n,2) array of (x,y) --
+        z is fixed per population (0.0 / -2.0 / _Z) and applied by the caller,
+        matching the legacy layout. `symmetric_geometry=True` reproduces the
+        EXACT legacy deterministic positions (byte-identical); False draws the
+        seeded jittered/irregular geometry from `topology_seed` via a
+        dedicated RNG stream (independent of the weight-init `seed`)."""
+        if self.params['symmetric_geometry']:
+            legacy_xy = _legacy_l1_xy()
+            return legacy_xy, legacy_xy.copy(), np.array([[x, y] for x, y, _ in L2_HOMES])
+        rng_l1e, rng_l1i, rng_l2e = (np.random.default_rng(s) for s in
+                                     np.random.SeedSequence(self.params['topology_seed']).spawn(3))
+        l1e_xy = _jittered_l1e_xy(rng_l1e)
+        l1i_xy = _paired_l1i_xy(rng_l1i, l1e_xy)
+        l2e_xy = _irregular_l2e_xy(rng_l2e)
+        return l1e_xy, l1i_xy, l2e_xy
+
     def _register_neurons(self):
+        # Engine-owned geometry (Phase 3): computed once here per _build(), and
+        # cached on self._geometry_xy so _apply_l2e_distances (and any future
+        # diagnostic) can reuse the SAME positions rather than redrawing them --
+        # positions are otherwise deterministic given topology_seed, but caching
+        # avoids a second RNG draw sequence entirely.
+        l1e_xy, l1i_xy, l2e_xy = self._compute_geometry()
+        self._geometry_xy = dict(l1e=l1e_xy, l1i=l1i_xy, l2e=l2e_xy)
         for i in range(N_PIX):
-            r, c = divmod(i, 3)
             nid = f'L1E{i}'
             self.neurons[nid] = self.l1.excitatory_neurons[i]
             self.meta[nid] = dict(id=nid, label=f'in {i}', layer='L1', type='E',
                                   threshold=self.params['threshold'],
-                                  pos=[(c - 1) * GRID, (1 - r) * GRID, 0.0])
+                                  pos=[round(float(l1e_xy[i, 0]), 4), round(float(l1e_xy[i, 1]), 4), 0.0])
         for i in range(N_PIX):
-            r, c = divmod(i, 3)
             nid = f'L1I{i}'
             self.neurons[nid] = self.l1.inhibitory_neurons[i]
             self.meta[nid] = dict(id=nid, label=f'inh {i}', layer='L1', type='I',
                                   threshold=self.params['threshold'],
-                                  pos=[(c - 1) * GRID, (1 - r) * GRID, -2.0])
+                                  pos=[round(float(l1i_xy[i, 0]), 4), round(float(l1i_xy[i, 1]), 4), -2.0])
         for j in range(N_OUT):
             nid = f'L2E{j}'
             self.neurons[nid] = self.l2.excitatory_neurons[j]
             self.meta[nid] = dict(id=nid, label=f'out {j}', layer='L2', type='E',
-                                  threshold=self.params['threshold_l2'], pos=list(L2_HOMES[j]))
+                                  threshold=self.params['threshold_l2'],
+                                  pos=[round(float(l2e_xy[j, 0]), 4), round(float(l2e_xy[j, 1]), 4), _Z])
         self.neurons['L2I'] = self.l2.inhibitory_neuron
+        # L2I stays fixed at the exact center -- brief SS6 allows this ("does not
+        # need mathematical perfection... central placement reduces extreme
+        # unfairness"); no jitter is applied to the single global neuron.
         self.meta['L2I'] = dict(id='L2I', label='inhib', layer='L2', type='I',
                                 threshold=self.params['threshold_l2'], pos=[0.0, 0.0, 6.0])
 
@@ -1105,27 +1241,33 @@ class SimulationEngine:
                 self.synapses.append(dict(id=f'fb{j}->{i}', source=f'L2E{j}', target=f'L1I{i}', kind='feedback'))
 
     def _apply_l2e_distances(self):
-        """Populate each L2E's per-afferent DELIVERY distance from the 3D layout:
-        euclidean(L2E_home, pixel_pos) for the nine pixel afferents (index i; the
-        active L2E has no index-0 placeholder). With distance_weighting on (ref=1,
-        power=2, min=1) the delivered charge is weight * 1/d^2, so a farther pixel
-        contributes less -- charge dissipates along the 'axon'. Stored weights are
-        untouched; this scales DELIVERY only. Pixel positions match
-        _register_neurons' meta: ((c-1)*GRID, (1-r)*GRID, 0)."""
-        pix = []
-        for i in range(N_PIX):
-            r, c = divmod(i, 3)
-            pix.append(((c - 1) * GRID, (1 - r) * GRID, 0.0))
+        """Populate each L2E's per-afferent DELIVERY distance: euclidean(L2E_home,
+        pixel_pos) for the nine pixel afferents (index i; the active L2E has no
+        index-0 placeholder). With distance_weighting on, the delivered charge is
+        weight * (distance_ref/max(d,distance_min))^distance_power, so a farther
+        pixel contributes less -- charge dissipates along the 'axon'. Stored
+        weights are untouched; this scales DELIVERY only.
+
+        TEMPORARY (Phase 3 `legacy_distance_compat`, default True; see the module
+        comment above L1_JITTER_FRAC): the reference geometry used HERE is the
+        legacy ring/grid (L2_HOMES + _legacy_l1_xy()), regardless of whether
+        `symmetric_geometry` is on -- so distance_weighting's already-live effect
+        on delivered charge stays numerically identical to the pre-Phase-3
+        baseline no matter which geometry is actually placed/rendered. When False,
+        distances are computed from the REAL positions in self._geometry_xy
+        (set by _register_neurons/reseed_topology) -- Phase 4's intended path."""
+        if self.params['legacy_distance_compat']:
+            pix_xy = _legacy_l1_xy()
+            homes_xyz = np.array([[x, y, z] for x, y, z in L2_HOMES])
+        else:
+            pix_xy = self._geometry_xy['l1e']
+            homes_xyz = np.column_stack([self._geometry_xy['l2e'], np.full(N_OUT, _Z)])
+        pix_xyz = np.column_stack([pix_xy, np.zeros(N_PIX)])
         for j in range(N_OUT):
             n = self.l2.excitatory_neurons[j]
             if n._weights_array is None or len(n._weights_array) == 0:
                 continue
-            d = np.ones(len(n._weights_array))
-            hx, hy, hz = L2_HOMES[j]
-            for i in range(N_PIX):
-                px, py, pz = pix[i]
-                d[i] = float(np.sqrt((hx - px) ** 2 + (hy - py) ** 2 + (hz - pz) ** 2))
-            n.distance = d
+            n.distance = np.linalg.norm(pix_xyz - homes_xyz[j], axis=1)
 
     # --------------------------------------------------------------- controls
     def reset(self):
@@ -1141,6 +1283,29 @@ class SimulationEngine:
         self.params['seed'] = int(np.random.SeedSequence().generate_state(1)[0])
         self._build()
         return self.params['seed']
+
+    def reseed_topology(self):
+        """Draw a fresh topology seed and regenerate ONLY the engine's geometry
+        (positions) -- unlike reset()/reseed(), this does NOT rebuild the
+        network: every learned weight, confidence value, and in-progress
+        pattern/probe/auto-cycle state is left exactly as it was. This is the
+        ONLY thing that changes engine-owned coordinates outside of
+        `symmetric_geometry` toggling (positions are otherwise deterministic
+        given topology_seed, so they stay fixed across reset/training/probes --
+        see the module comment above L1_JITTER_FRAC). Returns the new
+        topology_seed. A no-op on the actual positions when
+        symmetric_geometry=True (the legacy layout has no seed dependence)."""
+        self.params['topology_seed'] = int(np.random.SeedSequence().generate_state(1)[0])
+        l1e_xy, l1i_xy, l2e_xy = self._compute_geometry()
+        self._geometry_xy = dict(l1e=l1e_xy, l1i=l1i_xy, l2e=l2e_xy)
+        for i in range(N_PIX):
+            self.meta[f'L1E{i}']['pos'] = [round(float(l1e_xy[i, 0]), 4), round(float(l1e_xy[i, 1]), 4), 0.0]
+            self.meta[f'L1I{i}']['pos'] = [round(float(l1i_xy[i, 0]), 4), round(float(l1i_xy[i, 1]), 4), -2.0]
+        for j in range(N_OUT):
+            self.meta[f'L2E{j}']['pos'] = [round(float(l2e_xy[j, 0]), 4), round(float(l2e_xy[j, 1]), 4), _Z]
+        self._apply_l2e_distances()   # keep distance state consistent with the (possibly legacy-pinned) reference
+        self._log('control', f'topology reseeded (topology_seed={self.params["topology_seed"]})')
+        return self.params['topology_seed']
 
     # Parameters the dashboard is allowed to change live. Anything not listed here
     # is rejected so a stray key can't silently no-op or corrupt self.params.
@@ -1160,7 +1325,11 @@ class SimulationEngine:
                'distance_weighting', 'distance_power', 'distance_ref', 'distance_min',
                'assembly_flow_credit', 'assembly_decay_frac',
                'l2e_init_mode', 'l2e_init_jitter', 'leak_enabled',
-               'l2i_leak_enabled', 'l1i_leak_enabled')
+               'l2i_leak_enabled', 'l1i_leak_enabled',
+               # Phase 3 geometry ablation toggles. topology_seed is deliberately
+               # NOT here -- it has its own dedicated verb, reseed_topology(),
+               # not the generic config panel (see that method's docstring).
+               'symmetric_geometry', 'legacy_distance_compat')
 
     def apply_config(self, overrides: dict):
         """Merge tunable overrides into self.params and rebuild the network in
@@ -1182,7 +1351,7 @@ class SimulationEngine:
                      'inhibitory_flow_rate', 'inh_trace_normalized',
                      'inhibitory_delta_rule', 'distance_weighting',
                      'assembly_flow_credit', 'leak_enabled', 'l2i_leak_enabled',
-                     'l1i_leak_enabled'):
+                     'l1i_leak_enabled', 'symmetric_geometry', 'legacy_distance_compat'):
                 v = bool(v)
             elif k in ('seed', 'refractory', 'l2_charge_chunks'):
                 v = int(v)
@@ -1980,6 +2149,21 @@ class SimulationEngine:
                     probes=list(PROBES.keys()),
                     probe_vectors={k: list(map(int, v)) for k, v in PROBES.items()},
                     pattern_roles=dict(PATTERN_ROLE),
+                    # Geometry descriptor (Phase 3): lets the UI clearly label
+                    # when distance/influence numbers are a TEMPORARY legacy-
+                    # reference placeholder rather than computed from the
+                    # (possibly jittered) positions actually shown -- see
+                    # legacy_distance_compat's docstring in _apply_l2e_distances.
+                    # Never presented as if the pinned numbers came from the new
+                    # coordinates: `legacy_distance_compat_active` is only True
+                    # when the two could actually diverge (irregular geometry +
+                    # the compat shim both on).
+                    geometry=dict(symmetric=self.params['symmetric_geometry'],
+                                 topology_seed=self.params['topology_seed'],
+                                 legacy_distance_compat=self.params['legacy_distance_compat'],
+                                 legacy_distance_compat_active=(
+                                     self.params['legacy_distance_compat']
+                                     and not self.params['symmetric_geometry'])),
                     grid=dict(rows=3, cols=3), params=self.params)
 
     def dynamic_state(self) -> dict:

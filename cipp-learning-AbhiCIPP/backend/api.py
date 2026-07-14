@@ -142,6 +142,19 @@ async def reseed():
     return {"reseed": True, "seed": seed}
 
 
+@app.post("/api/reseed_topology")
+async def reseed_topology():
+    """Redraw ONLY the engine's geometry (positions) from a fresh topology
+    seed -- unlike /api/reseed, this does NOT pause/wipe the running network:
+    every learned weight and the current pattern/probe/auto-cycle state are
+    left untouched (see SimulationEngine.reseed_topology). Not persisted
+    across a server restart (only the weight-init seed is)."""
+    topology_seed = engine.reseed_topology()
+    await manager.broadcast(topology_message(engine))
+    await runner.broadcast_dynamic()
+    return {"reseed_topology": True, "topology_seed": topology_seed}
+
+
 @app.post("/api/speed/{sps}")
 async def set_speed(sps: float):
     runner.speed = max(0.5, min(120.0, sps))

@@ -9,9 +9,10 @@
   `CLAUDE_HANDOFF.md`)
 - Phase 1 audit checkpoint commit: `225b8b1` (`Geometric_Influence_Temporal_Winner_Audit.md`)
 - Phase 2 Milestone 1 checkpoint commit: `9163da2` (backend observability core)
-- This update corresponds to the **Phase 2 END** checkpoint (Milestone 2,
-  frontend, complete) — commit hash filled in after this commit lands, see
-  repo log.
+- Phase 2 END checkpoint commit: `05c17a0` (frontend, phase complete)
+- This update corresponds to the **Phase 3 END** checkpoint (seeded
+  engine-owned geometry, complete) — commit hash filled in after this commit
+  lands, see repo log.
 - Base branch `july14` is untouched and remains the protected base.
 - `four-pattern` branch exists (checked out in a separate worktree at
   `/home/charisxiong/Documents/others`) and is explicitly NOT merged here —
@@ -27,14 +28,26 @@ architecture invariants in `CLAUDE.md`: four center-crossing patterns,
 pattern-to-neuron assignment/argmax/owner-lock/oracle/global
 `normalizeW`/fake spikes/UI-side simulation.
 
-**Current phase (Phase 2 — Observability only, per explicit user instruction):**
-add observability infrastructure — shared pattern/probe metadata and dashboard
-preset, held-out probes with presentation-scoped plasticity freeze, backend-
-driven Causal Story, presentation IDs/boundaries, evidence-based receptive-field
-status, actual-bounds Fit View, delivery/pre-post-integration diagnostics — while
-changing **no neural equation and no preset value**. This phase is scoped
-strictly to observability; the audit's confirmed conflicts (latest-spike winner
-label, perfect-ring geometry, non-selective L1I, etc.) are NOT being fixed here.
+**Phase 2 (complete) — Observability only:** added observability infrastructure
+— shared pattern/probe metadata and dashboard preset, held-out probes with
+presentation-scoped plasticity freeze, backend-driven Causal Story,
+presentation IDs/boundaries, evidence-based receptive-field status,
+actual-bounds Fit View, delivery/pre-post-integration diagnostics — with **no
+neural equation and no preset value** changed.
+
+**Current phase (Phase 3, complete) — Seeded engine-owned geometry only, per
+explicit user instruction:** jittered/irregular engine-owned positions
+(L1E jittered within its assigned cell, L1I paired near its L1E, L2E placed
+irregularly with a minimum-separation constraint, L2I fixed near center),
+seeded and fixed across reset/training/probes, changing only on an explicit
+topology reseed, with the legacy symmetric ring/grid preserved as a selectable
+ablation. Per explicit user decision, a **temporary, clearly labeled
+legacy-distance-compatibility shim** keeps `distance_weighting`'s actual
+delivered-charge numbers pinned to the legacy reference geometry regardless of
+which layout is displayed, so this phase changes **no neural dynamics** —
+verified by an exact winner-sequence/final-weight equivalence test, not just
+aggregate diagnostics. Phase 4 is expected to remove that shim and
+intentionally activate influence from the real new geometry.
 
 ## Completed (this session)
 
@@ -68,14 +81,100 @@ Phase 1 (required audit, brief §14 + §20 — read-only, no mechanisms changed)
 - Ran the unmodified baseline test suite and two unmodified diagnostics (see
   Tests below) to anchor these findings against actual current behavior.
 
+Phase 2 (observability infrastructure; see "Files changed" and commits
+`9163da2`/`05c17a0` for full detail): shared pattern/probe metadata + dashboard
+preset, held-out probes with presentation-scoped plasticity freeze, backend-
+driven Causal Story/presentation tracking, evidence-based RF status,
+delivery/pre-post-integration diagnostics, and the matching frontend
+(probe controls, Causal Story tab, evidence-based status display, Fit View,
+presentation-boundary markers, distance/influence display). No neural
+equation or preset value changed.
+
+Phase 3 (seeded engine-owned geometry; see "Files changed" above for full
+detail): jittered L1E-in-cell / paired L1I / irregular-with-min-separation L2E
+/ centered L2I positions, seeded and fixed except on explicit topology reseed,
+legacy ring/grid preserved as a selectable ablation, and a temporary
+legacy-distance-compatibility shim that keeps this phase's dynamics
+byte-identical to before it (per explicit user decision) while clearly
+labeling the pinned numbers wherever they're shown.
+
 ## In progress
 
-**Phase 2 (Observability) is COMPLETE** — both milestones done, phase-end
-regressions run, this is the phase-end checkpoint per `CLAUDE.md`. Next phase
-(seeded engine-owned geometry) is queued, per explicit user instruction
-received while this phase was wrapping up; not started yet.
+**Phase 3 (Seeded engine-owned geometry) is COMPLETE** — single-milestone
+phase, phase-end regressions run, this is the phase-end checkpoint per
+`CLAUDE.md`. Phase 4 (intentionally activating influence from the real new
+geometry, removing the compat shim) is queued but not started — needs its own
+explicit go-ahead given the shim's removal WILL change dynamics by design.
 
-## Files changed (Milestone 2 — frontend, this checkpoint)
+## Files changed (Phase 3 — seeded engine-owned geometry, this checkpoint)
+
+- `backend/simulation.py`:
+  - New geometry constants + helpers: `L1_JITTER_FRAC`, `L1I_PAIR_JITTER_FRAC`,
+    `L2E_PLACEMENT_RADIUS`, `L2E_MIN_SEPARATION`,
+    `L2E_PLACEMENT_MAX_TRIES/_RESTARTS`, `_legacy_l1_xy()` (the deterministic
+    legacy grid, factored out and reused as both the `symmetric_geometry=True`
+    source and the `legacy_distance_compat` reference), `_jittered_l1e_xy()`,
+    `_paired_l1i_xy()`, `_irregular_l2e_xy()` (seeded rejection-sampling
+    placement with a minimum-separation constraint).
+  - Three new constructor params, all defaulting to the exact legacy behavior
+    so every existing caller/test is unaffected: `topology_seed=1`,
+    `symmetric_geometry=True`, `legacy_distance_compat=True`.
+  - `_compute_geometry()`: returns legacy positions verbatim when
+    `symmetric_geometry=True`, else draws jittered/irregular positions from
+    `topology_seed` via a dedicated RNG stream (independent of the weight-init
+    `seed`).
+  - `_register_neurons()` now calls `_compute_geometry()` and caches the result
+    on `self._geometry_xy`; positions are recomputed identically on every
+    `_build()` (deterministic given `topology_seed`), which is exactly what
+    keeps them FIXED across `reset()`/`apply_config()`/`reseed()` (weight)/
+    probes — none of those change `topology_seed`.
+  - `_apply_l2e_distances()`: when `legacy_distance_compat=True` (default), the
+    per-L2E delivery distances come from the legacy reference geometry
+    regardless of `symmetric_geometry`; when `False`, they come from the real
+    `self._geometry_xy` positions (the Phase 4 path).
+  - `reseed_topology()`: the ONLY thing that changes `topology_seed` (a new
+    dedicated verb, deliberately NOT in `TUNABLE`/the generic config panel) —
+    regenerates positions in place WITHOUT calling `_build()`, so every learned
+    weight/confidence value and the current pattern/probe/auto-cycle state
+    survive untouched.
+  - `TUNABLE`/`apply_config()`: added `symmetric_geometry`/
+    `legacy_distance_compat` as bool-coerced dashboard ablation toggles
+    (rebuilds the network, like every other config toggle); `topology_seed`
+    deliberately excluded.
+  - `topology()`: new `geometry` descriptor (`symmetric`, `topology_seed`,
+    `legacy_distance_compat`, `legacy_distance_compat_active`) so the UI can
+    clearly label when distance/influence numbers are the temporary pinned
+    placeholder rather than computed from the visible coordinates.
+- `backend/api.py`: new `POST /api/reseed_topology` endpoint.
+- `backend/presets.py`: `DASHBOARD_PRESET` now sets `symmetric_geometry=False`
+  (the live dashboard shows the new jittered/irregular geometry) and
+  `legacy_distance_compat=True` (dynamics stay pinned to the legacy baseline),
+  with an explicit comment flagging Phase 4 as where this is expected to flip.
+- `frontend/inspector.js`: a visible "legacy-distance compat active" notice
+  card plus a `⚠`-marked, differently-colored delivery readout on every
+  synapse row when `topology.geometry.legacy_distance_compat_active` is true —
+  the pinned numbers are never shown as if computed from the displayed
+  coordinates.
+- `frontend/index.html` / `frontend/controls.js`: a "Reseed Topology" button
+  (geometry-only; no confirmation dialog, since unlike Reseed/Reset it does
+  not wipe learned state) so the feature — and Fit View reacting to new
+  positions — is actually exercisable from the dashboard.
+- `test_geometry_phase.py` (new) — 19 tests: legacy-ablation exact
+  reproduction, seed reproduction (same/different topology_seed), fixity
+  across reset/training/weight-reseed/probe/apply_config, `reseed_topology()`
+  changes positions but preserves weights (and is a no-op under
+  `symmetric_geometry=True`), spatial bounds (L1E cell confinement, L1I
+  pairing, L2E placement radius, L2I center, z-coordinates unchanged),
+  irregularity (>10 distinct pairwise L2E distances vs. the legacy ring's 6),
+  minimum separation across 5 seeds, serialization (`geometry` descriptor +
+  per-synapse delivery fields under the new geometry), the compat shim's
+  distance-pinning in both directions, and the phase's central guarantee —
+  `DASHBOARD_PRESET`'s new geometry produces a byte-identical winner sequence
+  and final weights to what it would have produced before this phase.
+
+## Files changed (Phase 2, prior checkpoint `05c17a0`)
+
+### Milestone 2 — frontend
 
 - `frontend/index.html` — "Presentation" top-bar stat pill; "Held-out Probes"
   sidebar section (`#probe-buttons`, `#probe-status`); `#fit-view` button in
@@ -115,7 +214,7 @@ All new/changed JS files pass `node --input-type=module --check` (syntax-only;
 no bundler in this project). No file in `frontend/` steps or mutates engine
 state — every action is still an HTTP POST, exactly as before.
 
-## Files changed (Milestone 1 — backend core, prior checkpoint `9163da2`)
+### Milestone 1 — backend core (prior checkpoint `9163da2`)
 
 - `backend/presets.py` (new) — `DASHBOARD_PRESET`, the exact kwargs
   `backend/api.py` used to construct inline, now named/importable (no values
@@ -165,6 +264,49 @@ No neural equation and no preset VALUE was changed. `CLAUDE_HANDOFF.md`
 
 ## Tests
 
+### Phase 3 (this checkpoint)
+
+- `test_geometry_phase.py` (new, focused): **19/19 passed** — legacy-ablation
+  exact reproduction, seed reproduction, fixity across reset/training/
+  weight-reseed/probe/apply_config, `reseed_topology()` semantics, spatial
+  bounds, irregularity, minimum separation (5 seeds), serialization, and the
+  compat shim in both directions.
+- `pytest -q` (full suite): **150 passed, 5 failed** (131 prior + 19 new =
+  150; same 5 pre-existing failures as every prior checkpoint, untouched).
+- **Legacy equivalence — the central guarantee of this phase, verified at
+  three levels:**
+  1. `sustained_dominance.py` / `ablation_harness.py --seeds 1 2 --epochs 3`
+     (unmodified; never pass the new geometry kwargs) reproduce the Phase 1
+     numbers exactly, unchanged since Phase 2.
+  2. Per-L2E `distance` arrays are `np.array_equal` between
+     `symmetric_geometry=True` and `symmetric_geometry=False,
+     legacy_distance_compat=True` — the geometry-derived input to the neural
+     equations is provably identical regardless of displayed layout.
+  3. `test_dashboard_preset_with_new_geometry_is_dynamically_identical_to_pre_phase3`
+     runs `DASHBOARD_PRESET` (new geometry) against an otherwise-identical
+     config forced back to `symmetric_geometry=True` (what it would have been
+     before this phase) for 600 steps across all 4 training patterns: the
+     **exact winner-sequence and final learned weights are identical**, not
+     just aggregate statistics.
+- Irregularity/separation verified numerically, not just by construction: a
+  live-instance check found 27 of 28 possible pairwise L2E distances distinct
+  (vs. the legacy ring's 6), with the enforced 1.3 minimum comfortably cleared
+  (observed minimum 1.81 at `topology_seed=42`).
+- **Full-stack smoke test (real server):** ran `uvicorn backend.api:app`,
+  confirmed `topology.geometry` reports the new seeded state
+  (`symmetric: false, legacy_distance_compat_active: true`) with genuinely
+  irregular L2E positions (e.g. `L2E0 [1.663, 0.506, 4.0]`, nothing on a
+  ring), and that `POST /api/reseed_topology` redraws positions live (new
+  `topology_seed` returned, new coordinates on the next `/api/state` read)
+  without disturbing the running network.
+- Fit View's actual on-screen camera motion was not screenshotted (no browser
+  in this environment, same limitation as Phase 2) — but its only input
+  (`topology.neurons[i].pos`) was confirmed to carry real, varied, non-ring
+  coordinates from the live server, and `renderer.fitView()` itself is
+  unchanged code from Phase 2 (already reviewed).
+
+### Phase 2 (prior checkpoints, unchanged by this phase)
+
 - `test_observability_phase.py` (new, focused): **14/14 passed**.
 - `pytest -q` (full suite): **131 passed, 5 failed** (117 pre-existing + 14
   new = 131; same 5 pre-existing `test_flow_rate.py`/
@@ -210,9 +352,13 @@ No neural equation and no preset VALUE was changed. `CLAUDE_HANDOFF.md`
 ## Known problems
 
 - Per `AGENT_HANDOFF.md`/the Phase 1 audit, true one-to-one L2E ownership is
-  still unsolved and this phase does not touch it (observability only, by
-  explicit instruction). See `Geometric_Influence_Temporal_Winner_Audit.md`
-  for the full list of confirmed conflicts still awaiting a decision.
+  still unsolved and NEITHER Phase 2 nor Phase 3 touch it — this phase changes
+  geometry that's DISPLAYED, not the geometry that DRIVES dynamics (the compat
+  shim keeps those decoupled). See `Geometric_Influence_Temporal_Winner_Audit.md`
+  for the full list of confirmed conflicts still awaiting a decision — in
+  particular, finding (2)'s perfect-ring-geometry concern is now only fixed
+  for RENDERING/placement, not yet for the actual distance/influence
+  computation distance_weighting uses (that's Phase 4).
 - `four-pattern` branch carries diagnostic/tracer work not yet reviewed for
   porting.
 - Presentation boundaries are scoped to NAMED pattern/probe switches only
@@ -223,37 +369,31 @@ No neural equation and no preset VALUE was changed. `CLAUDE_HANDOFF.md`
   event-driven/chunked-charge path (what the live dashboard actually runs);
   the legacy `lasting_inhibition`/`event_driven=False` branches are wired
   (`_last_eligible` is set in both) but not separately tested here.
-- No literal browser was opened for this phase (none available in this
-  environment); Fit View / boundary-marker visuals were verified by code
+- No literal browser was opened for Phase 2 or Phase 3 (none available in
+  this environment); Fit View / boundary-marker visuals were verified by code
   review plus confirmed-correct upstream data, not a screenshot. Flagged for a
   human or a browser-capable session to eyeball if desired.
+- `topology_seed` is NOT persisted across a server restart (unlike the
+  weight-init `seed`, which is deliberately persisted to `.claude/dashboard_seed.txt`
+  — see `_load_seed`/`_save_seed`). A restart currently returns to
+  `topology_seed=1`'s geometry. This was a deliberate scope decision (the
+  instruction only required fixity across reset/training/probes, not across
+  restarts) — flagged in case the user wants restart-persistence added later.
+- `L2E_PLACEMENT_RADIUS=3.6` / `L2E_MIN_SEPARATION=1.3` were chosen to keep
+  the new layout roughly the same visual scale as the legacy ring (radius 3.2)
+  while giving the rejection sampler comfortable room (observed min separation
+  well above the floor across the seeds tested) — not derived from any brief
+  requirement beyond "bounded" and "minimum separation enforced". Revisit if a
+  tighter/looser packing is wanted.
 
 ## Next action
 
-Phase 2 is closed. Next phase, per explicit user instruction: **seeded
-engine-owned geometry** (still observability/topology infrastructure, not a
-dynamics change) —
-- Keep `N_OUT=8`.
-- Jitter L1E within assigned 3×3 cells; place each L1I near its paired L1E.
-- Place all 8 L2E irregularly with a minimum-separation constraint; keep the
-  single L2I near the center.
-- Coordinates fixed across reset/training/probes, changing only on an
-  explicit topology reseed (distinct from the existing weight-only
-  `reseed()` — needs a decision on whether to extend it or add a new verb).
-- Renderer must consume engine coordinates (already true per the Phase 1
-  audit and this phase's `fitView()` work — no renderer-side position logic
-  exists to remove).
-- Preserve the current symmetric ring/grid layout as a selectable legacy
-  ablation (do not delete it).
-- Do NOT enable neural distance effects beyond the current baseline if doing
-  so would change it — `distance_weighting=True` is already live in
-  `backend/api.py` (Phase 1 audit finding #4); changing the geometry WILL
-  change what that live feature computes, since it already reads L2_HOMES/
-  pixel positions. This needs an explicit decision (flagged, not resolved):
-  either (a) keep `distance_weighting` on and accept baseline behavior changes
-  as the intended point of jittered geometry, or (b) temporarily pin geometry
-  distances at their CURRENT ring/grid values for the influence calculation
-  while the jittered layout is only used for placement/rendering/minimum-
-  separation, so the "no baseline change yet" instruction is honored exactly.
-  Surface this choice to the user before implementing rather than picking
-  silently.
+Phase 3 is closed. Phase 4 (per the Goal section above, queued but NOT
+started): remove the `legacy_distance_compat` shim and let
+`distance_weighting`'s delivered-charge computation follow the REAL new
+geometry (`legacy_distance_compat=False`) — this is expected to, and is
+intended to, change neural dynamics (that's the actual point of jittered
+geometry per brief §6). Needs its own explicit go-ahead before flipping the
+default, since it's the first phase since the audit that will actually alter
+baseline behavior. Also worth revisiting then: whether `topology_seed` should
+persist across restarts like the weight seed does (see Known problems).

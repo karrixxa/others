@@ -53,6 +53,11 @@ export class Inspector {
     const strongest = [...incoming, ...outgoing].sort((a, b) => Math.abs(b.w) - Math.abs(a.w)).slice(0, 4);
     const col = meta.type === 'E' ? 'var(--exc)' : 'var(--inh)';
     const chargeBarPct = Math.max(0, Math.min(1, state.activation)) * 100;
+    // Phase 3: legacy_distance_compat_active means the distance/influence/
+    // effective numbers below are a TEMPORARY placeholder pinned to the
+    // legacy reference geometry, NOT computed from this neuron's visible
+    // (possibly jittered) position -- see backend geometry descriptor.
+    const compatActive = !!s.topology?.geometry?.legacy_distance_compat_active;
 
     this.body.innerHTML = `
       <div class="insp-head">
@@ -86,9 +91,16 @@ export class Inspector {
         ${card('Spike', `<span class="firing-badge ${state.spiked ? 'yes' : 'no'}">${state.spiked ? 'SPIKE' : 'idle'}</span>`, '', true)}
         ${card('Firing freq', (state.freq * 100).toFixed(1) + '%', bar(state.freq))}
         ${card('Refractory', state.refractory + ' steps')}
-        ${synCard('Strongest connections', strongest, this.id)}
-        ${synCard(`Incoming (${incoming.length})`, incoming, this.id)}
-        ${synCard(`Outgoing (${outgoing.length})`, outgoing, this.id)}
+        ${compatActive ? `<div class="icard full">
+            <div class="lbl">Geometry</div>
+            <div class="val sm" style="color:var(--inh)">legacy-distance compat active</div>
+            <p style="margin:4px 0 0;font-size:10.5px;color:var(--txt-2)">Positions shown are the
+              new seeded geometry, but distance/influence/effective below are TEMPORARILY pinned
+              to the legacy reference layout, not calculated from these coordinates.</p>
+          </div>` : ''}
+        ${synCard('Strongest connections', strongest, this.id, compatActive)}
+        ${synCard(`Incoming (${incoming.length})`, incoming, this.id, compatActive)}
+        ${synCard(`Outgoing (${outgoing.length})`, outgoing, this.id, compatActive)}
       </div>`;
   }
 }
@@ -102,7 +114,7 @@ function bar(x) {
   const pct = Math.max(0, Math.min(1, x)) * 100;
   return `<div class="bar"><i style="width:${pct}%"></i></div>`;
 }
-function synCard(title, list, self) {
+function synCard(title, list, self, compatActive = false) {
   if (!list.length) return `<div class="icard full"><div class="lbl">${title}</div><div class="val sm" style="color:var(--txt-2)">none</div></div>`;
   // Render every synapse in the list. Callers that want a summary (e.g. the
   // "Strongest connections" card) pre-slice their list; the Incoming/Outgoing
@@ -129,8 +141,12 @@ function synCard(title, list, self) {
     // Distance/influence/effective transmission (feedforward only; see
     // backend SimulationEngine._delivery_diagnostics -- brief SS7's required
     // per-connection fields, previously absent end-to-end).
+    // compatActive: this synapse's distance/influence/effective are pinned to
+    // the legacy reference geometry (Phase 3 temporary shim), NOT computed
+    // from the coordinates actually shown -- label it, never present it as
+    // if it were.
     const delivery = (sy.dist != null)
-      ? `<span class="wv" title="engine distance -> influence -> effective transmission" style="color:var(--txt-2)">d ${sy.dist.toFixed(2)} · g ${sy.infl.toFixed(2)} · eff ${sy.eff.toFixed(1)}</span>`
+      ? `<span class="wv" title="${compatActive ? 'LEGACY-COMPAT (pinned, not from the visible coordinates): ' : 'engine '}distance -> influence -> effective transmission" style="color:${compatActive ? 'var(--inh)' : 'var(--txt-2)'}">${compatActive ? '⚠ ' : ''}d ${sy.dist.toFixed(2)} · g ${sy.infl.toFixed(2)} · eff ${sy.eff.toFixed(1)}</span>`
       : '';
     return `<div class="syn-row">
       <span class="name">${sy.other}</span>
