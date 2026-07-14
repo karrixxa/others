@@ -54,6 +54,31 @@ PATTERNS = {
     'diag /':   [0, 0, 1, 0, 1, 0, 1, 0, 0],
 }
 
+# Held-out PROBES (observability only): the four non-center-crossing row/column
+# lines. These are NEVER trained -- auto-cycle's _cycle_order is built from
+# PATTERNS.keys() only (see _build), so a probe can never enter the training
+# rotation. present_probe() shows one for a presentation-scoped, plasticity-
+# FROZEN window (see Neuron.plasticity_frozen) so the network's real physical
+# response to an unseen line is observable without teaching it anything.
+# PATTERNS and PROBES share the same one-hot 3x3 encoding; a name is a key into
+# exactly one of the two dicts, never a neuron index.
+PROBES = {
+    'row 0': [1, 1, 1, 0, 0, 0, 0, 0, 0],
+    'row 2': [0, 0, 0, 0, 0, 0, 1, 1, 1],
+    'col 0': [1, 0, 0, 1, 0, 0, 1, 0, 0],
+    'col 2': [0, 0, 1, 0, 0, 1, 0, 0, 1],
+}
+
+# Shared pattern metadata: single source of truth for "is this name trained or
+# held-out", used by the engine, the API layer, and the frontend (via
+# topology()'s pattern_roles) so no caller re-derives or hardcodes the split.
+PATTERN_ROLE = {**{name: 'train' for name in PATTERNS}, **{name: 'probe' for name in PROBES}}
+
+# How long a neuron's spike history keeps it counted as "active" for the
+# evidence-based receptive-field status (see _l2e_status) -- a few presentation
+# windows' worth, not a single step.
+STATUS_RECENT_WINDOW = 200
+
 # Four center-crossing input primitives, but the L2E pool is DECOUPLED from the
 # pattern count: N_OUT L2E neurons compete over len(PATTERNS) inputs. With N_OUT=8
 # and 4 patterns that is 2x overcapacity -- multiple neurons vie for each pattern, so
@@ -996,6 +1021,43 @@ class SimulationEngine:
         self._pattern_streak: dict[str, int] = {n: 0 for n in PATTERNS}
         self._pattern_trained: dict[str, bool] = {n: False for n in PATTERNS}
 
+        # ---- Presentation tracking / probes / evidence bookkeeping (observability
+        # only -- read-only diagnostics over already-decided physical events; see
+        # _track_presentation, present_probe, _l2e_status). A "presentation" is one
+        # named pattern/probe shown via set_pattern/present_probe; raw pixel/random/
+        # noise edits do not start one (documented scope: named-pattern protocol
+        # only, not free-form manual input).
+        self.presentation_id = 0
+        self.presentation_role: str = 'train'
+        self.presentation_pattern: str = initial_pattern
+        self.presentation_start_t = 0
+        self._presentation_first_spiker: str | None = None
+        self._presentation_first_spike_t: int | None = None
+        self._presentation_tie = False
+        self._presentation_l1i_first_source: str | None = None
+        self._presentation_l1i_first_t: int | None = None
+        self._presentation_l2i_first_source: str | None = None
+        self._presentation_l2i_first_t: int | None = None
+        self._presentation_last_l2_winner: int | None = None
+        self._last_eligible: list[int] = []
+        self.presentation_log: deque = deque(maxlen=50)
+        self._pattern_first_responder_log: dict[str, deque] = {}
+        self._neuron_first_responder_counts: dict[str, dict[str, int]] = {}
+        self._neuron_total_spikes: dict[str, int] = defaultdict(int)
+        self._neuron_last_fired_t: dict[str, int] = {}
+
+        # Presentation-scoped plasticity freeze (see Neuron.plasticity_frozen and
+        # present_probe). Mirrored onto every neuron by _set_plasticity_frozen.
+        self.plasticity_frozen = False
+        self._probe_active = False
+        self.probe_steps_total = 0
+        self._probe_steps_elapsed = 0
+        self._probe_resume_pattern: str | None = None
+        self._probe_resume_input: np.ndarray | None = None
+
+        # Establishes presentation #1 (id goes 0 -> 1; nothing to log yet).
+        self._start_presentation(initial_pattern, 'train')
+
         self._log('backend', f'network built (seed={p["seed"]}, immediate delivery, '
                              f'{len(self.neurons)} neurons, {len(self.synapses)} synapses)')
 
@@ -1158,10 +1220,12 @@ class SimulationEngine:
     def set_pattern(self, name: str):
         if name not in PATTERNS:
             raise KeyError(name)
+        self._cancel_probe_if_active()
         self.input_vec = np.array(PATTERNS[name], dtype=float)
         self.current_pattern = name
         self._visit_step = 0                 # start a fresh visit window
         self._visit_spikes[:] = 0
+        self._start_presentation(name, 'train')
         self._log('control', f'pattern set: {name}')
 
     def set_auto_cycle(self, enabled: bool, streak: int | None = None,
@@ -1224,21 +1288,26 @@ class SimulationEngine:
         self.set_pattern(order[(idx + 1) % len(order)])   # resets the visit window
 
     def set_input(self, vec):
+        self._cancel_probe_if_active()
         self.input_vec = np.array(vec, dtype=float).reshape(N_PIX)
         self._log('control', 'input vector set')
 
     def toggle_pixel(self, i: int):
+        self._cancel_probe_if_active()
         self.input_vec[i] = 0.0 if self.input_vec[i] > 0.5 else 1.0
 
     def clear_input(self):
+        self._cancel_probe_if_active()
         self.input_vec = np.zeros(N_PIX)
         self._log('control', 'input cleared')
 
     def random_pattern(self):
+        self._cancel_probe_if_active()
         self.input_vec = (np.random.default_rng().random(N_PIX) > 0.5).astype(float)
         self._log('control', 'random input')
 
     def inject_noise(self, prob: float = 0.15):
+        self._cancel_probe_if_active()
         flip = np.random.default_rng().random(N_PIX) < prob
         self.input_vec = np.where(flip, 1.0 - self.input_vec, self.input_vec)
         self._log('control', f'noise injected (p={prob:.2f})')
@@ -1296,6 +1365,9 @@ class SimulationEngine:
         `t` is the current outer timestep (passed through to L2I flow-rate charge).
         """
         eligible = [j for j, e in enumerate(l2.excitatory_neurons) if e.check_threshold()]
+        # Diagnostic only (Causal Story sameStepTie): the eligible set at the step
+        # that resolves the competition. Read, never used to pick the winner.
+        self._last_eligible = eligible
         if not eligible:
             return 0.0, [], None
         winner = max(eligible, key=lambda j: l2.excitatory_neurons[j].potential)
@@ -1414,6 +1486,7 @@ class SimulationEngine:
             field = self.l2_inh_field
             eligible = [j for j, e in enumerate(l2.excitatory_neurons)
                         if e.refractory_timer <= 0 and e.potential >= e.threshold + field]
+            self._last_eligible = eligible   # diagnostic only, see _resolve_l2_competition
             if eligible:
                 winner = max(eligible, key=lambda j: l2.excitatory_neurons[j].potential)
                 l2.excitatory_neurons[winner].fire()
@@ -1522,6 +1595,17 @@ class SimulationEngine:
 
         # 5. Bookkeeping.
         self._record_spikes(l1e, l1i, l2e, l2i)
+        # Evidence bookkeeping for the Causal Story / evidence-based RF status:
+        # cumulative spike counts and last-fired step, read off this step's actual
+        # spike flags (no inference). step_winner_idx reads which single index of
+        # the (already WTA-decided) one-hot l2e vector is set -- not a competitive
+        # argmax, just "which entry is 1".
+        for nid, spk in self.spiked.items():
+            if spk:
+                self._neuron_total_spikes[nid] += 1
+                self._neuron_last_fired_t[nid] = t
+        step_winner_idx = int(np.argmax(l2e)) if l2e.any() else None
+        self._track_presentation(step_winner_idx, bool(l2i), l1i, t)
         # Queue this step's L1I spikes as one-step inhibition for t+1. Replacing
         # rather than OR-latching the register is what permits the E/silent/E rhythm.
         self.l1i_feedback_delay = l1i.copy()
@@ -1530,8 +1614,15 @@ class SimulationEngine:
         self._detect_confidence_changes()
         self._log_inhibitory_events()
         self._update_episode(l2e, t)
-        if self.auto_cycle:
+        # Auto-cycle is training-patterns-only by construction (_cycle_order is
+        # built from PATTERNS.keys()); pause its ticking while a probe is up so a
+        # probe's steps/current_pattern never feed the training bookkeeping.
+        if self.auto_cycle and not self._probe_active:
             self._auto_cycle_tick()
+        if self._probe_active:
+            self._probe_steps_elapsed += 1
+            if self._probe_steps_elapsed >= self.probe_steps_total:
+                self._end_probe(restore=True)
         return self.dynamic_state()
 
     def _log_inhibitory_events(self):
@@ -1637,6 +1728,119 @@ class SimulationEngine:
                                   f'(spikes={len(self.episode_l2_spikes)}, last_t={latest_t})')
         self.winner = winner
 
+    # ------------------------------------------------------- presentation / probes
+    def _start_presentation(self, name: str, role: str):
+        """Begin a new named presentation (a training pattern or a probe shown via
+        set_pattern/present_probe). Archives the JUST-ENDED presentation's causal
+        summary (first physical L2E responder, same-step tie, first L1I/L2I
+        source, etc. -- brief-required diagnostic fields, recorded, never
+        inferred) onto presentation_log, and folds its first-responder identity
+        into the per-pattern/per-neuron evidence history used by the Causal Story
+        and the evidence-based receptive-field status. Observability only: reads
+        already-decided physical events, never mutates a neuron or a weight."""
+        if self.presentation_id > 0:
+            self.presentation_log.append(dict(
+                id=self.presentation_id, pattern=self.presentation_pattern,
+                role=self.presentation_role, start_t=self.presentation_start_t,
+                end_t=self.timestep,
+                first_spiker=self._presentation_first_spiker,
+                first_spike_t=self._presentation_first_spike_t,
+                same_step_tie=self._presentation_tie,
+                l1i_first_source=self._presentation_l1i_first_source,
+                l1i_first_t=self._presentation_l1i_first_t,
+                l2i_first_source=self._presentation_l2i_first_source,
+                l2i_first_t=self._presentation_l2i_first_t))
+            if self._presentation_first_spiker is not None:
+                hist = self._pattern_first_responder_log.setdefault(
+                    self.presentation_pattern, deque(maxlen=20))
+                hist.append(self._presentation_first_spiker)
+                counts = self._neuron_first_responder_counts.setdefault(
+                    self._presentation_first_spiker, {})
+                counts[self.presentation_pattern] = counts.get(self.presentation_pattern, 0) + 1
+        self.presentation_id += 1
+        self.presentation_role = role
+        self.presentation_pattern = name
+        self.presentation_start_t = self.timestep
+        self._presentation_first_spiker = None
+        self._presentation_first_spike_t = None
+        self._presentation_tie = False
+        self._presentation_l1i_first_source = None
+        self._presentation_l1i_first_t = None
+        self._presentation_l2i_first_source = None
+        self._presentation_l2i_first_t = None
+        self._presentation_last_l2_winner = None
+
+    def _track_presentation(self, step_winner_idx: int | None, l2i_fired: bool, l1i_arr, t: int):
+        """Presentation-scoped causal tracking, called once per step() from
+        already-decided physical results (step_winner_idx is read off this step's
+        one-hot l2e vector, l2i_fired/l1i_arr off this step's actual discharge
+        arrays) -- it decides nothing and mutates no neuron/weight/membrane."""
+        if step_winner_idx is not None:
+            self._presentation_last_l2_winner = step_winner_idx
+            if self._presentation_first_spiker is None:
+                self._presentation_first_spiker = f'L2E{step_winner_idx}'
+                self._presentation_first_spike_t = t
+                self._presentation_tie = len(self._last_eligible) > 1
+        if l2i_fired and self._presentation_l2i_first_t is None:
+            self._presentation_l2i_first_t = t
+            self._presentation_l2i_first_source = (
+                f'L2E{step_winner_idx}' if step_winner_idx is not None else 'residual')
+        if np.any(l1i_arr > 0.5) and self._presentation_l1i_first_t is None:
+            self._presentation_l1i_first_t = t
+            self._presentation_l1i_first_source = (
+                f'L2E{self._presentation_last_l2_winner}'
+                if self._presentation_last_l2_winner is not None else None)
+
+    def _set_plasticity_frozen(self, frozen: bool):
+        self.plasticity_frozen = frozen
+        for n in self.neurons.values():
+            n.plasticity_frozen = frozen
+
+    def present_probe(self, name: str, steps: int | None = None):
+        """Show a held-out PROBE for a presentation-scoped, plasticity-FROZEN
+        window: real physical dynamics (spikes/inhibition/resets) run exactly as
+        normal, but every weight-mutating call is a no-op for the duration (see
+        Neuron.plasticity_frozen). Automatically restores whatever pattern/input
+        was showing before once the window elapses (see step()). Does not touch
+        auto-cycle's own bookkeeping (_visit_step/_visit_spikes/_pattern_streak
+        for the paused training pattern are simply not advanced meanwhile)."""
+        if name not in PROBES:
+            raise KeyError(name)
+        if self._probe_active:
+            self._end_probe(restore=False)
+        self._probe_resume_pattern = self.current_pattern
+        self._probe_resume_input = self.input_vec.copy()
+        self.probe_steps_total = max(1, int(steps) if steps is not None else self.visit_steps)
+        self._probe_steps_elapsed = 0
+        self._probe_active = True
+        self.input_vec = np.array(PROBES[name], dtype=float)
+        self.current_pattern = name
+        # Deliberately do NOT touch _visit_step/_visit_spikes here -- those belong
+        # to auto-cycle's paused training pattern and must come back untouched.
+        self._start_presentation(name, 'probe')
+        self._set_plasticity_frozen(True)
+        self._log('control', f'probe presented: {name} '
+                             f'({self.probe_steps_total} steps, plasticity frozen)')
+
+    def _end_probe(self, restore: bool):
+        self._probe_active = False
+        self._set_plasticity_frozen(False)
+        if restore:
+            self.input_vec = self._probe_resume_input
+            self.current_pattern = self._probe_resume_pattern
+            # _visit_step/_visit_spikes were never touched during the probe (see
+            # present_probe), so auto-cycle resumes exactly where it paused.
+            role = 'train' if self.current_pattern in PATTERNS else 'manual'
+            self._start_presentation(self.current_pattern, role)
+        self._log('control', 'probe ended: plasticity resumed')
+
+    def _cancel_probe_if_active(self):
+        """Manual input controls (set_input/toggle_pixel/random/clear/noise) end an
+        in-progress probe WITHOUT restoring the pre-probe pattern -- the user is
+        now driving a different, unnamed input, so there is nothing to resume."""
+        if self._probe_active:
+            self._end_probe(restore=False)
+
     # ------------------------------------------------------------- weight diff
     def _all_weights(self) -> dict:
         w = {}
@@ -1692,6 +1896,50 @@ class SimulationEngine:
             return float(n.weight_budget), float(w[w > 0].sum())
         return None, None
 
+    def _l2e_status(self, j: int) -> dict:
+        """Evidence-based receptive-field status for L2E{j} -- built ONLY from
+        actually-observed spikes/first-responder history (see _track_presentation
+        and _start_presentation), never from a weight-sum guess at whether the
+        neuron COULD fire. Replaces the prior client-side (receptive.js) "dead"
+        heuristic, which computed its own top-3-weight/threshold guess that could
+        diverge from the engine's actual behavior (Phase 1 audit finding)."""
+        nid = f'L2E{j}'
+        total = self._neuron_total_spikes.get(nid, 0)
+        last_t = self._neuron_last_fired_t.get(nid)
+        first_counts = dict(self._neuron_first_responder_counts.get(nid, {}))
+        if total == 0:
+            status = 'unrecruited'      # never observed to fire at all
+        elif last_t is not None and (self.timestep - last_t) <= STATUS_RECENT_WINDOW:
+            status = 'active'           # fired within the recent window
+        else:
+            status = 'quiet'            # has fired historically, not recently
+        return dict(status=status, spikes_total=total, last_fired_step=last_t,
+                    first_responder_counts=first_counts,
+                    patterns_led=sorted(first_counts.keys()))
+
+    def _delivery_diagnostics(self) -> dict:
+        """Per-feedforward-synapse distance / influence / effective-transmission,
+        computed the SAME WAY effective_weights() computes delivery (see
+        snn/rules/delivery.py) regardless of whether distance_weighting is
+        currently enabled -- so the audited quantities (brief SS7/14) are always
+        observable, not just when the toggle happens to be on. Read-only; never
+        mutates a weight."""
+        p = self.params
+        out: dict[str, dict] = {}
+        for j in range(N_OUT):
+            n = self.l2.excitatory_neurons[j]
+            d = n._distance
+            if n._weights_array is None or d is None or len(d) == 0:
+                continue
+            influence = (p['distance_ref'] / np.maximum(d, p['distance_min'])) ** p['distance_power']
+            w = n._weights_array
+            effective = w * influence if p['distance_weighting'] else w
+            for i in range(len(d)):
+                out[f'ff{i}->{j}'] = dict(distance=round(float(d[i]), 4),
+                                          influence=round(float(influence[i]), 4),
+                                          effective=round(float(effective[i]), 4))
+        return out
+
     # ----------------------------------------------------------------- access
     def firing_freq(self, nid: str) -> float:
         d = self.freq[nid]
@@ -1709,17 +1957,29 @@ class SimulationEngine:
     def topology(self) -> dict:
         weights = self._all_weights()
         confidence = self._all_confidence()
+        delivery = self._delivery_diagnostics()
         neurons = [dict(**self.meta[nid]) for nid in self.neurons]
         # The structural reset fanout has no weight: serialize kind='reset_inhibition'
         # with weight=null so it never reads as a learned magnitude.
         synapses = [dict(**s,
                          weight=(None if s['kind'] == 'reset_inhibition'
                                  else round(weights.get(s['id'], 0.0), 4)),
-                         confidence=round(confidence[s['id']], 4) if s['id'] in confidence else None)
+                         confidence=round(confidence[s['id']], 4) if s['id'] in confidence else None,
+                         # Per-connection distance/influence/effective-transmission
+                         # (feedforward synapses only; brief S7's required
+                         # per-connection inspector fields, previously absent
+                         # end-to-end -- see the Phase 1 audit).
+                         **delivery.get(s['id'], {}))
                     for s in self.synapses]
         return dict(neurons=neurons, synapses=synapses, layers=['L1', 'L2'],
                     patterns=list(PATTERNS.keys()),
                     pattern_vectors={k: list(map(int, v)) for k, v in PATTERNS.items()},
+                    # Held-out probes (never trained -- see PROBES) and shared
+                    # pattern-role metadata, so the frontend never re-derives or
+                    # hardcodes which names are trainable vs. held-out.
+                    probes=list(PROBES.keys()),
+                    probe_vectors={k: list(map(int, v)) for k, v in PROBES.items()},
+                    pattern_roles=dict(PATTERN_ROLE),
                     grid=dict(rows=3, cols=3), params=self.params)
 
     def dynamic_state(self) -> dict:
@@ -1742,7 +2002,10 @@ class SimulationEngine:
                                 assembly=(self.winner if nid == self.winner else None),
                                 # Optional flow-rate diagnostic: current-trace amplitude.
                                 **({'exc_trace': round(float(n.exc_trace), 4)}
-                                   if self.excitatory_flow_rate and n.excitatory_flow_rate else {})))
+                                   if self.excitatory_flow_rate and n.excitatory_flow_rate else {}),
+                                # Evidence-based RF status (L2E only) -- see _l2e_status.
+                                **({'rf_status': self._l2e_status(int(nid[3:]))}
+                                   if nid.startswith('L2E') else {})))
         return dict(timestep=self.timestep, running=False, neurons=neurons,
                     changed_synapses=self.changed_synapses,
                     changed_confidence=self.changed_confidence,
@@ -1761,6 +2024,35 @@ class SimulationEngine:
                     l2_charge_chunks=self.l2_charge_chunks,
                     l2_winner_chunk=self.l2_winner_chunk,
                     l2_inh_phases=self.l2_inh_phase_debug,
+                    # Pre-WTA (l2_drive) / post-inhibition-pre-update (l2_charge)
+                    # per-L2E membrane snapshots -- previously computed internally
+                    # every step but never serialized (Phase 1 audit: "pre/post
+                    # integration diagnostics" gap).
+                    l2_drive={k: round(v, 4) for k, v in self.l2_drive.items()},
+                    l2_charge={k: round(v, 4) for k, v in self.l2_charge.items()},
+                    # Raw per-event L1I/L2I inhibitory-gate-plasticity records for
+                    # this step (previously only summarized into the text event log).
+                    inh_events=[dict(neuron=nid, **ev) for nid, ev in self._inh_events],
+                    # Backend-driven Causal Story (brief SS9's required fields:
+                    # first physical L2E responder, same-step tie, first L1I/L2I
+                    # source, recorded -- never inferred/re-derived client-side).
+                    probe=dict(active=self._probe_active,
+                              steps_total=self.probe_steps_total,
+                              steps_elapsed=self._probe_steps_elapsed),
+                    causal_story=dict(
+                        presentation_id=self.presentation_id,
+                        pattern=self.presentation_pattern,
+                        role=self.presentation_role,
+                        start_t=self.presentation_start_t,
+                        plasticity_frozen=self.plasticity_frozen,
+                        first_spiker=self._presentation_first_spiker,
+                        first_spike_t=self._presentation_first_spike_t,
+                        same_step_tie=self._presentation_tie,
+                        l1i_first_source=self._presentation_l1i_first_source,
+                        l1i_first_t=self._presentation_l1i_first_t,
+                        l2i_first_source=self._presentation_l2i_first_source,
+                        l2i_first_t=self._presentation_l2i_first_t,
+                        history=list(self.presentation_log)[-10:]),
                     stats=self.stats(), log=list(self.event_log)[-12:])
 
     def stats(self) -> dict:

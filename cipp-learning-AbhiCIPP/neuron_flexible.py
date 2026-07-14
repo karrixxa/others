@@ -303,6 +303,16 @@ class Neuron(NeuralEntity):
         self.distance_ref = 1.0
         self.distance_min = 1.0
         self._distance = None               # per-afferent d_i (set at finalize)
+        # Presentation-scoped plasticity freeze (observability; see
+        # SimulationEngine.present_probe). Default OFF -- every existing caller is
+        # byte-identical. When ON, _update_weights, apply_competitive_reset's
+        # depression, apply_inhibition's gate-plasticity/loser-depression, and
+        # homeostatic scaling all skip their weight-mutating step while leaving
+        # every PHYSICAL effect (membrane integration, threshold crossing, firing,
+        # competitive reset's unconditional discharge, inhibitory discharge) fully
+        # live, so a held-out probe is observed with real dynamics but teaches
+        # nothing.
+        self.plasticity_frozen = False
         self.last_inhibitory_events = []    # debug records from the most recent apply_inhibition()
         # (last_spike_time / spiked live on the Membrane, seeded in its constructor;
         # Neuron forwards to them via the properties below.)
@@ -545,7 +555,11 @@ class Neuron(NeuralEntity):
             # Per-discharge gate learning is a strategy (Phase 3b): saturating vs
             # differentiating turnover/margin, selected by the neuron's flags. All
             # inputs are local to this event; it returns the new gate magnitude.
-            w_new = select_inhibitory_rule(self).new_magnitude(self, w, v_pre, w_max, theta, p)
+            # Frozen (probe presentation): skip the learning call entirely so the
+            # gate is provably unchanged (w_new = w), while the discharge above
+            # (v_pre -> v_post) still happened physically.
+            w_new = (w if self.plasticity_frozen else
+                     select_inhibitory_rule(self).new_magnitude(self, w, v_pre, w_max, theta, p))
             self._weights_array[idx] = -w_new      # keep the inhibitory sign
             events.append(dict(index=int(idx), v_pre=v_pre, v_post=v_post,
                                theta=theta, p=p, w_before=w,
@@ -553,7 +567,8 @@ class Neuron(NeuralEntity):
         # Loser depression: a real inhibitory discharge (events non-empty) means
         # this neuron was a suppressed near-winner; depress the active positive
         # feedforward gates that made it one. Opt-in; see _depress_losers.
-        if self.loser_depression and events:
+        # Frozen: skip (no positive-gate depression during a probe).
+        if not self.plasticity_frozen and self.loser_depression and events:
             self._depress_losers(v_entry)
         # Hard reset: AFTER the inhibitory plasticity rule (and loser depression)
         # have consumed the loser's pre-reset charge, clamp the membrane back to
@@ -627,7 +642,10 @@ class Neuron(NeuralEntity):
         weights_before = np.zeros(0)
         delta_weights = np.zeros(0)
         weights_after = np.zeros(0)
-        if (self.loser_depression and p_loss > 0.0 and self.weight_cap > 0
+        # Frozen (probe presentation): skip the structural depression below;
+        # the unconditional membrane/trace reset further down still runs.
+        if (not self.plasticity_frozen and self.loser_depression and p_loss > 0.0
+                and self.weight_cap > 0
                 and self._weights_array is not None and len(self._weights_array) > 0):
             participating = self._last_input_spikes > 0.5
             eligible = np.nonzero((self._weights_array > 0) & participating)[0]
@@ -691,7 +709,9 @@ class Neuron(NeuralEntity):
                 self.inh_trace *= self.inh_trace_decay
 
         # Homeostatic synaptic scaling (slow, activity-driven, non-Hebbian).
-        if self.homeostasis:
+        # Frozen (probe presentation): skip so a probe cannot drift the resource
+        # budget even under this slower, fire-independent rule.
+        if self.homeostasis and not self.plasticity_frozen:
             self._homeostatic_scaling()
 
         # Reset spike flag for next time step
@@ -751,6 +771,9 @@ class Neuron(NeuralEntity):
         (self._last_input_spikes), replacing the ARCHIVED trace-based
         participation and confidence-weighted credit-splitting rules.
         """
+        # Frozen (probe presentation): no weight-mutating rule runs on this fire.
+        if self.plasticity_frozen:
+            return
         if self._weights_array is None or len(self._weights_array) == 0:
             return
         # Polymorphic dispatch over the one active excitatory rule (Phase 3a). The
