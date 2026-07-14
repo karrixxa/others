@@ -313,6 +313,14 @@ class Neuron(NeuralEntity):
         # live, so a held-out probe is observed with real dynamics but teaches
         # nothing.
         self.plasticity_frozen = False
+        # Phase 4: per-L2E multiplier on the competitive-depression gain in
+        # apply_competitive_reset (see that method and SimulationEngine.
+        # _apply_experimental_pathway_distances). Default 1.0 (neutral) --
+        # every existing caller/config is byte-identical. This is the ONLY
+        # place the L2I->L2E pathway's influence can enter, since that path
+        # has no learned weight/delivery step to scale; the unconditional
+        # membrane reset itself is NEVER touched by this multiplier.
+        self.competitive_reset_influence = 1.0
         self.last_inhibitory_events = []    # debug records from the most recent apply_inhibition()
         # (last_spike_time / spiked live on the Membrane, seeded in its constructor;
         # Neuron forwards to them via the properties below.)
@@ -520,6 +528,17 @@ class Neuron(NeuralEntity):
 
         Returns: list[dict] debug records (v_pre, v_post, theta, p, w_before,
         delta_w, w_after, index) -- also stored on self.last_inhibitory_events.
+
+        Phase 4 (L1I->L2E... actually L1I->L1E -- see SimulationEngine.
+        _apply_experimental_pathway_distances): when self.distance_weighting is
+        on for THIS neuron (the target, e.g. an L1E), the DELIVERED magnitude
+        (the membrane subtraction / inhibitory-current injection below) is
+        scaled by (distance_ref/max(distance,distance_min))^distance_power --
+        mirroring effective_weights() in snn/rules/delivery.py, but for this
+        negative/inhibitory path, which delivers via apply_inhibition rather
+        than receive_input. The per-discharge LEARNING call further down keeps
+        using the RAW (unscaled) gate magnitude `w` -- influence is applied
+        exactly once, at delivery, never again in the learning update.
         """
         self._ensure_finalized()
         events = []
@@ -534,20 +553,30 @@ class Neuron(NeuralEntity):
         # BEFORE any inhibitory discharge this call (see _depress_losers).
         v_entry = float(self.potential)
         active = np.nonzero((self._weights_array < 0) & (spikes > 0.5))[0]
+        # Phase 4 delivery-only distance scaling (see docstring above). None
+        # when this neuron's distance_weighting is off -- byte-identical to
+        # every pre-Phase-4 caller in that case.
+        if self.distance_weighting and self._distance is not None:
+            delivery_influence = (self.distance_ref
+                                  / np.maximum(self._distance, self.distance_min)) ** self.distance_power
+        else:
+            delivery_influence = None
         for idx in active:
-            w = -float(self._weights_array[idx])   # magnitude of the inhibitory gate
+            w = -float(self._weights_array[idx])   # magnitude of the inhibitory gate (RAW, for learning)
+            w_delivered = w * float(delivery_influence[idx]) if delivery_influence is not None else w
             v_pre = float(self.potential)
             if self.inhibitory_flow_rate:
                 # Inhibitory FLOW: inject the gate into a decaying inhibitory current
                 # that drains the membrane over subsequent steps (see update()),
                 # rather than subtracting it all now. No instantaneous change here;
                 # the learning rule below still uses v_pre.
-                self.inh_trace += w * (1.0 - self.inh_trace_decay) if self.inh_trace_normalized else w
+                self.inh_trace += (w_delivered * (1.0 - self.inh_trace_decay)
+                                   if self.inh_trace_normalized else w_delivered)
                 v_post = v_pre
             else:
                 # Linear one-shot discharge FLOORED at rest:
                 # inhibition cannot push the membrane below resting potential.
-                self.potential = max(self.potential - w, self.resting_potential)
+                self.potential = max(self.potential - w_delivered, self.resting_potential)
                 v_post = float(self.potential)
             # Normalized closeness to firing, clamped to [0, 1] (saturating rule;
             # also recorded in the event below).
@@ -620,11 +649,13 @@ class Neuron(NeuralEntity):
           - structural: depress only the POSITIVE feedforward weights whose L1E
             sources participated in this response (weight > 0 AND last input spike),
             using the shared direction-aware bounded kernel with direction -1 and
-            gain = learning_rate * structural_gate * p_loss, where
-            p_loss = clamp(V_pre / theta, 0, 1). OFF (non-participating) afferents
-            are NEVER touched -- depressing them would potentiate absent pixels.
-            Only runs when loser_depression is enabled; a zero-charge loser (p_loss
-            == 0) learns nothing.
+            gain = learning_rate * structural_gate * p_loss * competitive_reset_influence,
+            where p_loss = clamp(V_pre / theta, 0, 1) and competitive_reset_influence
+            is the Phase 4 L2I->L2E distance-influence multiplier (default 1.0,
+            neutral -- see the attribute's docstring). OFF (non-participating)
+            afferents are NEVER touched -- depressing them would potentiate absent
+            pixels. Only runs when loser_depression is enabled; a zero-charge loser
+            (p_loss == 0) learns nothing.
           - transient: UNCONDITIONALLY reset the membrane to rest and clear the
             pending excitatory/inhibitory current traces (when hard_reset_clear_traces).
 
@@ -654,7 +685,7 @@ class Neuron(NeuralEntity):
                 w_min = self.min_positive_weight if self.min_positive_weight is not None else 0.0
                 gate = (self._structural_free_energy_gate()
                         if self.structural_free_energy else 1.0)
-                gain = self.learning_rate * gate * p_loss
+                gain = self.learning_rate * gate * p_loss * self.competitive_reset_influence
                 signal = np.full(eligible.size, -1.0)
                 w_after = bounded_signed_update(w_before, w_min, self.weight_cap,
                                                 gain, signal)

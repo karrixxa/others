@@ -10,9 +10,10 @@
 - Phase 1 audit checkpoint commit: `225b8b1` (`Geometric_Influence_Temporal_Winner_Audit.md`)
 - Phase 2 Milestone 1 checkpoint commit: `9163da2` (backend observability core)
 - Phase 2 END checkpoint commit: `05c17a0` (frontend, phase complete)
-- This update corresponds to the **Phase 3 END** checkpoint (seeded
-  engine-owned geometry, complete) — commit hash filled in after this commit
-  lands, see repo log.
+- Phase 3 END checkpoint commit: `0e353cd` (seeded engine-owned geometry)
+- This update corresponds to the **Phase 4 END** checkpoint (connection
+  distance/influence as isolated experimental behavior) — commit hash filled
+  in after this commit lands, see repo log.
 - Base branch `july14` is untouched and remains the protected base.
 - `four-pattern` branch exists (checked out in a separate worktree at
   `/home/charisxiong/Documents/others`) and is explicitly NOT merged here —
@@ -35,19 +36,30 @@ presentation IDs/boundaries, evidence-based receptive-field status,
 actual-bounds Fit View, delivery/pre-post-integration diagnostics — with **no
 neural equation and no preset value** changed.
 
-**Current phase (Phase 3, complete) — Seeded engine-owned geometry only, per
-explicit user instruction:** jittered/irregular engine-owned positions
-(L1E jittered within its assigned cell, L1I paired near its L1E, L2E placed
-irregularly with a minimum-separation constraint, L2I fixed near center),
-seeded and fixed across reset/training/probes, changing only on an explicit
-topology reseed, with the legacy symmetric ring/grid preserved as a selectable
-ablation. Per explicit user decision, a **temporary, clearly labeled
-legacy-distance-compatibility shim** keeps `distance_weighting`'s actual
-delivered-charge numbers pinned to the legacy reference geometry regardless of
-which layout is displayed, so this phase changes **no neural dynamics** —
-verified by an exact winner-sequence/final-weight equivalence test, not just
-aggregate diagnostics. Phase 4 is expected to remove that shim and
-intentionally activate influence from the real new geometry.
+**Phase 3 (complete) — Seeded engine-owned geometry only:** jittered/irregular
+engine-owned positions (L1E jittered within its assigned cell, L1I paired near
+its L1E, L2E placed irregularly with a minimum-separation constraint, L2I
+fixed near center), seeded and fixed across reset/training/probes, changing
+only on an explicit topology reseed, with the legacy symmetric ring/grid
+preserved as a selectable ablation. A temporary legacy-distance-compatibility
+shim kept `distance_weighting`'s delivered-charge numbers pinned to the legacy
+reference geometry, so that phase changed **no neural dynamics**.
+
+**Current phase (Phase 4, complete) — Connection distance/influence as
+isolated experimental behavior, per explicit user instruction:** adds FOUR
+NEW, fully independent experimental pathways — L2E→L2I, L2I→L2E, L2E→L1I,
+L1I→L1E — each with its own default-OFF ablation flag and one shared,
+configurable, safe-by-default power law (inverse-square, pure attenuation).
+L1E→L2E's existing legacy pathway (Phase 2/3, `distance_weighting`/
+`legacy_distance_compat`) is untouched. Every pathway exposes source, target,
+distance, influence, raw weight, effective transmission, and whether
+influence was actually applied, via a new `pathway_influence_report()`/
+`GET /api/pathway_influence`. Influence is applied **exactly once** per
+pathway — verified directly (delivery uses influence¹, learning always reads
+the raw, unscaled weight) — and none of the four new flags is enabled by
+default anywhere ("do not enable every pathway together"), so the
+geometry-off and legacy-distance baselines from Phases 2/3 are completely
+unaffected.
 
 ## Completed (this session)
 
@@ -90,23 +102,99 @@ delivery/pre-post-integration diagnostics, and the matching frontend
 presentation-boundary markers, distance/influence display). No neural
 equation or preset value changed.
 
-Phase 3 (seeded engine-owned geometry; see "Files changed" above for full
-detail): jittered L1E-in-cell / paired L1I / irregular-with-min-separation L2E
-/ centered L2I positions, seeded and fixed except on explicit topology reseed,
-legacy ring/grid preserved as a selectable ablation, and a temporary
-legacy-distance-compatibility shim that keeps this phase's dynamics
-byte-identical to before it (per explicit user decision) while clearly
-labeling the pinned numbers wherever they're shown.
+Phase 3 (seeded engine-owned geometry; see commit `0e353cd`): jittered
+L1E-in-cell / paired L1I / irregular-with-min-separation L2E / centered L2I
+positions, seeded and fixed except on explicit topology reseed, legacy
+ring/grid preserved as a selectable ablation, and a temporary
+legacy-distance-compatibility shim that keeps that phase's dynamics
+byte-identical to before it while clearly labeling the pinned numbers
+wherever they're shown.
+
+Phase 4 (connection distance/influence as isolated experimental behavior; see
+"Files changed" below for full detail): rather than removing Phase 3's
+legacy-distance-compat shim (the plan anticipated at the end of that phase),
+the ACTUAL instruction for this phase was narrower and safer -- add FOUR NEW,
+independently-ablated experimental pathways (L2E→L2I, L2I→L2E, L2E→L1I,
+L1I→L1E) beside the untouched legacy L1E→L2E pathway, each default-off, each
+fully audited (source/target/distance/influence/raw weight/effective
+transmission/applied), using one shared safe-by-default power law. The
+legacy-distance-compat shim and the L1E→L2E pathway it governs are completely
+UNCHANGED by this phase.
 
 ## In progress
 
-**Phase 3 (Seeded engine-owned geometry) is COMPLETE** — single-milestone
-phase, phase-end regressions run, this is the phase-end checkpoint per
-`CLAUDE.md`. Phase 4 (intentionally activating influence from the real new
-geometry, removing the compat shim) is queued but not started — needs its own
-explicit go-ahead given the shim's removal WILL change dynamics by design.
+**Phase 4 (connection distance/influence, isolated experimental behavior) is
+COMPLETE** — single-milestone phase, phase-end regressions run, this is the
+phase-end checkpoint per `CLAUDE.md`. No further phase is currently queued;
+awaiting user direction on what (if anything) comes next -- e.g. whether to
+actually experiment with one pathway at a time, or revisit the
+legacy_distance_compat shim removal originally anticipated after Phase 3.
 
-## Files changed (Phase 3 — seeded engine-owned geometry, this checkpoint)
+## Files changed (Phase 4 — connection distance/influence, this checkpoint)
+
+- `neuron_flexible.py`:
+  - `Neuron.competitive_reset_influence` (new, default `1.0` = neutral): the
+    ONLY place the L2I→L2E pathway's influence can enter, since that path has
+    no learned weight/delivery step. `apply_competitive_reset()`'s depression
+    `gain` is now `learning_rate * gate * p_loss * competitive_reset_influence`
+    — the UNCONDITIONAL membrane reset itself is never touched by it.
+  - `apply_inhibition()`: when the target neuron's `distance_weighting` is on
+    (used here by the NEW L1I→L1E pathway), the DELIVERED discharge magnitude
+    is scaled by `(distance_ref/max(distance,distance_min))^distance_power`
+    (mirroring `effective_weights()` in `snn/rules/delivery.py`, but for this
+    negative/inhibitory path, which delivers via `apply_inhibition` rather
+    than `receive_input`). The per-discharge LEARNING call keeps using the
+    RAW, unscaled gate magnitude — influence is applied exactly once, at
+    delivery, never again in the learning update.
+- `backend/simulation.py`:
+  - New module-level Phase 4 section: `INFLUENCE_SAFE_MAX=4.0`,
+    `_power_law_influence(d, ref, d_min, power)` (the shared, configurable
+    power law — defaults `ref==d_min` make it pure attenuation, never
+    amplifying), `_summarize_pathway(entries)` (min/median/max influence + a
+    `safe` flag).
+  - Seven new constructor params, all defaulting to neutral/off:
+    `infl_power=2.0` (inverse-square), `infl_ref=1.0`, `infl_min=1.0`
+    (ref==min by default), and `infl_l2e_l2i`/`infl_l2i_l2e`/`infl_l2e_l1i`/
+    `infl_l1i_l1e` (all `False`).
+  - `_apply_experimental_pathway_distances()`: computes real-geometry
+    distances for the four new pathways from `self._geometry_xy` and sets
+    `distance_weighting`/`distance_power`/`distance_ref`/`distance_min`/
+    `.distance` on the target neuron(s) for each — reusing the SAME generic
+    per-neuron delivery machinery the legacy L1E→L2E pathway already uses
+    (`effective_weights()` in `snn/rules/delivery.py`), since L2I/L1I/L1E's
+    distance fields were completely dormant before this phase (confirmed via
+    `NeuronConfig.apply_to()`, which explicitly forces `distance_weighting`
+    off for every non-L2E neuron — this method must run, and does run, AFTER
+    that). L1I→L1E neutralizes L1E's abstract external-pixel channel
+    (`distance[1] = infl_ref`, giving factor `1.0` exactly) so the sensory
+    input is never accidentally attenuated. Called from both `_build()` and
+    `reseed_topology()`.
+  - `pathway_influence_report()` (new): the full per-connection audit across
+    all FIVE pathways — source, target, distance, influence, raw weight,
+    effective transmission, `applied` — reusing `_delivery_diagnostics()` for
+    the untouched legacy L1E→L2E pathway.
+  - `TUNABLE`/`apply_config()`: the seven new params are dashboard-configurable
+    (bool-coerced flags, float-coerced power law).
+- `backend/api.py`: new `GET /api/pathway_influence` endpoint (returns
+  `pathway_influence_report()`); seven new `CONFIG_SPEC` entries (all
+  `advanced=True`, so they render in the collapsed "Advanced" panel, not the
+  main one — matching "isolated experimental", not a new default experience).
+- `test_influence_phase.py` (new) — 18 tests: all four new flags default off;
+  `DASHBOARD_PRESET` doesn't enable any of them; the legacy L1E→L2E pathway
+  and both Phase 2/3 baselines untouched; disabled-config byte-equivalence;
+  each pathway's flag is independent of the others; close-vs-distant delivery
+  for all four new pathways (L2E→L2I and L2E→L1I via `effective_weights()`
+  directly, L1I→L1E via a direct `apply_inhibition()` call since its effect
+  isn't reliably observable in L1E's spike outcome -- see Known problems,
+  L2I→L2E via a direct `apply_competitive_reset()` comparison confirming the
+  depression gain scales with distance while the reset itself stays exact);
+  influence fixed across steps/training/probes and only changes on
+  `reseed_topology()`; no-influence-squared checks (delivery uses
+  `influence**1` exactly, not `influence**2`); learning uses the raw
+  unscaled weight; no reported influence exceeds 1.0 under the default law;
+  full `pathway_influence_report()` structure and `applied`-flag correctness.
+
+### Phase 3 (prior checkpoint `0e353cd`)
 
 - `backend/simulation.py`:
   - New geometry constants + helpers: `L1_JITTER_FRAC`, `L1I_PAIR_JITTER_FRAC`,
@@ -172,9 +260,9 @@ explicit go-ahead given the shim's removal WILL change dynamics by design.
   `DASHBOARD_PRESET`'s new geometry produces a byte-identical winner sequence
   and final weights to what it would have produced before this phase.
 
-## Files changed (Phase 2, prior checkpoint `05c17a0`)
+### Phase 2 (prior checkpoints `9163da2`/`05c17a0`)
 
-### Milestone 2 — frontend
+#### Milestone 2 — frontend
 
 - `frontend/index.html` — "Presentation" top-bar stat pill; "Held-out Probes"
   sidebar section (`#probe-buttons`, `#probe-status`); `#fit-view` button in
@@ -214,7 +302,7 @@ All new/changed JS files pass `node --input-type=module --check` (syntax-only;
 no bundler in this project). No file in `frontend/` steps or mutates engine
 state — every action is still an HTTP POST, exactly as before.
 
-### Milestone 1 — backend core (prior checkpoint `9163da2`)
+#### Milestone 1 — backend core (prior checkpoint `9163da2`)
 
 - `backend/presets.py` (new) — `DASHBOARD_PRESET`, the exact kwargs
   `backend/api.py` used to construct inline, now named/importable (no values
@@ -264,7 +352,61 @@ No neural equation and no preset VALUE was changed. `CLAUDE_HANDOFF.md`
 
 ## Tests
 
-### Phase 3 (this checkpoint)
+### Phase 4 (this checkpoint)
+
+- `test_influence_phase.py` (new, focused): **18/18 passed**.
+- `pytest -q` (full suite): **168 passed, 5 failed** (150 prior + 18 new =
+  168; same 5 pre-existing failures as every prior checkpoint, untouched).
+- **Legacy/baseline equivalence:** `sustained_dominance.py`/
+  `ablation_harness.py` (unmodified) still reproduce the Phase 1 numbers
+  exactly; `test_disabled_equivalence_dashboard_preset_unaffected_by_new_params_existing`
+  confirms `DASHBOARD_PRESET` (which does not set any of the four new flags)
+  produces byte-identical winners/weights across a fresh 600-step run;
+  `test_dashboard_preset_does_not_enable_any_new_pathway` asserts this
+  directly against the preset dict, not just observed behavior.
+- **Close vs. distant delivery, per pathway** (brief requirement, tested
+  precisely, not just qualitatively):
+  - L2E→L2I / L2E→L1I: `effective_weights()` at `d==ref==min` returns the RAW
+    weight exactly (influence==1.0); at `d==5×ref` returns strictly less.
+  - L1I→L1E: tested via a **direct** `apply_inhibition()` call (not the full
+    engine loop) because L1E's pixel drive delivers exactly its own threshold
+    with zero margin — ANY nonzero inhibition already fully suppresses firing
+    regardless of magnitude, so the pathway's real, correctly-applied effect
+    is not reliably observable in whether L1E ends up spiking (see Known
+    problems). Direct test: close (`d==ref`) delivers the full discharge
+    (potential → 0 exactly); distant (`d==2×ref`, power=2) delivers exactly
+    25% (potential → 750.0 exactly) — confirming both the scaling AND that it
+    is not squared (would be 6.25% / potential → 937.5 if it were).
+  - L2I→L2E: `apply_competitive_reset()` compared directly at
+    `competitive_reset_influence=1.0` vs. `0.25` — the depression magnitude
+    scales down accordingly while `v_post` (the unconditional reset) is
+    `resting_potential` in BOTH cases, confirming the reset invariant survives
+    untouched.
+- **No influence-squared bug**, verified two ways: (1) direct numeric
+  comparison of `effective_weights()`'s output against `raw*influence**1`
+  (matches) and `raw*influence**2` (does not match); (2) the L1I→L1E
+  close/distant test above, where a squared factor would have produced a
+  visibly different (937.5, not 750.0) result.
+- **Learning uses the raw, unscaled weight**, not the distance-scaled
+  delivered value — verified for the E→I feedforward rule directly (heavy
+  distance attenuation on the delivery side does not gate whether/how much
+  the raw weight learns).
+- **Reset stability / fixed influence:** per-connection distances (hence
+  influence) are identical before/after 60 steps of training plus a 10-step
+  probe, and only change on an explicit `reseed_topology()` call — mirroring
+  Phase 3's positional-fixity guarantee, now re-verified at the influence
+  level for all three geometry-dependent new pathways.
+- **Avoid extreme amplification:** with all four new pathways simultaneously
+  enabled (deliberately stress-testing the "don't enable together" guidance
+  rather than avoiding it), every reported `influence_max` is `<= 1.0` and
+  every pathway's `safe` flag is `True`.
+- **Full-stack smoke test (real server):** ran `uvicorn backend.api:app`,
+  confirmed `GET /api/pathway_influence` returns all five pathways with
+  correct entry counts (72/8/8/72/9) and sane values, and that the seven new
+  `infl_*` config keys appear in `GET /api/config` under `advanced: true`
+  (collapsed "Advanced" panel — not surfaced as a new default control).
+
+### Phase 3 (prior checkpoint `0e353cd`)
 
 - `test_geometry_phase.py` (new, focused): **19/19 passed** — legacy-ablation
   exact reproduction, seed reproduction, fixity across reset/training/
@@ -352,15 +494,44 @@ No neural equation and no preset VALUE was changed. `CLAUDE_HANDOFF.md`
 ## Known problems
 
 - Per `AGENT_HANDOFF.md`/the Phase 1 audit, true one-to-one L2E ownership is
-  still unsolved and NEITHER Phase 2 nor Phase 3 touch it — this phase changes
-  geometry that's DISPLAYED, not the geometry that DRIVES dynamics (the compat
-  shim keeps those decoupled). See `Geometric_Influence_Temporal_Winner_Audit.md`
-  for the full list of confirmed conflicts still awaiting a decision — in
-  particular, finding (2)'s perfect-ring-geometry concern is now only fixed
-  for RENDERING/placement, not yet for the actual distance/influence
-  computation distance_weighting uses (that's Phase 4).
+  still unsolved and NEITHER Phase 2, 3, nor 4 fix it by default — the four
+  new Phase 4 pathways are all off in `DASHBOARD_PRESET`, so the live
+  dashboard's actual behavior is unchanged from Phase 3. See
+  `Geometric_Influence_Temporal_Winner_Audit.md` for the full list of
+  confirmed conflicts still awaiting a decision. Finding (2)'s
+  perfect-ring-geometry concern is addressed for placement/rendering (Phase 3)
+  and now has REAL, audited, opt-in influence pathways available for L2E→L2I/
+  L2I→L2E/L2E→L1I/L1I→L1E (Phase 4) — but L1E→L2E itself (the pathway that
+  concern was originally about) still runs under the `legacy_distance_compat`
+  shim by default, so IT still hasn't been flipped over to the real new
+  geometry. That flip was the original Phase 4 plan anticipated at the end of
+  Phase 3; the ACTUAL Phase 4 instruction took a narrower, additive path
+  instead (new isolated pathways, legacy pathway untouched) — flagged here so
+  future work knows that flip is still on the table, separately, if wanted.
+- **L1I→L1E's influence is real and correctly applied, but not reliably
+  observable in whether L1E fires.** L1E's external-pixel drive delivers
+  EXACTLY its own threshold with zero headroom (`e.weights=[-1,+1]*UNIT`,
+  `thr_l1=1*UNIT` — "one pixel spike... fires the encoder in one hit," per
+  the original module docstring). Any nonzero inhibitory discharge — scaled
+  by distance-influence or not — already drops the post-inhibition potential
+  below threshold, so L1E fails to fire either way. The pathway is verified
+  correct at the mechanism level (`apply_inhibition`'s delivered magnitude
+  provably scales with distance — see Tests), just not at the emergent
+  spike/L2E level under the current L1 fixed-point design. If this pathway is
+  meant to visibly change L1 spiking, L1E's threshold margin would need
+  revisiting separately — out of scope for "isolated experimental behavior."
 - `four-pattern` branch carries diagnostic/tracer work not yet reviewed for
   porting.
+- The four new pathways currently share ONE power-law configuration
+  (`infl_power`/`infl_ref`/`infl_min`), not independently tunable per pathway.
+  A scope decision for simplicity/parameter-surface reasons — easy to split
+  into per-pathway triples later if independent tuning turns out to matter.
+- `pathway_influence_report()`/`GET /api/pathway_influence` is diagnostic-only
+  (on-demand GET), not pushed with every `dynamic_state()` frame or surfaced
+  in any frontend view yet — no UI change was made this phase (the
+  instruction was backend/audit-focused; the existing generic config panel
+  already exposes the four new toggles + power-law sliders under "Advanced"
+  with no frontend code changes needed).
 - Presentation boundaries are scoped to NAMED pattern/probe switches only
   (`set_pattern`/`present_probe`); raw pixel/random/noise edits do not start a
   new presentation record. Documented, not a bug — free-form manual input was
@@ -388,12 +559,18 @@ No neural equation and no preset VALUE was changed. `CLAUDE_HANDOFF.md`
 
 ## Next action
 
-Phase 3 is closed. Phase 4 (per the Goal section above, queued but NOT
-started): remove the `legacy_distance_compat` shim and let
-`distance_weighting`'s delivered-charge computation follow the REAL new
-geometry (`legacy_distance_compat=False`) — this is expected to, and is
-intended to, change neural dynamics (that's the actual point of jittered
-geometry per brief §6). Needs its own explicit go-ahead before flipping the
-default, since it's the first phase since the audit that will actually alter
-baseline behavior. Also worth revisiting then: whether `topology_seed` should
-persist across restarts like the weight seed does (see Known problems).
+Phase 4 is closed. No further phase is currently instructed. Candidates for a
+future phase, none started, all needing their own explicit go-ahead:
+- Actually experiment with the four new pathways one at a time (per "do not
+  enable every pathway together") and observe effects on ownership/dominance
+  metrics — the infrastructure is ready (`pathway_influence_report()`,
+  per-pathway toggles) but no experiment has been run yet.
+- Revisit whether to flip `legacy_distance_compat=False` for the ORIGINAL
+  L1E→L2E pathway (the plan anticipated at the end of Phase 3) — this is the
+  one change in this whole area still expected to alter baseline dynamics
+  when it happens, so it should stay a deliberate, separately-approved step.
+- Whether `topology_seed` should persist across a server restart like the
+  weight-init `seed` does (currently does not — see Known problems from
+  Phase 3, still applicable).
+- Whether the four new pathways should get independent per-pathway power-law
+  configs instead of the current shared one.

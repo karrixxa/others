@@ -155,6 +155,16 @@ async def reseed_topology():
     return {"reseed_topology": True, "topology_seed": topology_seed}
 
 
+@app.get("/api/pathway_influence")
+async def pathway_influence():
+    """Phase 4 audit: per-connection distance/influence across all five
+    pathways (source, target, distance, influence, raw weight, effective
+    transmission, whether influence was actually applied) plus min/median/max
+    influence and a safety flag per pathway. Diagnostic-only; on-demand rather
+    than pushed every frame (see SimulationEngine.pathway_influence_report)."""
+    return engine.pathway_influence_report()
+
+
 @app.post("/api/speed/{sps}")
 async def set_speed(sps: float):
     runner.speed = max(0.5, min(120.0, sps))
@@ -446,6 +456,48 @@ CONFIG_SPEC = [
      "desc": "Controls membrane leak for the trainable L1 inhibitory accumulators. "
              "OFF (default) preserves accumulated L2E feedback charge until each "
              "L1I fires; immediate-relay mode does not use this accumulation."},
+    # Phase 4: four NEW, independently-ablated experimental distance/influence
+    # pathways, all DEFAULT OFF ("do not enable every pathway together" --
+    # isolated, one-at-a-time experimentation). Deliberately separate from the
+    # legacy L1E->L2E distance_weighting/legacy_distance_compat above -- see
+    # backend/simulation.py's module comment above INFLUENCE_SAFE_MAX.
+    {"key": "infl_l2e_l2i", "label": "Influence: L2E -> L2I", "kind": "toggle",
+     "desc": "Attenuate the delivered E->I charge (L2E winner -> L2I) by "
+             "geometric distance/influence. OFF by default; see /api/pathway_influence "
+             "for the audited per-connection numbers regardless of this toggle."},
+    {"key": "infl_l2i_l2e", "label": "Influence: L2I -> L2E", "kind": "toggle",
+     "desc": "L2I->L2E has no learned weight (unweighted structural reset). When ON, "
+             "influence scales ONLY the competitive-depression gain for the losing "
+             "L2E -- the unconditional membrane reset itself is never touched. OFF "
+             "by default."},
+    {"key": "infl_l2e_l1i", "label": "Influence: L2E -> L1I", "kind": "toggle",
+     "desc": "Attenuate the delivered E->I charge (L2E winner -> each L1I) by "
+             "geometric distance/influence -- since each L1I sits at its own "
+             "position, this gives L1I real pixel-local differentiation even "
+             "though all 9 units still share the same learned weight vector. "
+             "OFF by default."},
+    {"key": "infl_l1i_l1e", "label": "Influence: L1I -> L1E", "kind": "toggle",
+     "desc": "Attenuate the delivered inhibitory discharge (paired L1I -> L1E) by "
+             "geometric distance/influence. Note: L1E's pixel drive delivers "
+             "exactly its own threshold with no margin, so under most configs ANY "
+             "nonzero inhibition already fully suppresses firing -- this pathway's "
+             "effect is real (see /api/pathway_influence) but may not visibly change "
+             "which L1E fires. OFF by default."},
+    {"key": "infl_power", "label": "Influence power (new pathways)", "kind": "range",
+     "min": 0.0, "max": 4.0, "step": 0.5,
+     "desc": "Exponent in the shared power law for the four NEW pathways above "
+             "(2 = inverse-square, the initial experiment). Deliberately separate "
+             "from the legacy L1E->L2E distance_power. Only used by a pathway "
+             "whose own toggle is ON."},
+    {"key": "infl_ref", "label": "Influence ref distance (new pathways)", "kind": "range",
+     "min": 0.1, "max": 8.0, "step": 0.1,
+     "desc": "Reference distance for the four NEW pathways: influence = "
+             "(ref/max(d,min))^power. Default equals the min floor, so influence "
+             "<= 1.0 always (pure attenuation, never amplifies)."},
+    {"key": "infl_min", "label": "Influence min distance (new pathways)", "kind": "range",
+     "min": 0.1, "max": 4.0, "step": 0.1,
+     "desc": "Distance floor for the four NEW pathways, avoiding a divide-by-zero "
+             "/ over-boost for very close connections."},
 ]
 
 # Dashboard clutter control: the panel exposes every tunable, but most are inert

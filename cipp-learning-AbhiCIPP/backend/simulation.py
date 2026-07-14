@@ -187,6 +187,48 @@ def _irregular_l2e_xy(rng):
         f"could not place {N_OUT} L2E neurons with min separation "
         f"{L2E_MIN_SEPARATION} inside radius {L2E_PLACEMENT_RADIUS} after "
         f"{L2E_PLACEMENT_MAX_RESTARTS} restarts -- loosen the placement constants")
+
+
+# ---- Phase 4: per-connection distance/influence, audited separately per pathway ----
+# Brief SS7: influence must be exposed per-connection (source, target, distance,
+# influence, raw weight, effective transmission) and applied EXACTLY ONCE --
+# never once in delivery and again in learning. This adds FOUR NEW, fully
+# independent experimental pathways -- L2E->L2I, L2I->L2E, L2E->L1I, L1I->L1E
+# -- each with its OWN ablation flag, ALL DEFAULT OFF, sharing ONE configurable
+# power law that is DELIBERATELY SEPARATE from the legacy L1E->L2E pathway
+# (distance_weighting/distance_power/distance_ref/distance_min/
+# legacy_distance_compat -- Phase 2/3, left completely UNCHANGED by this
+# section; that remains the "legacy-distance baseline"). "Do not enable every
+# pathway together": DASHBOARD_PRESET leaves all four new flags OFF -- this is
+# deliberately isolated, one-pathway-at-a-time experimental infrastructure, not
+# a new default behavior. The "geometry-off" baseline (distance_weighting=False
+# and every infl_* flag False) and the "legacy-distance" baseline
+# (distance_weighting=True, legacy_distance_compat=True) are both fully
+# preserved -- nothing in this section touches either one.
+INFLUENCE_SAFE_MAX = 4.0   # reporting/safety ceiling; the DEFAULT law (ref==min)
+                          # never approaches this (max influence == 1.0 exactly)
+
+
+def _power_law_influence(d, ref, d_min, power):
+    """influence = (ref / max(d, d_min)) ** power. With the DEFAULT ref==d_min,
+    this is a pure ATTENUATION law: influence <= 1.0 for every d >= d_min,
+    never amplifying -- "avoid extreme amplification" as a structural default,
+    not merely a clip. Vectorized (accepts a scalar or an ndarray)."""
+    dd = np.asarray(d, dtype=float)
+    return (float(ref) / np.maximum(dd, float(d_min))) ** float(power)
+
+
+def _summarize_pathway(entries: list[dict]) -> dict:
+    """min/median/max influence + a `safe` flag (brief: "avoid extreme
+    amplification") for one pathway's per-connection entries."""
+    infl = [e['influence'] for e in entries]
+    return dict(entries=entries,
+               influence_min=round(min(infl), 4) if infl else None,
+               influence_median=round(float(np.median(infl)), 4) if infl else None,
+               influence_max=round(max(infl), 4) if infl else None,
+               safe=(max(infl) <= INFLUENCE_SAFE_MAX) if infl else True)
+
+
 # Active L2E fan-in: exactly N_PIX pixel afferents. There is NO index-0 local-I
 # placeholder and no negative L2I->L2E gate -- L2 competition is now an unweighted
 # hard reset plus local competitive depression (see Neuron.apply_competitive_reset
@@ -677,13 +719,32 @@ class SimulationEngine:
                  # selects the new seeded jittered/irregular geometry. The legacy
                  # layout stays selectable here as an ablation, not removed.
                  symmetric_geometry: bool = True,
-                 # TEMPORARY (Phase 3 only; see module comment): when True (the
-                 # default), the DELIVERY distances distance_weighting reads are
-                 # always computed from the legacy reference geometry regardless of
-                 # `symmetric_geometry`, so switching to the new geometry cannot by
-                 # itself change any neural dynamics. Phase 4 removes this flag and
-                 # lets distance/influence follow the real geometry unconditionally.
-                 legacy_distance_compat: bool = True):
+                 # TEMPORARY compatibility shim (Phase 3; see module comment): when
+                 # True (the default), the DELIVERY distances distance_weighting
+                 # reads for the L1E->L2E pathway are always computed from the
+                 # legacy reference geometry regardless of `symmetric_geometry`, so
+                 # switching to the new geometry cannot by itself change any neural
+                 # dynamics. Phase 4 (below) adds FOUR NEW, separately-ablated
+                 # experimental pathways that use the real new geometry directly --
+                 # this flag is explicitly preserved unchanged as the
+                 # "legacy-distance baseline" and continues to govern ONLY the
+                 # L1E->L2E pathway.
+                 legacy_distance_compat: bool = True,
+                 # ---- Phase 4: per-connection distance/influence, audited
+                 # separately per pathway (see the module comment above
+                 # INFLUENCE_SAFE_MAX). ONE shared, configurable power law for the
+                 # four NEW pathways below (deliberately separate from the legacy
+                 # L1E->L2E distance_power/_ref/_min above). Defaults (ref==min)
+                 # make it a pure ATTENUATION law -- never amplifies.
+                 infl_power: float = 2.0,    # inverse-square: the initial experiment
+                 infl_ref: float = 1.0,
+                 infl_min: float = 1.0,
+                 # Each pathway's OWN ablation flag, ALL DEFAULT OFF ("do not enable
+                 # every pathway together" -- isolated, one-at-a-time experimentation).
+                 infl_l2e_l2i: bool = False,
+                 infl_l2i_l2e: bool = False,
+                 infl_l2e_l1i: bool = False,
+                 infl_l1i_l1e: bool = False):
         # Decouple the SENSORY input rate from the INTRINSIC competition clock.
         # input_period: steps between external input samples. The default is 1:
         #   a held pixel supplies drive continuously, every simulation step.
@@ -764,7 +825,10 @@ class SimulationEngine:
                            l2e_init_jitter=l2e_init_jitter,
                            topology_seed=topology_seed,
                            symmetric_geometry=symmetric_geometry,
-                           legacy_distance_compat=legacy_distance_compat)
+                           legacy_distance_compat=legacy_distance_compat,
+                           infl_power=infl_power, infl_ref=infl_ref, infl_min=infl_min,
+                           infl_l2e_l2i=infl_l2e_l2i, infl_l2i_l2e=infl_l2i_l2e,
+                           infl_l2e_l1i=infl_l2e_l1i, infl_l1i_l1e=infl_l1i_l1e)
         self._build()
 
     # ------------------------------------------------------------------ build
@@ -1060,6 +1124,11 @@ class SimulationEngine:
         # with non-trivial source geometry). Must run after apply_to and after the
         # feedforward weights are finalized (set_weights reset distance to ones).
         self._apply_l2e_distances()
+        # Phase 4: the four NEW experimental pathways (L2E->L2I, L2I->L2E,
+        # L2E->L1I, L1I->L1E). Must also run after apply_to() -- see that
+        # method's docstring for why it forces distance_weighting=False on
+        # every non-L2E neuron.
+        self._apply_experimental_pathway_distances()
 
         # One-step feedback delay. L1I spikes produced at t inhibit paired L1E
         # neurons at t+1 only; the register is replaced every step.
@@ -1269,6 +1338,155 @@ class SimulationEngine:
                 continue
             n.distance = np.linalg.norm(pix_xyz - homes_xyz[j], axis=1)
 
+    def _apply_experimental_pathway_distances(self):
+        """Phase 4: real-geometry distance/influence for the four NEW,
+        independently-ablated experimental pathways (L2E->L2I, L2I->L2E,
+        L2E->L1I, L1I->L1E). Completely separate from the legacy L1E->L2E
+        distance_weighting/legacy_distance_compat machinery above, which this
+        method never touches. Must run AFTER cfg.apply_to() in _build() --
+        NeuronConfig.apply_to() explicitly sets distance_weighting=False on
+        every non-L2E neuron (see snn/config.py), so this is the thing that
+        turns it back on, population-by-population, for whichever of these
+        four flags is actually enabled. Called from both _build() and
+        reseed_topology() so a topology-only reseed keeps these pathways in
+        sync with the current geometry too.
+
+        L1I->L1E note: each L1E's afferent array is [inhibitory gate (index 0,
+        from its paired L1I), external pixel (index 1, abstract, no spatial
+        meaning)]. Index 1's distance is set to `infl_ref` exactly, which makes
+        its (ref/max(ref,min))^power delivery factor == 1.0 regardless of
+        geometry -- effective_weights() (used by receive_input, NOT by
+        apply_inhibition) must never attenuate the sensory pixel channel."""
+        p = self.params
+        power, ref, d_min = p['infl_power'], p['infl_ref'], p['infl_min']
+
+        l2e_xy, l1i_xy, l1e_xy = (self._geometry_xy['l2e'], self._geometry_xy['l1i'],
+                                  self._geometry_xy['l1e'])
+        l2e_xyz = np.column_stack([l2e_xy, np.full(N_OUT, _Z)])
+        l1i_xyz = np.column_stack([l1i_xy, np.full(N_PIX, -2.0)])
+        l1e_xyz = np.column_stack([l1e_xy, np.zeros(N_PIX)])
+        l2i_xyz = np.array([0.0, 0.0, 6.0])
+
+        # ---- L2E <-> L2I: one shared distance array, two independent pathways ----
+        d_l2e_l2i = np.linalg.norm(l2e_xyz - l2i_xyz, axis=1)          # (N_OUT,)
+        l2i = self.l2.inhibitory_neuron
+        l2i.distance_weighting = bool(p['infl_l2e_l2i'])
+        l2i.distance_power, l2i.distance_ref, l2i.distance_min = power, ref, d_min
+        l2i.distance = d_l2e_l2i
+        infl_l2e_l2i_vals = _power_law_influence(d_l2e_l2i, ref, d_min, power)
+        for j, e in enumerate(self.l2.excitatory_neurons):
+            e.competitive_reset_influence = (
+                float(infl_l2e_l2i_vals[j]) if p['infl_l2i_l2e'] else 1.0)
+
+        # ---- L2E -> L1I: per-L1I distance row to all N_OUT L2E ----
+        for i, inh in enumerate(self.l1.inhibitory_neurons):
+            d_row = np.linalg.norm(l2e_xyz - l1i_xyz[i], axis=1)      # (N_OUT,)
+            inh.distance_weighting = bool(p['infl_l2e_l1i'])
+            inh.distance_power, inh.distance_ref, inh.distance_min = power, ref, d_min
+            inh.distance = d_row
+
+        # ---- L1I -> L1E: paired distance (index 0 real, index 1 neutralized) ----
+        for i, e in enumerate(self.l1.excitatory_neurons):
+            d_pair = float(np.linalg.norm(l1e_xyz[i] - l1i_xyz[i]))
+            e.distance_weighting = bool(p['infl_l1i_l1e'])
+            e.distance_power, e.distance_ref, e.distance_min = power, ref, d_min
+            e.distance = np.array([d_pair, ref])
+
+        # Cached for pathway_influence_report() -- avoids recomputing geometry.
+        self._pathway_geometry = dict(l2e_xyz=l2e_xyz, l1i_xyz=l1i_xyz,
+                                      l1e_xyz=l1e_xyz, l2i_xyz=l2i_xyz,
+                                      d_l2e_l2i=d_l2e_l2i)
+
+    def pathway_influence_report(self) -> dict:
+        """Full per-connection distance/influence audit across all FIVE
+        pathways (brief SS7): source, target, distance, influence, raw weight,
+        effective transmission, and whether influence is actually being
+        applied (each pathway's own ablation flag) -- plus min/median/max
+        influence and a `safe` flag per pathway. L1E->L2E reuses the existing
+        legacy distance_weighting/legacy_distance_compat machinery (Phase 2/3,
+        UNCHANGED). L2I->L2E has no learned weight (an unweighted structural
+        reset event): raw_weight/effective are reported as None there --
+        influence scales ONLY the competitive-depression gain (see
+        Neuron.apply_competitive_reset), never the unconditional membrane
+        reset itself."""
+        p = self.params
+        report: dict[str, dict] = {}
+
+        # ---- L1E -> L2E (legacy pathway; Phase 2/3, unchanged) ----
+        delivery = self._delivery_diagnostics()
+        entries = []
+        applied = bool(p['distance_weighting'])
+        for j in range(N_OUT):
+            for i in range(N_PIX):
+                d = delivery.get(f'ff{i}->{j}')
+                if d is None:
+                    continue
+                entries.append(dict(source=f'L1E{i}', target=f'L2E{j}',
+                                    distance=d['distance'], influence=d['influence'],
+                                    raw_weight=round(float(self.l2.excitatory_neurons[j]._weights_array[i]), 4),
+                                    effective=d['effective'], applied=applied))
+        report['l1e_l2e'] = _summarize_pathway(entries)
+
+        # ---- L2E -> L2I / L2I -> L2E (share one distance array) ----
+        d_arr = self._pathway_geometry['d_l2e_l2i']
+        infl_arr = _power_law_influence(d_arr, p['infl_ref'], p['infl_min'], p['infl_power'])
+        l2i = self.l2.inhibitory_neuron
+
+        applied = bool(p['infl_l2e_l2i'])
+        entries = []
+        for j in range(N_OUT):
+            w = float(l2i._weights_array[j])
+            eff = w * float(infl_arr[j]) if applied else w
+            entries.append(dict(source=f'L2E{j}', target='L2I',
+                                distance=round(float(d_arr[j]), 4),
+                                influence=round(float(infl_arr[j]), 4),
+                                raw_weight=round(w, 4), effective=round(eff, 4),
+                                applied=applied))
+        report['l2e_l2i'] = _summarize_pathway(entries)
+
+        applied = bool(p['infl_l2i_l2e'])
+        entries = []
+        for j in range(N_OUT):
+            entries.append(dict(source='L2I', target=f'L2E{j}',
+                                distance=round(float(d_arr[j]), 4),
+                                influence=round(float(infl_arr[j]), 4),
+                                raw_weight=None, effective=None, applied=applied))
+        report['l2i_l2e'] = _summarize_pathway(entries)
+
+        # ---- L2E -> L1I ----
+        l2e_xyz, l1i_xyz = self._pathway_geometry['l2e_xyz'], self._pathway_geometry['l1i_xyz']
+        applied = bool(p['infl_l2e_l1i'])
+        entries = []
+        for i, inh in enumerate(self.l1.inhibitory_neurons):
+            d_row = np.linalg.norm(l2e_xyz - l1i_xyz[i], axis=1)
+            infl_row = _power_law_influence(d_row, p['infl_ref'], p['infl_min'], p['infl_power'])
+            for j in range(N_OUT):
+                w = float(inh._weights_array[j])
+                eff = w * float(infl_row[j]) if applied else w
+                entries.append(dict(source=f'L2E{j}', target=f'L1I{i}',
+                                    distance=round(float(d_row[j]), 4),
+                                    influence=round(float(infl_row[j]), 4),
+                                    raw_weight=round(w, 4), effective=round(eff, 4),
+                                    applied=applied))
+        report['l2e_l1i'] = _summarize_pathway(entries)
+
+        # ---- L1I -> L1E (paired; index 0 only, the real inhibitory gate) ----
+        l1e_xyz = self._pathway_geometry['l1e_xyz']
+        applied = bool(p['infl_l1i_l1e'])
+        entries = []
+        for i, e in enumerate(self.l1.excitatory_neurons):
+            d_pair = float(np.linalg.norm(l1e_xyz[i] - l1i_xyz[i]))
+            infl = float(_power_law_influence(d_pair, p['infl_ref'], p['infl_min'], p['infl_power']))
+            w = float(-e._weights_array[0])   # magnitude (stored as a negative gate)
+            eff = w * infl if applied else w
+            entries.append(dict(source=f'L1I{i}', target=f'L1E{i}',
+                                distance=round(d_pair, 4), influence=round(infl, 4),
+                                raw_weight=round(w, 4), effective=round(eff, 4),
+                                applied=applied))
+        report['l1i_l1e'] = _summarize_pathway(entries)
+
+        return report
+
     # --------------------------------------------------------------- controls
     def reset(self):
         self._build()
@@ -1304,6 +1522,7 @@ class SimulationEngine:
         for j in range(N_OUT):
             self.meta[f'L2E{j}']['pos'] = [round(float(l2e_xy[j, 0]), 4), round(float(l2e_xy[j, 1]), 4), _Z]
         self._apply_l2e_distances()   # keep distance state consistent with the (possibly legacy-pinned) reference
+        self._apply_experimental_pathway_distances()   # Phase 4: keep the four new pathways in sync too
         self._log('control', f'topology reseeded (topology_seed={self.params["topology_seed"]})')
         return self.params['topology_seed']
 
@@ -1329,7 +1548,11 @@ class SimulationEngine:
                # Phase 3 geometry ablation toggles. topology_seed is deliberately
                # NOT here -- it has its own dedicated verb, reseed_topology(),
                # not the generic config panel (see that method's docstring).
-               'symmetric_geometry', 'legacy_distance_compat')
+               'symmetric_geometry', 'legacy_distance_compat',
+               # Phase 4: the four NEW experimental pathways' own ablation flags
+               # plus their one shared, configurable power law.
+               'infl_l2e_l2i', 'infl_l2i_l2e', 'infl_l2e_l1i', 'infl_l1i_l1e',
+               'infl_power', 'infl_ref', 'infl_min')
 
     def apply_config(self, overrides: dict):
         """Merge tunable overrides into self.params and rebuild the network in
@@ -1351,7 +1574,8 @@ class SimulationEngine:
                      'inhibitory_flow_rate', 'inh_trace_normalized',
                      'inhibitory_delta_rule', 'distance_weighting',
                      'assembly_flow_credit', 'leak_enabled', 'l2i_leak_enabled',
-                     'l1i_leak_enabled', 'symmetric_geometry', 'legacy_distance_compat'):
+                     'l1i_leak_enabled', 'symmetric_geometry', 'legacy_distance_compat',
+                     'infl_l2e_l2i', 'infl_l2i_l2e', 'infl_l2e_l1i', 'infl_l1i_l1e'):
                 v = bool(v)
             elif k in ('seed', 'refractory', 'l2_charge_chunks'):
                 v = int(v)
