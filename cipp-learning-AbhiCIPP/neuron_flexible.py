@@ -305,21 +305,22 @@ class Neuron(NeuralEntity):
         self._distance = None               # per-afferent d_i (set at finalize)
         # Presentation-scoped plasticity freeze (observability; see
         # SimulationEngine.present_probe). Default OFF -- every existing caller is
-        # byte-identical. When ON, _update_weights, apply_competitive_reset's
+        # byte-identical. When ON, _update_weights, apply_delayed_inhibition's
         # depression, apply_inhibition's gate-plasticity/loser-depression, and
         # homeostatic scaling all skip their weight-mutating step while leaving
         # every PHYSICAL effect (membrane integration, threshold crossing, firing,
-        # competitive reset's unconditional discharge, inhibitory discharge) fully
+        # delayed inhibition's bounded discharge, inhibitory discharge) fully
         # live, so a held-out probe is observed with real dynamics but teaches
         # nothing.
         self.plasticity_frozen = False
         # Phase 4: per-L2E multiplier on the competitive-depression gain in
-        # apply_competitive_reset (see that method and SimulationEngine.
+        # apply_delayed_inhibition (see that method and SimulationEngine.
         # _apply_experimental_pathway_distances). Default 1.0 (neutral) --
         # every existing caller/config is byte-identical. This is the ONLY
         # place the L2I->L2E pathway's influence can enter, since that path
-        # has no learned weight/delivery step to scale; the unconditional
-        # membrane reset itself is NEVER touched by this multiplier.
+        # has no learned weight to scale; the delivered inhibitory magnitude
+        # itself is NEVER touched by this multiplier (Phase 7: only the
+        # scheduling engine's l2_inhibition_frac sets that).
         self.competitive_reset_influence = 1.0
         self.last_inhibitory_events = []    # debug records from the most recent apply_inhibition()
         # (last_spike_time / spiked live on the Membrane, seeded in its constructor;
@@ -640,33 +641,50 @@ class Neuron(NeuralEntity):
         self.loser_depression_events += 1
         self._apply_budget_and_cap()
 
-    def apply_competitive_reset(self):
-        """Unweighted L2I competitive-reset event on a LOSING L2E neuron
-        (L2_Hard_Reset_Competitive_Depression_Spec). This REPLACES the learned
-        L2I->L2E negative gate: there is no inhibitory magnitude and no negative
-        afferent involved. The event has two effects:
+    def apply_delayed_inhibition(self, magnitude: float):
+        """Causal L2I->L2E delayed inhibitory event (Phase 7; replaces the
+        retired apply_competitive_reset -- see July_14_Geometric_Influence_
+        Temporal_Winner_Brief.txt SS9). L2I no longer clamps a competitor the
+        instant it fires: this method is called later, when a PREVIOUSLY
+        scheduled delivery actually arrives (see SimulationEngine.
+        _deliver_scheduled_l2_inhibition), and delivers a bounded inhibitory
+        conductance rather than an unconditional reset. Two effects:
 
+          - transient: floor-limited subtraction, mirroring apply_inhibition's
+            delivery convention -- V = max(V - magnitude, resting_potential).
+            A neuron already at/near rest is left alone; one that is still
+            mid-race loses exactly `magnitude` of charge, no more. This is NOT
+            a hard clamp: unlike the retired method, a competitor that has
+            already fired keeps its spike (fire() already reset it on its own
+            terms), and one that hasn't yet crossed threshold merely loses
+            charge -- it is never forced to a specific value.
           - structural: depress only the POSITIVE feedforward weights whose L1E
-            sources participated in this response (weight > 0 AND last input spike),
-            using the shared direction-aware bounded kernel with direction -1 and
+            sources participated in this neuron's current response (weight > 0
+            AND last input spike), using the shared direction-aware bounded
+            kernel with direction -1 and
             gain = learning_rate * structural_gate * p_loss * competitive_reset_influence,
-            where p_loss = clamp(V_pre / theta, 0, 1) and competitive_reset_influence
-            is the Phase 4 L2I->L2E distance-influence multiplier (default 1.0,
-            neutral -- see the attribute's docstring). OFF (non-participating)
-            afferents are NEVER touched -- depressing them would potentiate absent
-            pixels. Only runs when loser_depression is enabled; a zero-charge loser
+            where p_loss = clamp(V_pre / theta, 0, 1) (this neuron's own
+            closeness to firing right now) and competitive_reset_influence is
+            the Phase 4 L2I->L2E distance-influence multiplier (default 1.0,
+            neutral). OFF (non-participating) afferents are never touched.
+            Only runs when loser_depression is enabled; a zero-charge target
             (p_loss == 0) learns nothing.
-          - transient: UNCONDITIONALLY reset the membrane to rest and clear the
-            pending excitatory/inhibitory current traces (when hard_reset_clear_traces).
 
-        The reset is unconditional even under a refractory timer (which is left
-        untouched): the guarantee is zero membrane/current state after the event.
-        Does NOT call apply_inhibition and needs no negative synapse. Returns a
-        diagnostic record (v_pre, v_post, theta, p_loss, depressed_indices,
-        weights_before, delta_weights, weights_after)."""
+        Refractory targets are SKIPPED ENTIRELY (no transient, no depression,
+        no record) -- matching apply_inhibition's own refractory convention,
+        and the opposite of the retired method's "unconditional even under
+        refractory" behaviour: a neuron already discharging from its own recent
+        spike is not touched by software a second time. Returns a diagnostic
+        record (applied, v_pre, v_post, theta, p_loss, magnitude,
+        depressed_indices, weights_before, delta_weights, weights_after)."""
         self._ensure_finalized()
         theta = self.threshold
         v_pre = float(self.potential)
+        if self.refractory_timer > 0:
+            return dict(applied=False, v_pre=v_pre, v_post=v_pre, theta=theta,
+                       p_loss=0.0, magnitude=float(magnitude),
+                       depressed_indices=[], weights_before=np.zeros(0),
+                       delta_weights=np.zeros(0), weights_after=np.zeros(0))
         p_loss = min(max(v_pre / theta, 0.0), 1.0) if theta > 0 else 0.0
 
         depressed_indices: list[int] = []
@@ -674,7 +692,7 @@ class Neuron(NeuralEntity):
         delta_weights = np.zeros(0)
         weights_after = np.zeros(0)
         # Frozen (probe presentation): skip the structural depression below;
-        # the unconditional membrane/trace reset further down still runs.
+        # the transient subtraction further down still runs.
         if (not self.plasticity_frozen and self.loser_depression and p_loss > 0.0
                 and self.weight_cap > 0
                 and self._weights_array is not None and len(self._weights_array) > 0):
@@ -696,14 +714,12 @@ class Neuron(NeuralEntity):
                 delta_weights = w_after - w_before
                 self.loser_depression_events += 1
 
-        # Unconditional hard reset: zero the membrane and pending current traces.
-        # The refractory timer is deliberately left untouched.
-        self.potential = self.resting_potential
-        if self.hard_reset_clear_traces:
-            self.exc_trace = 0.0
-            self.inh_trace = 0.0
+        # Bounded transient: floored at rest, never forced below it or clamped
+        # to an exact value -- see the docstring above.
+        self.potential = max(v_pre - float(magnitude), self.resting_potential)
         v_post = float(self.potential)
-        return dict(v_pre=v_pre, v_post=v_post, theta=theta, p_loss=p_loss,
+        return dict(applied=True, v_pre=v_pre, v_post=v_post, theta=theta,
+                    p_loss=p_loss, magnitude=float(magnitude),
                     depressed_indices=depressed_indices,
                     weights_before=weights_before, delta_weights=delta_weights,
                     weights_after=weights_after)

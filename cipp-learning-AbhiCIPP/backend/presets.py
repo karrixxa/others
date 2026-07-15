@@ -56,13 +56,15 @@ DASHBOARD_PRESET = dict(
     distance_min=1.0,
     l2e_budget=False,             # no positive-weight budget; -1 signal supplies down-pressure
     confidence_consolidation=False,
-    # Competitive depression (canonical, default ON): on an L2I hard-reset event
-    # each losing L2E depresses only the POSITIVE feedforward weights whose L1E
-    # sources participated in its (losing) response, scaled by its own pre-reset
-    # charge (p_loss) through the shared bounded kernel -- the structural half of
-    # the reset event (see L2_Hard_Reset_Competitive_Depression_Spec.md and
-    # Neuron.apply_competitive_reset). No learned inhibitory magnitude; the rate is
-    # the L2E's own learning_rate (eta_loss is not used and is removed here).
+    # Competitive depression (canonical, default ON): on a delayed L2I->L2E
+    # inhibition event (Phase 7: causal, delivered after a fixed delay, see
+    # SimulationEngine._deliver_scheduled_l2_inhibition) each affected L2E
+    # depresses only the POSITIVE feedforward weights whose L1E sources
+    # participated in its (currently losing) response, scaled by its own
+    # pre-delivery charge (p_loss) through the shared bounded kernel -- the
+    # structural half of the event (see L2_Hard_Reset_Competitive_Depression_Spec.md
+    # and Neuron.apply_delayed_inhibition). No learned inhibitory magnitude; the
+    # rate is the L2E's own learning_rate (eta_loss is not used and is removed here).
     loser_depression=True,
     # Assembly-flow credit lets a habitual winner's L2E->L2I synapse climb to
     # self-sufficiency so L2I fires in rhythm -- it removes the last-volley-only

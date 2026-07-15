@@ -1,11 +1,18 @@
-"""Focused tests for the L2 hard-reset competitive-depression architecture
-(L2_Hard_Reset_Competitive_Depression_Spec.md).
+"""Focused tests for the L2 competitive-depression architecture
+(L2_Hard_Reset_Competitive_Depression_Spec.md), updated for Phase 7's causal
+L2E->L2I->L2E redesign (July_14_Geometric_Influence_Temporal_Winner_Brief.txt
+SS9): Neuron.apply_competitive_reset was RETIRED and replaced by
+Neuron.apply_delayed_inhibition(magnitude) -- a bounded, floor-limited
+subtraction (not an unconditional clamp to rest) that is SKIPPED ENTIRELY on
+a refractory target, called later at delayed-delivery time rather than
+immediately when L2I fires. The structural depression half (local competitive
+depression of participating positive feedforward weights) is UNCHANGED.
 
-Covers the spec's Section 10 test list:
-  - the shared bounded weight kernel (H_up / reflected H_down);
-  - Neuron.apply_competitive_reset (unweighted reset + local depression);
+Covers the spec's Section 10 test list, adapted:
+  - the shared bounded weight kernel (H_up / reflected H_down) -- unchanged;
+  - Neuron.apply_delayed_inhibition (bounded delivery + local depression);
   - engine topology / serialization (no learned L2I->L2E gate; reset edges);
-  - integration (zero loser carryover, E->I still trains, 4-pattern cycling).
+  - integration (E->I still trains, 4-pattern cycling).
 
 Plain-script style:
     PYTHONPATH=. .venv/bin/python test_competitive_reset.py
@@ -78,7 +85,7 @@ def test_kernel_degenerate_range_is_noop():
 
 
 # ======================================================================
-# Competitive reset (spec Section 5, 7)
+# Delayed inhibition (spec Section 5, 7 -- adapted for Phase 7)
 # ======================================================================
 def _l2e(weights, theta=8.0, cap=8.0 / 3, floor=1.0, lr=0.02,
          participating=None, loser_depression=True, structural=False):
@@ -93,50 +100,96 @@ def _l2e(weights, theta=8.0, cap=8.0 / 3, floor=1.0, lr=0.02,
     return n
 
 
-def test_reset_positive_charge_to_rest():
+def test_full_magnitude_delivery_floors_at_rest():
+    """A delivery magnitude >= the target's current charge floors it at rest --
+    same net effect as the retired unconditional clamp, but as a bounded
+    subtraction rather than a forced value."""
     n = _l2e([2.0, 2.0, 2.0], participating=[1, 1, 0])
     n.potential = 0.7 * n.threshold
-    rec = n.apply_competitive_reset()
+    rec = n.apply_delayed_inhibition(n.threshold)
+    assert rec['applied'] is True
     assert n.potential == n.resting_potential
     assert rec['v_post'] == n.resting_potential
     assert rec['v_pre'] == 0.7 * n.threshold
-    print("PASS reset: a charged loser ends at exact rest")
+    print("PASS delivery: a sufficiently large magnitude floors a charged target at rest")
 
 
-def test_reset_clears_traces():
+def test_partial_magnitude_only_subtracts():
+    """Phase 7: unlike the retired unconditional clamp, a magnitude smaller
+    than the current charge only subtracts that much -- it never forces a
+    specific post value."""
+    n = _l2e([2.0, 2.0, 2.0], participating=[1, 1, 0])
+    n.potential = 0.7 * n.threshold
+    rec = n.apply_delayed_inhibition(0.2 * n.threshold)
+    assert np.isclose(n.potential, 0.5 * n.threshold)
+    assert np.isclose(rec['v_post'], 0.5 * n.threshold)
+    print("PASS delivery: a partial magnitude only subtracts, does not clamp")
+
+
+def test_delivery_never_pushes_below_rest():
+    n = _l2e([2.0, 2.0, 2.0], participating=[1, 1, 0])
+    n.potential = 0.1 * n.threshold
+    rec = n.apply_delayed_inhibition(10 * n.threshold)   # deliberately oversized
+    assert n.potential == n.resting_potential
+    assert rec['v_post'] == n.resting_potential
+    print("PASS delivery: an oversized magnitude floors at rest, never below it")
+
+
+def test_refractory_target_is_skipped_entirely():
+    """Phase 7 reverses the retired method's 'unconditional even under
+    refractory' behaviour: a target still in its own post-spike refractory
+    window is skipped -- no transient, no depression, no record -- matching
+    apply_inhibition's own refractory convention."""
+    n = _l2e([2.0, 2.0, 2.0], participating=[1, 1, 0])
+    n.refractory_timer = 2
+    n.potential = 0.9 * n.threshold
+    w_before = n._weights_array.copy()
+    rec = n.apply_delayed_inhibition(n.threshold)
+    assert rec['applied'] is False
+    assert n.potential == 0.9 * n.threshold, "refractory target's charge must be untouched"
+    assert np.array_equal(n._weights_array, w_before)
+    assert n.refractory_timer == 2
+    print("PASS delivery: a refractory target is skipped entirely (not clamped)")
+
+
+def test_delivery_does_not_touch_current_traces():
+    """Unlike the retired unconditional reset, a delivery event never clears
+    exc/inh traces -- flow-rate current is confirmed always inert in this
+    engine, so there is nothing physically meaningful left to drain."""
     n = _l2e([2.0, 2.0, 2.0], participating=[1, 1, 0])
     n.hard_reset_clear_traces = True
     n.potential = 0.5 * n.threshold
     n.exc_trace = 9.0
     n.inh_trace = 4.0
-    n.apply_competitive_reset()
-    assert n.exc_trace == 0.0 and n.inh_trace == 0.0, (n.exc_trace, n.inh_trace)
-    print("PASS reset: pending excitatory/inhibitory current traces are zeroed")
+    n.apply_delayed_inhibition(n.threshold)
+    assert n.exc_trace == 9.0 and n.inh_trace == 4.0, (n.exc_trace, n.inh_trace)
+    print("PASS delivery: current traces are left untouched")
 
 
-def test_reset_without_negative_afferent():
+def test_delivery_without_negative_afferent():
     n = _l2e([2.0, 2.0, 2.0], participating=[1, 1, 1])
     assert not (n._weights_array < 0).any()
     n.potential = 0.6 * n.threshold
-    n.apply_competitive_reset()          # no negative synapse required
+    n.apply_delayed_inhibition(n.threshold)          # no negative synapse required
     assert n.potential == n.resting_potential
-    print("PASS reset: works with no negative afferent weight")
+    print("PASS delivery: works with no negative afferent weight")
 
 
-def test_reset_occurs_with_depression_off():
+def test_delivery_occurs_with_depression_off():
     n = _l2e([2.0, 2.0, 2.0], participating=[1, 1, 0], loser_depression=False)
     w_before = n._weights_array.copy()
     n.potential = 0.9 * n.threshold
-    rec = n.apply_competitive_reset()
-    assert n.potential == n.resting_potential            # still resets
+    rec = n.apply_delayed_inhibition(n.threshold)
+    assert n.potential == n.resting_potential            # still discharges
     assert np.array_equal(n._weights_array, w_before)    # but does not learn
     assert rec['depressed_indices'] == []
-    print("PASS reset: still resets with loser_depression=False (no weight change)")
+    print("PASS delivery: still discharges with loser_depression=False (no weight change)")
 
 
-def test_no_reset_when_l2i_does_not_fire():
-    """The resolver only issues resets when L2I crosses threshold. Force a lone
-    sub-E->I winner so L2I cannot fire, and confirm no reset events."""
+def test_no_delivery_scheduled_when_l2i_does_not_fire():
+    """_resolve_l2_competition never performs an immediate reset (Phase 7);
+    the meaningful invariant is that nothing is SCHEDULED for delayed
+    delivery unless L2I itself crosses threshold."""
     e = SimulationEngine(seed=1, l1i_immediate_relay=False)
     l2 = e.l2
     thr = e.params['threshold_l2']
@@ -147,33 +200,50 @@ def test_no_reset_when_l2i_does_not_fire():
     l2.inhibitory_neuron.refractory_timer = 0
     l2.inhibitory_neuron.potential = 0.0                 # far from firing
     e._reset_events = []
+    e._l2i_pending = []
     l2i, inhibited, winner = e._resolve_l2_competition(l2, np.zeros(N_OUT), e.timestep)
     assert winner == 0
+    assert inhibited == [] and e._reset_events == []      # never populated here (Phase 7)
     if not l2i:
-        assert inhibited == [] and e._reset_events == []
-        print("PASS reset: no reset/depression when L2I does not fire")
+        assert e._l2i_pending == [], "nothing should be scheduled when L2I does not fire"
+        print("PASS delivery: no delayed delivery scheduled when L2I does not fire")
     else:
         raise AssertionError("L2I unexpectedly fired; test setup invalid")
 
 
-def test_winner_never_reset():
+def test_firer_typically_escapes_its_own_delayed_inhibition_via_refractory():
+    """Phase 7 delivery is UNIFORM across all N_OUT targets -- there is no
+    ID-based exemption for whoever fired. But a neuron that just fired to
+    trigger L2I is normally still in its own refractory window when the
+    delayed delivery arrives, so apply_delayed_inhibition skips it -- an
+    emergent property of physical timing, not a software exemption by ID."""
     e = SimulationEngine(seed=1, l1i_immediate_relay=False)
     l2 = e.l2
     thr = e.params['threshold_l2']
     for n in l2.excitatory_neurons:
         n.refractory_timer = 0
         n.potential = 0.0
-    l2.excitatory_neurons[0].potential = 2.0 * thr
-    l2.excitatory_neurons[1].potential = 1.5 * thr
+    winner_j = 0
+    l2.excitatory_neurons[winner_j].potential = 2.0 * thr
     l2.inhibitory_neuron.refractory_timer = 0
     l2.inhibitory_neuron.potential = l2.inhibitory_neuron.threshold   # ensure L2I fires
     e._reset_events = []
+    e._l2i_pending = []
     l2i, inhibited, winner = e._resolve_l2_competition(l2, np.zeros(N_OUT), e.timestep)
-    assert winner == 0
-    reset_ids = {nid for nid, _ in e._reset_events}
-    assert 'L2E0' not in reset_ids, "winner was passed through the reset path"
-    assert 0 not in inhibited
-    print("PASS reset: the winner is never reset")
+    assert winner == winner_j
+    assert inhibited == []                                # never populated here (Phase 7)
+    if l2i:
+        assert e._l2i_pending, "L2I fired but nothing was scheduled"
+        assert l2.excitatory_neurons[winner_j].refractory_timer > 0, \
+            "the firer should be refractory immediately after its own spike"
+        due_t = e._l2i_pending[0]['deliver_at']
+        delivered = e._deliver_scheduled_l2_inhibition(due_t)
+        assert winner_j not in delivered, \
+            "the firer (still refractory) should be skipped by its own delayed delivery"
+        print(f"PASS delivery: L2E{winner_j} escapes its own delayed inhibition via "
+              f"refractory, not by ID")
+    else:
+        print("PASS delivery: L2I did not fire in this setup (nothing to check)")
 
 
 # ======================================================================
@@ -183,7 +253,7 @@ def test_depression_only_participating_positive():
     n = _l2e([2.0, 2.0, 2.0], participating=[1, 0, 1])
     n.potential = 0.9 * n.threshold
     before = n._weights_array.copy()
-    rec = n.apply_competitive_reset()
+    rec = n.apply_delayed_inhibition(n.threshold)
     assert set(rec['depressed_indices']) == {0, 2}, rec['depressed_indices']
     assert n._weights_array[0] < before[0]               # participating -> down
     assert n._weights_array[2] < before[2]
@@ -196,21 +266,21 @@ def test_depression_creates_no_negative_or_absent_weight():
     n.potential = n.threshold                            # p_loss = 1 (max)
     for _ in range(50):
         n.potential = n.threshold
-        n.apply_competitive_reset()
+        n.apply_delayed_inhibition(n.threshold)
     assert (n._weights_array >= 1.0 - 1e-12).all(), n._weights_array
     assert not (n._weights_array < 0).any()
     print("PASS depress: no negative or below-floor weight is ever created")
 
 
-def test_zero_charge_loser_resets_but_does_not_learn():
+def test_zero_charge_target_discharges_but_does_not_learn():
     n = _l2e([2.0, 2.0, 2.0], participating=[1, 1, 1])
     n.potential = n.resting_potential                    # p_loss = 0
     before = n._weights_array.copy()
-    rec = n.apply_competitive_reset()
+    rec = n.apply_delayed_inhibition(n.threshold)
     assert n.potential == n.resting_potential
     assert np.array_equal(n._weights_array, before)
     assert rec['depressed_indices'] == []
-    print("PASS depress: a zero-charge loser resets but does not learn")
+    print("PASS depress: a zero-charge target discharges but does not learn")
 
 
 def test_higher_charge_gets_larger_update():
@@ -218,10 +288,10 @@ def test_higher_charge_gets_larger_update():
     hi = _l2e([2.0, 2.0, 2.0], participating=[1, 1, 1])
     lo.potential = 0.3 * lo.threshold
     hi.potential = 0.9 * hi.threshold
-    d_lo = -lo.apply_competitive_reset()['delta_weights']
-    d_hi = -hi.apply_competitive_reset()['delta_weights']
+    d_lo = -lo.apply_delayed_inhibition(lo.threshold)['delta_weights']
+    d_hi = -hi.apply_delayed_inhibition(hi.threshold)['delta_weights']
     assert (d_hi > d_lo).all(), (d_lo, d_hi)
-    print("PASS depress: a higher-charge loser is depressed more than a lower one")
+    print("PASS depress: a higher-charge target is depressed more than a lower one")
 
 
 def test_structural_maturity_scales_once():
@@ -235,20 +305,20 @@ def test_structural_maturity_scales_once():
     gain = n.learning_rate * gate * p_loss
     ref = bounded_signed_update(w_before, n.min_positive_weight, n.weight_cap,
                                 gain, np.full(3, -1.0))
-    n.apply_competitive_reset()
+    n.apply_delayed_inhibition(n.threshold)
     assert np.allclose(n._weights_array, ref), (n._weights_array, ref)
     print(f"PASS depress: structural maturity scales the loss update once (gate={gate:.3f})")
 
 
 def test_single_event_not_both_depressions():
-    """apply_competitive_reset must NOT invoke the legacy apply_inhibition loser
+    """apply_delayed_inhibition must NOT invoke the legacy apply_inhibition loser
     path: it never populates last_inhibitory_events and bumps the depression
     counter exactly once."""
     n = _l2e([2.0, 2.0, 2.0], participating=[1, 1, 1])
     n.last_inhibitory_events = ['sentinel']
     n.loser_depression_events = 0
     n.potential = 0.9 * n.threshold
-    n.apply_competitive_reset()
+    n.apply_delayed_inhibition(n.threshold)
     assert n.loser_depression_events == 1, n.loser_depression_events
     assert n.last_inhibitory_events == ['sentinel'], "apply_inhibition path ran"
     print("PASS depress: one event triggers competitive depression only (not legacy)")
@@ -348,17 +418,20 @@ if __name__ == "__main__":
     test_kernel_floored_cannot_go_lower()
     test_kernel_stays_in_bounds()
     test_kernel_degenerate_range_is_noop()
-    # reset
-    test_reset_positive_charge_to_rest()
-    test_reset_clears_traces()
-    test_reset_without_negative_afferent()
-    test_reset_occurs_with_depression_off()
-    test_no_reset_when_l2i_does_not_fire()
-    test_winner_never_reset()
+    # delayed inhibition
+    test_full_magnitude_delivery_floors_at_rest()
+    test_partial_magnitude_only_subtracts()
+    test_delivery_never_pushes_below_rest()
+    test_refractory_target_is_skipped_entirely()
+    test_delivery_does_not_touch_current_traces()
+    test_delivery_without_negative_afferent()
+    test_delivery_occurs_with_depression_off()
+    test_no_delivery_scheduled_when_l2i_does_not_fire()
+    test_firer_typically_escapes_its_own_delayed_inhibition_via_refractory()
     # depression
     test_depression_only_participating_positive()
     test_depression_creates_no_negative_or_absent_weight()
-    test_zero_charge_loser_resets_but_does_not_learn()
+    test_zero_charge_target_discharges_but_does_not_learn()
     test_higher_charge_gets_larger_update()
     test_structural_maturity_scales_once()
     test_single_event_not_both_depressions()

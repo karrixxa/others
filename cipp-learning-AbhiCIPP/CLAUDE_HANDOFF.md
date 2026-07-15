@@ -15,8 +15,10 @@
   isolated experimental behavior)
 - Phase 5 END checkpoint commit: `ff3048f` (diagnostic interleaved-presentation
   schedule)
-- This update corresponds to the **Phase 6 END** checkpoint (representation
-  candidate == first physical L2E threshold crossing) — commit hash filled in
+- Phase 6 END checkpoint commit: `aa271fc` (representation candidate == first
+  physical L2E threshold crossing)
+- This update corresponds to the **Phase 7 END** checkpoint (physical L2I
+  competition — causal, delayed L2E→L2I→L2E events) — commit hash filled in
   after this commit lands, see repo log.
 - Base branch `july14` is untouched and remains the protected base.
 - `four-pattern` branch exists (checked out in a separate worktree at
@@ -72,7 +74,7 @@ forgetting/silent-recruitable-cells/L2I-activity/L1I-selectivity across
 seeds. Zero engine/competition code changed — a 5-seed baseline was saved to
 `Diagnostic_Schedule_Baseline.md`.
 
-**Current phase (Phase 6, complete) — Representation candidate == first
+**Phase 6 (complete) — Representation candidate == first
 physical L2E threshold crossing, per explicit user instruction:** `self.winner`
 (the exposed representation candidate) is now set in EXACTLY one place — the
 instant a presentation's first physical L2E threshold crossing occurs — and
@@ -97,6 +99,36 @@ docstring as the thing Phase 7 is expected to reconsider/replace — this phase
 never touches physical dynamics (spike timing, membrane potentials, learning),
 confirmed by `sustained_dominance.py`/`ablation_harness.py` reproducing the
 exact Phase 1 numbers.
+
+**Current phase (Phase 7, complete) — Physical L2I competition, per explicit
+user instruction:** replaced the legacy immediate-reset tiebreak (single
+argmax-charge "winner" fires, every other threshold-crosser is hard-reset to
+rest in the SAME step) with a causal, delayed L2E→L2I→L2E event chain, per
+brief SS9's "investigate the physical dynamics, do not resolve this with a
+software exception." Every L2E that crosses threshold in a step now FIRES —
+no argmax pick, nobody is denied a spike because another also crossed. Each
+firer's event is logged as a contributor to L2I, which accumulates them
+toward its OWN threshold exactly as before (unchanged from every prior
+phase). Only once L2I itself fires does it SCHEDULE a delayed, uniform
+inhibitory delivery — a fixed magnitude (`l2_inhibition_frac * threshold_l2`,
+default 1.0) applied to all `N_OUT` L2E targets `l2_inhibition_delay` steps
+later (default 1), never fewer, never singling anyone out by ID. Delivery is
+a bounded, floor-limited membrane subtraction (`V = max(V - magnitude,
+rest)`), not a forced clamp, and is skipped entirely on a target still in its
+own post-spike refractory window (`Neuron.apply_delayed_inhibition`, which
+replaces the retired `apply_competitive_reset`) — the same convention as
+`apply_inhibition`, and the opposite of the retired method's "unconditional
+even under refractory" behaviour. A neuron that fired to help trigger L2I
+typically escapes its OWN consequence purely because it is still refractory
+when the delivery lands — an emergent property of timing, never a software
+exemption by index. Every requested fact is directly recorded, never
+inferred: contributing sources + arrival times, L2I pre/post charge at its
+own threshold crossing, the scheduled delivery record, the delivered
+inhibition, and competitor pre/post charge, all exposed via
+`dynamic_state()['l2_inhibition']` (`pending`/`last_delivery`/`log`). This
+phase deliberately changes physical dynamics (the explicit point of the
+instruction) — new baselines were captured and are EXPECTED to differ from
+every prior phase's; see Known problems for what changed and why.
 
 ## Completed (this session)
 
@@ -186,14 +218,135 @@ Python's per-process string hash randomization) -- confirmed NOT a Phase 6
 regression (the underlying spike counts were identical before and after; only
 the tie-break's displayed label was unstable).
 
+Phase 7 (physical L2I competition; see "Files changed" below): retired
+`Neuron.apply_competitive_reset` (unconditional clamp-to-rest, ignored
+refractory) and replaced it with `Neuron.apply_delayed_inhibition(magnitude)`
+(bounded floor-limited subtraction, skips a refractory target entirely).
+Rewrote `_resolve_l2_competition()` so every threshold-crosser fires and only
+contributes to L2I's own accumulation; added `_deliver_scheduled_l2_inhibition()`
+and the `_l2i_pending`/`_l2i_contributors`/`_last_l2_inhibition_delivery`/
+`_l2_inhibition_log` state to schedule and later apply delayed, uniform
+delivery. New config: `l2_inhibition_delay`/`l2_inhibition_frac` (constructor
++ live `apply_config`/`TUNABLE`). New diagnostics:
+`dynamic_state()['l2_inhibition']`. Updated 13 pre-existing tests across five
+files that directly exercised the retired mechanism's semantics (immediate
+reset, unconditional-under-refractory, argmax winner exemption) to match the
+new causal/bounded/refractory-skipping design; added
+`test_l2i_causal_inhibition.py` (15 new tests) asserting directly on the
+newly-exposed facts. Captured new `sustained_dominance.py`/
+`ablation_harness.py`/`diagnostic_schedule.py` baselines — all show real,
+expected declines in distinct-owner/pool-participation metrics (see Known
+problems), which is the anticipated cost of removing the same-step immediate
+mutual exclusion, not a bug.
+
 ## In progress
 
-**Phase 6 (representation candidate == first physical L2E threshold
-crossing) is COMPLETE** — single-milestone phase, phase-end regressions run,
-this is the phase-end checkpoint per `CLAUDE.md`. No further phase is
-currently queued.
+**Phase 7 (physical L2I competition) is COMPLETE** — single-milestone phase,
+phase-end regressions run, this is the phase-end checkpoint per `CLAUDE.md`.
+No further phase is currently queued.
 
-## Files changed (Phase 6 — representation candidate, this checkpoint)
+## Files changed (Phase 7 — physical L2I competition, this checkpoint)
+
+- `neuron_flexible.py`:
+  - **Retired** `apply_competitive_reset()`. **Added**
+    `apply_delayed_inhibition(magnitude)`: skips entirely (`applied=False`, no
+    transient, no depression, no record) when `refractory_timer > 0` (matching
+    `apply_inhibition`'s convention — the OPPOSITE of the retired method,
+    which was unconditional even under refractory); otherwise `V = max(V -
+    magnitude, resting_potential)` (a bounded, floor-limited subtraction, never
+    a forced clamp) plus the SAME structural depression as before (gain =
+    `learning_rate * gate * p_loss * competitive_reset_influence`, guarded by
+    `plasticity_frozen`/`loser_depression`). Dropped the unconditional
+    trace-clearing the retired method did (`exc_trace`/`inh_trace` are
+    confirmed always inert in this engine — see `_build()`'s neutering block —
+    so a delivery event has nothing physically meaningful left to drain).
+  - Updated the `competitive_reset_influence`/`plasticity_frozen` docstrings
+    that referenced the retired method by name.
+- `cortical_column_flexible.py` / `backend/presets.py`: updated comments that
+  named `apply_competitive_reset` to name the new method/mechanism.
+- `backend/simulation.py`:
+  - New constructor params `l2_inhibition_delay: int = 1` and
+    `l2_inhibition_frac: float = 1.0` (both in `TUNABLE`/live `apply_config`).
+    Default `frac=1.0` (a full-`threshold_l2` magnitude) reproduces the
+    retired method's net DISCHARGE magnitude for any target below
+    `threshold_l2` — only the CAUSALITY changes (delayed, accumulate-then-
+    cross-own-threshold, no ID-based exemption, refractory-skip) by default.
+  - New state: `_l2i_pending` (scheduled deliveries), `_l2i_contributors`
+    (running `(t, id)` list since L2I's last fire), `_last_l2_inhibition_delivery`,
+    `_l2_inhibition_log` (bounded history, same `LOG_MAX` convention as
+    `event_log`/`presentation_log`).
+  - `_resolve_l2_competition()` REWRITTEN: every `eligible` L2E now calls its
+    own `.fire()` (mutates `l2e` in place with a 1 for EACH firer, not one);
+    each firer is appended to `_l2i_contributors`. L2I's `receive_input` now
+    gets the full multi-hot vector (previously always one-hot). If L2I
+    crosses ITS OWN threshold (unchanged check), it fires (unchanged) and a
+    delayed delivery record is appended to `_l2i_pending`
+    (`fire_t`/`deliver_at`/`contributors`/`l2i_v_pre`/`l2i_v_post`/`magnitude`)
+    instead of an immediate reset loop. `inhibited` is now always `[]` and
+    `_reset_events` is never touched by this method — populated later, at
+    delivery time. `self._last_eligible` (Phase 6's same-step-tie source) is
+    still set exactly the same way, so `self.winner`/`earliest_response_set`
+    semantics are UNCHANGED.
+  - New `_deliver_scheduled_l2_inhibition(t)`: applies every pending record
+    whose `deliver_at <= t`, uniformly across ALL `N_OUT` L2E (no ID-based
+    exemption — a target still refractory from its own recent spike is simply
+    skipped by `apply_delayed_inhibition` itself). Builds `_reset_events`
+    (same tuple shape as before, `(nid, record)` — kept for compatibility with
+    the pre-existing standalone diagnostics `hard_reset_experiment.py`/
+    `report_competitive_depression.py`, which read it directly and needed no
+    changes), `l2_inh_phase_debug` (per-target `id`/`applied`/`v_pre`/`v_post`/
+    `p_loss`/`depressed`), and a `_l2_inhibition_log` entry.
+  - `step()`: calls `_deliver_scheduled_l2_inhibition(t)` at the very top,
+    BEFORE this step's own L1E/L2E processing — the same one-step-register
+    precedent as `l1i_feedback_delay` (a due delivery lands on the membrane
+    before new charge accumulates this step). The `reset->{j}` edge-flash list
+    is now built from the delivery's actually-applied target list, not from
+    an immediate per-step `inhibited` list. Removed the now-superseded
+    `_check_l2_reset_phases()` invariant check (it asserted every reset
+    reached EXACT rest, which no longer holds in general for a bounded,
+    partial-magnitude delivery — `l2_inh_phase_debug` is now built directly
+    at delivery time instead).
+  - `dynamic_state()`: added `l2_inhibition` block (`delay`, `magnitude`,
+    `pending`, `last_delivery`, `log`) exposing every requested fact —
+    contributing sources + arrival times, L2I pre/post charge at its own
+    threshold crossing, the scheduled delivery record, delivered inhibition,
+    and competitor pre/post charge — directly, never inferred from neuron IDs
+    or final spike counts.
+  - Updated stale docstrings/comments across the file (module-level L2E_FANIN
+    comment, `_build()`'s L2E config block, `event_driven`/`l2_charge_chunks`
+    constructor docs, `step()`'s 2b/2c comment block,
+    `pathway_influence_report()`'s L2I→L2E docstring, `_track_presentation()`'s
+    docstring) that named the retired argmax/hard-reset mechanism.
+- `test_competitive_reset.py`, `test_refractory_gating.py`,
+  `test_influence_phase.py`, `test_hard_reset_inhibition.py`,
+  `test_l2_competition.py`: 13 tests updated across these five files — each
+  directly exercised the retired mechanism's specific semantics (unconditional
+  clamp regardless of magnitude, ignoring refractory, a single-winner
+  ID-exemption from `inhibited`/`_reset_events`) and needed to change to
+  match the new bounded/refractory-skipping/uniform-delivery design. Every
+  other test in these files (the bounded weight kernel, topology/serialization,
+  depression-only-participating-positive math, `apply_inhibition`'s own
+  independent refractory gating, etc.) is UNCHANGED — only assertions that
+  actually depended on the retired mechanism's specific behavior were touched.
+- `test_l2i_causal_inhibition.py` (new) — 15 tests: every threshold-crosser
+  fires (not just one); a later response before delivery arrives is never
+  erased; L2I fire schedules a delayed record, never an immediate reset;
+  contributing sources + arrival times are exact recorded `(t, id)` events;
+  L2I's own pre/post charge at threshold crossing is recorded, not inferred;
+  a scheduled delivery applies at exactly `deliver_at`, not before, and is
+  consumed (not re-delivered); delivered inhibition exposes competitor
+  pre/post charge; a refractory target is skipped, verified directly against
+  `refractory_timer`; `dynamic_state()['l2_inhibition']` exposes the full
+  structure; pending entries carry every recorded field; a scheduled delivery
+  is NOT cancelled by a pattern switch (matching the `l1i_feedback_delay`
+  precedent); a probe's plasticity freeze blocks depression learning but not
+  the physical delivery discharge; `l2_inhibition_delay`/`l2_inhibition_frac`
+  are live-configurable both at construction and via `apply_config`; delivery
+  lands exactly `delay` steps after L2I fires; and a direct proof that
+  reading `dynamic_state()['l2_inhibition']` heavily between steps has zero
+  effect on spike timing or learned weights.
+
+### Phase 6 (prior checkpoint `aa271fc`)
 
 - `backend/simulation.py`:
   - **Retired** the entire "episode" latest-spike-wins mechanism: `EPISODE_QUIET_K`/
@@ -520,7 +673,48 @@ No neural equation and no preset VALUE was changed. `CLAUDE_HANDOFF.md`
 
 ## Tests
 
-### Phase 6 (this checkpoint)
+### Phase 7 (this checkpoint)
+
+- `test_l2i_causal_inhibition.py` (new, focused): **15/15 passed**.
+- 13 pre-existing tests updated across `test_competitive_reset.py`,
+  `test_refractory_gating.py`, `test_influence_phase.py`,
+  `test_hard_reset_inhibition.py`, `test_l2_competition.py` (see Files
+  changed): **all pass** with the new bounded/refractory-skipping/
+  delayed-delivery semantics.
+- `pytest -q` (full suite): **212 passed, 5 failed** (197 prior + 15 new = 212;
+  same 5 pre-existing `test_flow_rate.py`/`test_assembly_flow_credit.py`
+  failures as every prior checkpoint, untouched — flow-rate is permanently
+  neutered in `_build()`, confirmed unrelated to this phase).
+- **Probe non-mutation preserved:**
+  `test_probe_plasticity_freeze_does_not_block_delivery_discharge` confirms a
+  probe's frozen plasticity blocks the structural-depression learning a
+  delivery can trigger while the physical membrane discharge still happens —
+  and that no weight changes across the probe regardless.
+- **Direct engine-level verification, not inferred:**
+  `test_every_threshold_crosser_fires_not_just_one` forces two L2E above
+  threshold in the same step and confirms BOTH physically spike (`e.spiked`);
+  `test_l2i_fire_schedules_a_delayed_delivery_not_an_immediate_reset` confirms
+  `_resolve_l2_competition` never populates `_reset_events`/`inhibited` and
+  only schedules; `test_refractory_target_is_skipped_not_forced` confirms
+  delivery is attempted uniformly but a refractory target is excluded from
+  the applied-targets list; `test_pending_delivery_is_not_cancelled_by_a_pattern_switch`
+  confirms a scheduled delivery survives `set_pattern` (an in-flight physical
+  signal, matching the `l1i_feedback_delay` precedent).
+- **This phase deliberately changes physical dynamics** (the explicit point of
+  the instruction), so `sustained_dominance.py`/`ablation_harness.py`/
+  `diagnostic_schedule.py` were re-run to capture NEW baselines rather than
+  reproduce old ones — see Known problems for the numbers and why they
+  differ. This is the FIRST phase where a changed number is expected and
+  correct, not a regression.
+- **Full-stack smoke test:** direct engine construction + `step()` loop
+  confirmed `dynamic_state()['l2_inhibition']` is well-formed and non-empty
+  after a real run under `DASHBOARD_PRESET`; `backend.api` still imports and
+  builds its module-level `engine` cleanly (exercised via
+  `test_constant_input_feedback.py`, which imports `backend.api`, inside the
+  same `pytest -q` run — no separate httpx-based HTTP smoke test was possible
+  in this environment, see Known problems).
+
+### Phase 6 (prior checkpoint `aa271fc`)
 
 - `test_representation_candidate.py` (new, focused): **13/13 passed**.
 - `pytest -q` (full suite): **194 passed, 5 failed** (181 prior + 13 new =
@@ -776,19 +970,54 @@ No neural equation and no preset VALUE was changed. `CLAUDE_HANDOFF.md`
   (the existing `Diagnostic_Schedule_Baseline.md` numbers are unaffected,
   since that script computes `first_l2e_spiker` from its own raw stepping,
   not from `engine.winner` -- see Files changed for the confirmation this
-  produced no change). A future phase could re-run and save an updated
-  baseline explicitly framed around `self.winner`/`causal_story` now that
-  they mean the right thing.
-- **The legacy immediate-reset competition is real and still there.**
-  `_resolve_l2_competition`'s `max(eligible, key=potential)` tiebreak still
-  uses hidden membrane charge to decide which ONE neuron physically fires
-  (and therefore gets `apply_competitive_reset()`'d as the "winner" for
-  everyone else) whenever more than one L2E crosses threshold in the same
-  step. Phase 6 does not touch this -- it only stops the REPORTING layer from
-  treating that tiebreak's result as an unambiguous representation candidate.
-  This is the "legacy immediate-reset competition" explicitly flagged for
-  Phase 7 to reconsider/replace (e.g. a design that doesn't need to pick a
-  single physical "resetter" via hidden charge at all).
+  produced no change). Phase 7 re-ran this exact diagnostic and its numbers
+  DID change (see below) -- this bullet's "not yet done" framing is now
+  superseded by Phase 7's own findings.
+- **RESOLVED (Phase 6 -> Phase 7): the legacy immediate-reset competition is
+  gone.** `_resolve_l2_competition` no longer picks a single physical
+  "resetter" via hidden membrane charge -- every threshold-crosser fires, and
+  L2I's own threshold crossing schedules a delayed, uniform delivery instead
+  of an immediate reset. See Files changed/Goal above for the full design.
+- **Phase 7 measurably reduces distinct-owner/pool-participation metrics --
+  expected, and worth tracking closely.** Re-running
+  `diagnostic_schedule.py --seeds 1 2 3 4 5` (identical protocol to the saved
+  Phase 5 baseline) after this phase's change gives **distinct_owners =
+  1.60/4** (down from the Phase 5 baseline's 2.20/4) with per-pattern
+  consistency in a similar range (0.667-0.813 vs. the baseline's 0.680-0.813).
+  `sustained_dominance.py`/`ablation_harness.py` (held-pattern protocol) show
+  a much larger effect: **distinct=1/4, sustained_dominance=1.000, dead=7**
+  (vs. the long-standing confirmed baseline `distinct=2.00/4,
+  sustained_dominance=0.497, dead=5.00`) -- under a single HELD pattern for
+  many cycles, one specialist now wins EVERY cycle, and the SAME specialist
+  wins across all four DIFFERENT held patterns. This is the expected physical
+  consequence of removing the same-step immediate mutual exclusion: the old
+  design forced a fresh competition every single step (any step with 2+
+  crossers immediately reset everyone but one), which is what drove rotation;
+  the new design only corrects the pool every few steps (whenever L2I's OWN
+  accumulated evidence crosses its threshold), so a fast/confident specialist
+  can keep firing largely unimpeded between corrections and entrenches
+  further each pattern-hold. Per brief SS9 ("do not resolve this with a
+  software exception") this was NOT tuned away by adjusting
+  `l2_inhibition_frac`/`l2_inhibition_delay` to force a particular outcome --
+  it is reported as a real, measured consequence for the user to weigh. Not
+  yet investigated: whether this is specific to the `sustained_dominance`/
+  `ablation_harness` HELD-pattern protocol (a regime the brief's own
+  equal-interleaved schedule does not exercise) or a broader effect; a future
+  phase could look at this directly if the user wants pool utilization
+  addressed further.
+- **No adaptive/learned L2I->L2E gate was reintroduced.** The delayed
+  delivery's magnitude is a FIXED, configurable constant
+  (`l2_inhibition_frac * threshold_l2`), not something that learns per-target
+  over time -- an explicit, documented simplification (out of scope for this
+  phase; the instruction asked for causal timing/accumulation, not a new
+  learning rule).
+- **No httpx-based live-server HTTP smoke test was possible in this
+  environment** (`starlette.testclient` requires `httpx2`, not installed) --
+  verified instead via direct engine construction/stepping and via
+  `test_constant_input_feedback.py` (which imports `backend.api` and its
+  module-level `engine` inside the same `pytest -q` run). Flagged in case a
+  human or a differently-provisioned session wants to eyeball the live
+  websocket/API surface directly.
 - L1I/L2I source attribution's "no winner-specific credit" guard
   (`_credit_source`) only nulls out a source when it would otherwise name the
   presentation's own tied FIRST responder on the exact same step it fired.
@@ -880,23 +1109,32 @@ No neural equation and no preset VALUE was changed. `CLAUDE_HANDOFF.md`
 
 ## Next action
 
-Phase 6 is closed. Per explicit instruction, Phase 7 is the natural next step:
-**replace the legacy immediate-reset competition** flagged throughout this
-checkpoint (`_resolve_l2_competition`'s hidden-charge tiebreak and the
-single-firing hard-reset design that requires it) with something that doesn't
-need to silently pick one physical "resetter" via membrane charge when
-several L2E cross threshold in the same step -- this needs its own explicit
-go-ahead and careful design given brief SS9's "investigate the physical
-dynamics, do not resolve this with a software exception" guidance. Not
-started.
+Phase 7 is closed. No further phase is currently queued -- the natural next
+step, per Known problems above, would be investigating the measured
+distinct-owner/pool-participation decline (especially the
+`sustained_dominance.py`/`ablation_harness.py` HELD-pattern collapse to
+`distinct=1/4`) if the user wants that addressed; this needs its own explicit
+go-ahead and should NOT be resolved by tuning `l2_inhibition_frac`/
+`l2_inhibition_delay` to force a particular metric (per brief SS9's "do not
+resolve this with a software exception" -- the same guidance that shaped this
+phase itself).
 
 Other candidates for a future phase, none started, all needing their own
 explicit go-ahead:
-- Re-run `diagnostic_schedule.py --seeds 1 2 3 4 5` now that `self.winner`
-  correctly tracks the first physical responder, and save an updated baseline
-  framed around it (see Known problems) -- the existing
-  `Diagnostic_Schedule_Baseline.md` numbers remain valid since they never
-  depended on `engine.winner` in the first place.
+- Investigate why `sustained_dominance.py`/`ablation_harness.py`'s HELD-pattern
+  protocol now collapses to one specialist dominating all four patterns
+  (`distinct=1/4`, `dead=7`) while the brief's own equal-interleaved schedule
+  (`diagnostic_schedule.py`) shows a smaller decline (2.20/4 -> 1.60/4) --
+  whether this is protocol-specific or a broader Phase 7 consequence.
+- Whether a learned/adaptive L2I->L2E delivery magnitude (rather than the
+  current fixed `l2_inhibition_frac * threshold_l2`) is wanted -- explicitly
+  out of scope for Phase 7.
+- DONE (Phase 7): re-ran `diagnostic_schedule.py --seeds 1 2 3 4 5` now that
+  `self.winner` correctly tracks the first physical responder AND now that
+  competition itself is causal/delayed -- see Known problems for the numbers.
+  `Diagnostic_Schedule_Baseline.md` itself was left unmodified (it documents
+  the Phase 5 snapshot); a future phase could save a new dated baseline file
+  if a stable reference point post-Phase-7 is wanted.
 - Use `diagnostic_schedule.py` to actually experiment with the four Phase 4
   distance/influence pathways ONE AT A TIME (per "do not enable every pathway
   together"), comparing each run's `summarize()` output against the saved

@@ -102,45 +102,45 @@ def test_no_reset_without_discharge():
 
 
 # --------------------------------------------------------------- test 3
-def test_winner_not_reset():
-    """In the L2 competition the winner fires and is never passed to
-    apply_inhibition; only non-winners are inhibited (and hard-reset)."""
+def test_both_crossers_fire_and_delivery_is_scheduled_not_immediate():
+    """Phase 7: BOTH L2E that cross threshold this step FIRE -- there is no
+    argmax pick and no immediate reset of anyone (the retired mechanism this
+    test used to cover). _resolve_l2_competition never touches _reset_events;
+    it only SCHEDULES a delayed delivery once L2I itself crosses threshold."""
     e = SimulationEngine(seed=1, l2i_hard_reset_losers=True)
     l2 = e.l2
     thr = e.params['threshold_l2']
-    # Force two L2E over threshold with a clear max, everyone else below.
+    # Force two L2E over threshold, everyone else below.
     for j, n in enumerate(l2.excitatory_neurons):
         n.refractory_timer = 0
         n.last_inhibitory_events = []
         n.potential = 0.0
-    winner_j, loser_j = 0, 1
-    l2.excitatory_neurons[winner_j].potential = 2.0 * thr    # clear max
-    l2.excitatory_neurons[loser_j].potential = 1.5 * thr     # crosses, loses
-    # Pre-charge L2I to its threshold so the winner's spike reliably fires it
-    # (E->I weights start well below threshold, so a lone winner otherwise won't).
+    first_j, second_j = 0, 1
+    l2.excitatory_neurons[first_j].potential = 2.0 * thr
+    l2.excitatory_neurons[second_j].potential = 1.5 * thr
+    # Pre-charge L2I to its threshold so both crossers reliably fire it
+    # (E->I weights start well below threshold, so a lone crosser otherwise won't).
     l2.inhibitory_neuron.refractory_timer = 0
     l2.inhibitory_neuron.potential = l2.inhibitory_neuron.threshold
 
     l2e = np.zeros(N_OUT)
     e._inh_events = []
-    l2i, inhibited, winner = e._resolve_l2_competition(l2, l2e, e.timestep)
+    e._l2i_pending = []
+    l2i, inhibited, first_firer = e._resolve_l2_competition(l2, l2e, e.timestep)
 
-    assert winner == winner_j, f"expected winner {winner_j}, got {winner}"
-    assert winner_j not in inhibited, "winner must not be inhibited"
-    assert not l2.excitatory_neurons[winner_j].last_inhibitory_events, \
-        "winner received an inhibitory discharge"
+    assert first_firer in (first_j, second_j)
+    assert l2e[first_j] == 1.0 and l2e[second_j] == 1.0, \
+        "both threshold-crossers must physically fire, not just one"
+    assert inhibited == [], "Phase 7: _resolve_l2_competition never populates an immediate list"
+    assert not l2.excitatory_neurons[first_j].last_inhibitory_events, \
+        "no crosser received an immediate inhibitory discharge"
+    assert not l2.excitatory_neurons[second_j].last_inhibitory_events
     if l2i:
-        # The loser was inhibited and hard-reset to rest.
-        assert loser_j in inhibited, inhibited
-        assert np.isclose(l2.excitatory_neurons[loser_j].potential,
-                          l2.excitatory_neurons[loser_j].resting_potential), \
-            "loser was not hard-reset to rest"
-        print(f"PASS test3: winner L2E{winner_j} not reset by L2I; "
-              f"loser L2E{loser_j} hard-reset to rest")
+        assert e._l2i_pending, "L2I fired but nothing was scheduled for delayed delivery"
+        print("PASS test3: both crossers fired; L2I scheduled a delayed delivery "
+              "(nobody reset immediately)")
     else:
-        # If L2I didn't fire there is no inhibition at all -- still a valid check
-        # that the winner is untouched by inhibition.
-        print(f"PASS test3: winner L2E{winner_j} not inhibited (L2I did not fire)")
+        print("PASS test3: L2I did not fire in this setup (nothing scheduled)")
 
 
 # --------------------------------------------------------------- tests 4 & 5
@@ -241,8 +241,11 @@ def test_flow_traces_cleared_on_reset():
 
 # --------------------------------------------------------------- integration
 def test_preset_eliminates_carryover_end_to_end():
-    """Sanity end-to-end: under the preset, whenever L2I issues competitive resets
-    the reset L2E neurons end the step at rest (zero carryover)."""
+    """Sanity end-to-end: under the preset, whenever a Phase 7 delayed
+    L2I->L2E delivery reaches a target (default l2_inhibition_frac=1.0, a
+    full-threshold magnitude), that target ends the step at rest (zero
+    carryover) -- the same net discharge as the retired immediate reset,
+    just applied later and skipped on a still-refractory target."""
     e = SimulationEngine(seed=1, **HARD_RESET_PRESET)
     carryover_steps = 0
     discharge_steps = 0
@@ -273,7 +276,7 @@ if __name__ == "__main__":
     test_flag_off_preserves_behaviour()
     test_loser_reset_to_rest()
     test_no_reset_without_discharge()
-    test_winner_not_reset()
+    test_both_crossers_fire_and_delivery_is_scheduled_not_immediate()
     test_learning_uses_pre_reset_charge()
     test_preset_disables_loser_depression()
     test_signed_spike_update_unchanged()

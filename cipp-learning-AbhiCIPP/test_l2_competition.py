@@ -1,18 +1,22 @@
 """
-Regression test for L2 competition driven by the unweighted competitive reset.
+Regression test for L2 competition driven by the causal, delayed L2E->L2I->L2E
+event (Phase 7).
 
-Background: L2 competition is resolved by the shared inhibitory neuron L2I. When an
-L2E crosses threshold it fires and drives L2I; if L2I crosses ITS threshold it
-issues an unweighted competitive-reset event to every non-winner (see
-Neuron.apply_competitive_reset and L2_Hard_Reset_Competitive_Depression_Spec.md).
-There is NO learned L2I->L2E gate: the reset is binary (clamp the loser to rest and
-clear its current traces) plus local competitive depression of the participating
-positive feedforward weights.
+Background: L2 competition is resolved by the shared inhibitory neuron L2I. Every
+L2E that crosses threshold FIRES (no argmax pick); each firing is logged as a
+contributor to L2I, which accumulates them toward its own threshold exactly as
+before. Only once L2I itself crosses threshold does it SCHEDULE a delayed, uniform
+inhibitory delivery to the whole pool (see Neuron.apply_delayed_inhibition,
+_resolve_l2_competition and _deliver_scheduled_l2_inhibition,
+L2_Hard_Reset_Competitive_Depression_Spec.md). There is NO learned L2I->L2E gate:
+delivery is a fixed, floor-limited magnitude (default full threshold_l2) plus local
+competitive depression of the participating positive feedforward weights. A target
+still in its own post-spike refractory window is skipped by delivery entirely.
 
 This test asserts the pool stays alive and competition is inhibition-mediated:
 multiple neurons fire, multiple patterns map to distinct winners, L2I actually
-drives the resets, and the reset always returns a loser to exact rest (no residual
-learned-gate magnitude, no negative L2E afferent).
+drives deliveries, and a default-magnitude delivery returns its target to exact
+rest (no residual learned-gate magnitude, no negative L2E afferent).
 """
 
 from collections import Counter
@@ -73,26 +77,28 @@ def test_competitive_reset_keeps_pool_participating():
     print("  PASS: inhibition-driven competition via unweighted resets; no learned gate\n")
 
 
-def test_reset_returns_losers_to_rest():
-    """Directly exercise the resolver: when L2I fires, every non-winner ends at
-    exact rest with no negative afferent involved."""
-    print("=== L2 competition: a competitive reset returns losers to exact rest ===")
+def test_delayed_delivery_returns_targets_to_rest():
+    """Directly exercise the full engine: with the default full-threshold
+    delivery magnitude (l2_inhibition_frac=1.0), every target actually reached
+    by a delayed L2I->L2E delivery ends at exact rest, with no negative
+    afferent involved."""
+    print("=== L2 competition: a default-magnitude delivery returns targets to rest ===")
     e = SimulationEngine(seed=1, l1i_immediate_relay=False)
     e.set_pattern('row 1')
-    seen_reset_step = False
+    seen_delivery_step = False
     for _ in range(400):
         e.step()
         if e._reset_events:
-            seen_reset_step = True
+            seen_delivery_step = True
             for nid, rec in e._reset_events:
                 j = int(nid[3:])
                 pot = float(e.l2.excitatory_neurons[j].potential)
                 rest = float(e.l2.excitatory_neurons[j].resting_potential)
-                # v_post is measured right after the reset; end-of-step charge may
+                # v_post is measured right after delivery; end-of-step charge may
                 # rebuild on a LATER step but must be rest immediately after.
                 assert rec['v_post'] == rest, (nid, rec['v_post'], rest)
             break
-    assert seen_reset_step, "no competitive reset occurred in 400 steps"
+    assert seen_delivery_step, "no delayed delivery occurred in 400 steps"
     print("  PASS: losers clamped to rest by the competitive reset\n")
 
 
@@ -111,6 +117,6 @@ def test_robust_across_seeds():
 
 if __name__ == "__main__":
     test_competitive_reset_keeps_pool_participating()
-    test_reset_returns_losers_to_rest()
+    test_delayed_delivery_returns_targets_to_rest()
     test_robust_across_seeds()
     print("ALL L2 COMPETITION TESTS PASSED")

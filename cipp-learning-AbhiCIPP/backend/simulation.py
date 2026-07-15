@@ -230,9 +230,9 @@ def _summarize_pathway(entries: list[dict]) -> dict:
 
 
 # Active L2E fan-in: exactly N_PIX pixel afferents. There is NO index-0 local-I
-# placeholder and no negative L2I->L2E gate -- L2 competition is now an unweighted
-# hard reset plus local competitive depression (see Neuron.apply_competitive_reset
-# and L2_Hard_Reset_Competitive_Depression_Spec.md).
+# placeholder and no negative L2I->L2E gate -- L2 competition is a causal,
+# delayed L2E->L2I->L2E event (Phase 7) plus local competitive depression (see
+# Neuron.apply_delayed_inhibition and L2_Hard_Reset_Competitive_Depression_Spec.md).
 L2E_FANIN = N_PIX
 FREQ_WINDOW = 40
 WEIGHT_EPS = 1e-6
@@ -521,20 +521,21 @@ class SimulationEngine:
                  # before _apply_budget_and_cap); it is kept as a knob so the older
                  # budget/charge regime can still be reconstructed for comparison.
                  l2e_budget: bool = False,
-                 # Event-driven firing: resolve L2 competition EVERY step -- pick the
-                 # single argmax winner among the threshold-crossers and inhibit the
-                 # rest, once per timestep. DEFAULT ON: this per-step single-winner
-                 # flow is the canonical L2 procedure. Turn OFF to fall back to the
-                 # cycle-quantized regime (resolve the same argmax competition only on
-                 # the intrinsic cycle boundary, once per cycle_period steps), which
-                 # decouples winner timing from the input rate -- kept as a knob so
-                 # that rate-decoupling regime can still be reconstructed for A/B.
+                 # Event-driven firing: resolve L2 competition EVERY step -- every
+                 # threshold-crosser fires (Phase 7: no argmax pick), and L2I
+                 # accumulates their events toward its own threshold. DEFAULT ON:
+                 # this per-step flow is the canonical L2 procedure. Turn OFF to
+                 # fall back to the cycle-quantized regime (resolve the same
+                 # competition only on the intrinsic cycle boundary, once per
+                 # cycle_period steps), which decouples winner timing from the
+                 # input rate -- kept as a knob so that rate-decoupling regime can
+                 # still be reconstructed for A/B.
                  event_driven: bool = True,
                  # L2 feedforward charge granularity: deliver this step's L1->L2E
                  # drive in K equal chunks (weight_ji/K per active synapse) WITHIN a
-                 # frozen outer timestep, re-running the argmax WTA after each chunk
+                 # frozen outer timestep, re-attempting resolution after each chunk
                  # and stopping at the first chunk that produces a threshold-crosser
-                 # (consolidation-first: the earliest strong responder wins before
+                 # (consolidation-first: the earliest strong responder(s) fire before
                  # rivals pile up charge). The clock does not advance and no
                  # leak/update runs between chunks. K=1 (default) delivers the full
                  # drive in one chunk and reproduces the un-chunked behavior exactly.
@@ -632,6 +633,28 @@ class SimulationEngine:
                  lasting_inhibition: bool = False,
                  inh_decay: float = 0.15,
                  inh_boost_frac: float = 1.0,
+                 # ---- Phase 7: causal L2E->L2I->L2E competition (replaces the
+                 # legacy immediate-reset tiebreak; see July_14_Geometric_
+                 # Influence_Temporal_Winner_Brief.txt SS9). L2I accumulates
+                 # actual arriving L2E spike events and fires on its OWN
+                 # threshold crossing exactly as before; what changes is what
+                 # happens next -- instead of instantly clamping every non-
+                 # winner in the same timestep, L2I schedules a delayed,
+                 # uniform inhibitory conductance delivered l2_inhibition_delay
+                 # steps later (see _deliver_scheduled_l2_inhibition), sized as
+                 # l2_inhibition_frac * threshold_l2 (a FIXED, configurable
+                 # magnitude -- there is still no learned L2I->L2E gate; a
+                 # learned/adaptive gate is out of scope for this phase). The
+                 # delivery floors at rest (never forces a specific value) and
+                 # is skipped entirely for a target still in its OWN post-spike
+                 # refractory window. default frac=1.0 means a target that
+                 # never crossed threshold (charge < threshold_l2) is still
+                 # fully floored, reproducing the net discharge magnitude of
+                 # the retired immediate clamp -- only the CAUSALITY (delayed,
+                 # accumulate-then-cross-threshold, self-normal-reset-on-own-
+                 # spike, no ID-based exemption) actually changes.
+                 l2_inhibition_delay: int = 1,
+                 l2_inhibition_frac: float = 1.0,
                  # Reset-by-subtraction on L2E fire: on spike, potential -= threshold
                  # (floored at rest) instead of a full reset to rest. Standard LIF;
                  # leaves the winner its residual overshoot like partially-inhibited
@@ -818,6 +841,8 @@ class SimulationEngine:
                            distance_ref=distance_ref, distance_min=distance_min,
                            lasting_inhibition=lasting_inhibition, inh_decay=inh_decay,
                            inh_boost_frac=inh_boost_frac,
+                           l2_inhibition_delay=l2_inhibition_delay,
+                           l2_inhibition_frac=l2_inhibition_frac,
                            subtractive_reset=subtractive_reset,
                            l2i_hard_reset_losers=l2i_hard_reset_losers,
                            hard_reset_clear_traces=hard_reset_clear_traces,
@@ -917,8 +942,10 @@ class SimulationEngine:
         eff_leak_l2 = p['leak_l2'] if p['leak_enabled'] else 0.0
         # Active L2 has NO learned L2I->L2E gate: build the column without the
         # index-0 local-I placeholder so each L2E has exactly N_PIX pixel afferents.
-        # Competition is the unweighted hard reset + competitive depression in
-        # _resolve_l2_competition (see L2_Hard_Reset_Competitive_Depression_Spec.md).
+        # Competition is the causal, delayed L2E->L2I->L2E event (Phase 7:
+        # _resolve_l2_competition schedules, _deliver_scheduled_l2_inhibition
+        # applies) plus local competitive depression -- see
+        # L2_Hard_Reset_Competitive_Depression_Spec.md.
         self.l2 = CorticalColumn(n_neurons=N_OUT, threshold=thr_l2,
                                  refractory_period=p['refractory'], learning_rate=p['learning_rate'],
                                  weight_cap=thr_l2, leak_rate=eff_leak_l2,
@@ -1004,8 +1031,9 @@ class SimulationEngine:
                                          else L2E_MIN_WEIGHT_FLOOR)
                 # No learned L2I->L2E gate on the active path: the inhibitory-gate
                 # cap/eta and l2_gate_eq_frac are inert (they only configured the
-                # removed negative gate). L2 competition is the unweighted hard reset
-                # + competitive depression (Neuron.apply_competitive_reset).
+                # removed negative gate). L2 competition is the causal, delayed
+                # L2E->L2I->L2E event + competitive depression
+                # (Neuron.apply_delayed_inhibition).
                 # Charge-based excitatory rule (see Neuron._update_weights);
                 # eta scaled to this neuron's own weight_cap -- see ETA_FRAC note.
                 # Phase 1: L2E feedforward learning uses its own l2e_lr_frac.
@@ -1165,7 +1193,12 @@ class SimulationEngine:
         # index, hidden charge, weights, geometry, or UI logic.
         self.winner: str | None = None
         self._inh_events: list[tuple] = []   # (neuron_id, event) from this step's discharges
-        self._reset_events: list[tuple] = []  # (neuron_id, record) from L2 competitive resets
+        self._reset_events: list[tuple] = []  # (neuron_id, record) from delivered L2 inhibition
+        # Phase 7: causal L2E->L2I->L2E competition state.
+        self._l2i_pending: list[dict] = []        # scheduled deliveries, not yet due
+        self._l2i_contributors: list[tuple] = []  # (t, 'L2Ej') events since L2I's last fire
+        self._last_l2_inhibition_delivery: dict | None = None
+        self._l2_inhibition_log: deque = deque(maxlen=LOG_MAX)
 
         # Auto-cycle: rotate through the patterns, showing each for a short bounded
         # VISIT, and detect training per pattern. Sitting on one pattern can't
@@ -1179,9 +1212,9 @@ class SimulationEngine:
         # pattern is trained, auto-cycle disables itself (curriculum complete).
         self.event_driven = self.params['event_driven']   # fire on threshold crossing every step
         # L2 chunked-charge granularity (see step()): deliver this step's L1->L2E
-        # drive in K equal chunks, resolving the argmax WTA after each. K=1
+        # drive in K equal chunks, re-attempting resolution after each. K=1
         # reproduces un-chunked delivery. l2_winner_chunk records which chunk
-        # resolved the last competition (diagnostic; None if no winner fired).
+        # resolved the last competition (diagnostic; None if nobody fired).
         self.l2_charge_chunks = max(1, int(self.params['l2_charge_chunks']))
         self.l2_winner_chunk = None
         # L1I feedback firing mode (see step() 2e): immediate deterministic relay
@@ -1196,6 +1229,12 @@ class SimulationEngine:
         self.inh_decay = self.params['inh_decay']
         self.inh_boost = self.params['inh_boost_frac'] * self.params['threshold_l2']
         self.l2_inh_field = 0.0
+        # Phase 7: causal L2E->L2I->L2E delayed-delivery config (see the
+        # constructor docstring above). Threshold_l2-scaled so a config that
+        # lowers/raises threshold_l2 keeps the same relative magnitude.
+        self.l2_inhibition_delay = max(0, int(self.params['l2_inhibition_delay']))
+        self.l2_inhibition_frac = self.params['l2_inhibition_frac']
+        self.l2_inhibition_magnitude = self.l2_inhibition_frac * self.params['threshold_l2']
         self.current_pattern = initial_pattern    # name backing self.input_vec
         self.auto_cycle = False
         self.visit_steps = max(1, self.params['cycle_period'])   # steps per pattern visit
@@ -1307,10 +1346,11 @@ class SimulationEngine:
         for j in range(N_OUT):
             for i in range(N_PIX):
                 self.synapses.append(dict(id=f'ff{i}->{j}', source=f'L1E{i}', target=f'L2E{j}', kind='feedforward'))
-        # Structural (unweighted) L2I->L2E reset fanout: conveys the binary
-        # competitive_reset event, NOT a synaptic weight. It stays visible (the
-        # inhibitory fanout still exists) but carries weight=null and never appears
-        # in weight snapshots, weight-change tracking, or the weights graph.
+        # Structural (unweighted) L2I->L2E delayed-inhibition fanout: conveys the
+        # scheduled/delivered event (Phase 7), NOT a synaptic weight. It stays
+        # visible (the inhibitory fanout still exists) but carries weight=null
+        # and never appears in weight snapshots, weight-change tracking, or the
+        # weights graph.
         for j in range(N_OUT):
             self.synapses.append(dict(id=f'reset->{j}', source='L2I', target=f'L2E{j}',
                                       kind='reset_inhibition'))
@@ -1417,11 +1457,11 @@ class SimulationEngine:
         applied (each pathway's own ablation flag) -- plus min/median/max
         influence and a `safe` flag per pathway. L1E->L2E reuses the existing
         legacy distance_weighting/legacy_distance_compat machinery (Phase 2/3,
-        UNCHANGED). L2I->L2E has no learned weight (an unweighted structural
-        reset event): raw_weight/effective are reported as None there --
-        influence scales ONLY the competitive-depression gain (see
-        Neuron.apply_competitive_reset), never the unconditional membrane
-        reset itself."""
+        UNCHANGED). L2I->L2E has no learned weight (a fixed-magnitude, causally
+        delayed structural event -- see l2_inhibition_frac/_delay): raw_weight/
+        effective are reported as None there -- influence scales ONLY the
+        competitive-depression gain (see Neuron.apply_delayed_inhibition),
+        never the delivered inhibitory magnitude itself."""
         p = self.params
         report: dict[str, dict] = {}
 
@@ -1565,7 +1605,9 @@ class SimulationEngine:
                # Phase 4: the four NEW experimental pathways' own ablation flags
                # plus their one shared, configurable power law.
                'infl_l2e_l2i', 'infl_l2i_l2e', 'infl_l2e_l1i', 'infl_l1i_l1e',
-               'infl_power', 'infl_ref', 'infl_min')
+               'infl_power', 'infl_ref', 'infl_min',
+               # Phase 7: causal L2E->L2I->L2E delayed-inhibition scheduling.
+               'l2_inhibition_delay', 'l2_inhibition_frac')
 
     def apply_config(self, overrides: dict):
         """Merge tunable overrides into self.params and rebuild the network in
@@ -1590,7 +1632,7 @@ class SimulationEngine:
                      'l1i_leak_enabled', 'symmetric_geometry', 'legacy_distance_compat',
                      'infl_l2e_l2i', 'infl_l2i_l2e', 'infl_l2e_l1i', 'infl_l1i_l1e'):
                 v = bool(v)
-            elif k in ('seed', 'refractory', 'l2_charge_chunks'):
+            elif k in ('seed', 'refractory', 'l2_charge_chunks', 'l2_inhibition_delay'):
                 v = int(v)
             elif k == 'l2e_init_mode':
                 # Exposed as a dashboard TOGGLE (bool): on -> balanced, off ->
@@ -1727,93 +1769,107 @@ class SimulationEngine:
             self._pulses[neuron_id] = self._pulses.get(neuron_id, 0.0) + magnitude
         self._log('control', f'stimulate {neuron_id} (+{magnitude:g}{", hold" if continuous else ""})')
 
-    def _check_l2_reset_phases(self, l2, v_start):
-        """Build per-L2E reset-phase records for this step's competitive-reset events
-        and warn (never crash) if the reset invariant is violated. The invariant: a
-        competitive reset must leave the target at EXACT rest (v_post ==
-        resting_potential) and no later same-timestep operation (leak, trace advance)
-        may restore charge (v_end, measured after leak, must not rise above rest).
-        Read-only: it inspects this step's reset records and the current membrane; it
-        never mutates a neuron."""
-        self.l2_inh_phase_debug = []
-        for nid, rec in self._reset_events:
-            j = int(nid[3:])
-            neuron = l2.excitatory_neurons[j]
-            v_end = float(neuron.potential)
-            rest = float(neuron.resting_potential)
-            self.l2_inh_phase_debug.append(dict(
-                id=nid,
-                v_start=round(v_start.get(j, 0.0), 3),
-                v_pre=round(rec['v_pre'], 3),      # charge before the reset
-                p_loss=round(rec['p_loss'], 3),
-                depressed=len(rec['depressed_indices']),
-                v_post=round(rec['v_post'], 3),    # after the reset (should be rest)
-                v_end=round(v_end, 3)))
-            if abs(rec['v_post'] - rest) > 1e-6:
-                self._log('warn', f"{nid}: competitive reset did not reach rest "
-                                  f"(v_post={rec['v_post']:.1f}, rest={rest:.1f})")
-            if v_end > rest + 1e-6:
-                self._log('warn', f"{nid}: charge rose above rest after reset within the "
-                                  f"same timestep (v_end={v_end:.1f}) -- unexpected "
-                                  f"post-reset recharge")
-
     def _resolve_l2_competition(self, l2, l2e, t):
-        """Attempt one standard argmax WTA resolution on the CURRENT L2E membrane
-        state. If any L2E crossed threshold, the max-charge crosser fires, drives
-        L2I, and (if L2I fires) EVERY non-winner receives an unweighted competitive
-        reset -- an unconditional hard reset of its membrane/current traces plus
-        local competitive depression of the participating positive feedforward
-        weights (Neuron.apply_competitive_reset; there is no learned inhibitory
-        magnitude). Mutates `l2e` in place (sets the winner's one-hot bit). Returns
-        (l2i, inhibited, winner); winner is None and L2I is left UNTOUCHED when
-        nobody crossed, so a caller running this per charge-chunk can drive L2I's
-        no-winner integration exactly once after the chunk loop instead of K times.
-        `t` is the current outer timestep (passed through to L2I flow-rate charge).
+        """PHASE 7 -- causal L2E->L2I->L2E competition (replaces the retired
+        argmax immediate-reset tiebreak; see July_14_Geometric_Influence_
+        Temporal_Winner_Brief.txt SS9 and Neuron.apply_delayed_inhibition).
 
-        PHASE 6/7 NOTE -- this method's own `winner` (below) is a MECHANICAL
-        choice, not the representation candidate: when more than one L2E is
-        `eligible` in the same step, `max(eligible, key=potential)` is a LEGACY
-        immediate-reset tiebreak that decides which ONE neuron physically fires
-        and resets the rest -- it exists because the current hard-reset design
-        can only physically discharge the pool through a single firing event,
-        not because a tie should be resolved this way representationally. Phase
-        6 does NOT let this tiebreak's result stand in for an unambiguous
-        winner: the caller (_track_presentation) reads `self._last_eligible`
-        (the full eligible set, set below) and reports the response as an
-        ambiguous same-step tie -- earning no winner-specific credit -- whenever
-        that set has more than one member, regardless of which specific neuron
-        this mechanism happened to let fire. This tiebreak (and the single-
-        firing hard-reset design that requires it) is the "legacy immediate-
-        reset competition" flagged here for Phase 7 to reconsider/replace; it
-        is deliberately left unchanged in Phase 6.
+        EVERY L2E that is `eligible` (above its own threshold) this step FIRES
+        -- physically, via its own normal fire() (captures charge, discharges
+        on its own terms, starts its own refractory window, learns). There is
+        no mechanical argmax pick and no neuron is denied its spike because
+        another also crossed threshold: "later L2E spikes before inhibition
+        arrives are valid and remain ranked" (brief SS9). Each firer is logged
+        as a contributor (t, id) since L2I's last fire -- L2I's OWN threshold
+        crossing is what actually resolves the competition, not this method.
+
+        L2I accumulates the full multi-hot firing vector exactly as it always
+        has (receive_input); if THAT crosses L2I's own threshold, L2I fires
+        (on its own terms, same as before) and a delayed, uniform inhibitory
+        delivery is SCHEDULED (not applied) for l2_inhibition_delay steps
+        later -- see _deliver_scheduled_l2_inhibition, called at the top of
+        step(). No neuron is reset here; `inhibited` is always [] and
+        `_reset_events` is untouched by this method (populated later, at
+        delivery time, by whichever targets the scheduled event actually
+        reaches).
+
+        Mutates `l2e` in place (sets a 1 for every firer, not just one).
+        Returns (l2i, inhibited, first_firer); first_firer is None (and L2I is
+        left UNTOUCHED) when nobody crossed, so a caller running this per
+        charge-chunk can drive L2I's no-winner integration exactly once after
+        the chunk loop instead of K times. `t` is the current outer timestep.
         """
         eligible = [j for j, e in enumerate(l2.excitatory_neurons) if e.check_threshold()]
         # earliestResponseSet's source (Causal Story): the FULL eligible set at
         # the step that resolves the competition, read by _track_presentation
-        # to detect an ambiguous same-step tie. Never used here to pick the
-        # winner below -- that argmax is the legacy mechanism documented above.
+        # to detect an ambiguous same-step tie (Phase 6 semantics unchanged --
+        # ALL of these neurons now actually fire, but the representation
+        # candidate is still None on a same-step tie; see that method).
         self._last_eligible = eligible
         if not eligible:
             return 0.0, [], None
-        winner = max(eligible, key=lambda j: l2.excitatory_neurons[j].potential)
-        l2.excitatory_neurons[winner].fire()
-        l2e[winner] = 1.0
-        # The winner drives L2I, which fires (E->I weight = thr_l2) and issues the
-        # competitive-reset event to the whole rest of the pool.
+        for j in eligible:
+            l2.excitatory_neurons[j].fire()
+            l2e[j] = 1.0
+            self._l2i_contributors.append((t, f'L2E{j}'))
+        # L2I accumulates every actual arriving L2E event this step (not a
+        # one-hot "the winner"); it fires on its OWN threshold crossing exactly
+        # as before.
         l2.inhibitory_neuron.receive_input(l2e, t=t)
-        l2i = 1.0 if l2.inhibitory_neuron.check_threshold() else 0.0
-        inhibited = []
-        if l2i:
+        l2i = 0.0
+        if l2.inhibitory_neuron.check_threshold():
+            v_pre_l2i = float(l2.inhibitory_neuron.potential)
             l2.inhibitory_neuron.fire()
-            for j in range(N_OUT):
-                if j == winner:
-                    continue                        # winner already fired via its own fire()
-                # Every non-winner resets unconditionally (even far below threshold,
-                # even refractory); depression may be zero but the reset is not.
-                rec = l2.excitatory_neurons[j].apply_competitive_reset()
-                self._reset_events.append((f'L2E{j}', rec))
-                inhibited.append(j)
-        return l2i, inhibited, winner
+            l2i = 1.0
+            v_post_l2i = float(l2.inhibitory_neuron.potential)
+            contributors = list(self._l2i_contributors)
+            self._l2i_contributors = []
+            self._l2i_pending.append(dict(
+                fire_t=t, deliver_at=t + self.l2_inhibition_delay,
+                contributors=contributors,
+                l2i_v_pre=round(v_pre_l2i, 4), l2i_v_post=round(v_post_l2i, 4),
+                magnitude=self.l2_inhibition_magnitude))
+        return l2i, [], eligible[0]
+
+    def _deliver_scheduled_l2_inhibition(self, t):
+        """PHASE 7 -- apply every delayed L2I->L2E delivery scheduled (by
+        _resolve_l2_competition) whose deliver_at has arrived. Called at the
+        very top of step(), BEFORE this step's own L1E/L2E processing, so a
+        due delivery lands on the membrane before new charge accumulates --
+        the same one-step-register precedent as l1i_feedback_delay. Delivery
+        is UNIFORM across all N_OUT L2E targets (no ID-based exemption): a
+        target still in its own post-spike refractory window is skipped
+        entirely by apply_delayed_inhibition (so a neuron that fired to
+        trigger this very event typically -- not by exemption, but because it
+        is still refractory -- escapes being hit by its own consequence).
+        Read/mutate only via Neuron.apply_delayed_inhibition; builds
+        _reset_events / l2_inh_phase_debug / _l2_inhibition_log from the
+        result. Returns the list of L2E indices actually reached (applied)."""
+        self.l2_inh_phase_debug = []
+        due = [rec for rec in self._l2i_pending if rec['deliver_at'] <= t]
+        if not due:
+            return []
+        self._l2i_pending = [rec for rec in self._l2i_pending if rec['deliver_at'] > t]
+        applied_targets: list[int] = []
+        for rec in due:
+            targets = []
+            for j, e in enumerate(self.l2.excitatory_neurons):
+                out = e.apply_delayed_inhibition(rec['magnitude'])
+                if out['applied']:
+                    self._reset_events.append((f'L2E{j}', out))
+                    applied_targets.append(j)
+                targets.append(dict(id=f'L2E{j}', applied=out['applied'],
+                                    v_pre=round(out['v_pre'], 4), v_post=round(out['v_post'], 4),
+                                    p_loss=round(out['p_loss'], 4),
+                                    depressed=len(out['depressed_indices'])))
+            delivery = dict(fire_t=rec['fire_t'], deliver_at=t,
+                            contributors=[f'{ct}:{cid}' for ct, cid in rec['contributors']],
+                            l2i_v_pre=rec['l2i_v_pre'], l2i_v_post=rec['l2i_v_post'],
+                            magnitude=round(rec['magnitude'], 4), targets=targets)
+            self._l2_inhibition_log.append(delivery)
+            self._last_l2_inhibition_delivery = delivery
+            self.l2_inh_phase_debug = delivery['targets']
+        return applied_targets
 
     # ------------------------------------------------------------------- step
     def step(self) -> dict:
@@ -1837,6 +1893,10 @@ class SimulationEngine:
         cycle_boundary = (t % self.params['cycle_period'] == 0)
         self._inh_events = []
         self._reset_events = []
+        # Phase 7: apply any delayed L2I->L2E delivery scheduled on a previous
+        # step and now due, BEFORE this step's own L1E/L2E processing -- same
+        # one-step-register precedent as l1i_feedback_delay below.
+        l2_inhibition_delivered = self._deliver_scheduled_l2_inhibition(t)
         for i, e in enumerate(l1.excitatory_neurons):
             ext = 1.0 if (input_arrives and self.input_vec[i] > 0.5) else 0.0
             e.receive_input(np.array([0.0, ext]))
@@ -1857,26 +1917,27 @@ class SimulationEngine:
                 e.fire()
 
         # 2b/2c. Deliver L1E->L2E feedforward charge and resolve L2 competition.
-        #     When the winner fires, the shared inhibitory neuron L2I discharges the
-        #     ENTIRE rest of the pool through its learned L2I->L2E gate -- not just
-        #     the co-threshold-crossers. The sub-threshold rivals sitting JUST below
-        #     threshold are the real cause of winner rotation; discharging the whole
-        #     pool subtracts each rival's own learned gate magnitude so the race
-        #     restarts closer to even and the best-matched integrator can win
-        #     repeatedly (the precondition for consolidation). The gate stays below
-        #     threshold_l2 (L2_GATE_WMAX < thr_l2), a PARTIAL discharge that
-        #     preserves cross-volley evidence, not a hard reset. See
-        #     _resolve_l2_competition for the argmax WTA body.
+        #     PHASE 7: every L2E that crosses threshold this step FIRES (no
+        #     argmax pick, no immediate reset of anyone). Each firer's event is
+        #     logged as a contributor to the shared inhibitory neuron L2I, which
+        #     accumulates them toward ITS OWN threshold exactly as before. Only
+        #     when L2I itself crosses threshold and fires does it SCHEDULE a
+        #     delayed, uniform inhibitory delivery to the whole pool (fixed
+        #     magnitude = l2_inhibition_frac * threshold_l2), applied
+        #     l2_inhibition_delay steps later by
+        #     _deliver_scheduled_l2_inhibition -- called at the top of THIS
+        #     method, before this step's own processing. See
+        #     _resolve_l2_competition for the full mechanism.
         #
         #     Chunked charge (l2_charge_chunks = K): this step's feedforward drive
         #     can arrive in K equal chunks (weight_ji/K per active synapse) WITHIN
-        #     this frozen outer timestep. After each chunk the argmax WTA is
+        #     this frozen outer timestep. After each chunk resolution is
         #     re-attempted; the FIRST chunk that produces a threshold-crosser
         #     resolves the competition and the remaining chunks are skipped
-        #     (consolidation-first: the earliest strong responder wins before rivals
-        #     pile up charge). The clock does not advance and no leak/update runs
-        #     between chunks. K=1 (default) delivers the full drive in a single chunk
-        #     and reproduces the un-chunked behavior exactly.
+        #     (consolidation-first: the earliest strong responder(s) fire before
+        #     rivals pile up charge). The clock does not advance and no leak/update
+        #     runs between chunks. K=1 (default) delivers the full drive in a
+        #     single chunk and reproduces the un-chunked behavior exactly.
         ff_vec = np.zeros(L2E_FANIN)
         for i in range(N_PIX):
             if l1e[i]:
@@ -1896,7 +1957,6 @@ class SimulationEngine:
         # advance_trace(t) is a no-op). l2_drive is the PRE-WTA snapshot (peak/margin
         # consumers); l2_charge is the post-inhibition, pre-update diagnostic. The
         # dashboard reports the live end-of-step membrane for every population.
-        l2_v_start = {j: float(e.potential) for j, e in enumerate(l2.excitatory_neurons)}
 
         if self.lasting_inhibition:
             # Alternate mechanism (opt-in): deliver the full drive un-chunked and
@@ -1999,7 +2059,10 @@ class SimulationEngine:
                 for i in range(N_PIX):
                     self.emitted.append(f'fb{j}->{i}')
                 self.emitted.append(f'{j}->inh')
-        for j in inhibited:
+        # Phase 7: the L2I->L2E fanout edge now flashes on actual DELIVERY
+        # (this step's due deliveries, applied above at the top of step()),
+        # not on an immediate same-step reset.
+        for j in l2_inhibition_delivered:
             self.emitted.append(f'reset->{j}')
         for i in range(N_PIX):
             if l1i[i]:
@@ -2013,10 +2076,6 @@ class SimulationEngine:
         for e in l2.excitatory_neurons:
             e.update()
         l2.inhibitory_neuron.update()
-
-        # Reset-phase guard + per-L2E diagnostics for this step's competitive resets
-        # (V_end is post-leak here; it must stay at rest).
-        self._check_l2_reset_phases(l2, l2_v_start)
 
         # 5. Bookkeeping.
         self._record_spikes(l1e, l1i, l2e, l2i)
@@ -2174,10 +2233,12 @@ class SimulationEngine:
         tie and self.winner stays None for the rest of this presentation. This
         is never re-derived by argmax, index, hidden charge, weights,
         geometry, or UI logic -- see the module comment above the (retired)
-        episode mechanism for what this replaced, and _resolve_l2_competition's
-        own docstring for the legacy immediate-reset tiebreak this still relies
-        on to decide WHICH neuron physically fires when several cross threshold
-        in the same step (kept as-is; flagged there for Phase 7)."""
+        episode mechanism for what this replaced. Phase 7 removed the old
+        argmax immediate-reset tiebreak entirely: every neuron named in
+        _last_eligible now actually fires (step_winner_idx just reads which
+        index happens to be lowest among simultaneous same-step firers, purely
+        for this raw `first_spiker` fact); the same-step-tie/no-credit logic
+        below is unaffected either way."""
         if step_winner_idx is not None:
             nid = f'L2E{step_winner_idx}'
             self._presentation_last_l2_winner = step_winner_idx
@@ -2485,6 +2546,24 @@ class SimulationEngine:
                         l2i_first_source=self._presentation_l2i_first_source,
                         l2i_first_t=self._presentation_l2i_first_t,
                         history=list(self.presentation_log)[-10:]),
+                    # Phase 7: causal L2E->L2I->L2E competition, backend-recorded
+                    # (never inferred from neuron IDs or final spike counts).
+                    # pending: deliveries scheduled but not yet due (contributing
+                    # sources + arrival times, L2I pre/post charge at ITS
+                    # threshold crossing, scheduled delivery step, magnitude).
+                    # last_delivery/log: deliveries actually APPLIED (per-target
+                    # competitor pre/post charge and whether delivery reached
+                    # that target -- a refractory target is skipped, not forced).
+                    l2_inhibition=dict(
+                        delay=self.l2_inhibition_delay,
+                        magnitude=round(self.l2_inhibition_magnitude, 4),
+                        pending=[dict(fire_t=rec['fire_t'], deliver_at=rec['deliver_at'],
+                                     contributors=[f'{ct}:{cid}' for ct, cid in rec['contributors']],
+                                     l2i_v_pre=rec['l2i_v_pre'], l2i_v_post=rec['l2i_v_post'],
+                                     magnitude=round(rec['magnitude'], 4))
+                                for rec in self._l2i_pending],
+                        last_delivery=self._last_l2_inhibition_delivery,
+                        log=list(self._l2_inhibition_log)[-10:]),
                     stats=self.stats(), log=list(self.event_log)[-12:])
 
     def stats(self) -> dict:

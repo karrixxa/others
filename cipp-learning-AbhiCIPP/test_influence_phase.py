@@ -145,9 +145,11 @@ def test_close_vs_distant_delivery_l1i_l1e_direct():
 
 def test_l2i_l2e_depression_gain_scales_with_distance():
     """L2I->L2E has no learned weight; influence scales ONLY the competitive-
-    depression gain. Verify close vs. distant gives a smaller depression at
-    greater influence-attenuated distance, and that the UNCONDITIONAL reset
-    (membrane -> exact rest) is identical either way."""
+    depression gain (Phase 7: Neuron.apply_delayed_inhibition). Verify close
+    vs. distant gives a smaller depression at greater influence-attenuated
+    distance, and that the DELIVERED MAGNITUDE (a full-threshold delivery
+    floors either target at exact rest) is identical either way -- influence
+    never touches the delivery itself."""
     def make(influence):
         eng = SimulationEngine(seed=1, infl_l2i_l2e=True)
         n = eng.l2.excitatory_neurons[0]
@@ -157,12 +159,12 @@ def test_l2i_l2e_depression_gain_scales_with_distance():
         return n
 
     n_close = make(1.0)
-    rec_close = n_close.apply_competitive_reset()
+    rec_close = n_close.apply_delayed_inhibition(n_close.threshold)
     n_far = make(0.25)
-    rec_far = n_far.apply_competitive_reset()
+    rec_far = n_far.apply_delayed_inhibition(n_far.threshold)
 
     assert rec_close['v_post'] == n_close.resting_potential
-    assert rec_far['v_post'] == n_far.resting_potential   # reset itself unaffected
+    assert rec_far['v_post'] == n_far.resting_potential   # delivery magnitude unaffected
     dep_close = np.abs(rec_close['delta_weights']).sum()
     dep_far = np.abs(rec_far['delta_weights']).sum()
     assert dep_far < dep_close, "a farther L2E should be depressed LESS when infl_l2i_l2e is on"

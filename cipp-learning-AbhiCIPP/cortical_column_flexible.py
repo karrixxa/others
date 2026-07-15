@@ -97,7 +97,7 @@ class CorticalColumn:
             raise RuntimeError(
                 "set_local_inhibition_weights() is invalid on a column built with "
                 "include_local_inhibition=False (no learned local-I gate; the active "
-                "L2 competition uses Neuron.apply_competitive_reset instead).")
+                "L2 competition uses Neuron.apply_delayed_inhibition instead).")
         for e in self.excitatory_neurons:
             w = e._weights_array.copy()
             w[0] = weight

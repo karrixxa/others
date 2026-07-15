@@ -11,8 +11,10 @@ plasticity fires only when inhibition actually reduces charge in an active targe
 Covers: fixed-fan-in and dynamic-fan-in construction of a standalone negative gate
 (apply_inhibition, still used by L1I->L1E feedback and legacy experiments), each
 with an ACTIVE control so the no-op assertions can't pass vacuously. A separate
-in-engine test covers the active L2 path, which has NO learned gate: its
-competitive reset is unconditional and ignores the refractory timer entirely.
+in-engine test covers the active L2 path, which has NO learned gate: its Phase 7
+delayed-inhibition delivery (Neuron.apply_delayed_inhibition) SKIPS a refractory
+target entirely, matching apply_inhibition's own convention -- the opposite of
+the retired apply_competitive_reset, which ignored the refractory timer.
 
 Run:
     PYTHONPATH=. .venv/bin/python test_refractory_gating.py
@@ -71,12 +73,13 @@ def test_fixed_and_dynamic_refractory_gating():
     _active_updates(_make_dynamic, "dynamic")
 
 
-def test_in_engine_competitive_reset_ignores_refractory():
-    """The active engine has NO learned L2I->L2E gate: L2 competition is the
-    unweighted competitive reset. Unlike apply_inhibition (which no-ops on a
-    refractory target), a competitive reset is UNCONDITIONAL -- it must clamp even a
-    refractory loser to rest and leave its refractory timer untouched (spec Sec 5)."""
-    print("=== in-engine: competitive reset is unconditional (refractory too) ===")
+def test_in_engine_delayed_inhibition_skips_refractory():
+    """Phase 7: the active engine has NO learned L2I->L2E gate: L2 competition
+    is the causal delayed L2E->L2I->L2E event. Unlike the retired
+    apply_competitive_reset (which was unconditional even under refractory),
+    apply_delayed_inhibition SKIPS a refractory target entirely -- same
+    convention as apply_inhibition."""
+    print("=== in-engine: delayed-inhibition delivery skips a refractory target ===")
     e = SimulationEngine(seed=1)
     n = e.l2.excitatory_neurons[0]
     thr = e.params['threshold_l2']
@@ -85,24 +88,25 @@ def test_in_engine_competitive_reset_ignores_refractory():
     assert len(n._weights_array) == L2E_FANIN, len(n._weights_array)
     assert not (n._weights_array < 0).any(), "active L2E must have no negative gate"
 
-    # Refractory target: still resets to rest, timer preserved.
+    # Refractory target: delivery is skipped entirely, charge untouched.
     n.refractory_timer = 2
     n.potential = 0.9 * thr
-    rec = n.apply_competitive_reset()
-    assert float(n.potential) == n.resting_potential, "refractory loser not reset to rest"
-    assert n.refractory_timer == 2, "competitive reset must not touch the refractory timer"
-    assert rec['v_post'] == n.resting_potential
-    print("  PASS refractory: membrane clamped to rest, refractory timer untouched")
+    rec = n.apply_delayed_inhibition(thr)
+    assert rec['applied'] is False
+    assert float(n.potential) == 0.9 * thr, "refractory target's charge must be untouched"
+    assert n.refractory_timer == 2
+    print("  PASS refractory: delivery skipped, membrane and timer untouched")
 
-    # Active target: also resets to rest.
+    # Active (non-refractory) target: a full-magnitude delivery floors it at rest.
     n.refractory_timer = 0
     n.potential = 0.9 * thr
-    n.apply_competitive_reset()
-    assert float(n.potential) == n.resting_potential, "active loser not reset to rest"
-    print("  PASS active: membrane clamped to rest")
+    rec = n.apply_delayed_inhibition(thr)
+    assert rec['applied'] is True
+    assert float(n.potential) == n.resting_potential, "active target not floored at rest"
+    print("  PASS active: membrane floored at rest by a full-magnitude delivery")
 
 
 if __name__ == "__main__":
     test_fixed_and_dynamic_refractory_gating()
-    test_in_engine_competitive_reset_ignores_refractory()
+    test_in_engine_delayed_inhibition_skips_refractory()
     print("ALL REFRACTORY-GATING TESTS PASSED")
