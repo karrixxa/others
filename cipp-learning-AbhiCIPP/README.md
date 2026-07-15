@@ -205,13 +205,22 @@ charge/threshold/weight magnitudes share the linear `UNIT` scale
 **linear** cap, not a squared denominator, so linear-vs-quadratic scaling is
 unambiguous. `test_neuron.py::test_fixed_point_scale_invariance` guards this.
 
-**Dashboard views.** The **Spike Raster** shows discrete spikes only; a separate
-**Charge / time** overlay shows membrane charge `V/θ` per neuron (threshold line,
-spike peaks, carryover across pattern switches); a **Weights / time** overlay
-shows a selected L2E's feedforward weights and inhibitory gate evolving toward
-the cap (RF formation under the signed `+1/-1` rule). All three open full-screen
-from the bottom tab bar; the low-value activation-histogram, "currently firing",
-statistics, and rolling-line-chart panels were removed.
+**Dashboard views.** The **Spike Raster** defaults to discrete spikes only, with
+an optional "Show charge" mode (its own Options drawer) that restores dim
+per-lane charge buildup toward a dashed threshold guide behind the spike marks,
+plus toggleable presentation-boundary/inhibition-reset/first-response markers
+and independent L1E/L1I/L2E/L2I lane visibility; a separate **Charge / time**
+overlay shows membrane charge `V/θ` per neuron (threshold line, spike peaks,
+carryover across pattern switches) and remains available unchanged; a
+**Weights / time** overlay shows a selected L2E's feedforward weights and
+inhibitory gate evolving toward the cap (RF formation under the signed `+1/-1`
+rule). All three open full-screen from the bottom tab bar; the low-value
+activation-histogram, "currently firing", statistics, and rolling-line-chart
+panels were removed. The 3D viewport's **View Controls** panel (collapsed by
+default) has independent per-population neuron and per-edge-kind visibility
+toggles plus All/None/Excitatory-only/Inhibitory-only presets -- purely
+render-time state, never sent to the backend. See `docs/DASHBOARD.md` for
+the full breakdown.
 
 **Tiling metric.** Ownership is **visit-level**, not per-cycle:
 `owner(P)` = most common early (first) winner across P's repeated visits;

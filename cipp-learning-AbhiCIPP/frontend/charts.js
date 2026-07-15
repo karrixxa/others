@@ -23,7 +23,7 @@ export class Charts {
   }
 
   update(dyn, fps) {
-    // --- Layer-2 heat map (firing rate per L2E, winner highlighted) ---
+    // --- Layer-2 heat map (firing rate per L2E, first responder highlighted) ---
     if (this.heatmap) {
       const byId = new Map(dyn.neurons.map(n => [n.id, n]));
       for (const cell of this.heatmap.children) {
@@ -34,7 +34,14 @@ export class Charts {
         cell.classList.toggle('win', dyn.winner === cell.dataset.id);
       }
     }
-    if (this.hmWinner) this.hmWinner.textContent = dyn.winner || '—';
+    // dyn.winner is null both before any response AND on an ambiguous
+    // same-step tie (backend keeps self.winner None for the whole
+    // presentation then) -- distinguish the two rather than showing the
+    // same dash for both (see causal_story.same_step_tie).
+    if (this.hmWinner) {
+      this.hmWinner.textContent = dyn.winner
+        || (dyn.causal_story?.same_step_tie ? 'Ambiguous' : '—');
+    }
 
     // --- event log ---
     if (this.eventLog) {

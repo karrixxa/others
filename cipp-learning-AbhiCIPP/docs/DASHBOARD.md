@@ -53,7 +53,18 @@ frontend/
     renderer.js     Three.js scene; objects built once, mutated per frame.
     controls.js     Left sidebar + tabs; every action is an HTTP POST.
     inspector.js    Right sidebar neuron detail cards.
-    charts.js       Heat map, histogram, live line charts, stats, event log.
+    charts.js       Layer-2 heat map + event log.
+    receptive.js    Receptive Fields tab (per-L2E 3x3 feedforward weight grid).
+    causal.js       Causal Story tab -- pure renderer of dyn.causal_story.
+    raster.js       Full-screen Spike Raster (discrete and combined modes; see below).
+    charge.js       Full-screen Charge/time view (the combined raster mode's rendering donor).
+    weights.js      Full-screen Weights/time view for one selected neuron.
+    edge_filters.js Pure layer/edge-kind -> filter-key mapping (no DOM/three.js;
+                    directly testable, see test_phase14_logic.mjs).
+    labels.js       Pure first-responder/ambiguous-tie label helper (same reasoning).
+    package.json    `{"type":"module"}` only, so Node's module loader (tests,
+                    `node --check`) treats these .js files as ES modules, matching
+                    how index.html already loads them; browsers ignore this file.
 ```
 
 ## REST API
@@ -149,15 +160,67 @@ the fixed budget). See `neuron_flexible.Neuron` for the confidence rule.
 frame it only mutates existing objects:
 
 - neuron `emissiveIntensity` and scale track activation + a decaying spike pulse;
-- the winner gets a gold emissive and an orbiting halo;
+- the first responder (`dyn.winner`) gets a gold emissive and an orbiting halo;
 - changed synapses flash white and settle to an opacity set by `|weight|`;
-- display filters (only-active, hide-weak, isolate-assembly, per-layer, hide
-  inhibitory) toggle `.visible` without rebuilding anything.
+- the **View Controls** panel (collapsed by default; formerly "Display
+  Filters") toggles `.visible` without rebuilding anything -- independent
+  per-population neuron visibility (L1E/L1I/L2E/L2I), independent per-edge-kind
+  visibility (feedforward / L2E→L2I / L2I→L2E / L2E→L1I feedback / L1I→L1E
+  inhibition, mapped from synapse `kind` via `edge_filters.js`), All/None/
+  Excitatory-only/Inhibitory-only presets, plus the pre-existing only-active/
+  hide-weak/isolate-assembly filters. Hiding a layer hides only its own edges
+  (an edge with either endpoint hidden is hidden too -- no separate
+  bookkeeping needed). Every one of these controls calls only
+  `renderer.setFilters()`/local raster state, never `/api/config` -- purely
+  render-time state, verified to leave backend weights/spikes/history
+  untouched (see `test_phase14_logic.mjs` and the Phase 14 UI observability
+  handoff entry).
 
 The scene graph is never rebuilt except on `reset`, so the render loop stays
 allocation-free and scales to far more than the 27 neurons of this first
 experiment. Picking is a raycast on `pointerup` (suppressed if the pointer
 moved, so orbiting doesn't select).
+
+### Spike Raster: two modes, one recorded history
+
+The full-screen Spike Raster (`raster.js`) has two modes, both reading the
+exact same per-step data the separate Charge/time view (`charge.js`) also
+reads (`dyn.neurons[].spiked`/`.activation`) -- no second simulator, no
+frontend-side spike inference:
+
+- **Discrete** (default): the original spikes-only lanes.
+- **Combined** ("Show charge" toggle, restoring the older "spikes + charge
+  buildup" view): a dim charge bar rises toward a dashed threshold guide, and
+  an actual spike is a bright full-height mark -- rendering logic ported
+  directly from `charge.js`.
+
+A compact "⚙ Options" drawer (the overlay covers the sidebar, so raster-only
+toggles live here, not in the main View Controls panel) adds: Show charge,
+Hide silent lanes, presentation-boundary markers, inhibition/reset markers,
+first-response markers (filled dot = the recorded `first_spiker`; hollow ring
+on every id in `earliest_response_set` = an ambiguous same-step tie), and
+independent L1E/L1I/L2E/L2I lane toggles. Hover shows a tooltip (lane id,
+timestep, V/θ, SPIKE flag) reading the same retained arrays used to draw the
+canvas.
+
+### Terminology and weight-change provenance
+
+"Winner" is displayed everywhere as **"First responder"**; when the current
+presentation's first physical L2E response was an ambiguous same-step tie
+(`causal_story.same_step_tie`), the UI shows "Ambiguous first response"
+(or "Ambiguous" in compact widgets) instead of a generic dash -- see
+`labels.js`. The Receptive Fields grid and the inspector's synapse rows show
+a hover/title tag identifying whether a feedforward weight's most recent
+change was **self-spike learning** (the target L2E spiked this step) or
+**L2I loser depression** (the target appears in this step's
+`dyn.l2_inhibition.last_delivery` with a nonzero `depressed` count), computed
+in `app.js`'s `weightChangeCause()` from already-broadcast fields -- no new
+backend endpoint.
+
+Applying Model Config always rebuilds the network from fresh weights
+(`SimulationEngine.apply_config` has no non-rebuilding path), so `#config-apply`
+now confirms before firing, same as Reset/Reseed. View Controls' display-only
+toggles never go through this path.
 
 ## Extending
 

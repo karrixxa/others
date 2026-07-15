@@ -148,7 +148,8 @@ export class ReceptiveFields {
       const j = Number(id.slice(3));
       const card = this.cards[cardIndex];
       for (let i = 0; i < N_PIX; i++) {
-        const w = s.weights.get(`ff${i}->${j}`) ?? 0;
+        const synId = `ff${i}->${j}`;
+        const w = s.weights.get(synId) ?? 0;
         const cell = card.cells[i];
         cell.contentEditable = editable ? 'true' : 'false';
         cell.classList.toggle('rf-editable', editable);
@@ -156,6 +157,12 @@ export class ReceptiveFields {
         const norm = Math.max(0, Math.min(1, w / cap));
         cell.style.background = norm > 0.001
           ? `rgba(94,234,212,${(0.08 + 0.92 * norm).toFixed(3)})` : 'transparent';
+        // Weight-change provenance (Phase 14): identifies self-spike learning
+        // vs. L2I loser depression for this step's change, when available
+        // (see app.js weightChangeCause -- reads only already-broadcast
+        // dyn.neurons[].spiked and dyn.l2_inhibition.last_delivery).
+        const cause = s.weightChangeCause?.get(synId);
+        cell.title = cause ? `${synId} = ${w.toFixed(3)} · changed this step: ${cause}` : '';
         // Don't clobber a cell the user is actively editing.
         if (document.activeElement === cell) continue;
         cell.textContent = this.mode === 'ratio'

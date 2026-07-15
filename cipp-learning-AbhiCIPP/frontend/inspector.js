@@ -47,8 +47,12 @@ export class Inspector {
       // Distance/influence/effective-transmission (feedforward synapses only;
       // static per topology load -- see backend _delivery_diagnostics).
       const dist = syn.distance ?? null, infl = syn.influence ?? null, eff = syn.effective ?? null;
-      if (syn.target === this.id) incoming.push({ ...syn, w, conf, dist, infl, eff, other: syn.source });
-      if (syn.source === this.id) outgoing.push({ ...syn, w, conf, dist, infl, eff, other: syn.target });
+      // Weight-change provenance (Phase 14): self-spike learning vs. L2I
+      // loser depression, when this synapse changed THIS step -- see app.js
+      // weightChangeCause (reads only already-broadcast backend fields).
+      const cause = s.weightChangeCause?.get(syn.id) ?? null;
+      if (syn.target === this.id) incoming.push({ ...syn, w, conf, dist, infl, eff, cause, other: syn.source });
+      if (syn.source === this.id) outgoing.push({ ...syn, w, conf, dist, infl, eff, cause, other: syn.target });
     }
     const strongest = [...incoming, ...outgoing].sort((a, b) => Math.abs(b.w) - Math.abs(a.w)).slice(0, 4);
     const col = meta.type === 'E' ? 'var(--exc)' : 'var(--inh)';
@@ -148,10 +152,15 @@ function synCard(title, list, self, compatActive = false) {
     const delivery = (sy.dist != null)
       ? `<span class="wv" title="${compatActive ? 'LEGACY-COMPAT (pinned, not from the visible coordinates): ' : 'engine '}distance -> influence -> effective transmission" style="color:${compatActive ? 'var(--inh)' : 'var(--txt-2)'}">${compatActive ? '⚠ ' : ''}d ${sy.dist.toFixed(2)} · g ${sy.infl.toFixed(2)} · eff ${sy.eff.toFixed(1)}</span>`
       : '';
+    // Weight-change provenance (Phase 14): only set for a feedforward synapse
+    // that changed THIS step -- see app.js weightChangeCause.
+    const causeTag = sy.cause
+      ? `<span class="wv" title="changed this step: ${sy.cause}" style="color:var(--win)">Δ ${sy.cause}</span>`
+      : '';
     return `<div class="syn-row">
       <span class="name">${sy.other}</span>
       <span class="wbar"><i style="${style}"></i></span>
-      <span class="wv">${sy.w >= 0 ? '+' : ''}${sy.w.toFixed(3)}</span>${conf}${delivery}</div>`;
+      <span class="wv">${sy.w >= 0 ? '+' : ''}${sy.w.toFixed(3)}</span>${conf}${delivery}${causeTag}</div>`;
   }).join('');
   return `<div class="icard full"><div class="lbl">${title}</div><div class="syn-list">${rows}</div></div>`;
 }

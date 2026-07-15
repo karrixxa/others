@@ -11,6 +11,7 @@ import { Raster } from './raster.js';
 import { ChargeChart } from './charge.js';
 import { WeightsChart } from './weights.js';
 import { CausalStory } from './causal.js';
+import { firstResponderLabel } from './labels.js';
 
 const api = {
   async post(path, body) {
@@ -31,7 +32,42 @@ const store = {
   confidence: new Map(),    // synapse id -> current confidence (L2E gates)
   stateById: new Map(),     // id -> latest dynamic neuron state
   patternVectors: {},
+  // synapse id -> provenance string, recomputed fresh every dynamic message
+  // from already-broadcast fields only (dyn.neurons[].spiked and
+  // dyn.l2_inhibition.last_delivery/targets) -- never inferred beyond
+  // correlating two facts the backend already recorded. Only covers
+  // feedforward (ff{i}->{j}) synapses that actually changed THIS step; see
+  // weightChangeCause() below.
+  weightChangeCause: new Map(),
 };
+
+// Provenance for this step's changed feedforward synapses: did the target
+// L2E neuron just spike itself (self-spike learning), or was it hit by a
+// delivered L2I->L2E loser-depression event THIS step (dyn.l2_inhibition.
+// last_delivery.deliver_at === dyn.timestep, and this target's own
+// `depressed` count > 0)? Both can be true in the same step (delivery lands
+// at the top of step(), before this step's own competition -- see
+// Phase13b_Diagnostic_Correction.md); reported as "both" when so, never
+// resolved by guessing.
+function weightChangeCause(dyn) {
+  const cause = new Map();
+  if (!dyn.changed_synapses?.length) return cause;
+  const spiked = new Set(dyn.neurons.filter(n => n.spiked).map(n => n.id));
+  const delivery = dyn.l2_inhibition?.last_delivery;
+  const depressedNow = new Set(
+    (delivery && delivery.deliver_at === dyn.timestep)
+      ? (delivery.targets || []).filter(t => t.depressed > 0).map(t => t.id)
+      : []);
+  for (const c of dyn.changed_synapses) {
+    if (!c.id.startsWith('ff')) continue;   // feedforward L1E->L2E only
+    const target = 'L2E' + c.id.split('->')[1];
+    const self = spiked.has(target), loser = depressedNow.has(target);
+    if (self && loser) cause.set(c.id, 'self-spike learning + L2I loser depression');
+    else if (self) cause.set(c.id, 'self-spike learning');
+    else if (loser) cause.set(c.id, 'L2I loser depression');
+  }
+  return cause;
+}
 
 const renderer = new NeuronRenderer(document.getElementById('scene'), { onSelect: select });
 const inspector = new Inspector(store);
@@ -78,6 +114,7 @@ function onMessage(msg) {
     store.stateById = new Map(dyn.neurons.map(n => [n.id, n]));
     for (const c of dyn.changed_synapses || []) store.weights.set(c.id, c.weight);
     for (const c of dyn.changed_confidence || []) store.confidence.set(c.id, c.confidence);
+    store.weightChangeCause = weightChangeCause(dyn);
     const fps = tickFps();
     renderer.update(dyn);
     charts.update(dyn, fps);
@@ -94,12 +131,13 @@ function onMessage(msg) {
 
 // ---- top bar --------------------------------------------------------------
 const el = id => document.getElementById(id);
+
 function updateTopbar(dyn, fps) {
   el('st-status').textContent = dyn.running ? 'Running' : 'Paused';
   el('st-status').style.color = dyn.running ? 'var(--ok)' : 'var(--txt-1)';
   el('st-timestep').textContent = dyn.timestep;
   el('st-speed').textContent = (dyn.speed ?? 0).toFixed(0) + ' /s';
-  el('st-winner').textContent = dyn.winner || '—';
+  el('st-winner').textContent = firstResponderLabel(dyn, true);
   el('st-fps').textContent = fps;
   const story = dyn.causal_story;
   const pres = el('st-presentation');

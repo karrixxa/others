@@ -82,7 +82,14 @@ export class Controls {
       box.appendChild(details);
     }
 
+    // Every /api/config POST unconditionally rebuilds the network from fresh
+    // weights (backend/simulation.py apply_config() always ends in _build());
+    // there is no non-rebuilding config path, so this confirmation is required
+    // -- same pattern as Reset/Reseed below. View Controls' display-only
+    // toggles never call this path (they call renderer.setFilters()/raster
+    // toggles only, see _wireFilters()), so they never trigger this warning.
     document.getElementById('config-apply')?.addEventListener('click', () => {
+      if (!window.confirm('Applying config REBUILDS the network and clears all learned weights. Continue?')) return;
       const overrides = {};
       for (const [k, get] of Object.entries(this.configInputs)) overrides[k] = get();
       this.api.post('/api/config', { overrides });
@@ -249,13 +256,41 @@ export class Controls {
   }
 
   // ---------------------------------------------------------------- filters
+  // View-only (Phase 14): every control here calls only renderer.setFilters(),
+  // which is pure local rendering state (see renderer.js) -- never an
+  // api.post, so none of this can touch backend state/weights/spikes/history.
   _wireFilters() {
+    const LAYER_IDS = { 'f-l1e': 'l1e', 'f-l1i': 'l1i', 'f-l2e': 'l2e', 'f-l2i': 'l2i' };
+    const EDGE_IDS = {
+      'f-e-ff': 'edgeFeedforward', 'f-e-l2el2i': 'edgeL2eL2i', 'f-e-l2il2e': 'edgeL2iL2e',
+      'f-e-l2el1i': 'edgeL2eL1i', 'f-e-l1il1e': 'edgeL1iL1e',
+    };
     const map = { 'f-active': 'active', 'f-weak': 'weak', 'f-assembly': 'assembly',
-                  'f-l1': 'l1', 'f-l2': 'l2', 'f-inh': 'inh' };
+                  ...LAYER_IDS, ...EDGE_IDS };
+    const els = {};
     for (const [elId, key] of Object.entries(map)) {
       const el = document.getElementById(elId);
+      if (!el) continue;
+      els[elId] = el;
       el.addEventListener('change', () => this.renderer.setFilters({ [key]: el.checked }));
     }
+
+    // All / None / Excitatory only / Inhibitory only presets: set every
+    // neuron-layer checkbox (and mirror its checked state so the UI reflects
+    // what's actually applied), leaving edge/active/weak/assembly filters
+    // untouched -- edges already follow endpoint visibility (see
+    // renderer._applyFilters), so setting only the 4 layer toggles is enough.
+    const applyLayerPreset = (l1e, l1i, l2e, l2i) => {
+      const vals = { l1e, l1i, l2e, l2i };
+      for (const [elId, key] of Object.entries(LAYER_IDS)) {
+        if (els[elId]) els[elId].checked = vals[key];
+      }
+      this.renderer.setFilters(vals);
+    };
+    document.getElementById('vc-preset-all')?.addEventListener('click', () => applyLayerPreset(true, true, true, true));
+    document.getElementById('vc-preset-none')?.addEventListener('click', () => applyLayerPreset(false, false, false, false));
+    document.getElementById('vc-preset-exc')?.addEventListener('click', () => applyLayerPreset(true, false, true, false));
+    document.getElementById('vc-preset-inh')?.addEventListener('click', () => applyLayerPreset(false, true, false, true));
   }
 
   // ------------------------------------------------------------------- tabs

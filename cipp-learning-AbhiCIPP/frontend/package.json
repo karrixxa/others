@@ -1,0 +1,5 @@
+{
+  "private": true,
+  "type": "module",
+  "description": "No build step, no bundler, no runtime dependency -- this file exists only to tell Node's module loader (test_phase14_logic.mjs, node --check) that .js files here are ES modules, matching how index.html already loads them via <script type=\"module\">. Browsers ignore this file entirely."
+}

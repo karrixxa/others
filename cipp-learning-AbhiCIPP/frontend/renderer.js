@@ -12,6 +12,7 @@
 
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { layerKey, edgeKey } from './edge_filters.js';
 
 const COLORS = {
   E: 0x5eead4, I: 0xf0788c, winner: 0xffce5c,
@@ -30,7 +31,17 @@ export class NeuronRenderer {
     // id -> {mesh, ring, meta, pulse, spiked, act, freq, assembly}
     this.neurons = new Map();
     this.edges = new Map();       // id -> {line, mat, syn, weight, pulse}
-    this.filters = { active: false, weak: true, assembly: false, l1: true, l2: true, inh: true };
+    // View-only display filters (Phase 14 UI observability): independent
+    // per-population neuron visibility (L1E/L1I/L2E/L2I) and independent
+    // per-edge-kind visibility, plus the pre-existing active/weak/assembly
+    // filters. Purely local rendering state -- never sent to the backend
+    // (see setFilters()/_applyFilters(); no api.post anywhere in this file).
+    this.filters = {
+      active: false, weak: true, assembly: false,
+      l1e: true, l1i: true, l2e: true, l2i: true,
+      edgeFeedforward: true, edgeL2eL2i: true, edgeL2iL2e: true,
+      edgeL2eL1i: true, edgeL1iL1e: true,
+    };
     this._last = null;
     this._selected = null;
 
@@ -200,10 +211,8 @@ export class NeuronRenderer {
     }
     for (const [id, e] of this.neurons) {
       let vis = true;
-      const t = e.meta.type, layer = e.meta.layer;
-      if (t === 'I' && !F.inh) vis = false;
-      if (layer === 'L1' && !F.l1) vis = false;
-      if (layer === 'L2' && !F.l2) vis = false;
+      const lk = layerKey(e.meta.layer, e.meta.type);   // l1e/l1i/l2e/l2i
+      if (F[lk] === false) vis = false;
       if (F.active && e.act < 0.05 && !e.spiked) vis = false;
       if (F.assembly && win && !assemblyNeurons.has(id)) vis = false;
       e.mesh.visible = vis;
@@ -211,9 +220,17 @@ export class NeuronRenderer {
     }
     for (const e of this.edges.values()) {
       let vis = true;
+      // Independent per-edge-kind toggle (Phase 14): off hides every edge of
+      // that kind regardless of weight/endpoint visibility.
+      const ek = edgeKey(e.syn.kind);
+      if (ek && F[ek] === false) vis = false;
       // The structural reset fanout has no weight; it must stay visible regardless
       // of the weak-weight filter (only neuron-visibility/assembly filters apply).
       if (e.syn.kind !== 'reset_inhibition' && F.weak && Math.abs(e.weight) < WEAK) vis = false;
+      // Hiding a layer hides only ITS associated edges -- enforced here since an
+      // edge with either endpoint hidden is hidden too (no separate bookkeeping
+      // needed: this already implies "hide L1I" hides both L1I's incoming
+      // feedback edges and its outgoing inhibition edges, and nothing else).
       const sN = this.neurons.get(e.syn.source), tN = this.neurons.get(e.syn.target);
       if (sN && !sN.mesh.visible) vis = false;
       if (tN && !tN.mesh.visible) vis = false;

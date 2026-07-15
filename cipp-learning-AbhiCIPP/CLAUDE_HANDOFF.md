@@ -27,9 +27,13 @@
   PUBLISH — the last phase of the corrected Phases 6-12 sequence)
 - Phase 13 END checkpoint commit: `6655cfe` (dashboard behavior diagnostic,
   measurement only)
-- This update corresponds to the **Phase 13b END** checkpoint (corrected and
-  strengthened dashboard behavior diagnostic, measurement only — commit hash
-  filled in after this commit lands, see repo log).
+- Phase 13b END checkpoint commit: `4457f3b` (corrected and strengthened
+  dashboard behavior diagnostic, measurement only)
+- This update corresponds to the **Phase 14 END** checkpoint (UI-only
+  observability phase — display controls, spike-raster restoration,
+  terminology/provenance clarity; NO neural dynamics, parameters, timing,
+  learning, seeds, or defaults changed — commit hash filled in after this
+  commit lands, see repo log).
 - Base branch `july14` is untouched and remains the protected base.
 - `four-pattern` branch exists (checked out in a separate worktree at
   `/home/charisxiong/Documents/others`) and is explicitly NOT merged here —
@@ -394,6 +398,108 @@ claims, and every table are in `Phase13b_Diagnostic_Correction.md`; the
 135-run grid plus the reconciliation pass are in
 `phase13b_diagnostic_summary.json` (committed); full per-event logs are a
 disposable `/tmp` artifact per the standing commit-hygiene rule.
+
+**Current phase (Phase 14, complete) — UI-only observability, per explicit
+user instruction: NO neural dynamics, parameters, timing, learning, seeds,
+or defaults changed.** All changes are in `frontend/`; no `backend/*.py` or
+engine file touched.
+
+- **Network viewport (renderer.js/controls.js/index.html):** independent
+  visibility toggles for L1E/L1I/L2E/L2I neurons and independent toggles for
+  all five edge kinds (feedforward=L1E→L2E, excitation=L2E→L2I,
+  reset_inhibition=L2I→L2E, feedback=L2E→L1I, inhibition=L1I→L1E — mapped
+  from the synapse `kind` field via the new pure `edge_filters.js`). Hiding a
+  layer hides only its own edges (an edge already hides when either endpoint
+  is hidden — no separate bookkeeping needed). Added All/None/
+  Excitatory-only/Inhibitory-only presets. Every control calls only
+  `renderer.setFilters()` (pure local rendering state, never `/api/config`).
+- **Spike raster (raster.js):** restored the older "spikes + charge buildup"
+  mode alongside the preserved discrete-only default — a `showCharge` toggle
+  ports charge.js's own dim-bar/dashed-threshold-guide/full-height-spike
+  rendering verbatim (same source data, same CHARGE_CAP), so both modes read
+  the identical recorded `dyn.neurons[].spiked`/`.activation` history; no
+  second simulator, no frontend-side spike inference. Added toggles for hide-
+  silent-lanes, presentation boundaries, inhibition/reset markers (ported
+  from charge.js), first-response markers (new — filled dot = the recorded
+  `first_spiker`, hollow ring on every id in `earliest_response_set` = a
+  backend-recorded ambiguous same-step tie), and independent L1E/L1I/L2E/L2I
+  lane toggles, all in a compact options drawer (the overlay covers the
+  sidebar, so raster-only toggles live in the raster's own toolbar). Restored
+  the hover tooltip (lane id/timestep/V-θ/SPIKE flag) from the historical
+  `four-pattern`-branch raster (re-implemented by hand per `CLAUDE.md`, not
+  merged/cherry-picked — that branch's exact commits are documented in the
+  Phase 14 exploration notes for reference). Zoom/pan/pattern-label/firing-
+  rate-indicator all continue working unchanged; the separate Charge/time
+  view (`charge.js`) is completely untouched and still available.
+- **Terminology (labels.js + index.html/charts.js/causal.js):** every visible
+  "Winner" renamed to "First responder"; when `dyn.winner` is null because
+  the current presentation's first response was a same-step tie
+  (`causal_story.same_step_tie`), compact widgets show "Ambiguous" and the
+  Causal Story tab shows "Ambiguous first response" instead of a generic
+  dash — distinguishing that case from "no response yet" (also null). Only
+  user-visible text was renamed; internal identifiers (`dyn.winner`,
+  `COLORS.winner`, `.rf-winner`, etc.) are untouched since they're not
+  user-facing and renaming them would be unnecessary risk.
+- **Weight-change provenance (app.js `weightChangeCause()` +
+  receptive.js/inspector.js):** RF grid cells and the inspector's synapse
+  rows now show a hover/title tag identifying whether a feedforward
+  synapse's most recent change was self-spike learning (the target L2E
+  spiked this exact step) or L2I loser depression (the target appears in
+  `dyn.l2_inhibition.last_delivery` with a nonzero `depressed` count, and
+  that delivery's own `deliver_at` matches the current timestep) — both
+  facts read straight off already-broadcast backend fields, never
+  re-derived from anything the backend didn't already decide. Reports "both"
+  when a neuron is hit by delayed inhibition at the top of a step and still
+  fires later that same step (see Phase 13b's finding that this is rare and
+  config-specific).
+- **Config-rebuild warning (controls.js):** `#config-apply` now confirms
+  before firing (same `window.confirm` pattern as Reset/Reseed), since
+  `apply_config()` has no non-rebuilding path — every override rebuilds the
+  network from fresh weights. View Controls' toggles never call
+  `/api/config`, so they never trigger this warning.
+- **View Controls (index.html/style.css):** the old "Display Filters" panel
+  is renamed "View Controls," collapsed by default, and now holds both the
+  viewport filters above and is the sole home for the new preset buttons —
+  raster-specific toggles live in the raster overlay's own drawer instead
+  (the overlay covers the sidebar).
+- **Tests:** `frontend/edge_filters.js` and `frontend/labels.js` are new,
+  deliberately dependency-free pure-logic modules (no DOM, no three.js)
+  extracted specifically so they're testable — `frontend/
+  test_phase14_logic.mjs` runs under Node's own built-in test runner
+  (`node --test`, zero new dependencies) and covers the layer/edge filter
+  mapping and the first-responder/ambiguous-tie label logic (4 tests, all
+  passing). `frontend/package.json` (new) only sets `{"type":"module"}` so
+  Node's loader treats these `.js` files as ES modules, matching how
+  `index.html` already loads them via `<script type="module">` — browsers
+  ignore this file entirely. No JS test framework existed in this repo
+  before this phase; this is the practical shape of "focused tests" given
+  the architecture (no build step, everything else DOM/three.js-coupled).
+- **Verified live, not just read** (per this repo's `run` convention):
+  launched `uvicorn backend.api:app` and drove it with a headless
+  Playwright/Chromium session (installed into the session's throwaway venv;
+  no project dependency added). Confirmed: toggling every View Controls/
+  raster-options checkbox leaves `GET /api/state`'s synapse weights and the
+  engine's timestep progression completely unaffected (fetched state before/
+  after a full preset+edge-toggle sequence, byte-compared); the raster's
+  hover tooltip and first-response/inhibition markers render correctly once
+  real spike history exists; the RF grid's weight-change hover correctly
+  shows "self-spike learning" during live training; the config-apply
+  confirmation dialog fires with the correct warning text and is dismissable
+  without applying; zero browser console errors across the whole sequence.
+  Screenshots retained only in `/tmp` scratch space, not committed.
+- Full backend suite re-run after all frontend edits (no backend file
+  touched, but confirmed no regression anyway): **265 passed, 5 failed** —
+  identical pre-existing flow-rate failure set documented since before
+  Phase 6, unchanged. Plus the 4 new frontend logic tests (`node --test`),
+  all passing.
+- Updated `README.md`'s "Dashboard views" paragraph and `docs/DASHBOARD.md`
+  (project-structure listing, rendering-pipeline section, and new "Spike
+  Raster: two modes" / "Terminology and weight-change provenance"
+  subsections) to describe the above — that doc had drifted out of date
+  with several already-existing frontend files (raster.js/charge.js/
+  weights.js/causal.js/receptive.js were undocumented before this phase;
+  fixed opportunistically since this phase's own new files needed the same
+  section anyway, not a separate full audit of the whole doc).
 
 ## Completed (this session)
 
