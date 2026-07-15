@@ -46,6 +46,29 @@
   experiment -- named Phase 17, not Phase 16, since Phase 16 was already
   taken by the factorial above; new mechanism is default-off and NOT
   promoted -- commit hash filled in after this commit lands, see repo log).
+- Phase 18 END checkpoint commit: `3fef508` (LPS Lecture 14 prediction
+  architecture contract, docs only -- eight-predictor-per-L2E topology,
+  now SUPERSEDED, see below).
+- Phase 18b (first correction) END checkpoint commit: `3e43cca` (corrected
+  per-input-column contract with an all-to-all L2Ej->Pi decoder but no
+  lateral connection, decoder gated on L2Ej's spike -- also now SUPERSEDED).
+- Note: origin/HEAD independently advanced to `d91e7f7` ("Phase 19A:
+  corrected prediction scaffold" -- a per-column P0..P8 scaffold with a
+  stored decoder matrix and fixed Pi->L1Ei replay, no active learning rule)
+  from a concurrent session on the same checkout. Preserved as real history
+  (not rewritten); its own uncommitted config/UI continuation was found and
+  preserved on `backup/phase19a-scaffold-config-ui-wip`.
+- This update corresponds to **Phase 18b-v2 / Phase 19-v2**: the final,
+  transcript-faithful S_i/PC_i/I_i LOCAL-COINCIDENCE architecture --
+  `Phase18b_Lecture14_Local_Coincidence_Architecture_Contract.md` (contract)
+  and `Phase19_Local_Coincidence_Shadow_Report.md` (implementation +
+  calibration + diagnostic + promotion-bar verdict). New, separate,
+  mutually-exclusive-with-every-prior-mechanism flag
+  `prediction_column_enabled` (default OFF, not promoted). Every prior
+  prototype (eight-predictor, Phase 18b's first correction, Phase 19A) is
+  preserved unmerged on its own backup branch, never deleted or rewritten --
+  see `backup/phase19-candidate-a-wip`, `backup/phase19-eight-predictor-wip`,
+  `backup/phase19a-scaffold-config-ui-wip`, `backup/phase19-corrected-prediction`.
 - Base branch `july14` is untouched and remains the protected base.
 - `four-pattern` branch exists (checked out in a separate worktree at
   `/home/charisxiong/Documents/others`) and is explicitly NOT merged here —

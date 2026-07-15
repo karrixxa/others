@@ -1,5 +1,19 @@
 # Phase 18b — Corrected LPS Lecture 14 Prediction Architecture Contract
 
+> **SUPERSEDED.** A fuller read of the annotated architecture diagram adds a
+> requirement this document does not have: a fixed LOCAL lateral `S_i->Pi`
+> coincidence connection (so `Pi` can distinguish "R_j fired while my own
+> pixel was active" from "R_j fired but my pixel was absent"), and gates
+> decoder learning on `Pi`'s OWN spike (with `R_j` eligibility credit)
+> rather than on `L2Ej`'s spike. See
+> `Phase18b_Lecture14_Local_Coincidence_Architecture_Contract.md` for the
+> corrected contract. This document is kept unmodified below for the record;
+> its topology (no lateral connection, decoder gated on `L2Ej`'s spike) is
+> not to be implemented. Its own implementation (`test_prediction_phase19.py`
+> / the `l1p`/`eta_pred` code) is preserved, unmerged, on branch
+> `backup/phase19-corrected-prediction` (an isolated worktree used earlier
+> in this session).
+
 **No neural-dynamics change. No topology change. No runtime behavior added.**
 This document supersedes `Phase18_Lecture14_Prediction_Architecture_Contract.md`'s
 eight-predictor topology (one `L2Pk` per `L2Ek`, decoding to all nine `L1Ei`).
