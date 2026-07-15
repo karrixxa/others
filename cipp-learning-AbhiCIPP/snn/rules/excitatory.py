@@ -57,6 +57,40 @@ def bounded_signed_update(w, w_min, w_cap, gain, signal):
     return np.clip(w + dw, w_min, w_cap)
 
 
+def exact_local_free_energy_update(w, w_min, w_max, lr, fe, learn_signal):
+    """Phase 8 -- EXACT local free-energy learning rule (July14 Phases 6-12
+    corrected prompts, PHASE 8): supersedes the earlier ported structural-FE
+    experiment's use of the shared `bounded_signed_update` reflected kernel
+    (Claude_Structural_Free_Energy_Prompt.md left the saturating term as
+    "whatever the local cap/floor behavior is"; the corrected Phase 8 prompt
+    pins it exactly) with the literal specified equation:
+
+        delta_w = LR * FE * (1 - w / w_max)^2 * learn_signal
+
+    `fe` (FE) is this neuron's own `_structural_free_energy_gate()` value --
+    local (only this neuron's positive afferent sum vs its own threshold), no
+    membrane voltage, no rivals, no labels. `(1 - w/w_max)^2` IS the
+    remaining-capacity factor for this rule; nothing else is stacked on top
+    of it (no `p`/closeness, no confidence/maturity multiplier -- avoiding
+    the "duplicate remaining-capacity factor" the phase warns against).
+    `learn_signal` is +1 (active/participating) or -1 (OFF), matching the
+    existing signed-spike convention. The result is clamped ONLY for
+    numerical bounds ([w_min, w_max]) -- this is a plain safety clip, not a
+    shaping kernel: unlike `bounded_signed_update`'s reflected H_up/H_down
+    (which lets a capped weight still be depressed), this exact envelope is
+    symmetric and goes to zero at w_max in BOTH directions, so a
+    fully-saturated weight cannot move further until it decays back down
+    first. That is the literal consequence of the specified equation, not an
+    oversight."""
+    w = np.asarray(w, dtype=float)
+    if w_max <= 0:
+        return w.copy()
+    learn_signal = np.asarray(learn_signal, dtype=float)
+    envelope = (1.0 - w / w_max) ** 2
+    dw = lr * fe * envelope * learn_signal
+    return np.clip(w + dw, w_min, w_max)
+
+
 class ExcitatoryRule:
     def on_fire(self, n, v_pre):
         raise NotImplementedError
@@ -65,7 +99,8 @@ class ExcitatoryRule:
 class SignedSpikeRule(ExcitatoryRule):
     """Every positive synapse gets a +/-1 signed update (active potentiates, OFF
     depresses) via dw = eta * p * (1 - (w/w_cap)^2) * signal, no budget. When the
-    structural free-energy gate is on it REPLACES p with the maturity brake."""
+    structural free-energy gate is on, Phase 8's EXACT equation REPLACES both the
+    p-scaled gain AND the bounded-kernel shape (see exact_local_free_energy_update)."""
 
     def on_fire(self, n, v_pre):
         p = _closeness(n, v_pre)
@@ -74,15 +109,19 @@ class SignedSpikeRule(ExcitatoryRule):
         if pos.any() and n.weight_cap > 0:
             w = n._weights_array[pos]
             signal = np.where(participating[pos], 1.0, -1.0)
-            gain = (n.learning_rate * n._structural_free_energy_gate()
-                    if n.structural_free_energy
-                    else n.learning_rate * p)
             w_min = n.min_positive_weight if n.min_positive_weight is not None else 0.0
-            # Shared bounded kernel: +1 afferents potentiate via H_up, OFF afferents
-            # depress via the reflected H_down -- the SAME downward branch the
-            # competitive-depression loser update uses (spec Section 6).
-            n._weights_array[pos] = bounded_signed_update(
-                w, w_min, n.weight_cap, gain, signal)
+            if n.structural_free_energy:
+                n._weights_array[pos] = exact_local_free_energy_update(
+                    w, w_min, n.weight_cap, n.learning_rate,
+                    n._structural_free_energy_gate(), signal)
+            else:
+                gain = n.learning_rate * p
+                # Shared bounded kernel: +1 afferents potentiate via H_up, OFF
+                # afferents depress via the reflected H_down -- the SAME
+                # downward branch the competitive-depression loser update uses
+                # (spec Section 6).
+                n._weights_array[pos] = bounded_signed_update(
+                    w, w_min, n.weight_cap, gain, signal)
 
 
 class AssemblyFlowCredit(ExcitatoryRule):

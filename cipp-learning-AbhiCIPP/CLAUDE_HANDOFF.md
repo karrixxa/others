@@ -17,13 +17,19 @@
   schedule)
 - Phase 6 END checkpoint commit: `aa271fc` (representation candidate == first
   physical L2E threshold crossing)
-- This update corresponds to the **Phase 7 END** checkpoint (physical L2I
-  competition — causal, delayed L2E→L2I→L2E events) — commit hash filled in
-  after this commit lands, see repo log.
+- Phase 7 END checkpoint commit: `d946ff0` (physical L2I competition —
+  causal, delayed L2E→L2I→L2E events)
+- This update corresponds to the **Phase 8 END** checkpoint (exact local
+  free-energy learning) — commit hash filled in after this commit lands, see
+  repo log.
 - Base branch `july14` is untouched and remains the protected base.
 - `four-pattern` branch exists (checked out in a separate worktree at
   `/home/charisxiong/Documents/others`) and is explicitly NOT merged here —
   see `CLAUDE.md`.
+- Phases 6-12 are now driven by the corrected prompt file at
+  `/home/charisxiong/Downloads/July14_Phases_6_to_12_Corrected_Claude_Prompts.txt`
+  (outside the repo — read it fresh each phase, do not rely on memory of it).
+  Confirmed byte-for-byte consistent with what Phase 6/7 already implemented.
 
 ## Goal
 
@@ -129,6 +135,36 @@ inhibition, and competitor pre/post charge, all exposed via
 phase deliberately changes physical dynamics (the explicit point of the
 instruction) — new baselines were captured and are EXPECTED to differ from
 every prior phase's; see Known problems for what changed and why.
+
+**Current phase (Phase 8, complete) — Exact local free-energy learning, per
+the corrected Phases 6-12 prompt file:** the already-existing, already-named
+`structural_free_energy` mechanism (ported earlier from
+`Claude_Structural_Free_Energy_Prompt.md`, which deliberately left its
+saturating term as "whatever the local cap/floor behavior is") is now pinned
+to the EXACT specified equation when enabled:
+`delta_w = LR * FE * (1 - w/w_max)^2 * learn_signal`, where `FE` is this
+neuron's own `_structural_free_energy_gate()` (local: only this neuron's
+positive-afferent sum vs its own threshold — no rivals, no labels, no
+membrane voltage) and `learn_signal` is the existing +1/-1 signed-spike
+convention. This REPLACES that branch's previous use of the shared
+`bounded_signed_update` reflected kernel (`SignedSpikeRule.on_fire`, in
+`snn/rules/excitatory.py`) with a new, separate helper
+(`exact_local_free_energy_update`) so the two saturating shapes stay
+distinguishable and `bounded_signed_update` itself (still used by the
+non-FE signed path and by `apply_delayed_inhibition`'s Phase 7 depression
+gain) is completely untouched. The new equation's envelope,
+`(1 - w/w_max)^2`, is symmetric and reaches exactly zero at `w_max` in BOTH
+directions — a fully-saturated weight cannot move further until it decays,
+unlike the old reflected kernel which still permitted downward movement at
+the cap. This is the literal, intended consequence of using the equation
+exactly as specified, not an oversight. No global normalization,
+pattern-to-neuron assignment, hidden-state argmax, or weight-based ownership
+was added; the rule is purely per-neuron/event-driven (fires on THIS
+neuron's own spike only) and therefore has no representative-specific credit
+to withhold on an ambiguous same-step tie in the first place — verified
+directly with a forced tie. Frozen probes are unaffected (the existing
+`plasticity_frozen` guard at the top of `_update_weights` is unconditional
+and was never touched).
 
 ## Completed (this session)
 
@@ -239,13 +275,55 @@ expected declines in distinct-owner/pool-participation metrics (see Known
 problems), which is the anticipated cost of removing the same-step immediate
 mutual exclusion, not a bug.
 
+Phase 8 (exact local free-energy learning; see "Files changed" below): pinned
+the `structural_free_energy`-gated branch of `SignedSpikeRule` (in
+`snn/rules/excitatory.py`) to the literal equation
+`delta_w = LR * FE * (1 - w/w_max)^2 * learn_signal` via a new helper
+`exact_local_free_energy_update`, replacing that branch's previous use of
+`bounded_signed_update`. `bounded_signed_update` itself is untouched (still
+used by the non-FE signed-spike path and by Phase 7's
+`apply_delayed_inhibition` depression gain — a different call site/purpose,
+out of this phase's scope). Updated one pre-existing test
+(`test_gate_replaces_p`) that pinned the OLD formula; added 8 new focused
+tests covering the exact equation, both-direction saturation at `w_max`,
+purely-numerical clamping, voltage-independence (FE fully replaces `p`, no
+leakage), code-level locality (AST-verified: the helper's executable body
+references no name beyond its own five arguments), same-step-tie
+non-discrimination, and probe non-mutation.
+
 ## In progress
 
-**Phase 7 (physical L2I competition) is COMPLETE** — single-milestone phase,
-phase-end regressions run, this is the phase-end checkpoint per `CLAUDE.md`.
-No further phase is currently queued.
+**Phase 8 (exact local free-energy learning) is COMPLETE** — single-milestone
+phase, phase-end regressions run, this is the phase-end checkpoint per
+`CLAUDE.md`. No further phase is currently queued.
 
-## Files changed (Phase 7 — physical L2I competition, this checkpoint)
+## Files changed (Phase 8 — exact local free-energy learning, this checkpoint)
+
+- `snn/rules/excitatory.py`: added `exact_local_free_energy_update(w, w_min,
+  w_max, lr, fe, learn_signal)` — the literal Phase 8 equation, clamped only
+  for numerical bounds `[w_min, w_max]`. `SignedSpikeRule.on_fire`'s
+  `structural_free_energy` branch now calls this helper instead of
+  `bounded_signed_update`; the non-FE branch (plain `p`-scaled signed-spike
+  learning) is byte-for-byte unchanged.
+- `snn/rules/__init__.py`: exported `exact_local_free_energy_update`.
+- `test_structural_free_energy.py`: updated `test_gate_replaces_p` to build
+  its reference via `exact_local_free_energy_update` instead of
+  `bounded_signed_update`; added `test_exact_equation_matches_the_literal_formula`,
+  `test_saturation_envelope_zero_at_w_max_both_directions`,
+  `test_saturation_envelope_maximal_at_w_min`, `test_clamp_is_purely_numerical`,
+  `test_fe_gate_and_envelope_are_the_only_two_factors` (voltage-independence),
+  `test_fe_update_uses_only_this_neurons_own_state` (AST-based locality proof),
+  `test_same_step_tie_gives_no_special_credit_either_side` (drives a real
+  forced same-step tie through the full engine and confirms both firers still
+  apply their own local FE update, with no asymmetric winner/loser treatment),
+  and `test_frozen_probe_does_not_mutate_weights_or_confidence_under_fe`.
+- No changes to `neuron_flexible.py`, `backend/simulation.py`, or any Phase
+  4-7 mechanism — `_structural_free_energy_gate()`/`structural_fe_eta_floor`/
+  the `apply_delayed_inhibition` depression-gain consumer of the same gate
+  function are all unchanged; only `SignedSpikeRule`'s OWN use of the gate
+  value changed.
+
+### Phase 7 (prior checkpoint `d946ff0`)
 
 - `neuron_flexible.py`:
   - **Retired** `apply_competitive_reset()`. **Added**
@@ -673,7 +751,51 @@ No neural equation and no preset VALUE was changed. `CLAUDE_HANDOFF.md`
 
 ## Tests
 
-### Phase 7 (this checkpoint)
+### Phase 8 (this checkpoint)
+
+- `test_structural_free_energy.py`: **13/13 passed** (5 pre-existing + 8 new).
+- `pytest -q` (full suite): **220 passed, 5 failed** (212 prior + 8 new = 220;
+  same 5 pre-existing `test_flow_rate.py`/`test_assembly_flow_credit.py`
+  failures as every prior checkpoint, untouched — unrelated to this phase).
+- **Equation exactness:** `test_exact_equation_matches_the_literal_formula`
+  computes the reference by hand from the literal spec string and checks
+  bit-for-bit; `test_gate_replaces_p` re-derives the same reference inline
+  inside the full `_update_weights` call path (not just the bare helper).
+- **Saturation:** `test_saturation_envelope_zero_at_w_max_both_directions`
+  confirms a weight sitting exactly at `w_max` cannot move in EITHER
+  direction (the intended, literal consequence of the symmetric envelope —
+  contrasted explicitly with the OLD reflected kernel, which still permitted
+  downward movement at the cap); `test_saturation_envelope_maximal_at_w_min`
+  confirms envelope=1 at w=0; `test_clamp_is_purely_numerical` confirms an
+  oversized update lands exactly on the bound rather than overshooting.
+- **No duplicated capacity/influence factor:**
+  `test_fe_gate_and_envelope_are_the_only_two_factors` fires the SAME neuron
+  at two wildly different `v_pre` values (which would change `p` by ~100x)
+  and confirms the FE-gated update is bit-identical either way — proving `p`
+  has been fully replaced, not blended in.
+- **Locality, verified structurally (not just by convention):**
+  `test_fe_update_uses_only_this_neurons_own_state` parses
+  `exact_local_free_energy_update`'s AST and asserts its executable body
+  (docstring excluded) references no name beyond its own five parameters —
+  a stronger guarantee than a docstring claim.
+- **Ambiguity (same-step tie):**
+  `test_same_step_tie_gives_no_special_credit_either_side` forces a real
+  same-step tie through the full engine (`structural_free_energy=True`) and
+  confirms both firers independently apply their own local FE update
+  regardless of `self.winner`/tie status — the rule never referenced
+  `self.winner` in the first place, so there was no representative-specific
+  credit to withhold, and this test proves that absence rather than assuming it.
+- **Probe non-mutation:**
+  `test_frozen_probe_does_not_mutate_weights_or_confidence_under_fe` re-runs
+  Phase 2's guarantee under `DASHBOARD_PRESET` with `structural_free_energy=True`
+  layered on top — weights and confidence are byte-identical across the probe.
+- **No collateral:** all four other pre-existing tests in the file
+  (`test_gate_monotonic_in_sum`, `test_negative_gate_ignored`,
+  `test_flag_off_identical`, `test_only_signed_path`) pass unchanged — the
+  gate VALUE computation, the flag-off path, and the legacy-charge-path
+  inertness are all untouched by this phase.
+
+### Phase 7 (prior checkpoint `d946ff0`)
 
 - `test_l2i_causal_inhibition.py` (new, focused): **15/15 passed**.
 - 13 pre-existing tests updated across `test_competitive_reset.py`,
@@ -961,6 +1083,25 @@ No neural equation and no preset VALUE was changed. `CLAUDE_HANDOFF.md`
 
 ## Known problems
 
+- **`structural_free_energy` is still default OFF** (`DASHBOARD_PRESET` does
+  not set it) -- Phase 8 corrected the equation used WHEN it is enabled, but
+  did not turn it on by default or measure its effect on distinct-owner/
+  pool-participation metrics against the new Phase 7 baseline. The original
+  ported prompt's own "Expected Effect"/"Measurements" sections (multi-seed
+  consolidation/retention comparisons) were explicitly NOT part of the
+  corrected Phase 8 prompt's narrower scope (equation + tests + validation +
+  handoff only) and were deliberately not run here -- a future phase could
+  sweep `structural_free_energy`/`structural_fe_eta_floor` against the Phase 7
+  baseline if the user wants that experiment revisited.
+- **The exact envelope's both-directions-zero-at-cap property is a real
+  behavioral difference from the old reflected kernel**, worth remembering if
+  `structural_free_energy` is ever enabled together with `loser_depression`'s
+  OWN structural-FE-gated depression path in `apply_delayed_inhibition`
+  (unaffected by this phase, still uses `bounded_signed_update`) -- the two
+  call sites now use DIFFERENT saturating shapes for what is nominally "the
+  same" FE gate value, which is intentional (Phase 8 only pins the
+  potentiation/signed-learning path) but should be kept in mind if the two
+  are ever meant to be unified later.
 - **The "central failure" is now measured through an honest first-spike lens,
   and it's still unsolved.** With `self.winner` correctly tracking the first
   physical responder (not latest-spike), re-running
@@ -1109,18 +1250,24 @@ No neural equation and no preset VALUE was changed. `CLAUDE_HANDOFF.md`
 
 ## Next action
 
-Phase 7 is closed. No further phase is currently queued -- the natural next
-step, per Known problems above, would be investigating the measured
-distinct-owner/pool-participation decline (especially the
-`sustained_dominance.py`/`ablation_harness.py` HELD-pattern collapse to
-`distinct=1/4`) if the user wants that addressed; this needs its own explicit
-go-ahead and should NOT be resolved by tuning `l2_inhibition_frac`/
-`l2_inhibition_delay` to force a particular metric (per brief SS9's "do not
-resolve this with a software exception" -- the same guidance that shaped this
-phase itself).
+Phase 8 is closed. Per the corrected Phases 6-12 prompt file (see Branch/HEAD)
+and the user's explicit "continue autonomously through Phases 7-12"
+instruction, **Phase 9 (causal L1I predictive feedback) is next** and is
+being started immediately in this same session -- see the Phase 9 sections
+above (or below, once written) for its own Goal/Completed/Files
+changed/Tests entries.
 
 Other candidates for a future phase, none started, all needing their own
 explicit go-ahead:
+- Sweep `structural_free_energy`/`structural_fe_eta_floor` (now Phase
+  8-corrected) against the Phase 7 competition baseline, per the original
+  ported prompt's multi-seed consolidation/retention measurements -- not run
+  in Phase 8 (out of its narrower corrected scope).
+- Investigating the measured distinct-owner/pool-participation decline from
+  Phase 7 (especially the `sustained_dominance.py`/`ablation_harness.py`
+  HELD-pattern collapse to `distinct=1/4`) if the user wants that addressed;
+  should NOT be resolved by tuning `l2_inhibition_frac`/`l2_inhibition_delay`
+  to force a particular metric (brief SS9).
 - Investigate why `sustained_dominance.py`/`ablation_harness.py`'s HELD-pattern
   protocol now collapses to one specialist dominating all four patterns
   (`distinct=1/4`, `dead=7`) while the brief's own equal-interleaved schedule
