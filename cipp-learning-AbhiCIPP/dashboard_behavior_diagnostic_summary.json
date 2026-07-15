@@ -1,0 +1,618 @@
+{
+  "default": {
+    "config": "default",
+    "total_weight_delta_records": 15728,
+    "non_spiking_records": 9497,
+    "non_spiking_increases": 0,
+    "non_spiking_increase_examples": [],
+    "non_spiking_by_cause": {
+      "l2i_loser_depression": 9497
+    },
+    "loser_depression_total_events": 9497,
+    "loser_depression_non_spiking_events": 9497,
+    "l2e5_weights": {
+      "0": 1.0,
+      "1": 1.0,
+      "2": 230.8,
+      "3": 1.0,
+      "4": 2362.85,
+      "5": 1.0,
+      "6": 230.8,
+      "7": 1.0,
+      "8": 1.0
+    },
+    "l2e5_union_pixels": [
+      1,
+      3,
+      4,
+      5,
+      7
+    ],
+    "l2e5_union_mean_weight": 473.37,
+    "l2e5_other_mean_weight": 115.9,
+    "weight_cap": 2666.6666666666665,
+    "self_spike_off_depression_events": 2301,
+    "self_spike_stuck_at_cap_events": 0,
+    "loser_depression_moved_at_cap_events": 0,
+    "center_pixel_influence_mean": 2.1277,
+    "other_pixel_influence_mean": 1.9414,
+    "unrecruited_evidence": {
+      "L2E6": {
+        "status": {
+          "status": "active",
+          "spikes_total": 167,
+          "last_fired_step": 3158,
+          "first_responder_counts": {
+            "col 1": 20
+          },
+          "patterns_led": [
+            "col 1"
+          ]
+        },
+        "weight_cap": 2666.6666666666665,
+        "positive_weight_sum": 3155.3654269240183,
+        "weights": [
+          1.0,
+          1249.64,
+          1.0,
+          1.0,
+          648.5,
+          1.0,
+          1.0,
+          1251.23,
+          1.0
+        ],
+        "loser_depression_events_recorded": 1023,
+        "self_spike_events_recorded": 533
+      },
+      "L2E7": {
+        "status": {
+          "status": "active",
+          "spikes_total": 169,
+          "last_fired_step": 3178,
+          "first_responder_counts": {
+            "diag \\": 22
+          },
+          "patterns_led": [
+            "diag \\"
+          ]
+        },
+        "weight_cap": 2666.6666666666665,
+        "positive_weight_sum": 3164.542146486224,
+        "weights": [
+          1248.19,
+          1.0,
+          1.0,
+          1.0,
+          661.7,
+          1.0,
+          1.0,
+          1.0,
+          1248.65
+        ],
+        "loser_depression_events_recorded": 1014,
+        "self_spike_events_recorded": 532
+      }
+    },
+    "l1i_all_identical_weight_vector": true,
+    "l1i_all_nine_sync_rate": 1.0,
+    "rf_ui_matches_backend_hold_scenario": true,
+    "rf_ui_matches_backend_interleaved_scenario": true,
+    "rf_check_details": {
+      "hold": {
+        "checked": 72,
+        "mismatches": [],
+        "exact_match": true
+      },
+      "interleaved": {
+        "checked": 72,
+        "mismatches": [],
+        "exact_match": true
+      }
+    },
+    "final_l2e_status": {
+      "L2E0": {
+        "status": "unrecruited",
+        "spikes_total": 0,
+        "last_fired_step": null,
+        "first_responder_counts": {},
+        "patterns_led": []
+      },
+      "L2E1": {
+        "status": "unrecruited",
+        "spikes_total": 0,
+        "last_fired_step": null,
+        "first_responder_counts": {},
+        "patterns_led": []
+      },
+      "L2E2": {
+        "status": "quiet",
+        "spikes_total": 6,
+        "last_fired_step": 136,
+        "first_responder_counts": {
+          "diag \\": 1
+        },
+        "patterns_led": [
+          "diag \\"
+        ]
+      },
+      "L2E3": {
+        "status": "quiet",
+        "spikes_total": 38,
+        "last_fired_step": 657,
+        "first_responder_counts": {
+          "col 1": 3,
+          "diag /": 1,
+          "row 1": 1
+        },
+        "patterns_led": [
+          "col 1",
+          "diag /",
+          "row 1"
+        ]
+      },
+      "L2E4": {
+        "status": "active",
+        "spikes_total": 246,
+        "last_fired_step": 3138,
+        "first_responder_counts": {
+          "row 1": 25,
+          "col 1": 5,
+          "diag /": 5,
+          "diag \\": 1
+        },
+        "patterns_led": [
+          "col 1",
+          "diag /",
+          "diag \\",
+          "row 1"
+        ]
+      },
+      "L2E5": {
+        "status": "active",
+        "spikes_total": 674,
+        "last_fired_step": 3198,
+        "first_responder_counts": {
+          "row 1": 12,
+          "diag /": 31,
+          "diag \\": 15,
+          "col 1": 12
+        },
+        "patterns_led": [
+          "col 1",
+          "diag /",
+          "diag \\",
+          "row 1"
+        ]
+      },
+      "L2E6": {
+        "status": "active",
+        "spikes_total": 167,
+        "last_fired_step": 3158,
+        "first_responder_counts": {
+          "col 1": 20
+        },
+        "patterns_led": [
+          "col 1"
+        ]
+      },
+      "L2E7": {
+        "status": "active",
+        "spikes_total": 169,
+        "last_fired_step": 3178,
+        "first_responder_counts": {
+          "diag \\": 22
+        },
+        "patterns_led": [
+          "diag \\"
+        ]
+      }
+    }
+  },
+  "A_distance_off_adaptive_off": {
+    "config": "A_distance_off_adaptive_off",
+    "total_weight_delta_records": 13048,
+    "non_spiking_records": 8347,
+    "non_spiking_increases": 0,
+    "non_spiking_increase_examples": [],
+    "non_spiking_by_cause": {
+      "l2i_loser_depression": 8347
+    },
+    "loser_depression_total_events": 8347,
+    "loser_depression_non_spiking_events": 8347,
+    "l2e5_weights": {
+      "0": 1.0,
+      "1": 56.84,
+      "2": 1.0,
+      "3": 1.0,
+      "4": 121.27,
+      "5": 1.0,
+      "6": 1.0,
+      "7": 56.84,
+      "8": 1.0
+    },
+    "l2e5_union_pixels": [
+      1,
+      3,
+      4,
+      5,
+      7
+    ],
+    "l2e5_union_mean_weight": 47.39,
+    "l2e5_other_mean_weight": 1.0,
+    "weight_cap": 2666.6666666666665,
+    "self_spike_off_depression_events": 2253,
+    "self_spike_stuck_at_cap_events": 0,
+    "loser_depression_moved_at_cap_events": 0,
+    "center_pixel_influence_mean": 2.1277,
+    "other_pixel_influence_mean": 1.9414,
+    "unrecruited_evidence": {
+      "L2E6": {
+        "status": {
+          "status": "unrecruited",
+          "spikes_total": 0,
+          "last_fired_step": null,
+          "first_responder_counts": {},
+          "patterns_led": []
+        },
+        "weight_cap": 2666.6666666666665,
+        "positive_weight_sum": 565.4513668645392,
+        "weights": [
+          109.92,
+          47.61,
+          46.71,
+          77.22,
+          8.72,
+          67.34,
+          72.27,
+          94.72,
+          40.94
+        ],
+        "loser_depression_events_recorded": 1488,
+        "self_spike_events_recorded": 0
+      },
+      "L2E7": {
+        "status": {
+          "status": "quiet",
+          "spikes_total": 1,
+          "last_fired_step": 91,
+          "first_responder_counts": {
+            "row 1": 1
+          },
+          "patterns_led": [
+            "row 1"
+          ]
+        },
+        "weight_cap": 2666.6666666666665,
+        "positive_weight_sum": 524.6745060985205,
+        "weights": [
+          62.84,
+          21.88,
+          46.14,
+          74.82,
+          14.54,
+          108.29,
+          63.29,
+          53.38,
+          79.49
+        ],
+        "loser_depression_events_recorded": 1488,
+        "self_spike_events_recorded": 9
+      }
+    },
+    "l1i_all_identical_weight_vector": true,
+    "l1i_all_nine_sync_rate": 1.0,
+    "rf_ui_matches_backend_hold_scenario": true,
+    "rf_ui_matches_backend_interleaved_scenario": true,
+    "rf_check_details": {
+      "hold": {
+        "checked": 72,
+        "mismatches": [],
+        "exact_match": true
+      },
+      "interleaved": {
+        "checked": 72,
+        "mismatches": [],
+        "exact_match": true
+      }
+    },
+    "final_l2e_status": {
+      "L2E0": {
+        "status": "unrecruited",
+        "spikes_total": 0,
+        "last_fired_step": null,
+        "first_responder_counts": {},
+        "patterns_led": []
+      },
+      "L2E1": {
+        "status": "unrecruited",
+        "spikes_total": 0,
+        "last_fired_step": null,
+        "first_responder_counts": {},
+        "patterns_led": []
+      },
+      "L2E2": {
+        "status": "quiet",
+        "spikes_total": 228,
+        "last_fired_step": 1885,
+        "first_responder_counts": {
+          "diag /": 6,
+          "row 1": 5,
+          "col 1": 2,
+          "diag \\": 2
+        },
+        "patterns_led": [
+          "col 1",
+          "diag /",
+          "diag \\",
+          "row 1"
+        ]
+      },
+      "L2E3": {
+        "status": "quiet",
+        "spikes_total": 9,
+        "last_fired_step": 593,
+        "first_responder_counts": {
+          "col 1": 2
+        },
+        "patterns_led": [
+          "col 1"
+        ]
+      },
+      "L2E4": {
+        "status": "active",
+        "spikes_total": 493,
+        "last_fired_step": 3195,
+        "first_responder_counts": {
+          "col 1": 21,
+          "diag \\": 21,
+          "diag /": 19,
+          "row 1": 20
+        },
+        "patterns_led": [
+          "col 1",
+          "diag /",
+          "diag \\",
+          "row 1"
+        ]
+      },
+      "L2E5": {
+        "status": "quiet",
+        "spikes_total": 80,
+        "last_fired_step": 999,
+        "first_responder_counts": {
+          "row 1": 7,
+          "diag \\": 8,
+          "col 1": 5,
+          "diag /": 4
+        },
+        "patterns_led": [
+          "col 1",
+          "diag /",
+          "diag \\",
+          "row 1"
+        ]
+      },
+      "L2E6": {
+        "status": "unrecruited",
+        "spikes_total": 0,
+        "last_fired_step": null,
+        "first_responder_counts": {},
+        "patterns_led": []
+      },
+      "L2E7": {
+        "status": "quiet",
+        "spikes_total": 1,
+        "last_fired_step": 91,
+        "first_responder_counts": {
+          "row 1": 1
+        },
+        "patterns_led": [
+          "row 1"
+        ]
+      }
+    }
+  },
+  "B_distance_off_adaptive_on": {
+    "config": "B_distance_off_adaptive_on",
+    "total_weight_delta_records": 10177,
+    "non_spiking_records": 5906,
+    "non_spiking_increases": 0,
+    "non_spiking_increase_examples": [],
+    "non_spiking_by_cause": {
+      "l2i_loser_depression": 5906
+    },
+    "loser_depression_total_events": 5906,
+    "loser_depression_non_spiking_events": 5906,
+    "l2e5_weights": {
+      "0": 1.0,
+      "1": 1.0,
+      "2": 3.88,
+      "3": 86.34,
+      "4": 1125.26,
+      "5": 86.34,
+      "6": 3.88,
+      "7": 1.0,
+      "8": 1.0
+    },
+    "l2e5_union_pixels": [
+      1,
+      3,
+      4,
+      5,
+      7
+    ],
+    "l2e5_union_mean_weight": 259.99,
+    "l2e5_other_mean_weight": 2.44,
+    "weight_cap": 2666.6666666666665,
+    "self_spike_off_depression_events": 2000,
+    "self_spike_stuck_at_cap_events": 0,
+    "loser_depression_moved_at_cap_events": 0,
+    "center_pixel_influence_mean": 2.1277,
+    "other_pixel_influence_mean": 1.9414,
+    "unrecruited_evidence": {
+      "L2E6": {
+        "status": {
+          "status": "unrecruited",
+          "spikes_total": 0,
+          "last_fired_step": null,
+          "first_responder_counts": {},
+          "patterns_led": []
+        },
+        "weight_cap": 2666.6666666666665,
+        "positive_weight_sum": 561.4331838038969,
+        "weights": [
+          110.2,
+          46.48,
+          45.57,
+          78.35,
+          8.47,
+          68.32,
+          70.5,
+          92.48,
+          41.05
+        ],
+        "loser_depression_events_recorded": 999,
+        "self_spike_events_recorded": 0
+      },
+      "L2E7": {
+        "status": {
+          "status": "quiet",
+          "spikes_total": 1,
+          "last_fired_step": 91,
+          "first_responder_counts": {
+            "row 1": 1
+          },
+          "patterns_led": [
+            "row 1"
+          ]
+        },
+        "weight_cap": 2666.6666666666665,
+        "positive_weight_sum": 522.2754502587769,
+        "weights": [
+          62.85,
+          21.27,
+          44.9,
+          76.11,
+          14.03,
+          110.15,
+          61.6,
+          51.87,
+          79.5
+        ],
+        "loser_depression_events_recorded": 999,
+        "self_spike_events_recorded": 9
+      }
+    },
+    "l1i_all_identical_weight_vector": true,
+    "l1i_all_nine_sync_rate": 1.0,
+    "rf_ui_matches_backend_hold_scenario": true,
+    "rf_ui_matches_backend_interleaved_scenario": true,
+    "rf_check_details": {
+      "hold": {
+        "checked": 72,
+        "mismatches": [],
+        "exact_match": true
+      },
+      "interleaved": {
+        "checked": 72,
+        "mismatches": [],
+        "exact_match": true
+      }
+    },
+    "final_l2e_status": {
+      "L2E0": {
+        "status": "unrecruited",
+        "spikes_total": 0,
+        "last_fired_step": null,
+        "first_responder_counts": {},
+        "patterns_led": []
+      },
+      "L2E1": {
+        "status": "unrecruited",
+        "spikes_total": 0,
+        "last_fired_step": null,
+        "first_responder_counts": {},
+        "patterns_led": []
+      },
+      "L2E2": {
+        "status": "quiet",
+        "spikes_total": 70,
+        "last_fired_step": 1509,
+        "first_responder_counts": {
+          "diag /": 10,
+          "row 1": 5
+        },
+        "patterns_led": [
+          "diag /",
+          "row 1"
+        ]
+      },
+      "L2E3": {
+        "status": "active",
+        "spikes_total": 91,
+        "last_fired_step": 3159,
+        "first_responder_counts": {
+          "col 1": 19,
+          "diag \\": 1
+        },
+        "patterns_led": [
+          "col 1",
+          "diag \\"
+        ]
+      },
+      "L2E4": {
+        "status": "active",
+        "spikes_total": 328,
+        "last_fired_step": 3199,
+        "first_responder_counts": {
+          "col 1": 12,
+          "diag \\": 25,
+          "row 1": 20,
+          "diag /": 28
+        },
+        "patterns_led": [
+          "col 1",
+          "diag /",
+          "diag \\",
+          "row 1"
+        ]
+      },
+      "L2E5": {
+        "status": "active",
+        "spikes_total": 262,
+        "last_fired_step": 3139,
+        "first_responder_counts": {
+          "row 1": 13,
+          "diag \\": 14,
+          "col 1": 9,
+          "diag /": 1
+        },
+        "patterns_led": [
+          "col 1",
+          "diag /",
+          "diag \\",
+          "row 1"
+        ]
+      },
+      "L2E6": {
+        "status": "unrecruited",
+        "spikes_total": 0,
+        "last_fired_step": null,
+        "first_responder_counts": {},
+        "patterns_led": []
+      },
+      "L2E7": {
+        "status": "quiet",
+        "spikes_total": 1,
+        "last_fired_step": 91,
+        "first_responder_counts": {
+          "row 1": 1
+        },
+        "patterns_led": [
+          "row 1"
+        ]
+      }
+    }
+  }
+}

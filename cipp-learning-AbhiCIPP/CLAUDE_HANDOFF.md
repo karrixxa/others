@@ -23,10 +23,12 @@
 - Phase 9 END checkpoint commit: `3dd6f4c` (causal L1I predictive feedback)
 - Phase 10 END checkpoint commit: `d333945` (adaptive-threshold ablation)
 - Phase 11 END checkpoint commit: `1a59ae8` (controlled multi-seed validation)
-- This update corresponds to the **Phase 12 END** checkpoint (final local
-  review — DO NOT PUBLISH; this is the last phase of the corrected Phases
-  6-12 sequence) — commit hash filled in after this commit lands, see repo
-  log.
+- Phase 12 END checkpoint commit: `e4ee1f9` (final local review, DO NOT
+  PUBLISH — the last phase of the corrected Phases 6-12 sequence)
+- This update corresponds to the **Phase 13 END** checkpoint (dashboard
+  behavior diagnostic, measurement only, requested directly by the user
+  outside the Phases 6-12 sequence — commit hash filled in after this commit
+  lands, see repo log).
 - Base branch `july14` is untouched and remains the protected base.
 - `four-pattern` branch exists (checked out in a separate worktree at
   `/home/charisxiong/Documents/others`) and is explicitly NOT merged here —
@@ -281,6 +283,54 @@ success criteria and reconfirmed: not met in any of 16 conditions across all
 remains open. Wrote `Phase12_Final_Local_Review.md` with all of the above,
 plus an honest "Unresolved failures" list and the exact final commit
 chain/working-tree status for handoff.
+
+**Current phase (Phase 13, complete) — Dashboard behavior diagnostic,
+MEASUREMENT ONLY, requested directly by the user (outside the Phases 6-12
+prompt sequence, after observing "only 3 neurons are actively participating
+with a tyrant" in the live dashboard):** no neural mechanism changed, no
+parameter tuned. Built `dashboard_behavior_diagnostic.py` (new,
+non-mutating instrumentation, same discipline as
+`diagnostic_schedule.py`/`phase11_validation.py`) that wraps every L2E
+neuron's `fire()`/`apply_delayed_inhibition()`/`_homeostatic_scaling()` and
+`SimulationEngine.set_feedforward_weight()` to record every feedforward
+weight delta with a directly-observed (never inferred) cause, timestep,
+pattern, spiked flag, L2I delivery source/time, V_pre/threshold/p_loss,
+active inputs, and weight before/delta/after. Ran seed=1 across the
+dashboard default and two ablations (A: distance_weighting off, adaptive
+off; B: distance_weighting off, adaptive on), both a row-1-then-col-1 hold/
+switch and 40 rotations of the brief's 20-step equal-interleaved schedule
+(reusing `diagnostic_schedule.CYCLE_ORDER`/`PRESENTATION_STEPS` directly).
+Verified `topology()`'s serialized RF weights are byte-identical to the
+engine's own `_all_weights()`/raw weight array (0 mismatches, every synapse,
+every run). Headline findings: (1) zero non-spiking L2E weight increases in
+any config -- every non-spiking delta is `l2i_loser_depression`, the only
+non-spiking-triggered weight-mutating path active in these configs; (2) L2E5
+does NOT form a union receptive field of row 1/col 1 -- it collapses onto
+the one pixel shared by every trained pattern (the center) while its actual
+distinguishing pixels decay to the weight floor, because the center pixel
+never receives the signed rule's `-1` (depress) signal under any pattern;
+(3) the self-spike exact-FE update's `(1-w/w_max)^2` envelope and the loser-
+depression `bounded_signed_update` reflected kernel diverge sharply near the
+cap (>1000x envelope-value gap at 97% of cap in an extended 150-cycle run),
+though no weight fully saturated within the measured run length; (4) legacy
+distance amplification of the center pixel is real but modest (~9.6%
+relative to the mean of other pixels) -- the center pixel's dominance is
+driven far more by its 100% pattern duty cycle than by distance; (5) turning
+`distance_weighting` OFF (configs A/B) made recruitment measurably WORSE,
+not better (4/8 active neurons in the dashboard default down to 1/8 in A,
+3/8 in B) -- config B reproduces the reported "3 active neurons with a
+tyrant" symptom almost exactly, ruling out distance-weighting as the fix to
+reach for; (6) L2E0/L2E1 stay fully unrecruited (0 spikes) in every config,
+consistent with unlucky `legacy_wide` random init plus loser-depression's
+rich-get-richer entrenchment and no rescue mechanism for a neuron that never
+got an early lead; (7) all nine L1I units remain fully synchronized in every
+config (identical weight vectors, 100% all-nine-fire-together rate) --
+confirmed structural, unrelated to distance/adaptive-threshold. Full
+findings, the exact reproduction method, and every example record are in
+`Phase13_Dashboard_Behavior_Diagnostic.md`; the compact aggregate data
+backing every number is in `dashboard_behavior_diagnostic_summary.json`
+(committed); the full per-event log (tens of MB) is a disposable `/tmp`
+artifact, not committed, per this repo's own commit-hygiene rule.
 
 ## Completed (this session)
 
