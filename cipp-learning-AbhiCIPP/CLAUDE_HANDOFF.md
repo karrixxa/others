@@ -20,8 +20,9 @@
 - Phase 7 END checkpoint commit: `d946ff0` (physical L2I competition —
   causal, delayed L2E→L2I→L2E events)
 - Phase 8 END checkpoint commit: `c0ac363` (exact local free-energy learning)
-- This update corresponds to the **Phase 9 END** checkpoint (causal L1I
-  predictive feedback) — commit hash filled in after this commit lands, see
+- Phase 9 END checkpoint commit: `3dd6f4c` (causal L1I predictive feedback)
+- This update corresponds to the **Phase 10 END** checkpoint (adaptive-
+  threshold ablation) — commit hash filled in after this commit lands, see
   repo log.
 - Base branch `july14` is untouched and remains the protected base.
 - `four-pattern` branch exists (checked out in a separate worktree at
@@ -198,6 +199,33 @@ broadcast shortcut (verified: `l1i_immediate_relay` defaults to False, and
 the default trainable-integrator mode genuinely requires threshold crossing
 — sabotaging L1I's weights/threshold confirms it does not fire).
 
+**Current phase (Phase 10, complete) — Adaptive-threshold ablation, per the
+corrected Phases 6-12 prompt file:** a new, separately-named, default-off
+L2E-only mechanism (`adaptive_threshold`), fully independent of the existing
+synaptic-scaling homeostasis feature (`homeostasis`) and of geometry -- not a
+rename or silent reuse of either. Each L2E neuron maintains local state `a_i`
+(`Neuron.threshold_adapt`): `effective_threshold = threshold + a_i`; on that
+neuron's OWN physical spike, `a_i += delta_threshold` (`fire()`); every step,
+`a_i` decays exponentially toward zero with time constant `tau_threshold`
+(`update()`, independent of the membrane's own refractory/leak state -- decay
+continues even while the neuron itself is refractory, since `a_i` is a
+separate local memory). `check_threshold()` delegates straight to the
+Membrane's own decision when the flag is off (byte-identical to every
+existing caller, verified directly and via a full engine run comparing
+`adaptive_threshold=False` explicit vs. the default). `delta_threshold_frac`
+(0.05 default) and `tau_threshold` (25 steps default) are documented,
+reasonable starting points, deliberately NOT swept or tuned to make any
+particular seed succeed -- Phase 11 measures the effect, and Phase 10 does
+not pre-judge it. State and trajectory are exposed per-neuron
+(`threshold_adapt`/`effective_threshold`) and via a new top-level
+`dynamic_state()['adaptive_threshold']` block (config + full per-neuron
+history). A probe lets `a_i` evolve internally (real physical spikes during
+the probe legitimately move it) but snapshots it beforehand and restores it
+UNCONDITIONALLY afterward -- whether the probe elapses naturally or is
+cancelled by manual input -- so probe evaluation can never alter subsequent
+training. Isolation between neurons and deterministic replay are both
+verified directly.
+
 ## Completed (this session)
 
 Phase 0 (branch/docs setup):
@@ -337,13 +365,83 @@ L2E→L1I delivery mechanism itself are UNCHANGED — this phase is
 observability plus a targeted attribution-logic fix, not a rewiring of
 connectivity. Added `test_l1i_causal_feedback.py` (12 new tests).
 
+Phase 10 (adaptive-threshold ablation; see "Files changed" below): added
+`Neuron.adaptive_threshold`/`delta_threshold`/`tau_threshold`/`threshold_adapt`
+(a_i) and `effective_threshold`; `check_threshold()` uses the elevated
+threshold only when the flag is on, else delegates unchanged to the
+Membrane. L2E-only wiring in `_build()`, new engine constructor params
+(`adaptive_threshold`, `delta_threshold_frac`, `tau_threshold`), new
+`dynamic_state()['adaptive_threshold']` block plus per-neuron
+`threshold_adapt`/`effective_threshold` fields, and probe snapshot/restore
+in `present_probe`/`_end_probe` (unconditional restore regardless of how the
+probe ends). Added `test_adaptive_threshold.py` (16 new tests).
+
 ## In progress
 
-**Phase 9 (causal L1I predictive feedback) is COMPLETE** — single-milestone
+**Phase 10 (adaptive-threshold ablation) is COMPLETE** — single-milestone
 phase, phase-end regressions run, this is the phase-end checkpoint per
 `CLAUDE.md`. No further phase is currently queued.
 
-## Files changed (Phase 9 — causal L1I predictive feedback, this checkpoint)
+## Files changed (Phase 10 — adaptive-threshold ablation, this checkpoint)
+
+- `neuron_flexible.py`:
+  - New `__init__` state: `adaptive_threshold` (bool, default False),
+    `delta_threshold` (float, default 0.0), `tau_threshold` (float, default
+    1.0, guarded > 0 wherever divided), `threshold_adapt` (a_i, default 0.0).
+  - `fire()`: when `adaptive_threshold` is on, `threshold_adapt +=
+    delta_threshold` on THIS neuron's own spike only (no cross-neuron
+    coupling) — placed right after the membrane discharge.
+  - `update()`: when `adaptive_threshold` is on, `threshold_adapt *=
+    exp(-1/tau_threshold)` every step, unconditionally (independent of the
+    membrane's own refractory/leak branch — a_i is a separate local memory
+    that keeps decaying even while the neuron is refractory).
+  - `check_threshold()`: delegates straight to `self._membrane.check_threshold()`
+    when the flag is off (byte-identical to every existing caller); when on,
+    compares `potential` against the new `effective_threshold` property
+    directly (still respecting the refractory gate).
+  - New `effective_threshold` property: `threshold + threshold_adapt` when on,
+    else exactly `threshold`.
+- `backend/simulation.py`:
+  - New constructor params `adaptive_threshold: bool = False`,
+    `delta_threshold_frac: float = 0.05`, `tau_threshold: float = 25.0`
+    (both in `TUNABLE`/live `apply_config`). Documented as reasonable,
+    non-adversarial defaults, not swept to make any seed succeed (Phase 11
+    measures the effect).
+  - `_build()`: wires `adaptive_threshold`/`delta_threshold` (scaled by
+    `thr_l2`, scale-invariant)/`tau_threshold` onto L2E neurons ONLY, in the
+    same L2E-only branch as `structural_free_energy` etc. — every other
+    population's `adaptive_threshold` stays at the class default (False).
+  - New `self.threshold_adapt_history` (per-L2E bounded deque, same
+    `FREQ_WINDOW` convention as `self.freq`), appended once per step right
+    after `_record_spikes`.
+  - `dynamic_state()`: per-neuron `threshold_adapt`/`effective_threshold`
+    (L2E only); new top-level `adaptive_threshold` block (`enabled`,
+    `delta_threshold`, `tau_threshold`, per-neuron `state`,
+    `effective_threshold`, and `history`).
+  - `present_probe()`/`_end_probe()`: snapshot every L2E's `threshold_adapt`
+    before the probe starts (`_probe_threshold_adapt_snapshot`); restore it
+    UNCONDITIONALLY in `_end_probe` (both `restore=True` — the probe elapsed
+    — and `restore=False` — the probe was cancelled by manual input) so
+    probe evaluation can never alter subsequent training. Physical dynamics
+    (spike-local increments, per-step decay) stay fully live DURING the
+    probe window — only the pre/post values are protected, not frozen live.
+- `test_adaptive_threshold.py` (new) — 16 tests: spike-local increment;
+  exponential decay toward zero (including the exact hand-computed value
+  after one step); decay continues during refractory; the effective-
+  threshold equation (and that it collapses to exactly `threshold` when
+  off); `check_threshold` actually compares against the elevated threshold;
+  a stray nonzero `a_i` is fully ignored when the flag is off; isolation
+  between two neurons; `adaptive_threshold` and `homeostasis` are fully
+  independent flags; the engine defaults to off and an explicit
+  `adaptive_threshold=False` is byte-identical to the default (same winner
+  sequence and final weights over a real 60-step run); `delta_threshold_frac`
+  scales with `threshold_l2`; every non-L2E population never gets the flag;
+  state/trajectory are exposed correctly end-to-end; deterministic replay
+  (identical seed -> identical `a_i` trajectory); the probe restores `a_i`
+  whether it elapses naturally or is cancelled; and a_i genuinely evolves
+  DURING an open probe window (not frozen live, only protected afterward).
+
+### Phase 9 (prior checkpoint `3dd6f4c`)
 
 - `backend/simulation.py`:
   - `_credit_source(idx)`: now returns `'ambiguous'` whenever
@@ -843,7 +941,45 @@ No neural equation and no preset VALUE was changed. `CLAUDE_HANDOFF.md`
 
 ## Tests
 
-### Phase 9 (this checkpoint)
+### Phase 10 (this checkpoint)
+
+- `test_adaptive_threshold.py` (new, focused): **16/16 passed**.
+- `pytest -q` (full suite): **248 passed, 5 failed** (232 prior + 16 new =
+  248; same 5 pre-existing `test_flow_rate.py`/`test_assembly_flow_credit.py`
+  failures as every prior checkpoint, untouched).
+- **Toggle-off equivalence, verified at both levels:**
+  `test_toggle_off_is_baseline_equivalent` (unit) confirms a stray nonzero
+  `a_i` is fully ignored when the flag is off; `test_engine_default_is_off_and_baseline_equivalent`
+  (engine) runs an explicit `adaptive_threshold=False` engine side-by-side
+  with the default over 60 real steps and confirms an identical winner
+  sequence AND identical final weights.
+- **Equation exactness:** `test_decay_toward_zero` compares the post-update
+  `a_i` against a hand-computed `10.0 * exp(-1/5)` after one step, then
+  confirms convergence to ~0 after 200 steps; `test_effective_threshold_equation`
+  and `test_check_threshold_uses_effective_threshold_when_on` confirm the
+  elevated threshold is actually what gates firing, not just computed and
+  ignored.
+- **Independence from homeostasis/geometry:**
+  `test_separate_from_homeostasis_flag` confirms toggling one flag never
+  implies the other; `test_non_l2e_populations_never_get_adaptive_threshold`
+  confirms the L2E-only scope.
+- **Isolation and determinism:** `test_isolation_between_neurons` fires one
+  neuron and confirms a sibling's `a_i` stays exactly 0;
+  `test_deterministic_replay` runs the identical seed/steps twice and
+  confirms a bit-identical `a_i` trajectory.
+- **Probe restoration, both exit paths:**
+  `test_probe_restores_pre_probe_threshold_adapt` (natural elapse) and
+  `test_probe_cancellation_also_restores_threshold_adapt` (cancelled via
+  `clear_input()`) both confirm `a_i` returns to its exact pre-probe value;
+  `test_probe_lets_a_i_evolve_internally_during_the_window` confirms it is
+  NOT frozen live (real spikes during the probe do move it) -- only the
+  before/after values are protected.
+- **No parameter tuning to force a result:** defaults
+  (`delta_threshold_frac=0.05`, `tau_threshold=25.0`) are used as-is across
+  every test; no seed-specific override was introduced to make a particular
+  test pass.
+
+### Phase 9 (prior checkpoint `3dd6f4c`)
 
 - `test_l1i_causal_feedback.py` (new, focused): **12/12 passed**.
 - `pytest -q` (full suite): **232 passed, 5 failed** (220 prior + 12 new =
@@ -1208,6 +1344,13 @@ No neural equation and no preset VALUE was changed. `CLAUDE_HANDOFF.md`
 
 ## Known problems
 
+- **`adaptive_threshold` is default OFF and its EFFECT is unmeasured.** Phase
+  10 built the mechanism, verified it in isolation, and confirmed it does
+  nothing when off -- it deliberately did NOT run consolidation/retention
+  experiments (that is explicitly Phase 11's job: "cross each condition with
+  adaptive threshold off/on"). `delta_threshold_frac=0.05`/`tau_threshold=25`
+  are reasonable, undocumented-as-optimal defaults; do not read them as
+  tuned/recommended values.
 - **L1I still has no real per-unit geometric/causal differentiation by
   default.** All 9 units share one literal feedback weight vector and
   receive an identical `l2e` delivery, so their synchrony (confirmed again
@@ -1389,10 +1532,12 @@ No neural equation and no preset VALUE was changed. `CLAUDE_HANDOFF.md`
 
 ## Next action
 
-Phase 9 is closed. Per the corrected Phases 6-12 prompt file (see Branch/HEAD)
-and the user's explicit "continue autonomously through Phases 7-12"
-instruction, **Phase 10 (adaptive-threshold ablation) is next** and is being
-started immediately in this same session.
+Phase 10 is closed. Per the corrected Phases 6-12 prompt file (see
+Branch/HEAD) and the user's explicit "continue autonomously through Phases
+7-12" instruction, **Phase 11 (controlled multi-seed validation) is next**
+and is being started immediately in this same session. Phase 11 will
+exercise `adaptive_threshold` off/on as one of its crossed conditions -- this
+is where its effect first gets measured.
 
 Other candidates for a future phase, none started, all needing their own
 explicit go-ahead:

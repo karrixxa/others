@@ -190,6 +190,22 @@ class Neuron(NeuralEntity):
         # dependent). Default OFF -> signed rule uses p exactly as before.
         self.structural_free_energy = False
         self.structural_fe_eta_floor = 0.02    # plasticity floor for a mature neuron
+        # Phase 10 (corrected Phases 6-12 prompt file): adaptive-threshold
+        # ablation -- a separately named, SEPARATE mechanism from
+        # self.homeostasis (synaptic-scaling homeostasis) and from geometry.
+        # Local spike-frequency-adaptation-style state a_i (self.threshold_adapt):
+        #   effective_threshold = self.threshold + a_i
+        #   on this neuron's own physical spike: a_i += self.delta_threshold
+        #   every step (including refractory ones -- a_i is independent of the
+        #   membrane's own refractory/leak state): a_i *= exp(-1/tau_threshold)
+        # Default OFF: check_threshold() delegates straight to the Membrane's
+        # own decision (byte-identical to every existing caller); a_i still
+        # exists and updates would still be tracked if somehow toggled mid-run,
+        # but is never consulted while the flag is off.
+        self.adaptive_threshold = False
+        self.delta_threshold = 0.0
+        self.tau_threshold = 1.0     # guarded > 0 wherever used as a divisor
+        self.threshold_adapt = 0.0   # a_i
         # Reset-by-subtraction on fire (opt-in; see fire()). Default OFF reproduces
         # the full reset-to-rest. When ON, a fired neuron keeps its residual
         # overshoot above threshold (standard LIF), floored at rest -- this attacks
@@ -761,9 +777,16 @@ class Neuron(NeuralEntity):
         if self.homeostasis and not self.plasticity_frozen:
             self._homeostatic_scaling()
 
+        # Phase 10: adaptive-threshold decay. Independent of the membrane's own
+        # refractory/leak state (runs every step, refractory or not) -- a_i is
+        # a separate local SFA-style memory, not part of the membrane. Default
+        # OFF is a complete no-op (branch never entered).
+        if self.adaptive_threshold and self.tau_threshold > 0:
+            self.threshold_adapt *= float(np.exp(-1.0 / self.tau_threshold))
+
         # Reset spike flag for next time step
         self.spiked = False
-        
+
     def check_threshold(self):
         """
         Check if neuron should fire based on threshold.
@@ -772,7 +795,15 @@ class Neuron(NeuralEntity):
             bool: True if neuron fires, False otherwise
         """
         self._ensure_finalized()
+        if self.adaptive_threshold:
+            return self.refractory_timer <= 0 and self.potential >= self.effective_threshold
         return self._membrane.check_threshold()
+
+    @property
+    def effective_threshold(self):
+        """Phase 10: base threshold + adaptive-threshold elevation a_i (0 when
+        adaptive_threshold is off, so this equals self.threshold exactly)."""
+        return self.threshold + self.threshold_adapt if self.adaptive_threshold else self.threshold
     
     def fire(self):
         """
@@ -789,6 +820,12 @@ class Neuron(NeuralEntity):
         # Membrane discharge on spike: reset (full or subtractive), arm refractory,
         # record spike time, mark spiked. See Membrane.fire_reset.
         self._membrane.fire_reset(self.subtractive_reset)
+
+        # Phase 10: adaptive-threshold spike-local increment. Runs on THIS
+        # neuron's own physical spike only -- no cross-neuron coupling, no
+        # rival inspection. Default OFF is a complete no-op.
+        if self.adaptive_threshold:
+            self.threshold_adapt += self.delta_threshold
 
         # Flow-rate: discharge the excitatory current trace along with the membrane,
         # so no residual current keeps re-charging a just-fired neuron (and none

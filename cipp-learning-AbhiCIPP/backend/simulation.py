@@ -712,6 +712,26 @@ class SimulationEngine:
                  # reshaped on a later pattern. Default OFF -> signed rule uses p.
                  structural_free_energy: bool = False,
                  structural_fe_eta_floor: float = 0.02,
+                 # ---- Phase 10 (corrected Phases 6-12 prompt file):
+                 # adaptive-threshold ablation. A SEPARATE experiment from
+                 # geometry and from the existing synaptic-scaling homeostasis
+                 # feature (`homeostasis` above) -- NOT a rename/reuse of it.
+                 # For each L2E neuron: effective_threshold = threshold + a_i;
+                 # on that neuron's own spike, a_i += delta_threshold_frac*thr_l2;
+                 # every step, a_i decays exponentially toward zero with time
+                 # constant tau_threshold (steps). Default OFF reproduces
+                 # baseline exactly (see Neuron.check_threshold). Defaults below
+                 # are reasonable, documented starting points -- NOT swept or
+                 # tuned to make any particular seed succeed: delta_threshold_frac
+                 # 0.05 is a small, noticeable-but-not-immediately-disabling
+                 # per-spike step; tau_threshold 25 steps is the same order of
+                 # magnitude as the presentation windows used throughout this
+                 # repo's own tests/diagnostics (20-60 steps), so the effect is
+                 # visible within one presentation without one spike silencing
+                 # the neuron for many presentations afterward.
+                 adaptive_threshold: bool = False,
+                 delta_threshold_frac: float = 0.05,
+                 tau_threshold: float = 25.0,
                  # Capacity rule for the minimal experiment (see the prompt's
                  # "Threshold, Cap, Floor" section). l2e_weight_cap_frac sets each
                  # L2E positive feedforward weight cap to frac*thr_l2, so three
@@ -851,6 +871,9 @@ class SimulationEngine:
                            signed_spike_learning=signed_spike_learning,
                            structural_free_energy=structural_free_energy,
                            structural_fe_eta_floor=structural_fe_eta_floor,
+                           adaptive_threshold=adaptive_threshold,
+                           delta_threshold_frac=delta_threshold_frac,
+                           tau_threshold=tau_threshold,
                            l2e_weight_cap_frac=l2e_weight_cap_frac,
                            pos_weight_floor=pos_weight_floor,
                            l2e_init_mode=l2e_init_mode,
@@ -1102,6 +1125,14 @@ class SimulationEngine:
                 # maturity vs its threshold; default off leaves the p-scaled rule.
                 n.structural_free_energy = p['structural_free_energy']
                 n.structural_fe_eta_floor = p['structural_fe_eta_floor']
+                # Phase 10: adaptive-threshold ablation (L2E only; see Neuron
+                # for the a_i mechanics). SEPARATE from self.homeostasis
+                # (synaptic-scaling homeostasis) and from geometry -- default
+                # off leaves check_threshold byte-identical to every existing
+                # caller (see Neuron.check_threshold/effective_threshold).
+                n.adaptive_threshold = p['adaptive_threshold']
+                n.delta_threshold = p['delta_threshold_frac'] * thr_l2
+                n.tau_threshold = p['tau_threshold']
             else:
                 n.weight_budget = None
                 if self.meta[nid]['type'] == 'I':
@@ -1173,6 +1204,10 @@ class SimulationEngine:
         self.timestep = 0
         self.spiked = defaultdict(bool)
         self.freq = {nid: deque(maxlen=FREQ_WINDOW) for nid in self.neurons}
+        # Phase 10: adaptive-threshold state/trajectory, L2E only (harmless
+        # empty history for any other population, since a_i stays 0 there).
+        self.threshold_adapt_history = {
+            f'L2E{j}': deque(maxlen=FREQ_WINDOW) for j in range(N_OUT)}
         self.emitted: list[str] = []   # synapse IDs that carried a spike this step
         self._pulses: dict[str, float] = {}
         self._holds: dict[str, float] = {}
@@ -1291,6 +1326,9 @@ class SimulationEngine:
         self._probe_steps_elapsed = 0
         self._probe_resume_pattern: str | None = None
         self._probe_resume_input: np.ndarray | None = None
+        # Phase 10: pre-probe snapshot of each L2E's adaptive-threshold state
+        # a_i (see present_probe/_end_probe) -- None when no probe is active.
+        self._probe_threshold_adapt_snapshot: dict[int, float] | None = None
 
         # Establishes presentation #1 (id goes 0 -> 1; nothing to log yet).
         self._start_presentation(initial_pattern, 'train')
@@ -1613,7 +1651,9 @@ class SimulationEngine:
                'infl_l2e_l2i', 'infl_l2i_l2e', 'infl_l2e_l1i', 'infl_l1i_l1e',
                'infl_power', 'infl_ref', 'infl_min',
                # Phase 7: causal L2E->L2I->L2E delayed-inhibition scheduling.
-               'l2_inhibition_delay', 'l2_inhibition_frac')
+               'l2_inhibition_delay', 'l2_inhibition_frac',
+               # Phase 10: adaptive-threshold ablation (separate from homeostasis).
+               'adaptive_threshold', 'delta_threshold_frac', 'tau_threshold')
 
     def apply_config(self, overrides: dict):
         """Merge tunable overrides into self.params and rebuild the network in
@@ -1636,7 +1676,8 @@ class SimulationEngine:
                      'inhibitory_delta_rule', 'distance_weighting',
                      'assembly_flow_credit', 'leak_enabled', 'l2i_leak_enabled',
                      'l1i_leak_enabled', 'symmetric_geometry', 'legacy_distance_compat',
-                     'infl_l2e_l2i', 'infl_l2i_l2e', 'infl_l2e_l1i', 'infl_l1i_l1e'):
+                     'infl_l2e_l2i', 'infl_l2i_l2e', 'infl_l2e_l1i', 'infl_l1i_l1e',
+                     'adaptive_threshold'):
                 v = bool(v)
             elif k in ('seed', 'refractory', 'l2_charge_chunks', 'l2_inhibition_delay'):
                 v = int(v)
@@ -2096,6 +2137,9 @@ class SimulationEngine:
 
         # 5. Bookkeeping.
         self._record_spikes(l1e, l1i, l2e, l2i)
+        # Phase 10: adaptive-threshold trajectory (end-of-step a_i, post-decay).
+        for j, e in enumerate(l2.excitatory_neurons):
+            self.threshold_adapt_history[f'L2E{j}'].append(round(float(e.threshold_adapt), 4))
         # Evidence bookkeeping for the Causal Story / evidence-based RF status:
         # cumulative spike counts and last-fired step, read off this step's actual
         # spike flags (no inference). step_winner_idx reads which single index of
@@ -2341,6 +2385,14 @@ class SimulationEngine:
         self._probe_active = True
         self.input_vec = np.array(PROBES[name], dtype=float)
         self.current_pattern = name
+        # Phase 10: snapshot each L2E's adaptive-threshold state a_i before the
+        # probe. Real physical dynamics (including spike-local a_i increments
+        # and per-step decay) stay LIVE during the probe -- like membrane
+        # potential, a_i is not frozen -- but it is restored unconditionally
+        # in _end_probe so probe evaluation can never alter subsequent
+        # training, regardless of how the probe ends (elapsed or cancelled).
+        self._probe_threshold_adapt_snapshot = {
+            j: float(e.threshold_adapt) for j, e in enumerate(self.l2.excitatory_neurons)}
         # Deliberately do NOT touch _visit_step/_visit_spikes here -- those belong
         # to auto-cycle's paused training pattern and must come back untouched.
         self._start_presentation(name, 'probe')
@@ -2351,6 +2403,15 @@ class SimulationEngine:
     def _end_probe(self, restore: bool):
         self._probe_active = False
         self._set_plasticity_frozen(False)
+        # Phase 10: restore each L2E's adaptive-threshold state a_i to its
+        # pre-probe snapshot -- unconditionally, whether the probe elapsed
+        # naturally (restore=True) or was cancelled by manual input
+        # (restore=False), since either way the goal is the same: probe
+        # evaluation must not leak into subsequent training.
+        if self._probe_threshold_adapt_snapshot is not None:
+            for j, e in enumerate(self.l2.excitatory_neurons):
+                e.threshold_adapt = self._probe_threshold_adapt_snapshot.get(j, 0.0)
+            self._probe_threshold_adapt_snapshot = None
         if restore:
             self.input_vec = self._probe_resume_input
             self.current_pattern = self._probe_resume_pattern
@@ -2546,6 +2607,12 @@ class SimulationEngine:
                                    if self.excitatory_flow_rate and n.excitatory_flow_rate else {}),
                                 # Evidence-based RF status (L2E only) -- see _l2e_status.
                                 **({'rf_status': self._l2e_status(int(nid[3:]))}
+                                   if nid.startswith('L2E') else {}),
+                                # Phase 10: adaptive-threshold state (L2E only;
+                                # a_i is 0 and effective_threshold == threshold
+                                # for every other population always).
+                                **({'threshold_adapt': round(float(n.threshold_adapt), 4),
+                                   'effective_threshold': round(float(n.effective_threshold), 4)}
                                    if nid.startswith('L2E') else {})))
         return dict(timestep=self.timestep, running=False, neurons=neurons,
                     changed_synapses=self.changed_synapses,
@@ -2628,6 +2695,20 @@ class SimulationEngine:
                                 for rec in self._l2i_pending],
                         last_delivery=self._last_l2_inhibition_delivery,
                         log=list(self._l2_inhibition_log)[-10:]),
+                    # Phase 10: adaptive-threshold ablation state/trajectory
+                    # (L2E only; a_i and its history stay 0/empty for every
+                    # other population always, and for L2E itself whenever the
+                    # flag is off).
+                    adaptive_threshold=dict(
+                        enabled=self.params['adaptive_threshold'],
+                        delta_threshold=round(self.l2.excitatory_neurons[0].delta_threshold, 4)
+                            if N_OUT else 0.0,
+                        tau_threshold=self.params['tau_threshold'],
+                        state={f'L2E{j}': round(float(e.threshold_adapt), 4)
+                              for j, e in enumerate(self.l2.excitatory_neurons)},
+                        effective_threshold={f'L2E{j}': round(float(e.effective_threshold), 4)
+                                            for j, e in enumerate(self.l2.excitatory_neurons)},
+                        history={nid: list(hist) for nid, hist in self.threshold_adapt_history.items()}),
                     stats=self.stats(), log=list(self.event_log)[-12:])
 
     def stats(self) -> dict:
