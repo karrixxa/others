@@ -1,0 +1,322 @@
+LPS Lecture Summary – Detailed Notes
+
+============================================================
+OVERVIEW
+============================================================
+
+This lecture marks one of the largest conceptual changes so far in the project.
+Instead of merely adjusting learning equations or tuning parameters, the instructor
+changes the overall architecture of the network and rethinks several biological
+assumptions.
+
+The central goal of the system has NOT changed:
+    • Learn one neuron per pattern (one-hot encoding)
+    • Learn through both feedforward and feedback
+    • Stop learning once a pattern is fully represented
+    • Continue learning new patterns without old winners dominating
+
+However, the instructor concludes that the current architecture cannot accomplish
+this, leading to several important changes.
+
+============================================================
+1. METRIC OF SUCCESS (UNCHANGED)
+============================================================
+
+The desired final behavior of the network is:
+
+Input Pattern
+    ↓
+Representation Neuron
+    ↓
+Feedback Prediction
+    ↓
+Feedback inhibits the already-learned input
+    ↓
+Learning naturally stops
+
+The desired representation is sparse:
+• Every pattern should activate exactly ONE neuron.
+• Different patterns should activate different neurons.
+• No duplicated representations.
+• No multiple winners.
+
+============================================================
+2. MAJOR PROBLEM DISCOVERED
+============================================================
+
+Current simulations consistently fail to produce the desired behavior.
+
+Observed problems:
+
+• One neuron becomes extremely strong ("tyrant winner")
+• Same neuron wins every future competition
+• New patterns fail to receive new neurons
+• Sometimes two or three neurons become permanent winners
+• Sparse representations are lost
+
+Instead of:
+Pattern A → Neuron 1
+Pattern B → Neuron 2
+Pattern C → Neuron 3
+
+The network often produces:
+Pattern A → Neuron 1
+Pattern B → Neuron 1
+Pattern C → Neuron 1
+
+or
+
+Pattern A → Neurons 1 & 2
+Pattern B → Neurons 1 & 2
+
+This is considered a major failure of the learning algorithm.
+
+============================================================
+3. BIGGEST CONCEPTUAL CHANGE
+============================================================
+
+Old assumption:
+    Inhibitory neurons should learn.
+
+New assumption:
+    Inhibitory neurons are already trained BEFORE pattern learning begins.
+
+Reasoning:
+Before an animal learns anything, its brain already requires:
+
+• activity regulation
+• sparse firing
+• safety mechanisms
+• sodium regulation
+• preventing overheating
+
+Therefore inhibition must already exist before any sensory learning.
+
+============================================================
+4. WINNER-TAKE-ALL IS NOW PRE-TRAINED
+============================================================
+
+The instructor now believes winner-take-all does not need to be learned.
+
+Instead:
+
+First neuron fires
+        ↓
+Pre-trained inhibitory neuron fires
+        ↓
+Immediately suppresses neighboring neurons
+        ↓
+Winner selected automatically
+
+This removes the need for inhibitory learning.
+
+============================================================
+5. ARCHITECTURE CHANGE
+============================================================
+
+OLD:
+
+Pattern
+   ↓
+Excitatory
+   ↓
+Inhibitory
+
+NEW:
+
+Pattern
+   ↓
+Prediction Excitatory Neuron
+   ↓
+Pre-trained Inhibitory Neuron
+   ↓
+Suppresses neighbors
+
+The newly introduced excitatory prediction neuron is one of the most important
+changes in the project.
+
+============================================================
+6. WHY ADD AN EXCITATORY PREDICTION NEURON?
+============================================================
+
+Previously:
+Feedback only inhibited activity.
+
+That means:
+• cannot imagine
+• cannot reconstruct patterns
+• cannot decode stored memories
+
+With the new excitatory neuron:
+
+Stored representation
+        ↓
+Prediction neuron fires
+        ↓
+Original pattern recreated
+
+Now the network can eventually:
+• imagine
+• reconstruct memories
+• decode representations
+• make excitatory predictions
+
+============================================================
+7. ENCODER + DECODER
+============================================================
+
+The network now becomes both an encoder and decoder.
+
+Encoding:
+Input → Representation
+
+Decoding:
+Representation → Predicted Input
+
+This is considered much closer to biological cortex.
+
+============================================================
+8. FREE ENERGY IS CHANGING
+============================================================
+
+Previous definition:
+Free Energy ≈ Threshold − Sum(Weights)
+
+Instructor now believes this is incomplete.
+
+New proposal:
+
+Free Energy should depend on firing frequency.
+
+============================================================
+9. HALF-FREQUENCY RULE
+============================================================
+
+Initially:
+Neuron fires every spike
+Frequency = 1
+
+As prediction improves:
+Feedback suppresses every other spike
+
+Eventually:
+Frequency = 1/2
+
+Interpretation:
+
+Frequency > 1/2
+    → still learning
+
+Frequency = 1/2
+    → learning complete
+
+The half-frequency point becomes the signal that a model has successfully learned.
+
+============================================================
+10. SOLVING THE TYRANT WINNER
+============================================================
+
+When a neuron reaches half-frequency:
+
+• it stops learning
+• effectively leaves future competitions
+• new neurons can now learn new patterns
+
+This naturally replaces manually removing winners.
+
+============================================================
+11. LEARNING MOVES TO THE SYNAPSE LEVEL
+============================================================
+
+Instead of whole neurons learning,
+individual synapses learn independently.
+
+Each synapse has:
+• its own free energy
+• its own stopping condition
+• its own learning progress
+
+This is more biologically realistic.
+
+============================================================
+12. TIME MAY BE REQUIRED
+============================================================
+
+The instructor originally wanted to avoid explicit time equations.
+
+Current conclusion:
+
+Time-dependent equations may be unavoidable.
+
+Future work may include:
+• spike timing
+• temporal dynamics
+• frequency-based learning
+
+============================================================
+13. CURRENT SIMULATION FAILURES
+============================================================
+
+Students should recognize:
+
+• tyrant winners
+• multiple permanent winners
+• unstable competition
+• dependence on random seeds
+• inability to create one-hot representations
+
+Changing small equation parameters alone is not enough.
+
+============================================================
+14. RESEARCH PHILOSOPHY
+============================================================
+
+The instructor explains that students are intentionally working with an
+incomplete model.
+
+The goal is NOT to solve everything immediately.
+
+Instead students should:
+
+• understand every equation
+• understand every graph
+• debug carefully
+• observe dynamics
+• identify failure modes
+
+============================================================
+15. IMPLEMENTATION TASKS
+============================================================
+
+Students should now:
+
+1. Remove inhibitory learning.
+2. Assume inhibitory neurons are pre-trained.
+3. Add the new excitatory prediction neuron.
+4. Modify network topology.
+5. Re-run simulations.
+6. Observe changes.
+7. Continue analyzing dynamics.
+
+============================================================
+MOST IMPORTANT CHANGES
+============================================================
+
+OLD IDEA
+• Learn inhibitory neurons
+• Learn winner-take-all
+• Feedback only inhibits
+• Weight-based free energy
+• Neuron-level learning
+• Avoid explicit time
+
+NEW IDEA
+• Inhibitory neurons are pre-trained.
+• Winner-take-all already exists biologically.
+• Add excitatory prediction neurons.
+• Free energy depends on firing frequency.
+• Learning stops around half-frequency.
+• Learning occurs at the synapse level.
+• Time-dependent equations may be necessary.
+
+These changes represent a major redesign of the architecture rather than a small update to the learning rules.
