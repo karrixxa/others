@@ -498,6 +498,51 @@ CONFIG_SPEC = [
      "min": 0.1, "max": 4.0, "step": 0.1,
      "desc": "Distance floor for the four NEW pathways, avoiding a divide-by-zero "
              "/ over-boost for very close connections."},
+    # Phase 3 (pre-existing gap, closed in Phase 12's backend/UI-agreement
+    # audit): geometry ablation toggles were TUNABLE on the engine since
+    # Phase 3 but never exposed here, so the config panel could not reach
+    # them. topology_seed is deliberately NOT here -- it has its own
+    # dedicated verb, reseed_topology(), not the generic config panel.
+    {"key": "symmetric_geometry", "label": "Symmetric (legacy ring) geometry", "kind": "toggle",
+     "desc": "ON = the legacy ring/grid layout (byte-identical positions for every "
+             "existing caller/test). OFF = the seeded jittered/irregular geometry "
+             "(Phase 3). Positions are fixed across reset/training/probes; only "
+             "reseed_topology() changes them. DASHBOARD_PRESET default is OFF."},
+    {"key": "legacy_distance_compat", "label": "Legacy-distance compatibility shim", "kind": "toggle",
+     "desc": "ON (default) pins the L1E->L2E distance-weighting pathway's DELIVERY "
+             "distances to the legacy reference geometry regardless of "
+             "symmetric_geometry, so switching to jittered geometry alone cannot "
+             "change any neural dynamics. OFF lets distance_weighting read the "
+             "REAL (possibly jittered) positions. Governs ONLY the L1E->L2E pathway."},
+    # Phase 7: causal L2E->L2I->L2E delayed-inhibition scheduling (replaces the
+    # retired immediate-reset tiebreak). No learned L2I->L2E gate; magnitude is
+    # this fixed, configurable fraction of threshold_l2.
+    {"key": "l2_inhibition_delay", "label": "L2I->L2E delivery delay (steps)", "kind": "range",
+     "min": 0, "max": 8, "step": 1,
+     "desc": "Steps between L2I crossing ITS OWN threshold and the scheduled "
+             "delayed inhibitory delivery actually reaching the L2E pool. 1 = the "
+             "same one-step-register precedent as l1i_feedback_delay."},
+    {"key": "l2_inhibition_frac", "label": "L2I->L2E delivery magnitude (×thr_l2)", "kind": "range",
+     "min": 0.0, "max": 2.0, "step": 0.05,
+     "desc": "Fixed inhibitory conductance delivered to EVERY L2E target (uniform, "
+             "no ID-based exemption), as a fraction of threshold_l2. 1.0 (default) "
+             "floors any sub-threshold target at rest, matching the retired "
+             "immediate clamp's net discharge -- only the causality changes."},
+    # Phase 10: adaptive-threshold ablation. A SEPARATE experiment from
+    # homeostasis (above) and from geometry -- not a rename/reuse of either.
+    {"key": "adaptive_threshold", "label": "Adaptive threshold (L2E)", "kind": "toggle",
+     "desc": "L2E only. effective_threshold = threshold + a_i; on that neuron's "
+             "OWN spike, a_i += delta_threshold_frac*thr_l2; every step, a_i decays "
+             "exponentially toward zero with tau_threshold. OFF (default) is "
+             "baseline-equivalent -- check_threshold ignores a_i entirely."},
+    {"key": "delta_threshold_frac", "label": "Adaptive threshold step (×thr_l2)", "kind": "range",
+     "min": 0.0, "max": 0.5, "step": 0.01,
+     "desc": "Per-spike increment to a_i, as a fraction of threshold_l2. Only used "
+             "when adaptive threshold is on."},
+    {"key": "tau_threshold", "label": "Adaptive threshold decay (tau, steps)", "kind": "range",
+     "min": 1.0, "max": 200.0, "step": 1.0,
+     "desc": "Exponential decay time constant (in steps) for a_i's return toward "
+             "zero between spikes. Only used when adaptive threshold is on."},
 ]
 
 # Dashboard clutter control: the panel exposes every tunable, but most are inert

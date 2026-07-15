@@ -22,9 +22,11 @@
 - Phase 8 END checkpoint commit: `c0ac363` (exact local free-energy learning)
 - Phase 9 END checkpoint commit: `3dd6f4c` (causal L1I predictive feedback)
 - Phase 10 END checkpoint commit: `d333945` (adaptive-threshold ablation)
-- This update corresponds to the **Phase 11 END** checkpoint (controlled
-  multi-seed validation) — commit hash filled in after this commit lands,
-  see repo log.
+- Phase 11 END checkpoint commit: `1a59ae8` (controlled multi-seed validation)
+- This update corresponds to the **Phase 12 END** checkpoint (final local
+  review — DO NOT PUBLISH; this is the last phase of the corrected Phases
+  6-12 sequence) — commit hash filled in after this commit lands, see repo
+  log.
 - Base branch `july14` is untouched and remains the protected base.
 - `four-pattern` branch exists (checked out in a separate worktree at
   `/home/charisxiong/Documents/others`) and is explicitly NOT merged here —
@@ -253,6 +255,33 @@ data in `phase11_validation_report.json` (96 records); the harness itself
 invariance, a mechanical null-result sanity check, harness determinism, and
 a re-derivation of the report's own headline success count from raw data).
 
+**Current phase (Phase 12, complete) — Final local review, per the corrected
+Phases 6-12 prompt file. DO NOT PUBLISH:** no new neural mechanism
+implemented, nothing tuned around Phase 11's results. Ran the full test
+suite (254 passed, same 5 pre-existing failures) plus, for the first time in
+this session, REAL end-to-end smoke checks against a live-server-shaped
+`TestClient` (REST GET/POST config round-trip that actually changes engine
+behavior, and a full WebSocket topology+dynamic exchange) -- closing the
+"no httpx available" gap flagged in Phase 7's Known Problems.
+**Audited backend/UI configuration agreement and found a real gap:**
+`symmetric_geometry`/`legacy_distance_compat` (Phase 3, pre-existing) and
+`l2_inhibition_delay`/`l2_inhibition_frac`/`adaptive_threshold`/
+`delta_threshold_frac`/`tau_threshold` (Phases 7/10, introduced this
+session) were all `TUNABLE` on the engine but absent from
+`backend/api.py`'s `CONFIG_SPEC` -- fixed by adding all 7 entries, verified
+via the live HTTP round-trip. **Audited for remaining software winner/tie-
+break shortcuts:** the default/dashboard competition path
+(`_resolve_l2_competition`, `_credit_source`) is clean; found exactly ONE
+remaining hidden-charge argmax tiebreak, confined to the non-default,
+pre-existing, unexercised `lasting_inhibition` alternate mechanism --
+documented, not fixed (fixing it would be a new-mechanism change, barred by
+this phase's own scope). Reviewed Phase 11's evidence against its stated
+success criteria and reconfirmed: not met in any of 16 conditions across all
+6 seed-topology combinations; the central one-to-one-ownership problem
+remains open. Wrote `Phase12_Final_Local_Review.md` with all of the above,
+plus an honest "Unresolved failures" list and the exact final commit
+chain/working-tree status for handoff.
+
 ## Completed (this session)
 
 Phase 0 (branch/docs setup):
@@ -417,13 +446,46 @@ conclusions sections and a failures-recorded-honestly section in
 (6 tests) validating the saved report's shape, `N_OUT` invariance, a
 mechanical sanity check, and harness determinism.
 
+Phase 12 (final local review; see "Files changed" below): full test suite +
+real end-to-end smoke checks (REST + WebSocket, via a newly-installed
+`httpx2` in the session venv) against `backend.api.app`; found and fixed a
+backend/UI `CONFIG_SPEC` gap for `symmetric_geometry`/`legacy_distance_compat`
+(Phase 3) and `l2_inhibition_delay`/`l2_inhibition_frac`/`adaptive_threshold`/
+`delta_threshold_frac`/`tau_threshold` (Phases 7/10); audited the whole
+engine for remaining software winner/tie-break shortcuts and found exactly
+one, confined to the non-default `lasting_inhibition` mechanism (documented,
+not fixed -- out of this phase's "no new mechanisms" scope); reconfirmed
+Phase 11's success-criteria evaluation; wrote
+`Phase12_Final_Local_Review.md` as the final handoff document for this
+session's work.
+
 ## In progress
 
-**Phase 11 (controlled multi-seed validation) is COMPLETE** — single-
-milestone phase, phase-end regressions run, this is the phase-end checkpoint
-per `CLAUDE.md`. No further phase is currently queued.
+**Phase 12 (final local review) is COMPLETE — this is the final phase of
+the corrected Phases 6-12 sequence.** No further phase is queued in this
+session. The branch is ready for human review; see
+`Phase12_Final_Local_Review.md` for the exact commit chain and working-tree
+status.
 
-## Files changed (Phase 11 — controlled multi-seed validation, this checkpoint)
+## Files changed (Phase 12 — final local review, this checkpoint)
+
+- `backend/api.py`: added 7 `CONFIG_SPEC` entries (`symmetric_geometry`,
+  `legacy_distance_compat`, `l2_inhibition_delay`, `l2_inhibition_frac`,
+  `adaptive_threshold`, `delta_threshold_frac`, `tau_threshold`) closing the
+  backend/UI agreement gap found in this phase's audit (see §3 of
+  `Phase12_Final_Local_Review.md`). All left `advanced: true` (not added to
+  `_MAIN_CONFIG_KEYS`), consistent with how Phase 4's `infl_*` pathways were
+  treated. No engine file (`backend/simulation.py`, `neuron_flexible.py`,
+  `snn/*`) was touched this phase.
+- `Phase12_Final_Local_Review.md` (new) — the final review document: full
+  test suite result, end-to-end smoke check results (REST + WebSocket),
+  the backend/UI agreement audit (found/fixed + confirmed-out-of-scope
+  gaps), the no-software-tiebreak audit (one remaining instance, documented),
+  the Phase 11 success-criteria re-confirmation, an "Unresolved failures"
+  section, and the exact final commit chain / working-tree status for
+  handoff.
+
+### Phase 11 (prior checkpoint `1a59ae8`)
 
 - `phase11_validation.py` (new) — the measurement harness. Defines the 4
   `GEOMETRY_CONDITIONS`, crosses them with `adaptive_threshold`,
@@ -1015,7 +1077,36 @@ No neural equation and no preset VALUE was changed. `CLAUDE_HANDOFF.md`
 
 ## Tests
 
-### Phase 11 (this checkpoint)
+### Phase 12 (this checkpoint)
+
+- `pytest -q` (full suite, final run of this session): **254 passed, 5
+  failed** — identical count and identical failing test names to the Phase
+  11 checkpoint (no test file was added or changed this phase; only
+  `backend/api.py`'s `CONFIG_SPEC` was touched, and it is not exercised by
+  the unit suite's collection count, only by the new smoke checks below).
+- **New this phase — real end-to-end smoke checks** (not part of `pytest -q`,
+  run directly via `fastapi.testclient.TestClient` after installing `httpx2`
+  into the session venv): `GET /api/state`, `GET /api/config`, `POST
+  /api/config` (round-trip verified to actually change engine behavior, not
+  just accepted), `POST /api/step`, `GET /api/pathway_influence` all return
+  200 with the expected Phase 7/9/10 fields present; a full WebSocket
+  `topology` → `step` → `dynamic` exchange over `/ws` also carries
+  `l2_inhibition`/`adaptive_threshold` in the streamed payload. This is the
+  first checkpoint in this session where a live-server-shaped check (as
+  opposed to direct `SimulationEngine` construction) was possible.
+- **Backend/UI agreement, verified programmatically:** a direct set-difference
+  between `SimulationEngine.TUNABLE` and `backend.api.CONFIG_SPEC` (plus
+  `_HIDDEN_CONFIG_KEYS`) confirmed zero orphaned UI controls (every served
+  key is engine-`TUNABLE`) and enumerated the 7 previously-missing keys
+  (now fixed) plus the 9 remaining, confirmed-pre-existing, out-of-scope
+  gaps (see `Phase12_Final_Local_Review.md` §3).
+- **No-software-tiebreak audit:** `grep`-based sweep of `backend/simulation.py`
+  for `argmax`/`key=lambda` patterns, with every hit individually reviewed
+  and classified (competition-deciding vs. UI/logging-only vs. raw-fact-
+  labeling-only vs. the one remaining `lasting_inhibition` exception) —
+  documented in `Phase12_Final_Local_Review.md` §6, not just asserted.
+
+### Phase 11 (prior checkpoint `1a59ae8`)
 
 - `test_phase11_validation.py` (new, focused): **6/6 passed**.
 - `pytest -q` (full suite): **254 passed, 5 failed** (248 prior + 6 new =
@@ -1445,6 +1536,31 @@ No neural equation and no preset VALUE was changed. `CLAUDE_HANDOFF.md`
 
 ## Known problems
 
+- **RESOLVED (Phase 12): backend/UI `CONFIG_SPEC` gap for 7 keys.**
+  `symmetric_geometry`/`legacy_distance_compat` (Phase 3) and
+  `l2_inhibition_delay`/`l2_inhibition_frac`/`adaptive_threshold`/
+  `delta_threshold_frac`/`tau_threshold` (Phases 7/10) were `TUNABLE` on the
+  engine but unreachable from the dashboard config panel. Fixed; verified
+  via a live HTTP round-trip (see `Phase12_Final_Local_Review.md` §2-3).
+- **One software winner/tie-break shortcut remains, found in Phase 12's
+  audit and NOT fixed** (out of Phase 12's "no new mechanisms" scope):
+  `lasting_inhibition`'s branch in `step()` (~line 2034) still picks a
+  single physical firer via `max(eligible, key=potential)` -- a genuine
+  hidden-charge argmax. It is a pre-existing, `default=False`, opt-in
+  ALTERNATE competition mechanism, never touched by Phase 7 (which targeted
+  only `_resolve_l2_competition`), not enabled by `DASHBOARD_PRESET`, and
+  not exercised by any of Phase 11's 96 runs. The default/dashboard
+  competition path itself has zero remaining shortcuts. Flagged for a
+  future phase if `lasting_inhibition` is ever meant to become a supported,
+  non-experimental path.
+- **Nine legacy `TUNABLE` keys remain unexposed in `CONFIG_SPEC`**
+  (`conf_cap_frac`, `eta_min`, `hard_reset_clear_traces`,
+  `inhibitory_delta_eta`, `inhibitory_margin_frac`, `inhibitory_rule_mode`,
+  `l2i_excitatory_flow_rate`, `l2i_hard_reset_losers`, `seed`) -- confirmed
+  pre-existing (predate Phase 6), confirmed NOT touched by Phases 6-11,
+  deliberately left alone in Phase 12 (bundling nine unrelated legacy-knob
+  decisions into a final-review commit would obscure what Phases 6-12
+  actually changed) -- candidate for a future, explicitly-scoped cleanup.
 - **RESOLVED (measured, Phase 11): `adaptive_threshold`'s effect is now
   characterized, and it is a MIXED result, not a clean win.** It raised mean
   distinct_owners in 6 of 8 condition-pairs (most in long-saturation:
@@ -1661,18 +1777,23 @@ No neural equation and no preset VALUE was changed. `CLAUDE_HANDOFF.md`
 
 ## Next action
 
-Phase 11 is closed. Per the corrected Phases 6-12 prompt file (see
-Branch/HEAD) and the user's explicit "continue autonomously through Phases
-7-12" instruction, **Phase 12 (final local review; do not publish) is next**
-and is being started immediately in this same session. Phase 12 must not
-implement new mechanisms or tune around Phase 11's results -- it reviews the
-Phase 11 evidence against the stated success criteria, verifies
-configuration/probe/determinism/backend-UI-agreement/no-software-tiebreak
-invariants across the whole branch, and produces a final local
-review+handoff document. No push, merge, or PR.
+**Phase 12 is closed. This was the final phase of the corrected Phases 6-12
+prompt file.** No further phase is queued in this session. The branch
+(`july14-integration`, HEAD at this checkpoint) is ready for human review;
+see `Phase12_Final_Local_Review.md` for the complete final commit chain and
+working-tree status. Per that file's "LATER PUSH PROMPT" section, any push
+requires its own separate, explicit human confirmation after review --
+nothing in Phases 7-12 pushed, merged, or opened a PR.
 
-Other candidates for a future phase, none started, all needing their own
-explicit go-ahead:
+Candidates for a future phase, none started, all needing their own explicit
+go-ahead (compiled across Phases 7-12, still open at this checkpoint):
+- Redesign `lasting_inhibition`'s competition mechanism (Phase 12 audit,
+  Known Problems) to remove its remaining hidden-charge argmax tiebreak, if
+  that alternate mechanism is ever meant to become a supported path rather
+  than an unexercised, default-off legacy ablation.
+- Explicitly-scoped cleanup pass exposing the 9 remaining legacy `TUNABLE`
+  keys in `CONFIG_SPEC` (or formally deprecating/removing them if truly
+  dead) -- deliberately not bundled into Phase 12's final-review commit.
 - Investigate the central ownership-consolidation problem directly (Phase
   11's 96-run sweep confirms it is still open in every configuration tested)
   -- NOT by tuning `l2_inhibition_frac`/`delta_threshold_frac`/etc. to force
