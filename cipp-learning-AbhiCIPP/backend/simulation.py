@@ -753,6 +753,25 @@ class SimulationEngine:
                  # repeatedly-firing competitor"), not a per-experiment tuned value.
                  loser_depression_protection: bool = False,
                  loser_depression_protection_ca_ref: float = 0.02,
+                 # Phase 17 (LPS Lecture 14 mapping): pre-trained, task-independent
+                 # L2E->L2I recruitment. Default OFF reproduces the current learned-
+                 # recruitment baseline byte-identically. When True: every L2E->L2I
+                 # synapse is initialized to one identical fixed value (the resolved
+                 # L2I threshold itself -- see _build, no unit conversion needed since
+                 # infl_l2e_l2i, the only thing that would attenuate this delivery,
+                 # stays off and untouched), and L2I's OWN incoming-excitatory
+                 # learning_rate is pinned to 0 so those weights never move again.
+                 # Nothing else changes: L2I still physically integrates charge and
+                 # crosses its own threshold (Neuron.check_threshold/fire, untouched),
+                 # L2I->L2E inhibition is still scheduled and causally delayed by
+                 # l2_inhibition_delay (untouched), delivery is still uniform across
+                 # the whole L2E pool (untouched). This flag touches ONLY the initial
+                 # value and the learning rate of L2I's own incoming weights -- it
+                 # does not add a prediction-excitatory population, a frequency/
+                 # synapse-level free-energy rule, or any explicit time equation
+                 # (those Lecture 14 proposals are explicitly deferred, not
+                 # implemented here).
+                 pretrained_l2i_recruitment: bool = False,
                  # Capacity rule for the minimal experiment (see the prompt's
                  # "Threshold, Cap, Floor" section). l2e_weight_cap_frac sets each
                  # L2E positive feedforward weight cap to frac*thr_l2, so three
@@ -897,6 +916,7 @@ class SimulationEngine:
                            tau_threshold=tau_threshold,
                            loser_depression_protection=loser_depression_protection,
                            loser_depression_protection_ca_ref=loser_depression_protection_ca_ref,
+                           pretrained_l2i_recruitment=pretrained_l2i_recruitment,
                            l2e_weight_cap_frac=l2e_weight_cap_frac,
                            pos_weight_floor=pos_weight_floor,
                            l2e_init_mode=l2e_init_mode,
@@ -1008,9 +1028,21 @@ class SimulationEngine:
         # LEARNING ceiling for these synapses is threshold_l2 itself, set
         # per-neuron below -- much higher than this init range -- so growth
         # can carry a habitually-participating synapse to self-sufficiency.
-        self.l2.set_lateral_excitation_weights(
-            rng_ei.uniform(L2_EI_WEIGHT_INIT_LOW_FRAC * thr_l2i,
-                           L2_EI_WEIGHT_INIT_HIGH_FRAC * thr_l2i, size=N_OUT))
+        if p['pretrained_l2i_recruitment']:
+            # Phase 17: pre-trained, task-independent recruitment -- every
+            # L2E->L2I synapse starts at exactly thr_l2i (the resolved L2I
+            # threshold), so ONE ordinary physical L2E spike alone delivers
+            # thr_l2i charge via the unscaled instantaneous delivery path
+            # (infl_l2e_l2i, the only thing that would attenuate this specific
+            # delivery, stays off and untouched by this flag) and makes L2I
+            # reach its own threshold immediately. rng_ei is deliberately NOT
+            # consumed in this branch (nothing else reads that stream later),
+            # so this cannot perturb rng_ff/rng_fb's determinism either way.
+            self.l2.set_lateral_excitation_weights(thr_l2i)
+        else:
+            self.l2.set_lateral_excitation_weights(
+                rng_ei.uniform(L2_EI_WEIGHT_INIT_LOW_FRAC * thr_l2i,
+                               L2_EI_WEIGHT_INIT_HIGH_FRAC * thr_l2i, size=N_OUT))
         # Small positive feedforward weights: neurons must accumulate across many
         # volleys initially (LIF phase), then specialise toward single-volley firing
         # (pattern integrator phase). 'balanced' is the optional task-independent
@@ -1206,6 +1238,15 @@ class SimulationEngine:
                     else:
                         n.assembly_flow_credit = p['assembly_flow_credit']
                         n.assembly_decay_frac = p['assembly_decay_frac']
+                        # Phase 17: pre-trained recruitment pins L2I's own
+                        # incoming-excitatory learning rate to exactly 0, so
+                        # ChargeBasedRule's dw = eta*p*(1-w^2/w_max) is always
+                        # 0 regardless of which L2E fires -- weights set above
+                        # never move again. Nothing else about L2I (its
+                        # membrane, threshold check, fire(), or the delayed
+                        # L2I->L2E delivery path) is touched here.
+                        if p['pretrained_l2i_recruitment']:
+                            n.learning_rate = 0.0
 
         # Uniform per-neuron delivery / flow-rate / inhibitory-gate-rule / distance
         # config. The engine's params are the SOURCE OF TRUTH; NeuronConfig is a
@@ -1688,7 +1729,10 @@ class SimulationEngine:
                # Phase 15: local developmental protection from L2I loser
                # depression (separate from homeostasis/structural_free_energy/
                # adaptive_threshold).
-               'loser_depression_protection', 'loser_depression_protection_ca_ref')
+               'loser_depression_protection', 'loser_depression_protection_ca_ref',
+               # Phase 17: pre-trained, task-independent L2E->L2I recruitment
+               # (LPS Lecture 14 mapping; separate from every mechanism above).
+               'pretrained_l2i_recruitment')
 
     def apply_config(self, overrides: dict):
         """Merge tunable overrides into self.params and rebuild the network in
@@ -1712,7 +1756,8 @@ class SimulationEngine:
                      'assembly_flow_credit', 'leak_enabled', 'l2i_leak_enabled',
                      'l1i_leak_enabled', 'symmetric_geometry', 'legacy_distance_compat',
                      'infl_l2e_l2i', 'infl_l2i_l2e', 'infl_l2e_l1i', 'infl_l1i_l1e',
-                     'adaptive_threshold', 'loser_depression_protection'):
+                     'adaptive_threshold', 'loser_depression_protection',
+                     'pretrained_l2i_recruitment'):
                 v = bool(v)
             elif k in ('seed', 'refractory', 'l2_charge_chunks', 'l2_inhibition_delay'):
                 v = int(v)

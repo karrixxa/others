@@ -34,10 +34,18 @@
   neural dynamics/parameters/timing/learning/seeds/defaults changed)
 - Phase 15 END checkpoint commit: `18bb5f3` (local developmental protection
   from L2I loser depression — new, default-off, NOT promoted)
-- This update corresponds to the **Phase 16 END** checkpoint
-  (adaptive-threshold x developmental-protection factorial + spare-capacity
-  challenge, measurement only, no new mechanism/default/tuning — commit
-  hash filled in after this commit lands, see repo log).
+- Phase 16 END checkpoint commit: `030fffe` (adaptive-threshold x
+  developmental-protection factorial + spare-capacity challenge,
+  measurement only)
+- Note: origin received a separate direct push (`3a5f158`, "Add files via
+  upload" -- the two `LPS_Lecture_14_*.txt` notes) based on `20d6b45`,
+  diverging from local `030fffe`. Reconciled with a conflict-free local
+  merge (`055b30f`), not pushed, before Phase 17 began.
+- This update corresponds to the **Phase 17 END** checkpoint (LPS Lecture
+  14 architecture mapping + isolated pre-trained-L2I-recruitment
+  experiment -- named Phase 17, not Phase 16, since Phase 16 was already
+  taken by the factorial above; new mechanism is default-off and NOT
+  promoted -- commit hash filled in after this commit lands, see repo log).
 - Base branch `july14` is untouched and remains the protected base.
 - `four-pattern` branch exists (checked out in a separate worktree at
   `/home/charisxiong/Documents/others`) and is explicitly NOT merged here —
@@ -671,6 +679,86 @@ every table are in `Phase16_Factorial_Spare_Capacity_Report.md`; the
 120+60-run grid is in `phase16_factorial_spare_capacity_summary.json`
 (committed), and the supplementary never-fired checkpoint is in
 `phase16_never_fired_checkpoint.json` (committed).
+
+**Current phase (Phase 17, complete) — LPS Lecture 14 architecture mapping
++ isolated pre-trained L2I recruitment experiment. Named Phase 17 (not
+Phase 16, already taken above).** Read `LPS_Lecture_14_Detailed_Summary.txt`/
+`LPS_Lecture_14_Expanded_Chronological_Notes.txt` in full as conceptual
+research context (not an equation/topology spec). Six proposed hypotheses
+classified: pre-trained inhibition is PARTIALLY implemented (L2I's outgoing
+side was already fixed since Phase 7, coincidentally, for unrelated
+reasons; only the incoming/recruitment side is new here, isolated behind a
+flag); "first spike physically recruits inhibition" is ALREADY implemented
+(Phase 7's causal chain); the prediction-excitatory population, frequency-
+based free energy, synapse-level maturity, and explicit temporal dynamics
+are all ABSENT and explicitly DEFERRED, not designed or implemented.
+
+**Audit (measurement only, current baseline):** L2E->L2I learns via
+`ChargeBasedRule`; L2I's outgoing side has no learned gate at all (Phase 7);
+L2E->L1I learns via `AssemblyFlowCredit` (forced on for all L1I); **L1I's
+OWN output inhibition is NOT fixed** -- `NeuronConfig.apply_to()` applies
+`inhibitory_delta_rule` uniformly, so L1E's own inhibitory gate (from its
+paired L1I) still learns via the legacy saturating rule even under
+`DASHBOARD_PRESET`. L2E-first-spike->L2I-fire latency ~0.6-1.1 steps;
+L2I-fire->delivery latency exactly 1 step (deterministic); mean 1.4-1.7
+contributors per L2I event. **One physical spike already becomes
+sufficient to fire L2I by the training MIDPOINT in every one of 5 seeds
+tested at baseline** -- the learned system already converges to what
+Lecture 14 proposes to hard-code from the start. **Required false-positive
+control confirmed directly:** a sustained single-pattern hold converges
+L1E frequency to EXACTLY 0.5 via mere synchronized global L1I suppression,
+with zero selective prediction -- frequency=0.5 must not be read as
+"prediction complete" (verified with a dedicated test that no
+weight-mutating code path reads firing frequency at all).
+
+**Mechanism (`pretrained_l2i_recruitment`, new default-off flag):** every
+L2E->L2I synapse initializes to exactly `thr_l2i` (the resolved L2I
+threshold -- audited: no unit conversion needed, `infl_l2e_l2i` stays off
+and untouched) and L2I's own incoming-excitatory `learning_rate` is pinned
+to 0. Nothing else touched: L2I still physically integrates and crosses
+its own `check_threshold()`/`fire()`; L2I->L2E inhibition remains
+scheduled and causally delayed exactly as before; delivery stays uniform;
+no winner/pattern/owner/index/cross-neuron state is read anywhere in the
+new code. Off reproduces baseline byte-identically (verified at unit and
+200-step engine level). 19 new tests (`test_pretrained_l2i_recruitment.py`,
+all passing, exceeding the 17 required proofs). Full suite: 299 passed, 5
+failed (same pre-existing set, unchanged).
+
+**Multi-seed result (5 weight seeds x 3 topology seeds x 3 schedules:
+20+20 short hold/switch, 600+200 long hold/switch, 40-rotation equal
+interleaving) -- REJECTED FOR PROMOTION, confirms this phase's own stated
+caution:** pre-trained recruitment recruits measurably FEWER neurons in
+EVERY schedule tested, and reaches **literal, total single-neuron monopoly
+(tyrant_share = 1.000) in EVERY ONE of 15 seed/topology combinations under
+the long-hold schedule** -- directly confirming "fixed WTA may make the
+first random tyrant stronger." Distinct ownership in the interleaved
+schedule is worse (2.00 vs. 3.60 owners), collisions higher. One-hot
+firing rate is comparable-to-better under the new mode (simultaneous
+same-step firers become nearly impossible once single-spike recruitment is
+instant) -- explicitly NOT the same as one-to-one ownership, which gets
+worse; the two move in opposite directions, exactly the distinction this
+phase's cautions warn against conflating. **A genuine, counter-to-trend
+secondary finding in the spare-capacity challenge:** pre-trained
+recruitment shows a HIGHER genuine spare-capacity recruitment rate (6/15
+vs. 0/15 seeds where the novel pattern's eventual owner had never fired
+before) and BETTER original-pattern retention (0.950 vs. 0.750) --
+explained as a downstream consequence of training leaving more neurons
+genuinely untouched in the first place, not an independent success. Against
+the instruction's own explicit promotion bar (must not increase tyrant
+capture or dead-neuron count), **this mechanism fails on both of the two
+most heavily-weighted criteria** despite passing three secondary ones.
+
+**Decision: `pretrained_l2i_recruitment` remains default OFF, not
+promoted, and further testing of this specific mechanism in this form is
+not recommended** (though the spare-capacity retention finding is flagged
+as a candidate for narrower, separate follow-up). Deferred Lecture 14 work
+(prediction-excitatory population, encoder/decoder equation, frequency-
+based free energy, synapse-level maturity, explicit temporal dynamics)
+remains entirely undesigned. Full findings, every table, and the exact
+promotion-bar scorecard are in
+`Phase17_Lecture14_Mapping_and_Pretrained_L2I_Report.md`; raw data is in
+`phase17_lecture14_audit.json` and `phase17_controlled_comparison_summary.json`
+(both committed).
 
 ## Completed (this session)
 

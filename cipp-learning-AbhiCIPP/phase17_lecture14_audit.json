@@ -1,0 +1,1428 @@
+[
+  {
+    "weight_seed": 1,
+    "weight_checkpoints": [
+      {
+        "label": "start",
+        "t": 0,
+        "weights": [
+          983.843,
+          1067.0589,
+          830.0575,
+          816.9276,
+          1075.2372,
+          804.537,
+          1320.0743,
+          907.7271
+        ],
+        "max_weight": 1320.0743,
+        "single_spike_sufficient": false,
+        "thr_l2i": 2666.6667
+      },
+      {
+        "label": "mid",
+        "t": 1600,
+        "weights": [
+          983.843,
+          1067.0589,
+          830.0575,
+          1504.8825,
+          2526.7051,
+          2666.6667,
+          1446.6017,
+          1012.1021
+        ],
+        "max_weight": 2666.6667,
+        "single_spike_sufficient": true,
+        "thr_l2i": 2666.6667
+      },
+      {
+        "label": "end",
+        "t": 3200,
+        "weights": [
+          983.843,
+          1067.0589,
+          830.0575,
+          1504.8825,
+          2526.7051,
+          2666.6667,
+          1446.6017,
+          1012.1021
+        ],
+        "max_weight": 2666.6667,
+        "single_spike_sufficient": true,
+        "thr_l2i": 2666.6667
+      }
+    ],
+    "n_deliveries": 400,
+    "delivery_records_sample": [
+      {
+        "l2i_fire_t": 1574,
+        "deliver_at": 1575,
+        "l2e_to_l2i_latency": 1,
+        "l2i_to_delivery_latency": 1,
+        "n_contributors": 2,
+        "contributor_ids": [
+          "L2E7",
+          "L2E5"
+        ]
+      },
+      {
+        "l2i_fire_t": 1578,
+        "deliver_at": 1579,
+        "l2e_to_l2i_latency": 1,
+        "l2i_to_delivery_latency": 1,
+        "n_contributors": 2,
+        "contributor_ids": [
+          "L2E7",
+          "L2E5"
+        ]
+      },
+      {
+        "l2i_fire_t": 1582,
+        "deliver_at": 1583,
+        "l2e_to_l2i_latency": 0,
+        "l2i_to_delivery_latency": 1,
+        "n_contributors": 1,
+        "contributor_ids": [
+          "L2E5"
+        ]
+      },
+      {
+        "l2i_fire_t": 1585,
+        "deliver_at": 1586,
+        "l2e_to_l2i_latency": 0,
+        "l2i_to_delivery_latency": 1,
+        "n_contributors": 1,
+        "contributor_ids": [
+          "L2E5"
+        ]
+      },
+      {
+        "l2i_fire_t": 1588,
+        "deliver_at": 1589,
+        "l2e_to_l2i_latency": 0,
+        "l2i_to_delivery_latency": 1,
+        "n_contributors": 1,
+        "contributor_ids": [
+          "L2E5"
+        ]
+      },
+      {
+        "l2i_fire_t": 1591,
+        "deliver_at": 1592,
+        "l2e_to_l2i_latency": 0,
+        "l2i_to_delivery_latency": 1,
+        "n_contributors": 1,
+        "contributor_ids": [
+          "L2E5"
+        ]
+      },
+      {
+        "l2i_fire_t": 1594,
+        "deliver_at": 1595,
+        "l2e_to_l2i_latency": 0,
+        "l2i_to_delivery_latency": 1,
+        "n_contributors": 1,
+        "contributor_ids": [
+          "L2E5"
+        ]
+      },
+      {
+        "l2i_fire_t": 1597,
+        "deliver_at": 1598,
+        "l2e_to_l2i_latency": 0,
+        "l2i_to_delivery_latency": 1,
+        "n_contributors": 1,
+        "contributor_ids": [
+          "L2E5"
+        ]
+      },
+      {
+        "l2i_fire_t": 1600,
+        "deliver_at": 1601,
+        "l2e_to_l2i_latency": 0,
+        "l2i_to_delivery_latency": 1,
+        "n_contributors": 1,
+        "contributor_ids": [
+          "L2E5"
+        ]
+      },
+      {
+        "l2i_fire_t": 1605,
+        "deliver_at": 1606,
+        "l2e_to_l2i_latency": 2,
+        "l2i_to_delivery_latency": 1,
+        "n_contributors": 2,
+        "contributor_ids": [
+          "L2E4",
+          "L2E5"
+        ]
+      },
+      {
+        "l2i_fire_t": 1610,
+        "deliver_at": 1611,
+        "l2e_to_l2i_latency": 2,
+        "l2i_to_delivery_latency": 1,
+        "n_contributors": 2,
+        "contributor_ids": [
+          "L2E4",
+          "L2E5"
+        ]
+      },
+      {
+        "l2i_fire_t": 1615,
+        "deliver_at": 1616,
+        "l2e_to_l2i_latency": 2,
+        "l2i_to_delivery_latency": 1,
+        "n_contributors": 2,
+        "contributor_ids": [
+          "L2E4",
+          "L2E5"
+        ]
+      },
+      {
+        "l2i_fire_t": 1620,
+        "deliver_at": 1621,
+        "l2e_to_l2i_latency": 2,
+        "l2i_to_delivery_latency": 1,
+        "n_contributors": 2,
+        "contributor_ids": [
+          "L2E4",
+          "L2E5"
+        ]
+      },
+      {
+        "l2i_fire_t": 1624,
+        "deliver_at": 1625,
+        "l2e_to_l2i_latency": 1,
+        "l2i_to_delivery_latency": 1,
+        "n_contributors": 2,
+        "contributor_ids": [
+          "L2E6",
+          "L2E5"
+        ]
+      },
+      {
+        "l2i_fire_t": 1628,
+        "deliver_at": 1629,
+        "l2e_to_l2i_latency": 1,
+        "l2i_to_delivery_latency": 1,
+        "n_contributors": 2,
+        "contributor_ids": [
+          "L2E6",
+          "L2E5"
+        ]
+      },
+      {
+        "l2i_fire_t": 1632,
+        "deliver_at": 1633,
+        "l2e_to_l2i_latency": 1,
+        "l2i_to_delivery_latency": 1,
+        "n_contributors": 2,
+        "contributor_ids": [
+          "L2E6",
+          "L2E5"
+        ]
+      },
+      {
+        "l2i_fire_t": 1636,
+        "deliver_at": 1637,
+        "l2e_to_l2i_latency": 1,
+        "l2i_to_delivery_latency": 1,
+        "n_contributors": 2,
+        "contributor_ids": [
+          "L2E6",
+          "L2E5"
+        ]
+      },
+      {
+        "l2i_fire_t": 1640,
+        "deliver_at": 1641,
+        "l2e_to_l2i_latency": 1,
+        "l2i_to_delivery_latency": 1,
+        "n_contributors": 2,
+        "contributor_ids": [
+          "L2E6",
+          "L2E5"
+        ]
+      },
+      {
+        "l2i_fire_t": 1644,
+        "deliver_at": 1645,
+        "l2e_to_l2i_latency": 1,
+        "l2i_to_delivery_latency": 1,
+        "n_contributors": 2,
+        "contributor_ids": [
+          "L2E7",
+          "L2E5"
+        ]
+      },
+      {
+        "l2i_fire_t": 1648,
+        "deliver_at": 1649,
+        "l2e_to_l2i_latency": 1,
+        "l2i_to_delivery_latency": 1,
+        "n_contributors": 2,
+        "contributor_ids": [
+          "L2E7",
+          "L2E5"
+        ]
+      }
+    ],
+    "mean_l2e_to_l2i_latency": 1.067,
+    "mean_l2i_to_delivery_latency": 1.0,
+    "mean_n_contributors": 1.655,
+    "mean_l1e_freq": 0.2374,
+    "mean_l1i_freq": 0.2878,
+    "mean_l2e_freq": 0.0508,
+    "mean_l2i_freq": 0.2106,
+    "near_half_fraction": 0.0,
+    "l1i_all_identical_weights": true,
+    "distinct_owners": 4,
+    "l1i_all_nine_sync_rate": null,
+    "silent_cells": [
+      "L2E0",
+      "L2E1"
+    ]
+  },
+  {
+    "weight_seed": 2,
+    "weight_checkpoints": [
+      {
+        "label": "start",
+        "t": 0,
+        "weights": [
+          1284.2143,
+          812.7644,
+          1038.3037,
+          1217.308,
+          1273.3098,
+          1132.7449,
+          1285.5712,
+          701.292
+        ],
+        "max_weight": 1285.5712,
+        "single_spike_sufficient": false,
+        "thr_l2i": 2666.6667
+      },
+      {
+        "label": "mid",
+        "t": 1600,
+        "weights": [
+          1739.6249,
+          853.5726,
+          1038.3037,
+          2666.6667,
+          1273.3098,
+          1375.7225,
+          1400.2159,
+          765.5312
+        ],
+        "max_weight": 2666.6667,
+        "single_spike_sufficient": true,
+        "thr_l2i": 2666.6667
+      },
+      {
+        "label": "end",
+        "t": 3200,
+        "weights": [
+          1739.6249,
+          853.5726,
+          1038.3037,
+          2666.6667,
+          1273.3098,
+          1375.7225,
+          1400.2159,
+          765.5312
+        ],
+        "max_weight": 2666.6667,
+        "single_spike_sufficient": true,
+        "thr_l2i": 2666.6667
+      }
+    ],
+    "n_deliveries": 400,
+    "delivery_records_sample": [
+      {
+        "l2i_fire_t": 1570,
+        "deliver_at": 1571,
+        "l2e_to_l2i_latency": 1,
+        "l2i_to_delivery_latency": 1,
+        "n_contributors": 2,
+        "contributor_ids": [
+          "L2E6",
+          "L2E3"
+        ]
+      },
+      {
+        "l2i_fire_t": 1574,
+        "deliver_at": 1575,
+        "l2e_to_l2i_latency": 1,
+        "l2i_to_delivery_latency": 1,
+        "n_contributors": 2,
+        "contributor_ids": [
+          "L2E6",
+          "L2E3"
+        ]
+      },
+      {
+        "l2i_fire_t": 1578,
+        "deliver_at": 1579,
+        "l2e_to_l2i_latency": 1,
+        "l2i_to_delivery_latency": 1,
+        "n_contributors": 2,
+        "contributor_ids": [
+          "L2E6",
+          "L2E3"
+        ]
+      },
+      {
+        "l2i_fire_t": 1582,
+        "deliver_at": 1583,
+        "l2e_to_l2i_latency": 1,
+        "l2i_to_delivery_latency": 1,
+        "n_contributors": 2,
+        "contributor_ids": [
+          "L2E5",
+          "L2E3"
+        ]
+      },
+      {
+        "l2i_fire_t": 1586,
+        "deliver_at": 1587,
+        "l2e_to_l2i_latency": 1,
+        "l2i_to_delivery_latency": 1,
+        "n_contributors": 2,
+        "contributor_ids": [
+          "L2E5",
+          "L2E3"
+        ]
+      },
+      {
+        "l2i_fire_t": 1590,
+        "deliver_at": 1591,
+        "l2e_to_l2i_latency": 1,
+        "l2i_to_delivery_latency": 1,
+        "n_contributors": 2,
+        "contributor_ids": [
+          "L2E5",
+          "L2E3"
+        ]
+      },
+      {
+        "l2i_fire_t": 1594,
+        "deliver_at": 1595,
+        "l2e_to_l2i_latency": 1,
+        "l2i_to_delivery_latency": 1,
+        "n_contributors": 2,
+        "contributor_ids": [
+          "L2E5",
+          "L2E3"
+        ]
+      },
+      {
+        "l2i_fire_t": 1598,
+        "deliver_at": 1599,
+        "l2e_to_l2i_latency": 1,
+        "l2i_to_delivery_latency": 1,
+        "n_contributors": 2,
+        "contributor_ids": [
+          "L2E5",
+          "L2E3"
+        ]
+      },
+      {
+        "l2i_fire_t": 1602,
+        "deliver_at": 1603,
+        "l2e_to_l2i_latency": 1,
+        "l2i_to_delivery_latency": 1,
+        "n_contributors": 2,
+        "contributor_ids": [
+          "L2E0",
+          "L2E3"
+        ]
+      },
+      {
+        "l2i_fire_t": 1606,
+        "deliver_at": 1607,
+        "l2e_to_l2i_latency": 1,
+        "l2i_to_delivery_latency": 1,
+        "n_contributors": 2,
+        "contributor_ids": [
+          "L2E0",
+          "L2E3"
+        ]
+      },
+      {
+        "l2i_fire_t": 1610,
+        "deliver_at": 1611,
+        "l2e_to_l2i_latency": 1,
+        "l2i_to_delivery_latency": 1,
+        "n_contributors": 2,
+        "contributor_ids": [
+          "L2E0",
+          "L2E3"
+        ]
+      },
+      {
+        "l2i_fire_t": 1614,
+        "deliver_at": 1615,
+        "l2e_to_l2i_latency": 1,
+        "l2i_to_delivery_latency": 1,
+        "n_contributors": 2,
+        "contributor_ids": [
+          "L2E0",
+          "L2E3"
+        ]
+      },
+      {
+        "l2i_fire_t": 1618,
+        "deliver_at": 1619,
+        "l2e_to_l2i_latency": 1,
+        "l2i_to_delivery_latency": 1,
+        "n_contributors": 2,
+        "contributor_ids": [
+          "L2E0",
+          "L2E3"
+        ]
+      },
+      {
+        "l2i_fire_t": 1621,
+        "deliver_at": 1622,
+        "l2e_to_l2i_latency": 0,
+        "l2i_to_delivery_latency": 1,
+        "n_contributors": 1,
+        "contributor_ids": [
+          "L2E3"
+        ]
+      },
+      {
+        "l2i_fire_t": 1624,
+        "deliver_at": 1625,
+        "l2e_to_l2i_latency": 0,
+        "l2i_to_delivery_latency": 1,
+        "n_contributors": 1,
+        "contributor_ids": [
+          "L2E3"
+        ]
+      },
+      {
+        "l2i_fire_t": 1627,
+        "deliver_at": 1628,
+        "l2e_to_l2i_latency": 0,
+        "l2i_to_delivery_latency": 1,
+        "n_contributors": 1,
+        "contributor_ids": [
+          "L2E3"
+        ]
+      },
+      {
+        "l2i_fire_t": 1630,
+        "deliver_at": 1631,
+        "l2e_to_l2i_latency": 0,
+        "l2i_to_delivery_latency": 1,
+        "n_contributors": 1,
+        "contributor_ids": [
+          "L2E3"
+        ]
+      },
+      {
+        "l2i_fire_t": 1633,
+        "deliver_at": 1634,
+        "l2e_to_l2i_latency": 0,
+        "l2i_to_delivery_latency": 1,
+        "n_contributors": 1,
+        "contributor_ids": [
+          "L2E3"
+        ]
+      },
+      {
+        "l2i_fire_t": 1636,
+        "deliver_at": 1637,
+        "l2e_to_l2i_latency": 0,
+        "l2i_to_delivery_latency": 1,
+        "n_contributors": 1,
+        "contributor_ids": [
+          "L2E3"
+        ]
+      },
+      {
+        "l2i_fire_t": 1639,
+        "deliver_at": 1640,
+        "l2e_to_l2i_latency": 0,
+        "l2i_to_delivery_latency": 1,
+        "n_contributors": 1,
+        "contributor_ids": [
+          "L2E3"
+        ]
+      }
+    ],
+    "mean_l2e_to_l2i_latency": 1.08,
+    "mean_l2i_to_delivery_latency": 1.0,
+    "mean_n_contributors": 1.665,
+    "mean_l1e_freq": 0.2396,
+    "mean_l1i_freq": 0.2812,
+    "mean_l2e_freq": 0.0507,
+    "mean_l2i_freq": 0.2284,
+    "near_half_fraction": 0.0,
+    "l1i_all_identical_weights": true,
+    "distinct_owners": 4,
+    "l1i_all_nine_sync_rate": null,
+    "silent_cells": [
+      "L2E2",
+      "L2E4"
+    ]
+  },
+  {
+    "weight_seed": 3,
+    "weight_checkpoints": [
+      {
+        "label": "start",
+        "t": 0,
+        "weights": [
+          733.5574,
+          1088.3426,
+          1019.2557,
+          1275.8591,
+          1192.0765,
+          1006.5206,
+          748.5821,
+          859.4621
+        ],
+        "max_weight": 1275.8591,
+        "single_spike_sufficient": false,
+        "thr_l2i": 2666.6667
+      },
+      {
+        "label": "mid",
+        "t": 1600,
+        "weights": [
+          733.5574,
+          1088.3426,
+          1019.2557,
+          2666.6667,
+          1315.6109,
+          1475.9508,
+          1700.8715,
+          1494.8303
+        ],
+        "max_weight": 2666.6667,
+        "single_spike_sufficient": true,
+        "thr_l2i": 2666.6667
+      },
+      {
+        "label": "end",
+        "t": 3200,
+        "weights": [
+          733.5574,
+          1088.3426,
+          1019.2557,
+          2666.6667,
+          1315.6109,
+          1475.9508,
+          1700.8715,
+          1494.8303
+        ],
+        "max_weight": 2666.6667,
+        "single_spike_sufficient": true,
+        "thr_l2i": 2666.6667
+      }
+    ],
+    "n_deliveries": 400,
+    "delivery_records_sample": [
+      {
+        "l2i_fire_t": 1755,
+        "deliver_at": 1756,
+        "l2e_to_l2i_latency": 0,
+        "l2i_to_delivery_latency": 1,
+        "n_contributors": 1,
+        "contributor_ids": [
+          "L2E3"
+        ]
+      },
+      {
+        "l2i_fire_t": 1758,
+        "deliver_at": 1759,
+        "l2e_to_l2i_latency": 0,
+        "l2i_to_delivery_latency": 1,
+        "n_contributors": 1,
+        "contributor_ids": [
+          "L2E3"
+        ]
+      },
+      {
+        "l2i_fire_t": 1762,
+        "deliver_at": 1763,
+        "l2e_to_l2i_latency": 1,
+        "l2i_to_delivery_latency": 1,
+        "n_contributors": 2,
+        "contributor_ids": [
+          "L2E4",
+          "L2E3"
+        ]
+      },
+      {
+        "l2i_fire_t": 1766,
+        "deliver_at": 1767,
+        "l2e_to_l2i_latency": 1,
+        "l2i_to_delivery_latency": 1,
+        "n_contributors": 2,
+        "contributor_ids": [
+          "L2E4",
+          "L2E3"
+        ]
+      },
+      {
+        "l2i_fire_t": 1770,
+        "deliver_at": 1771,
+        "l2e_to_l2i_latency": 1,
+        "l2i_to_delivery_latency": 1,
+        "n_contributors": 2,
+        "contributor_ids": [
+          "L2E4",
+          "L2E3"
+        ]
+      },
+      {
+        "l2i_fire_t": 1774,
+        "deliver_at": 1775,
+        "l2e_to_l2i_latency": 1,
+        "l2i_to_delivery_latency": 1,
+        "n_contributors": 2,
+        "contributor_ids": [
+          "L2E4",
+          "L2E3"
+        ]
+      },
+      {
+        "l2i_fire_t": 1778,
+        "deliver_at": 1779,
+        "l2e_to_l2i_latency": 1,
+        "l2i_to_delivery_latency": 1,
+        "n_contributors": 2,
+        "contributor_ids": [
+          "L2E4",
+          "L2E3"
+        ]
+      },
+      {
+        "l2i_fire_t": 1782,
+        "deliver_at": 1783,
+        "l2e_to_l2i_latency": 1,
+        "l2i_to_delivery_latency": 1,
+        "n_contributors": 2,
+        "contributor_ids": [
+          "L2E5",
+          "L2E3"
+        ]
+      },
+      {
+        "l2i_fire_t": 1786,
+        "deliver_at": 1787,
+        "l2e_to_l2i_latency": 1,
+        "l2i_to_delivery_latency": 1,
+        "n_contributors": 2,
+        "contributor_ids": [
+          "L2E5",
+          "L2E3"
+        ]
+      },
+      {
+        "l2i_fire_t": 1790,
+        "deliver_at": 1791,
+        "l2e_to_l2i_latency": 1,
+        "l2i_to_delivery_latency": 1,
+        "n_contributors": 2,
+        "contributor_ids": [
+          "L2E5",
+          "L2E3"
+        ]
+      },
+      {
+        "l2i_fire_t": 1794,
+        "deliver_at": 1795,
+        "l2e_to_l2i_latency": 1,
+        "l2i_to_delivery_latency": 1,
+        "n_contributors": 2,
+        "contributor_ids": [
+          "L2E5",
+          "L2E3"
+        ]
+      },
+      {
+        "l2i_fire_t": 1798,
+        "deliver_at": 1799,
+        "l2e_to_l2i_latency": 1,
+        "l2i_to_delivery_latency": 1,
+        "n_contributors": 2,
+        "contributor_ids": [
+          "L2E5",
+          "L2E3"
+        ]
+      },
+      {
+        "l2i_fire_t": 1801,
+        "deliver_at": 1802,
+        "l2e_to_l2i_latency": 0,
+        "l2i_to_delivery_latency": 1,
+        "n_contributors": 1,
+        "contributor_ids": [
+          "L2E3"
+        ]
+      },
+      {
+        "l2i_fire_t": 1804,
+        "deliver_at": 1805,
+        "l2e_to_l2i_latency": 0,
+        "l2i_to_delivery_latency": 1,
+        "n_contributors": 1,
+        "contributor_ids": [
+          "L2E3"
+        ]
+      },
+      {
+        "l2i_fire_t": 1807,
+        "deliver_at": 1808,
+        "l2e_to_l2i_latency": 0,
+        "l2i_to_delivery_latency": 1,
+        "n_contributors": 1,
+        "contributor_ids": [
+          "L2E3"
+        ]
+      },
+      {
+        "l2i_fire_t": 1810,
+        "deliver_at": 1811,
+        "l2e_to_l2i_latency": 0,
+        "l2i_to_delivery_latency": 1,
+        "n_contributors": 1,
+        "contributor_ids": [
+          "L2E3"
+        ]
+      },
+      {
+        "l2i_fire_t": 1813,
+        "deliver_at": 1814,
+        "l2e_to_l2i_latency": 0,
+        "l2i_to_delivery_latency": 1,
+        "n_contributors": 1,
+        "contributor_ids": [
+          "L2E3"
+        ]
+      },
+      {
+        "l2i_fire_t": 1816,
+        "deliver_at": 1817,
+        "l2e_to_l2i_latency": 0,
+        "l2i_to_delivery_latency": 1,
+        "n_contributors": 1,
+        "contributor_ids": [
+          "L2E3"
+        ]
+      },
+      {
+        "l2i_fire_t": 1819,
+        "deliver_at": 1820,
+        "l2e_to_l2i_latency": 0,
+        "l2i_to_delivery_latency": 1,
+        "n_contributors": 1,
+        "contributor_ids": [
+          "L2E3"
+        ]
+      },
+      {
+        "l2i_fire_t": 1822,
+        "deliver_at": 1823,
+        "l2e_to_l2i_latency": 0,
+        "l2i_to_delivery_latency": 1,
+        "n_contributors": 1,
+        "contributor_ids": [
+          "L2E3"
+        ]
+      }
+    ],
+    "mean_l2e_to_l2i_latency": 0.613,
+    "mean_l2i_to_delivery_latency": 1.0,
+    "mean_n_contributors": 1.395,
+    "mean_l1e_freq": 0.2424,
+    "mean_l1i_freq": 0.2728,
+    "mean_l2e_freq": 0.0487,
+    "mean_l2i_freq": 0.2369,
+    "near_half_fraction": 0.0,
+    "l1i_all_identical_weights": true,
+    "distinct_owners": 3,
+    "l1i_all_nine_sync_rate": null,
+    "silent_cells": [
+      "L2E0",
+      "L2E1",
+      "L2E2"
+    ]
+  },
+  {
+    "weight_seed": 4,
+    "weight_checkpoints": [
+      {
+        "label": "start",
+        "t": 0,
+        "weights": [
+          1318.3098,
+          1321.9711,
+          944.8222,
+          1049.1555,
+          1160.2486,
+          684.8999,
+          1237.6464,
+          830.5236
+        ],
+        "max_weight": 1321.9711,
+        "single_spike_sufficient": false,
+        "thr_l2i": 2666.6667
+      },
+      {
+        "label": "mid",
+        "t": 1600,
+        "weights": [
+          2666.6667,
+          2666.6667,
+          944.8222,
+          2666.6667,
+          1227.5037,
+          684.8999,
+          1237.6464,
+          913.1669
+        ],
+        "max_weight": 2666.6667,
+        "single_spike_sufficient": true,
+        "thr_l2i": 2666.6667
+      },
+      {
+        "label": "end",
+        "t": 3200,
+        "weights": [
+          2666.6667,
+          2666.6667,
+          944.8222,
+          2666.6667,
+          1646.0932,
+          684.8999,
+          1237.6464,
+          951.6029
+        ],
+        "max_weight": 2666.6667,
+        "single_spike_sufficient": true,
+        "thr_l2i": 2666.6667
+      }
+    ],
+    "n_deliveries": 400,
+    "delivery_records_sample": [
+      {
+        "l2i_fire_t": 1656,
+        "deliver_at": 1657,
+        "l2e_to_l2i_latency": 1,
+        "l2i_to_delivery_latency": 1,
+        "n_contributors": 2,
+        "contributor_ids": [
+          "L2E7",
+          "L2E1"
+        ]
+      },
+      {
+        "l2i_fire_t": 1660,
+        "deliver_at": 1661,
+        "l2e_to_l2i_latency": 1,
+        "l2i_to_delivery_latency": 1,
+        "n_contributors": 2,
+        "contributor_ids": [
+          "L2E7",
+          "L2E1"
+        ]
+      },
+      {
+        "l2i_fire_t": 1664,
+        "deliver_at": 1665,
+        "l2e_to_l2i_latency": 0,
+        "l2i_to_delivery_latency": 1,
+        "n_contributors": 1,
+        "contributor_ids": [
+          "L2E1"
+        ]
+      },
+      {
+        "l2i_fire_t": 1668,
+        "deliver_at": 1669,
+        "l2e_to_l2i_latency": 0,
+        "l2i_to_delivery_latency": 1,
+        "n_contributors": 1,
+        "contributor_ids": [
+          "L2E1"
+        ]
+      },
+      {
+        "l2i_fire_t": 1672,
+        "deliver_at": 1673,
+        "l2e_to_l2i_latency": 0,
+        "l2i_to_delivery_latency": 1,
+        "n_contributors": 1,
+        "contributor_ids": [
+          "L2E1"
+        ]
+      },
+      {
+        "l2i_fire_t": 1676,
+        "deliver_at": 1677,
+        "l2e_to_l2i_latency": 0,
+        "l2i_to_delivery_latency": 1,
+        "n_contributors": 1,
+        "contributor_ids": [
+          "L2E1"
+        ]
+      },
+      {
+        "l2i_fire_t": 1680,
+        "deliver_at": 1681,
+        "l2e_to_l2i_latency": 0,
+        "l2i_to_delivery_latency": 1,
+        "n_contributors": 1,
+        "contributor_ids": [
+          "L2E1"
+        ]
+      },
+      {
+        "l2i_fire_t": 1684,
+        "deliver_at": 1685,
+        "l2e_to_l2i_latency": 1,
+        "l2i_to_delivery_latency": 1,
+        "n_contributors": 2,
+        "contributor_ids": [
+          "L2E4",
+          "L2E0"
+        ]
+      },
+      {
+        "l2i_fire_t": 1688,
+        "deliver_at": 1689,
+        "l2e_to_l2i_latency": 1,
+        "l2i_to_delivery_latency": 1,
+        "n_contributors": 2,
+        "contributor_ids": [
+          "L2E4",
+          "L2E0"
+        ]
+      },
+      {
+        "l2i_fire_t": 1692,
+        "deliver_at": 1693,
+        "l2e_to_l2i_latency": 1,
+        "l2i_to_delivery_latency": 1,
+        "n_contributors": 2,
+        "contributor_ids": [
+          "L2E4",
+          "L2E0"
+        ]
+      },
+      {
+        "l2i_fire_t": 1696,
+        "deliver_at": 1697,
+        "l2e_to_l2i_latency": 1,
+        "l2i_to_delivery_latency": 1,
+        "n_contributors": 2,
+        "contributor_ids": [
+          "L2E4",
+          "L2E0"
+        ]
+      },
+      {
+        "l2i_fire_t": 1700,
+        "deliver_at": 1701,
+        "l2e_to_l2i_latency": 1,
+        "l2i_to_delivery_latency": 1,
+        "n_contributors": 2,
+        "contributor_ids": [
+          "L2E4",
+          "L2E0"
+        ]
+      },
+      {
+        "l2i_fire_t": 1704,
+        "deliver_at": 1705,
+        "l2e_to_l2i_latency": 0,
+        "l2i_to_delivery_latency": 1,
+        "n_contributors": 1,
+        "contributor_ids": [
+          "L2E1"
+        ]
+      },
+      {
+        "l2i_fire_t": 1708,
+        "deliver_at": 1709,
+        "l2e_to_l2i_latency": 0,
+        "l2i_to_delivery_latency": 1,
+        "n_contributors": 1,
+        "contributor_ids": [
+          "L2E1"
+        ]
+      },
+      {
+        "l2i_fire_t": 1712,
+        "deliver_at": 1713,
+        "l2e_to_l2i_latency": 0,
+        "l2i_to_delivery_latency": 1,
+        "n_contributors": 1,
+        "contributor_ids": [
+          "L2E1"
+        ]
+      },
+      {
+        "l2i_fire_t": 1716,
+        "deliver_at": 1717,
+        "l2e_to_l2i_latency": 0,
+        "l2i_to_delivery_latency": 1,
+        "n_contributors": 1,
+        "contributor_ids": [
+          "L2E1"
+        ]
+      },
+      {
+        "l2i_fire_t": 1720,
+        "deliver_at": 1721,
+        "l2e_to_l2i_latency": 0,
+        "l2i_to_delivery_latency": 1,
+        "n_contributors": 1,
+        "contributor_ids": [
+          "L2E1"
+        ]
+      },
+      {
+        "l2i_fire_t": 1725,
+        "deliver_at": 1726,
+        "l2e_to_l2i_latency": 2,
+        "l2i_to_delivery_latency": 1,
+        "n_contributors": 2,
+        "contributor_ids": [
+          "L2E7",
+          "L2E1"
+        ]
+      },
+      {
+        "l2i_fire_t": 1729,
+        "deliver_at": 1730,
+        "l2e_to_l2i_latency": 1,
+        "l2i_to_delivery_latency": 1,
+        "n_contributors": 2,
+        "contributor_ids": [
+          "L2E7",
+          "L2E1"
+        ]
+      },
+      {
+        "l2i_fire_t": 1733,
+        "deliver_at": 1734,
+        "l2e_to_l2i_latency": 1,
+        "l2i_to_delivery_latency": 1,
+        "n_contributors": 2,
+        "contributor_ids": [
+          "L2E7",
+          "L2E1"
+        ]
+      }
+    ],
+    "mean_l2e_to_l2i_latency": 0.76,
+    "mean_l2i_to_delivery_latency": 1.0,
+    "mean_n_contributors": 1.51,
+    "mean_l1e_freq": 0.2478,
+    "mean_l1i_freq": 0.2569,
+    "mean_l2e_freq": 0.0486,
+    "mean_l2i_freq": 0.2206,
+    "near_half_fraction": 0.075,
+    "l1i_all_identical_weights": true,
+    "distinct_owners": 4,
+    "l1i_all_nine_sync_rate": null,
+    "silent_cells": [
+      "L2E2",
+      "L2E5",
+      "L2E6"
+    ]
+  },
+  {
+    "weight_seed": 5,
+    "weight_checkpoints": [
+      {
+        "label": "start",
+        "t": 0,
+        "weights": [
+          835.4359,
+          715.9327,
+          1212.9184,
+          1040.7459,
+          962.921,
+          1237.17,
+          851.0259,
+          923.5204
+        ],
+        "max_weight": 1237.17,
+        "single_spike_sufficient": false,
+        "thr_l2i": 2666.6667
+      },
+      {
+        "label": "mid",
+        "t": 1600,
+        "weights": [
+          835.4359,
+          715.9327,
+          1212.9184,
+          2666.6667,
+          962.921,
+          1630.5502,
+          962.8468,
+          2553.1404
+        ],
+        "max_weight": 2666.6667,
+        "single_spike_sufficient": true,
+        "thr_l2i": 2666.6667
+      },
+      {
+        "label": "end",
+        "t": 3200,
+        "weights": [
+          835.4359,
+          715.9327,
+          1212.9184,
+          2666.6667,
+          962.921,
+          1630.5502,
+          962.8468,
+          2553.1404
+        ],
+        "max_weight": 2666.6667,
+        "single_spike_sufficient": true,
+        "thr_l2i": 2666.6667
+      }
+    ],
+    "n_deliveries": 400,
+    "delivery_records_sample": [
+      {
+        "l2i_fire_t": 1772,
+        "deliver_at": 1773,
+        "l2e_to_l2i_latency": 1,
+        "l2i_to_delivery_latency": 1,
+        "n_contributors": 2,
+        "contributor_ids": [
+          "L2E4",
+          "L2E3"
+        ]
+      },
+      {
+        "l2i_fire_t": 1776,
+        "deliver_at": 1777,
+        "l2e_to_l2i_latency": 1,
+        "l2i_to_delivery_latency": 1,
+        "n_contributors": 2,
+        "contributor_ids": [
+          "L2E4",
+          "L2E3"
+        ]
+      },
+      {
+        "l2i_fire_t": 1780,
+        "deliver_at": 1781,
+        "l2e_to_l2i_latency": 1,
+        "l2i_to_delivery_latency": 1,
+        "n_contributors": 2,
+        "contributor_ids": [
+          "L2E4",
+          "L2E3"
+        ]
+      },
+      {
+        "l2i_fire_t": 1783,
+        "deliver_at": 1784,
+        "l2e_to_l2i_latency": 0,
+        "l2i_to_delivery_latency": 1,
+        "n_contributors": 1,
+        "contributor_ids": [
+          "L2E3"
+        ]
+      },
+      {
+        "l2i_fire_t": 1786,
+        "deliver_at": 1787,
+        "l2e_to_l2i_latency": 0,
+        "l2i_to_delivery_latency": 1,
+        "n_contributors": 1,
+        "contributor_ids": [
+          "L2E3"
+        ]
+      },
+      {
+        "l2i_fire_t": 1789,
+        "deliver_at": 1790,
+        "l2e_to_l2i_latency": 0,
+        "l2i_to_delivery_latency": 1,
+        "n_contributors": 1,
+        "contributor_ids": [
+          "L2E3"
+        ]
+      },
+      {
+        "l2i_fire_t": 1792,
+        "deliver_at": 1793,
+        "l2e_to_l2i_latency": 0,
+        "l2i_to_delivery_latency": 1,
+        "n_contributors": 1,
+        "contributor_ids": [
+          "L2E3"
+        ]
+      },
+      {
+        "l2i_fire_t": 1795,
+        "deliver_at": 1796,
+        "l2e_to_l2i_latency": 0,
+        "l2i_to_delivery_latency": 1,
+        "n_contributors": 1,
+        "contributor_ids": [
+          "L2E3"
+        ]
+      },
+      {
+        "l2i_fire_t": 1798,
+        "deliver_at": 1799,
+        "l2e_to_l2i_latency": 0,
+        "l2i_to_delivery_latency": 1,
+        "n_contributors": 1,
+        "contributor_ids": [
+          "L2E3"
+        ]
+      },
+      {
+        "l2i_fire_t": 1801,
+        "deliver_at": 1802,
+        "l2e_to_l2i_latency": 0,
+        "l2i_to_delivery_latency": 1,
+        "n_contributors": 1,
+        "contributor_ids": [
+          "L2E3"
+        ]
+      },
+      {
+        "l2i_fire_t": 1804,
+        "deliver_at": 1805,
+        "l2e_to_l2i_latency": 0,
+        "l2i_to_delivery_latency": 1,
+        "n_contributors": 1,
+        "contributor_ids": [
+          "L2E3"
+        ]
+      },
+      {
+        "l2i_fire_t": 1807,
+        "deliver_at": 1808,
+        "l2e_to_l2i_latency": 0,
+        "l2i_to_delivery_latency": 1,
+        "n_contributors": 1,
+        "contributor_ids": [
+          "L2E3"
+        ]
+      },
+      {
+        "l2i_fire_t": 1810,
+        "deliver_at": 1811,
+        "l2e_to_l2i_latency": 0,
+        "l2i_to_delivery_latency": 1,
+        "n_contributors": 1,
+        "contributor_ids": [
+          "L2E3"
+        ]
+      },
+      {
+        "l2i_fire_t": 1813,
+        "deliver_at": 1814,
+        "l2e_to_l2i_latency": 0,
+        "l2i_to_delivery_latency": 1,
+        "n_contributors": 1,
+        "contributor_ids": [
+          "L2E3"
+        ]
+      },
+      {
+        "l2i_fire_t": 1816,
+        "deliver_at": 1817,
+        "l2e_to_l2i_latency": 0,
+        "l2i_to_delivery_latency": 1,
+        "n_contributors": 1,
+        "contributor_ids": [
+          "L2E3"
+        ]
+      },
+      {
+        "l2i_fire_t": 1819,
+        "deliver_at": 1820,
+        "l2e_to_l2i_latency": 0,
+        "l2i_to_delivery_latency": 1,
+        "n_contributors": 1,
+        "contributor_ids": [
+          "L2E3"
+        ]
+      },
+      {
+        "l2i_fire_t": 1823,
+        "deliver_at": 1824,
+        "l2e_to_l2i_latency": 1,
+        "l2i_to_delivery_latency": 1,
+        "n_contributors": 2,
+        "contributor_ids": [
+          "L2E6",
+          "L2E3"
+        ]
+      },
+      {
+        "l2i_fire_t": 1827,
+        "deliver_at": 1828,
+        "l2e_to_l2i_latency": 1,
+        "l2i_to_delivery_latency": 1,
+        "n_contributors": 2,
+        "contributor_ids": [
+          "L2E6",
+          "L2E3"
+        ]
+      },
+      {
+        "l2i_fire_t": 1831,
+        "deliver_at": 1832,
+        "l2e_to_l2i_latency": 1,
+        "l2i_to_delivery_latency": 1,
+        "n_contributors": 2,
+        "contributor_ids": [
+          "L2E6",
+          "L2E3"
+        ]
+      },
+      {
+        "l2i_fire_t": 1835,
+        "deliver_at": 1836,
+        "l2e_to_l2i_latency": 1,
+        "l2i_to_delivery_latency": 1,
+        "n_contributors": 2,
+        "contributor_ids": [
+          "L2E6",
+          "L2E3"
+        ]
+      }
+    ],
+    "mean_l2e_to_l2i_latency": 0.565,
+    "mean_l2i_to_delivery_latency": 1.0,
+    "mean_n_contributors": 1.4,
+    "mean_l1e_freq": 0.2399,
+    "mean_l1i_freq": 0.2806,
+    "mean_l2e_freq": 0.0525,
+    "mean_l2i_freq": 0.2534,
+    "near_half_fraction": 0.0,
+    "l1i_all_identical_weights": true,
+    "distinct_owners": 3,
+    "l1i_all_nine_sync_rate": null,
+    "silent_cells": [
+      "L2E0",
+      "L2E1",
+      "L2E2"
+    ]
+  }
+]

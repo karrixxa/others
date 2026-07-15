@@ -558,6 +558,19 @@ CONFIG_SPEC = [
      "desc": "The neuron's own ca (slow EMA of its own spiking) at which the "
              "protection gate reaches 1.0 (full/normal depression strength). "
              "Only used when loser-depression protection is on."},
+    # Phase 17 (LPS Lecture 14 mapping): pre-trained, task-independent L2I
+    # recruitment -- separate from every mechanism above.
+    {"key": "pretrained_l2i_recruitment", "label": "Pre-trained L2I recruitment", "kind": "toggle",
+     "desc": "Every L2E->L2I synapse starts at one fixed, task-independent "
+             "value (the resolved L2I threshold itself), so ONE ordinary "
+             "physical L2E spike alone is sufficient to fire L2I, and L2I's "
+             "own incoming-excitatory learning rate is pinned to 0 (these "
+             "weights never move again). L2I still physically integrates "
+             "charge and crosses its own threshold; L2I->L2E inhibition is "
+             "still scheduled and causally delayed exactly as before -- only "
+             "the initial value and learning of L2I's OWN incoming weights "
+             "change. OFF (default) is byte-identical to the learned-"
+             "recruitment baseline."},
 ]
 
 # Dashboard clutter control: the panel exposes every tunable, but most are inert
