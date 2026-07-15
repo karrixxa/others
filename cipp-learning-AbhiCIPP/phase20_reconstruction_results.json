@@ -1,0 +1,136 @@
+{
+  "owners": {
+    "row 1": 4,
+    "col 1": 5,
+    "diag \\": 7,
+    "diag /": 5
+  },
+  "results": {
+    "no_cue": {
+      "precision": 1.0,
+      "recall": 0.0,
+      "center_fired": false,
+      "peripheral_recall": 0.0,
+      "fired": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "false_l2e_activation": false
+    },
+    "correct_cue_row 1": {
+      "precision": 1.0,
+      "recall": 0.0,
+      "center_fired": false,
+      "peripheral_recall": 0.0,
+      "fired": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "false_l2e_activation": false
+    },
+    "correct_cue_col 1": {
+      "precision": 1.0,
+      "recall": 0.0,
+      "center_fired": false,
+      "peripheral_recall": 0.0,
+      "fired": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "false_l2e_activation": false
+    },
+    "correct_cue_diag \\": {
+      "precision": 1.0,
+      "recall": 0.0,
+      "center_fired": false,
+      "peripheral_recall": 0.0,
+      "fired": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "false_l2e_activation": false
+    },
+    "correct_cue_diag /": {
+      "precision": 1.0,
+      "recall": 0.0,
+      "center_fired": false,
+      "peripheral_recall": 0.0,
+      "fired": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "false_l2e_activation": false
+    },
+    "wrong_cue_row1_pattern_with_col1_owner": {
+      "precision": 1.0,
+      "recall": 0.0,
+      "center_fired": false,
+      "peripheral_recall": 0.0,
+      "fired": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "false_l2e_activation": false
+    },
+    "shuffled_decoder_row1": {
+      "precision": 1.0,
+      "recall": 0.0,
+      "center_fired": false,
+      "peripheral_recall": 0.0,
+      "fired": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "false_l2e_activation": false
+    }
+  }
+}

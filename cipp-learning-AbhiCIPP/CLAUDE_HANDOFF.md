@@ -76,6 +76,21 @@
   preserved unmerged on its own backup branch, never deleted or rewritten --
   see `backup/phase19-candidate-a-wip`, `backup/phase19-eight-predictor-wip`,
   `backup/phase19a-scaffold-config-ui-wip`, `backup/phase19-corrected-prediction`.
+- Phase 20 (measurement only, no new flag): `Phase20_Frozen_Reconstruction_
+  Report.md` + `test_phase20_frozen_reconstruction.py` +
+  `phase20_frozen_reconstruction.py`. Adapted the original decoder->L1E-
+  replay spec to the corrected architecture (no such replay path exists by
+  design) -- reconstruction is measured directly at the PCi population from
+  a cued L2E. HONEST NEGATIVE RESULT: realistic training (60 interleaved
+  cycles, or 50,000 steps of a single uninterrupted hold) never matures
+  R_j->PCi feedback weights past a ~50-64 plateau reached by step 10,000 --
+  far below the ~500 threshold needed for feedback-alone firing, so cueing
+  any owner (realistically trained) reconstructs nothing. A manually-
+  matured decoder (explicit test control, not normal operation) DOES
+  reconstruct correctly with precision/recall 1.0, no center-only collapse,
+  no runaway, no false L2E activation -- confirming the architecture/
+  cueing mechanism itself is sound; the gap is specifically that Phase 19's
+  calibrated learning rate never reaches maturity under realistic training.
 - Base branch `july14` is untouched and remains the protected base.
 - `four-pattern` branch exists (checked out in a separate worktree at
   `/home/charisxiong/Documents/others`) and is explicitly NOT merged here —
