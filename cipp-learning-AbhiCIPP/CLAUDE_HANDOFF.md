@@ -32,10 +32,12 @@
 - Phase 14 END checkpoint commit: `30a8cff` (UI-only observability — display
   controls, spike-raster restoration, terminology/provenance clarity; no
   neural dynamics/parameters/timing/learning/seeds/defaults changed)
-- This update corresponds to the **Phase 15 END** checkpoint (local
-  developmental protection from L2I loser depression — the first actual
-  neural-dynamics change since Phase 10; new, default-off, NOT promoted —
-  commit hash filled in after this commit lands, see repo log).
+- Phase 15 END checkpoint commit: `18bb5f3` (local developmental protection
+  from L2I loser depression — new, default-off, NOT promoted)
+- This update corresponds to the **Phase 16 END** checkpoint
+  (adaptive-threshold x developmental-protection factorial + spare-capacity
+  challenge, measurement only, no new mechanism/default/tuning — commit
+  hash filled in after this commit lands, see repo log).
 - Base branch `july14` is untouched and remains the protected base.
 - `four-pattern` branch exists (checked out in a separate worktree at
   `/home/charisxiong/Documents/others`) and is explicitly NOT merged here —
@@ -589,6 +591,86 @@ every prior phase's finding that the central one-to-one ownership-
 consolidation problem remains open. Full findings and every table are in
 `Phase15_Loser_Depression_Protection_Report.md`; the 60-run grid is in
 `phase15_loser_depression_protection_summary.json` (committed).
+
+**Current phase (Phase 16, complete) — Adaptive-threshold x developmental-
+protection factorial + genuine spare-capacity challenge. MEASUREMENT ONLY:
+both mechanisms already exist (Phase 10, Phase 15); no new neural rule, no
+default changed, nothing tuned per seed, distance/leak/initialization/L1I
+untouched.** Conditions A (both off) / B (adaptive on) / C (protection on)
+/ D (both on), each mechanism at its own already-documented reference value
+(`delta_threshold_frac=0.05`/`tau_threshold=25.0`;
+`loser_depression_protection_ca_ref=0.02`), `DASHBOARD_PRESET`'s own legacy
+distance config throughout -- only the two booleans toggled.
+
+**Grid (`phase16_factorial_spare_capacity.py`):** weight seeds 1-5 x
+topology seeds 1-3 x 2 scenarios (20-step equal interleaving/40 rotations;
+long row-hold-600-then-col-switch-200) x 4 conditions = 120 factorial runs,
+plus a 60-run spare-capacity challenge extending each condition's own
+interleaved-40 trained engine: freeze+record the original four patterns'
+owners/consistency -> unfreeze and present ONE declared novel pattern
+(`row 0`, an existing held-out `PROBES` entry) 10 times WITH PLASTICITY
+LIVE (never `present_probe()`, which freezes -- instead directly drives
+`input_vec`+`_start_presentation`, the same public bookkeeping
+`set_pattern()`/`present_probe()` already use, zero engine code changed) ->
+identify the eventual responder and its PRE-novel status -> freeze again
+and re-evaluate the original four. 4 harness-verification tests (all
+passing) confirm the novel presentation actually keeps plasticity live, uses
+real presentation-tracking, that the retention/collision bookkeeping is
+internally consistent, and that the harness itself contains ZERO hardcoded
+quiet-neuron-count acceptance assertions. Full suite: 280 passed, 5 failed
+(same pre-existing set).
+
+**Key findings:**
+- **`adaptive_threshold`, not `loser_depression_protection`, is the
+  dominant driver of raw recruitment breadth** -- in the long-hold schedule
+  it roughly doubles active count and eliminates the quiet category
+  entirely (B/D: active 3.00, quiet 0.00 vs. A/C: ~1.3 active, ~1.7 quiet).
+  In the interleaved schedule the COMBINATION (D) reaches the best
+  recruitment of any single condition (mean active 5.00/8, unrecruited
+  1.20) -- a real, seed-robust improvement over baseline.
+- That recruitment win comes at a real cost: D has the LOWEST
+  distinct_owners (2.20 vs. A's 3.60) and the HIGHEST collisions/forgetting
+  of any condition -- recruitment breadth and ownership stability move in
+  opposite directions, sharper under D than under protection alone
+  (Phase 15).
+- Adaptive threshold (B, D) meaningfully reduces tyrant share in the
+  long-hold schedule specifically (0.366/0.353 vs. A's 0.465) but not in
+  the interleaved schedule.
+- Depression-by-maturity's monotonic ramp (Phase 15's core mechanism proof)
+  is preserved identically under D -- the two mechanisms don't interfere
+  with each other's own internal math.
+- **Spare-capacity challenge -- the most important finding:** under
+  baseline A, the novel pattern is captured by an already-active neuron in
+  ALL 15 seeds (0 genuine spare-capacity recruitments; 12/15 times by the
+  existing tyrant itself). B and C each produce genuine spare-capacity
+  recruitment (a previously-UNRECRUITED neuron becomes the novel pattern's
+  owner) in 3/15 seeds -- real but modest, and specific to that one
+  mechanism. **Combining both (D) ELIMINATES this benefit entirely: 0/15
+  genuine recruitments (back to A's baseline), tyrant-capture back to
+  12/15, and the WORST retention (0.550) and WORST novel-pattern
+  consistency (0.58) of any condition** -- a genuine negative interaction
+  between two mechanisms that each individually help a little, found and
+  reported as-is, not tuned away.
+- A dedicated supplementary within-run checkpoint (same protocol as Phase
+  15's own check, extended to all four conditions:
+  `phase16_never_fired_checkpoint.json`) confirms 0 of 75
+  never-fired-at-halfway neurons ever fire by the end, under EVERY
+  condition -- neither mechanism, nor their combination, actively rescues
+  an already-fallen-behind competitor within this timeframe.
+- No fixed quiet-neuron-count criterion was imposed anywhere in the
+  harness (verified by a dedicated test) -- every count above is reported
+  as observed.
+
+**Conclusion: consistent with Phase 15, the central one-to-one ownership-
+consolidation problem remains open.** This phase maps where two existing,
+individually-tested mechanisms land relative to it, alone and combined,
+without adjusting anything to make the map look better -- including the
+genuinely surprising finding that combining them can erase each one's
+individual (modest) benefit rather than compounding it. Full findings and
+every table are in `Phase16_Factorial_Spare_Capacity_Report.md`; the
+120+60-run grid is in `phase16_factorial_spare_capacity_summary.json`
+(committed), and the supplementary never-fired checkpoint is in
+`phase16_never_fired_checkpoint.json` (committed).
 
 ## Completed (this session)
 

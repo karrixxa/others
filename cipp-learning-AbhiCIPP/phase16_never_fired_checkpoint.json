@@ -1,0 +1,18 @@
+{
+  "A_adaptive_off_protection_off": {
+    "never_at_half": 75,
+    "rescued": 0
+  },
+  "B_adaptive_on_protection_off": {
+    "never_at_half": 75,
+    "rescued": 0
+  },
+  "C_adaptive_off_protection_on": {
+    "never_at_half": 75,
+    "rescued": 0
+  },
+  "D_adaptive_on_protection_on": {
+    "never_at_half": 75,
+    "rescued": 0
+  }
+}
