@@ -1,0 +1,5897 @@
+{
+  "quick": false,
+  "weight_seeds": [
+    1,
+    2,
+    3
+  ],
+  "topology_seeds": [
+    1,
+    2
+  ],
+  "results": [
+    {
+      "schedule": "short_interleaved",
+      "geometry": "symmetric_influence_off",
+      "adaptive_threshold": false,
+      "weight_seed": 1,
+      "topology_seed": 1,
+      "distinct_owners": 3,
+      "per_pattern_consistency": {
+        "row 1": 0.5,
+        "col 1": 0.3,
+        "diag \\": 0.6,
+        "diag /": 0.6
+      },
+      "mean_ambiguity_rate": 0.025,
+      "mean_latency_margin": 3.838,
+      "forgetting": {
+        "row 1": true,
+        "col 1": true,
+        "diag \\": true,
+        "diag /": true
+      },
+      "silent_cells": [
+        "L2E0",
+        "L2E1",
+        "L2E6"
+      ],
+      "recruitable_cells": [
+        "L2E3",
+        "L2E7"
+      ],
+      "collisions": {
+        "L2E5": [
+          "row 1",
+          "diag \\"
+        ]
+      },
+      "l2i_activity": {
+        "mean_per_presentation": 1.45,
+        "total": 58
+      },
+      "l1i_all_nine_sync_rate": 1.0,
+      "frozen_replay_zero_weight_drift": true,
+      "frozen_first_responder_consistency": {
+        "row 1": 1.0,
+        "col 1": 1.0,
+        "diag \\": 1.0,
+        "diag /": 1.0
+      },
+      "rf_similarity": {
+        "mean": 0.4823,
+        "max": 0.999
+      },
+      "adaptive_threshold_summary": {
+        "enabled": false,
+        "final_a_mean": 0.0,
+        "final_a_max": 0.0,
+        "final_a_nonzero_count": 0
+      },
+      "l2i_causal_timing": {
+        "delay": 1,
+        "magnitude": 8000.0,
+        "pending_count": 1,
+        "delivered_log_count": 10
+      },
+      "influence_distribution": {
+        "applied": false,
+        "influence_min": 1.0,
+        "influence_median": 1.7964,
+        "influence_max": 3.4877,
+        "safe": true
+      }
+    },
+    {
+      "schedule": "long_saturation",
+      "geometry": "symmetric_influence_off",
+      "adaptive_threshold": false,
+      "weight_seed": 1,
+      "topology_seed": 1,
+      "distinct_owners": 1,
+      "dead_cells": 5,
+      "per_pattern_dominance": {
+        "row 1": {
+          "modal_owner": "L2E2",
+          "dominance": 1.0
+        },
+        "col 1": {
+          "modal_owner": "L2E2",
+          "dominance": 0.6667
+        },
+        "diag \\": {
+          "modal_owner": "L2E2",
+          "dominance": 0.6667
+        },
+        "diag /": {
+          "modal_owner": "L2E2",
+          "dominance": 0.5
+        }
+      },
+      "mean_sustained_dominance": 0.7084,
+      "rf_similarity": {
+        "mean": 0.5142,
+        "max": 0.9436
+      },
+      "adaptive_threshold_summary": {
+        "enabled": false,
+        "final_a_mean": 0.0,
+        "final_a_max": 0.0,
+        "final_a_nonzero_count": 0
+      },
+      "l2i_causal_timing": {
+        "delay": 1,
+        "magnitude": 8000.0,
+        "pending_count": 0,
+        "delivered_log_count": 10
+      },
+      "influence_distribution": {
+        "applied": false,
+        "influence_min": 1.0,
+        "influence_median": 1.7964,
+        "influence_max": 3.4877,
+        "safe": true
+      }
+    },
+    {
+      "schedule": "short_interleaved",
+      "geometry": "symmetric_influence_off",
+      "adaptive_threshold": false,
+      "weight_seed": 1,
+      "topology_seed": 2,
+      "distinct_owners": 3,
+      "per_pattern_consistency": {
+        "row 1": 0.5,
+        "col 1": 0.3,
+        "diag \\": 0.6,
+        "diag /": 0.6
+      },
+      "mean_ambiguity_rate": 0.025,
+      "mean_latency_margin": 3.838,
+      "forgetting": {
+        "row 1": true,
+        "col 1": true,
+        "diag \\": true,
+        "diag /": true
+      },
+      "silent_cells": [
+        "L2E0",
+        "L2E1",
+        "L2E6"
+      ],
+      "recruitable_cells": [
+        "L2E3",
+        "L2E7"
+      ],
+      "collisions": {
+        "L2E5": [
+          "row 1",
+          "diag \\"
+        ]
+      },
+      "l2i_activity": {
+        "mean_per_presentation": 1.45,
+        "total": 58
+      },
+      "l1i_all_nine_sync_rate": 1.0,
+      "frozen_replay_zero_weight_drift": true,
+      "frozen_first_responder_consistency": {
+        "row 1": 1.0,
+        "col 1": 1.0,
+        "diag \\": 1.0,
+        "diag /": 1.0
+      },
+      "rf_similarity": {
+        "mean": 0.4823,
+        "max": 0.999
+      },
+      "adaptive_threshold_summary": {
+        "enabled": false,
+        "final_a_mean": 0.0,
+        "final_a_max": 0.0,
+        "final_a_nonzero_count": 0
+      },
+      "l2i_causal_timing": {
+        "delay": 1,
+        "magnitude": 8000.0,
+        "pending_count": 1,
+        "delivered_log_count": 10
+      },
+      "influence_distribution": {
+        "applied": false,
+        "influence_min": 1.0,
+        "influence_median": 1.7964,
+        "influence_max": 3.4877,
+        "safe": true
+      }
+    },
+    {
+      "schedule": "long_saturation",
+      "geometry": "symmetric_influence_off",
+      "adaptive_threshold": false,
+      "weight_seed": 1,
+      "topology_seed": 2,
+      "distinct_owners": 1,
+      "dead_cells": 5,
+      "per_pattern_dominance": {
+        "row 1": {
+          "modal_owner": "L2E2",
+          "dominance": 1.0
+        },
+        "col 1": {
+          "modal_owner": "L2E2",
+          "dominance": 0.6667
+        },
+        "diag \\": {
+          "modal_owner": "L2E2",
+          "dominance": 0.6667
+        },
+        "diag /": {
+          "modal_owner": "L2E2",
+          "dominance": 0.5
+        }
+      },
+      "mean_sustained_dominance": 0.7084,
+      "rf_similarity": {
+        "mean": 0.5142,
+        "max": 0.9436
+      },
+      "adaptive_threshold_summary": {
+        "enabled": false,
+        "final_a_mean": 0.0,
+        "final_a_max": 0.0,
+        "final_a_nonzero_count": 0
+      },
+      "l2i_causal_timing": {
+        "delay": 1,
+        "magnitude": 8000.0,
+        "pending_count": 0,
+        "delivered_log_count": 10
+      },
+      "influence_distribution": {
+        "applied": false,
+        "influence_min": 1.0,
+        "influence_median": 1.7964,
+        "influence_max": 3.4877,
+        "safe": true
+      }
+    },
+    {
+      "schedule": "short_interleaved",
+      "geometry": "symmetric_influence_off",
+      "adaptive_threshold": false,
+      "weight_seed": 2,
+      "topology_seed": 1,
+      "distinct_owners": 4,
+      "per_pattern_consistency": {
+        "row 1": 0.5,
+        "col 1": 0.5,
+        "diag \\": 0.5,
+        "diag /": 0.3
+      },
+      "mean_ambiguity_rate": 0.0,
+      "mean_latency_margin": 4.385,
+      "forgetting": {
+        "row 1": true,
+        "col 1": true,
+        "diag \\": true,
+        "diag /": true
+      },
+      "silent_cells": [
+        "L2E4"
+      ],
+      "recruitable_cells": [
+        "L2E3",
+        "L2E6",
+        "L2E7"
+      ],
+      "collisions": {},
+      "l2i_activity": {
+        "mean_per_presentation": 1.325,
+        "total": 53
+      },
+      "l1i_all_nine_sync_rate": 1.0,
+      "frozen_replay_zero_weight_drift": true,
+      "frozen_first_responder_consistency": {
+        "row 1": 1.0,
+        "col 1": 1.0,
+        "diag \\": 1.0,
+        "diag /": 1.0
+      },
+      "rf_similarity": {
+        "mean": 0.4744,
+        "max": 0.994
+      },
+      "adaptive_threshold_summary": {
+        "enabled": false,
+        "final_a_mean": 0.0,
+        "final_a_max": 0.0,
+        "final_a_nonzero_count": 0
+      },
+      "l2i_causal_timing": {
+        "delay": 1,
+        "magnitude": 8000.0,
+        "pending_count": 0,
+        "delivered_log_count": 10
+      },
+      "influence_distribution": {
+        "applied": false,
+        "influence_min": 1.0,
+        "influence_median": 1.7964,
+        "influence_max": 3.4877,
+        "safe": true
+      }
+    },
+    {
+      "schedule": "long_saturation",
+      "geometry": "symmetric_influence_off",
+      "adaptive_threshold": false,
+      "weight_seed": 2,
+      "topology_seed": 1,
+      "distinct_owners": 2,
+      "dead_cells": 5,
+      "per_pattern_dominance": {
+        "row 1": {
+          "modal_owner": "L2E0",
+          "dominance": 0.6667
+        },
+        "col 1": {
+          "modal_owner": "L2E1",
+          "dominance": 0.75
+        },
+        "diag \\": {
+          "modal_owner": "L2E0",
+          "dominance": 1.0
+        },
+        "diag /": {
+          "modal_owner": "L2E0",
+          "dominance": 1.0
+        }
+      },
+      "mean_sustained_dominance": 0.8542,
+      "rf_similarity": {
+        "mean": 0.3472,
+        "max": 0.9991
+      },
+      "adaptive_threshold_summary": {
+        "enabled": false,
+        "final_a_mean": 0.0,
+        "final_a_max": 0.0,
+        "final_a_nonzero_count": 0
+      },
+      "l2i_causal_timing": {
+        "delay": 1,
+        "magnitude": 8000.0,
+        "pending_count": 0,
+        "delivered_log_count": 10
+      },
+      "influence_distribution": {
+        "applied": false,
+        "influence_min": 1.0,
+        "influence_median": 1.7964,
+        "influence_max": 3.4877,
+        "safe": true
+      }
+    },
+    {
+      "schedule": "short_interleaved",
+      "geometry": "symmetric_influence_off",
+      "adaptive_threshold": false,
+      "weight_seed": 2,
+      "topology_seed": 2,
+      "distinct_owners": 4,
+      "per_pattern_consistency": {
+        "row 1": 0.5,
+        "col 1": 0.5,
+        "diag \\": 0.5,
+        "diag /": 0.3
+      },
+      "mean_ambiguity_rate": 0.0,
+      "mean_latency_margin": 4.385,
+      "forgetting": {
+        "row 1": true,
+        "col 1": true,
+        "diag \\": true,
+        "diag /": true
+      },
+      "silent_cells": [
+        "L2E4"
+      ],
+      "recruitable_cells": [
+        "L2E3",
+        "L2E6",
+        "L2E7"
+      ],
+      "collisions": {},
+      "l2i_activity": {
+        "mean_per_presentation": 1.325,
+        "total": 53
+      },
+      "l1i_all_nine_sync_rate": 1.0,
+      "frozen_replay_zero_weight_drift": true,
+      "frozen_first_responder_consistency": {
+        "row 1": 1.0,
+        "col 1": 1.0,
+        "diag \\": 1.0,
+        "diag /": 1.0
+      },
+      "rf_similarity": {
+        "mean": 0.4744,
+        "max": 0.994
+      },
+      "adaptive_threshold_summary": {
+        "enabled": false,
+        "final_a_mean": 0.0,
+        "final_a_max": 0.0,
+        "final_a_nonzero_count": 0
+      },
+      "l2i_causal_timing": {
+        "delay": 1,
+        "magnitude": 8000.0,
+        "pending_count": 0,
+        "delivered_log_count": 10
+      },
+      "influence_distribution": {
+        "applied": false,
+        "influence_min": 1.0,
+        "influence_median": 1.7964,
+        "influence_max": 3.4877,
+        "safe": true
+      }
+    },
+    {
+      "schedule": "long_saturation",
+      "geometry": "symmetric_influence_off",
+      "adaptive_threshold": false,
+      "weight_seed": 2,
+      "topology_seed": 2,
+      "distinct_owners": 2,
+      "dead_cells": 5,
+      "per_pattern_dominance": {
+        "row 1": {
+          "modal_owner": "L2E0",
+          "dominance": 0.6667
+        },
+        "col 1": {
+          "modal_owner": "L2E1",
+          "dominance": 0.75
+        },
+        "diag \\": {
+          "modal_owner": "L2E0",
+          "dominance": 1.0
+        },
+        "diag /": {
+          "modal_owner": "L2E0",
+          "dominance": 1.0
+        }
+      },
+      "mean_sustained_dominance": 0.8542,
+      "rf_similarity": {
+        "mean": 0.3472,
+        "max": 0.9991
+      },
+      "adaptive_threshold_summary": {
+        "enabled": false,
+        "final_a_mean": 0.0,
+        "final_a_max": 0.0,
+        "final_a_nonzero_count": 0
+      },
+      "l2i_causal_timing": {
+        "delay": 1,
+        "magnitude": 8000.0,
+        "pending_count": 0,
+        "delivered_log_count": 10
+      },
+      "influence_distribution": {
+        "applied": false,
+        "influence_min": 1.0,
+        "influence_median": 1.7964,
+        "influence_max": 3.4877,
+        "safe": true
+      }
+    },
+    {
+      "schedule": "short_interleaved",
+      "geometry": "symmetric_influence_off",
+      "adaptive_threshold": false,
+      "weight_seed": 3,
+      "topology_seed": 1,
+      "distinct_owners": 3,
+      "per_pattern_consistency": {
+        "row 1": 0.6,
+        "col 1": 0.8,
+        "diag \\": 0.7,
+        "diag /": 0.3
+      },
+      "mean_ambiguity_rate": 0.0,
+      "mean_latency_margin": 4.161,
+      "forgetting": {
+        "row 1": true,
+        "col 1": false,
+        "diag \\": false,
+        "diag /": true
+      },
+      "silent_cells": [
+        "L2E0",
+        "L2E1"
+      ],
+      "recruitable_cells": [
+        "L2E2",
+        "L2E4",
+        "L2E7"
+      ],
+      "collisions": {
+        "L2E3": [
+          "col 1",
+          "diag /"
+        ]
+      },
+      "l2i_activity": {
+        "mean_per_presentation": 1.4,
+        "total": 56
+      },
+      "l1i_all_nine_sync_rate": 1.0,
+      "frozen_replay_zero_weight_drift": true,
+      "frozen_first_responder_consistency": {
+        "row 1": 1.0,
+        "col 1": 0.75,
+        "diag \\": 1.0,
+        "diag /": 1.0
+      },
+      "rf_similarity": {
+        "mean": 0.5034,
+        "max": 0.9915
+      },
+      "adaptive_threshold_summary": {
+        "enabled": false,
+        "final_a_mean": 0.0,
+        "final_a_max": 0.0,
+        "final_a_nonzero_count": 0
+      },
+      "l2i_causal_timing": {
+        "delay": 1,
+        "magnitude": 8000.0,
+        "pending_count": 0,
+        "delivered_log_count": 10
+      },
+      "influence_distribution": {
+        "applied": false,
+        "influence_min": 1.0,
+        "influence_median": 1.7964,
+        "influence_max": 3.4877,
+        "safe": true
+      }
+    },
+    {
+      "schedule": "long_saturation",
+      "geometry": "symmetric_influence_off",
+      "adaptive_threshold": false,
+      "weight_seed": 3,
+      "topology_seed": 1,
+      "distinct_owners": 2,
+      "dead_cells": 6,
+      "per_pattern_dominance": {
+        "row 1": {
+          "modal_owner": "L2E5",
+          "dominance": 0.75
+        },
+        "col 1": {
+          "modal_owner": "L2E3",
+          "dominance": 1.0
+        },
+        "diag \\": {
+          "modal_owner": "L2E3",
+          "dominance": 1.0
+        },
+        "diag /": {
+          "modal_owner": "L2E3",
+          "dominance": 1.0
+        }
+      },
+      "mean_sustained_dominance": 0.9375,
+      "rf_similarity": {
+        "mean": 0.4313,
+        "max": 0.9997
+      },
+      "adaptive_threshold_summary": {
+        "enabled": false,
+        "final_a_mean": 0.0,
+        "final_a_max": 0.0,
+        "final_a_nonzero_count": 0
+      },
+      "l2i_causal_timing": {
+        "delay": 1,
+        "magnitude": 8000.0,
+        "pending_count": 0,
+        "delivered_log_count": 10
+      },
+      "influence_distribution": {
+        "applied": false,
+        "influence_min": 1.0,
+        "influence_median": 1.7964,
+        "influence_max": 3.4877,
+        "safe": true
+      }
+    },
+    {
+      "schedule": "short_interleaved",
+      "geometry": "symmetric_influence_off",
+      "adaptive_threshold": false,
+      "weight_seed": 3,
+      "topology_seed": 2,
+      "distinct_owners": 3,
+      "per_pattern_consistency": {
+        "row 1": 0.6,
+        "col 1": 0.8,
+        "diag \\": 0.7,
+        "diag /": 0.3
+      },
+      "mean_ambiguity_rate": 0.0,
+      "mean_latency_margin": 4.161,
+      "forgetting": {
+        "row 1": true,
+        "col 1": false,
+        "diag \\": false,
+        "diag /": true
+      },
+      "silent_cells": [
+        "L2E0",
+        "L2E1"
+      ],
+      "recruitable_cells": [
+        "L2E2",
+        "L2E4",
+        "L2E7"
+      ],
+      "collisions": {
+        "L2E3": [
+          "col 1",
+          "diag /"
+        ]
+      },
+      "l2i_activity": {
+        "mean_per_presentation": 1.4,
+        "total": 56
+      },
+      "l1i_all_nine_sync_rate": 1.0,
+      "frozen_replay_zero_weight_drift": true,
+      "frozen_first_responder_consistency": {
+        "row 1": 1.0,
+        "col 1": 0.75,
+        "diag \\": 1.0,
+        "diag /": 1.0
+      },
+      "rf_similarity": {
+        "mean": 0.5034,
+        "max": 0.9915
+      },
+      "adaptive_threshold_summary": {
+        "enabled": false,
+        "final_a_mean": 0.0,
+        "final_a_max": 0.0,
+        "final_a_nonzero_count": 0
+      },
+      "l2i_causal_timing": {
+        "delay": 1,
+        "magnitude": 8000.0,
+        "pending_count": 0,
+        "delivered_log_count": 10
+      },
+      "influence_distribution": {
+        "applied": false,
+        "influence_min": 1.0,
+        "influence_median": 1.7964,
+        "influence_max": 3.4877,
+        "safe": true
+      }
+    },
+    {
+      "schedule": "long_saturation",
+      "geometry": "symmetric_influence_off",
+      "adaptive_threshold": false,
+      "weight_seed": 3,
+      "topology_seed": 2,
+      "distinct_owners": 2,
+      "dead_cells": 6,
+      "per_pattern_dominance": {
+        "row 1": {
+          "modal_owner": "L2E5",
+          "dominance": 0.75
+        },
+        "col 1": {
+          "modal_owner": "L2E3",
+          "dominance": 1.0
+        },
+        "diag \\": {
+          "modal_owner": "L2E3",
+          "dominance": 1.0
+        },
+        "diag /": {
+          "modal_owner": "L2E3",
+          "dominance": 1.0
+        }
+      },
+      "mean_sustained_dominance": 0.9375,
+      "rf_similarity": {
+        "mean": 0.4313,
+        "max": 0.9997
+      },
+      "adaptive_threshold_summary": {
+        "enabled": false,
+        "final_a_mean": 0.0,
+        "final_a_max": 0.0,
+        "final_a_nonzero_count": 0
+      },
+      "l2i_causal_timing": {
+        "delay": 1,
+        "magnitude": 8000.0,
+        "pending_count": 0,
+        "delivered_log_count": 10
+      },
+      "influence_distribution": {
+        "applied": false,
+        "influence_min": 1.0,
+        "influence_median": 1.7964,
+        "influence_max": 3.4877,
+        "safe": true
+      }
+    },
+    {
+      "schedule": "short_interleaved",
+      "geometry": "symmetric_influence_off",
+      "adaptive_threshold": true,
+      "weight_seed": 1,
+      "topology_seed": 1,
+      "distinct_owners": 3,
+      "per_pattern_consistency": {
+        "row 1": 0.5,
+        "col 1": 0.6,
+        "diag \\": 0.5,
+        "diag /": 0.9
+      },
+      "mean_ambiguity_rate": 0.0,
+      "mean_latency_margin": 3.167,
+      "forgetting": {
+        "row 1": false,
+        "col 1": false,
+        "diag \\": false,
+        "diag /": false
+      },
+      "silent_cells": [
+        "L2E0",
+        "L2E1",
+        "L2E6"
+      ],
+      "recruitable_cells": [
+        "L2E3",
+        "L2E7"
+      ],
+      "collisions": {
+        "L2E4": [
+          "col 1",
+          "diag \\"
+        ]
+      },
+      "l2i_activity": {
+        "mean_per_presentation": 1.325,
+        "total": 53
+      },
+      "l1i_all_nine_sync_rate": 1.0,
+      "frozen_replay_zero_weight_drift": true,
+      "frozen_first_responder_consistency": {
+        "row 1": 0.5,
+        "col 1": 0.5,
+        "diag \\": 0.75,
+        "diag /": 0.5
+      },
+      "rf_similarity": {
+        "mean": 0.4989,
+        "max": 1.0
+      },
+      "adaptive_threshold_summary": {
+        "enabled": true,
+        "final_a_mean": 348.3283,
+        "final_a_max": 959.451,
+        "final_a_nonzero_count": 4
+      },
+      "l2i_causal_timing": {
+        "delay": 1,
+        "magnitude": 8000.0,
+        "pending_count": 0,
+        "delivered_log_count": 10
+      },
+      "influence_distribution": {
+        "applied": false,
+        "influence_min": 1.0,
+        "influence_median": 1.7964,
+        "influence_max": 3.4877,
+        "safe": true
+      }
+    },
+    {
+      "schedule": "long_saturation",
+      "geometry": "symmetric_influence_off",
+      "adaptive_threshold": true,
+      "weight_seed": 1,
+      "topology_seed": 1,
+      "distinct_owners": 3,
+      "dead_cells": 4,
+      "per_pattern_dominance": {
+        "row 1": {
+          "modal_owner": "L2E4",
+          "dominance": 0.5
+        },
+        "col 1": {
+          "modal_owner": "L2E3",
+          "dominance": 0.5
+        },
+        "diag \\": {
+          "modal_owner": "L2E4",
+          "dominance": 0.6667
+        },
+        "diag /": {
+          "modal_owner": "L2E5",
+          "dominance": 0.75
+        }
+      },
+      "mean_sustained_dominance": 0.6042,
+      "rf_similarity": {
+        "mean": 0.5085,
+        "max": 0.9972
+      },
+      "adaptive_threshold_summary": {
+        "enabled": true,
+        "final_a_mean": 405.9097,
+        "final_a_max": 1758.5773,
+        "final_a_nonzero_count": 2
+      },
+      "l2i_causal_timing": {
+        "delay": 1,
+        "magnitude": 8000.0,
+        "pending_count": 0,
+        "delivered_log_count": 10
+      },
+      "influence_distribution": {
+        "applied": false,
+        "influence_min": 1.0,
+        "influence_median": 1.7964,
+        "influence_max": 3.4877,
+        "safe": true
+      }
+    },
+    {
+      "schedule": "short_interleaved",
+      "geometry": "symmetric_influence_off",
+      "adaptive_threshold": true,
+      "weight_seed": 1,
+      "topology_seed": 2,
+      "distinct_owners": 3,
+      "per_pattern_consistency": {
+        "row 1": 0.5,
+        "col 1": 0.6,
+        "diag \\": 0.5,
+        "diag /": 0.9
+      },
+      "mean_ambiguity_rate": 0.0,
+      "mean_latency_margin": 3.167,
+      "forgetting": {
+        "row 1": false,
+        "col 1": false,
+        "diag \\": false,
+        "diag /": false
+      },
+      "silent_cells": [
+        "L2E0",
+        "L2E1",
+        "L2E6"
+      ],
+      "recruitable_cells": [
+        "L2E3",
+        "L2E7"
+      ],
+      "collisions": {
+        "L2E4": [
+          "col 1",
+          "diag \\"
+        ]
+      },
+      "l2i_activity": {
+        "mean_per_presentation": 1.325,
+        "total": 53
+      },
+      "l1i_all_nine_sync_rate": 1.0,
+      "frozen_replay_zero_weight_drift": true,
+      "frozen_first_responder_consistency": {
+        "row 1": 0.5,
+        "col 1": 0.5,
+        "diag \\": 0.75,
+        "diag /": 0.5
+      },
+      "rf_similarity": {
+        "mean": 0.4989,
+        "max": 1.0
+      },
+      "adaptive_threshold_summary": {
+        "enabled": true,
+        "final_a_mean": 348.3283,
+        "final_a_max": 959.451,
+        "final_a_nonzero_count": 4
+      },
+      "l2i_causal_timing": {
+        "delay": 1,
+        "magnitude": 8000.0,
+        "pending_count": 0,
+        "delivered_log_count": 10
+      },
+      "influence_distribution": {
+        "applied": false,
+        "influence_min": 1.0,
+        "influence_median": 1.7964,
+        "influence_max": 3.4877,
+        "safe": true
+      }
+    },
+    {
+      "schedule": "long_saturation",
+      "geometry": "symmetric_influence_off",
+      "adaptive_threshold": true,
+      "weight_seed": 1,
+      "topology_seed": 2,
+      "distinct_owners": 3,
+      "dead_cells": 4,
+      "per_pattern_dominance": {
+        "row 1": {
+          "modal_owner": "L2E4",
+          "dominance": 0.5
+        },
+        "col 1": {
+          "modal_owner": "L2E3",
+          "dominance": 0.5
+        },
+        "diag \\": {
+          "modal_owner": "L2E4",
+          "dominance": 0.6667
+        },
+        "diag /": {
+          "modal_owner": "L2E5",
+          "dominance": 0.75
+        }
+      },
+      "mean_sustained_dominance": 0.6042,
+      "rf_similarity": {
+        "mean": 0.5085,
+        "max": 0.9972
+      },
+      "adaptive_threshold_summary": {
+        "enabled": true,
+        "final_a_mean": 405.9097,
+        "final_a_max": 1758.5773,
+        "final_a_nonzero_count": 2
+      },
+      "l2i_causal_timing": {
+        "delay": 1,
+        "magnitude": 8000.0,
+        "pending_count": 0,
+        "delivered_log_count": 10
+      },
+      "influence_distribution": {
+        "applied": false,
+        "influence_min": 1.0,
+        "influence_median": 1.7964,
+        "influence_max": 3.4877,
+        "safe": true
+      }
+    },
+    {
+      "schedule": "short_interleaved",
+      "geometry": "symmetric_influence_off",
+      "adaptive_threshold": true,
+      "weight_seed": 2,
+      "topology_seed": 1,
+      "distinct_owners": 4,
+      "per_pattern_consistency": {
+        "row 1": 0.6,
+        "col 1": 0.3,
+        "diag \\": 0.8,
+        "diag /": 0.4
+      },
+      "mean_ambiguity_rate": 0.0,
+      "mean_latency_margin": 4.472,
+      "forgetting": {
+        "row 1": true,
+        "col 1": true,
+        "diag \\": false,
+        "diag /": true
+      },
+      "silent_cells": [
+        "L2E4"
+      ],
+      "recruitable_cells": [
+        "L2E0",
+        "L2E6",
+        "L2E7"
+      ],
+      "collisions": {},
+      "l2i_activity": {
+        "mean_per_presentation": 1.2,
+        "total": 48
+      },
+      "l1i_all_nine_sync_rate": 1.0,
+      "frozen_replay_zero_weight_drift": true,
+      "frozen_first_responder_consistency": {
+        "row 1": 1.0,
+        "col 1": 0.5,
+        "diag \\": 1.0,
+        "diag /": 0.75
+      },
+      "rf_similarity": {
+        "mean": 0.449,
+        "max": 0.9995
+      },
+      "adaptive_threshold_summary": {
+        "enabled": true,
+        "final_a_mean": 258.8922,
+        "final_a_max": 566.6784,
+        "final_a_nonzero_count": 7
+      },
+      "l2i_causal_timing": {
+        "delay": 1,
+        "magnitude": 8000.0,
+        "pending_count": 0,
+        "delivered_log_count": 10
+      },
+      "influence_distribution": {
+        "applied": false,
+        "influence_min": 1.0,
+        "influence_median": 1.7964,
+        "influence_max": 3.4877,
+        "safe": true
+      }
+    },
+    {
+      "schedule": "long_saturation",
+      "geometry": "symmetric_influence_off",
+      "adaptive_threshold": true,
+      "weight_seed": 2,
+      "topology_seed": 1,
+      "distinct_owners": 3,
+      "dead_cells": 5,
+      "per_pattern_dominance": {
+        "row 1": {
+          "modal_owner": "L2E3",
+          "dominance": 1.0
+        },
+        "col 1": {
+          "modal_owner": "L2E1",
+          "dominance": 0.6667
+        },
+        "diag \\": {
+          "modal_owner": "L2E5",
+          "dominance": 0.75
+        },
+        "diag /": {
+          "modal_owner": "L2E3",
+          "dominance": 1.0
+        }
+      },
+      "mean_sustained_dominance": 0.8542,
+      "rf_similarity": {
+        "mean": 0.4124,
+        "max": 0.9894
+      },
+      "adaptive_threshold_summary": {
+        "enabled": true,
+        "final_a_mean": 254.3786,
+        "final_a_max": 2034.8993,
+        "final_a_nonzero_count": 2
+      },
+      "l2i_causal_timing": {
+        "delay": 1,
+        "magnitude": 8000.0,
+        "pending_count": 0,
+        "delivered_log_count": 10
+      },
+      "influence_distribution": {
+        "applied": false,
+        "influence_min": 1.0,
+        "influence_median": 1.7964,
+        "influence_max": 3.4877,
+        "safe": true
+      }
+    },
+    {
+      "schedule": "short_interleaved",
+      "geometry": "symmetric_influence_off",
+      "adaptive_threshold": true,
+      "weight_seed": 2,
+      "topology_seed": 2,
+      "distinct_owners": 4,
+      "per_pattern_consistency": {
+        "row 1": 0.6,
+        "col 1": 0.3,
+        "diag \\": 0.8,
+        "diag /": 0.4
+      },
+      "mean_ambiguity_rate": 0.0,
+      "mean_latency_margin": 4.472,
+      "forgetting": {
+        "row 1": true,
+        "col 1": true,
+        "diag \\": false,
+        "diag /": true
+      },
+      "silent_cells": [
+        "L2E4"
+      ],
+      "recruitable_cells": [
+        "L2E0",
+        "L2E6",
+        "L2E7"
+      ],
+      "collisions": {},
+      "l2i_activity": {
+        "mean_per_presentation": 1.2,
+        "total": 48
+      },
+      "l1i_all_nine_sync_rate": 1.0,
+      "frozen_replay_zero_weight_drift": true,
+      "frozen_first_responder_consistency": {
+        "row 1": 1.0,
+        "col 1": 0.5,
+        "diag \\": 1.0,
+        "diag /": 0.75
+      },
+      "rf_similarity": {
+        "mean": 0.449,
+        "max": 0.9995
+      },
+      "adaptive_threshold_summary": {
+        "enabled": true,
+        "final_a_mean": 258.8922,
+        "final_a_max": 566.6784,
+        "final_a_nonzero_count": 7
+      },
+      "l2i_causal_timing": {
+        "delay": 1,
+        "magnitude": 8000.0,
+        "pending_count": 0,
+        "delivered_log_count": 10
+      },
+      "influence_distribution": {
+        "applied": false,
+        "influence_min": 1.0,
+        "influence_median": 1.7964,
+        "influence_max": 3.4877,
+        "safe": true
+      }
+    },
+    {
+      "schedule": "long_saturation",
+      "geometry": "symmetric_influence_off",
+      "adaptive_threshold": true,
+      "weight_seed": 2,
+      "topology_seed": 2,
+      "distinct_owners": 3,
+      "dead_cells": 5,
+      "per_pattern_dominance": {
+        "row 1": {
+          "modal_owner": "L2E3",
+          "dominance": 1.0
+        },
+        "col 1": {
+          "modal_owner": "L2E1",
+          "dominance": 0.6667
+        },
+        "diag \\": {
+          "modal_owner": "L2E5",
+          "dominance": 0.75
+        },
+        "diag /": {
+          "modal_owner": "L2E3",
+          "dominance": 1.0
+        }
+      },
+      "mean_sustained_dominance": 0.8542,
+      "rf_similarity": {
+        "mean": 0.4124,
+        "max": 0.9894
+      },
+      "adaptive_threshold_summary": {
+        "enabled": true,
+        "final_a_mean": 254.3786,
+        "final_a_max": 2034.8993,
+        "final_a_nonzero_count": 2
+      },
+      "l2i_causal_timing": {
+        "delay": 1,
+        "magnitude": 8000.0,
+        "pending_count": 0,
+        "delivered_log_count": 10
+      },
+      "influence_distribution": {
+        "applied": false,
+        "influence_min": 1.0,
+        "influence_median": 1.7964,
+        "influence_max": 3.4877,
+        "safe": true
+      }
+    },
+    {
+      "schedule": "short_interleaved",
+      "geometry": "symmetric_influence_off",
+      "adaptive_threshold": true,
+      "weight_seed": 3,
+      "topology_seed": 1,
+      "distinct_owners": 4,
+      "per_pattern_consistency": {
+        "row 1": 0.6,
+        "col 1": 0.5,
+        "diag \\": 0.8,
+        "diag /": 0.8
+      },
+      "mean_ambiguity_rate": 0.025,
+      "mean_latency_margin": 3.371,
+      "forgetting": {
+        "row 1": true,
+        "col 1": false,
+        "diag \\": false,
+        "diag /": false
+      },
+      "silent_cells": [
+        "L2E0",
+        "L2E1"
+      ],
+      "recruitable_cells": [
+        "L2E2",
+        "L2E7"
+      ],
+      "collisions": {},
+      "l2i_activity": {
+        "mean_per_presentation": 1.175,
+        "total": 47
+      },
+      "l1i_all_nine_sync_rate": 1.0,
+      "frozen_replay_zero_weight_drift": true,
+      "frozen_first_responder_consistency": {
+        "row 1": 0.5,
+        "col 1": 1.0,
+        "diag \\": 0.75,
+        "diag /": 1.0
+      },
+      "rf_similarity": {
+        "mean": 0.5218,
+        "max": 0.9086
+      },
+      "adaptive_threshold_summary": {
+        "enabled": true,
+        "final_a_mean": 274.0861,
+        "final_a_max": 935.4247,
+        "final_a_nonzero_count": 5
+      },
+      "l2i_causal_timing": {
+        "delay": 1,
+        "magnitude": 8000.0,
+        "pending_count": 0,
+        "delivered_log_count": 10
+      },
+      "influence_distribution": {
+        "applied": false,
+        "influence_min": 1.0,
+        "influence_median": 1.7964,
+        "influence_max": 3.4877,
+        "safe": true
+      }
+    },
+    {
+      "schedule": "long_saturation",
+      "geometry": "symmetric_influence_off",
+      "adaptive_threshold": true,
+      "weight_seed": 3,
+      "topology_seed": 1,
+      "distinct_owners": 3,
+      "dead_cells": 4,
+      "per_pattern_dominance": {
+        "row 1": {
+          "modal_owner": "L2E5",
+          "dominance": 0.6667
+        },
+        "col 1": {
+          "modal_owner": "L2E3",
+          "dominance": 0.9167
+        },
+        "diag \\": {
+          "modal_owner": "L2E5",
+          "dominance": 0.6667
+        },
+        "diag /": {
+          "modal_owner": "L2E4",
+          "dominance": 0.9167
+        }
+      },
+      "mean_sustained_dominance": 0.7917,
+      "rf_similarity": {
+        "mean": 0.5216,
+        "max": 0.9198
+      },
+      "adaptive_threshold_summary": {
+        "enabled": true,
+        "final_a_mean": 435.2813,
+        "final_a_max": 1775.9477,
+        "final_a_nonzero_count": 3
+      },
+      "l2i_causal_timing": {
+        "delay": 1,
+        "magnitude": 8000.0,
+        "pending_count": 0,
+        "delivered_log_count": 10
+      },
+      "influence_distribution": {
+        "applied": false,
+        "influence_min": 1.0,
+        "influence_median": 1.7964,
+        "influence_max": 3.4877,
+        "safe": true
+      }
+    },
+    {
+      "schedule": "short_interleaved",
+      "geometry": "symmetric_influence_off",
+      "adaptive_threshold": true,
+      "weight_seed": 3,
+      "topology_seed": 2,
+      "distinct_owners": 4,
+      "per_pattern_consistency": {
+        "row 1": 0.6,
+        "col 1": 0.5,
+        "diag \\": 0.8,
+        "diag /": 0.8
+      },
+      "mean_ambiguity_rate": 0.025,
+      "mean_latency_margin": 3.371,
+      "forgetting": {
+        "row 1": true,
+        "col 1": false,
+        "diag \\": false,
+        "diag /": false
+      },
+      "silent_cells": [
+        "L2E0",
+        "L2E1"
+      ],
+      "recruitable_cells": [
+        "L2E2",
+        "L2E7"
+      ],
+      "collisions": {},
+      "l2i_activity": {
+        "mean_per_presentation": 1.175,
+        "total": 47
+      },
+      "l1i_all_nine_sync_rate": 1.0,
+      "frozen_replay_zero_weight_drift": true,
+      "frozen_first_responder_consistency": {
+        "row 1": 0.5,
+        "col 1": 1.0,
+        "diag \\": 0.75,
+        "diag /": 1.0
+      },
+      "rf_similarity": {
+        "mean": 0.5218,
+        "max": 0.9086
+      },
+      "adaptive_threshold_summary": {
+        "enabled": true,
+        "final_a_mean": 274.0861,
+        "final_a_max": 935.4247,
+        "final_a_nonzero_count": 5
+      },
+      "l2i_causal_timing": {
+        "delay": 1,
+        "magnitude": 8000.0,
+        "pending_count": 0,
+        "delivered_log_count": 10
+      },
+      "influence_distribution": {
+        "applied": false,
+        "influence_min": 1.0,
+        "influence_median": 1.7964,
+        "influence_max": 3.4877,
+        "safe": true
+      }
+    },
+    {
+      "schedule": "long_saturation",
+      "geometry": "symmetric_influence_off",
+      "adaptive_threshold": true,
+      "weight_seed": 3,
+      "topology_seed": 2,
+      "distinct_owners": 3,
+      "dead_cells": 4,
+      "per_pattern_dominance": {
+        "row 1": {
+          "modal_owner": "L2E5",
+          "dominance": 0.6667
+        },
+        "col 1": {
+          "modal_owner": "L2E3",
+          "dominance": 0.9167
+        },
+        "diag \\": {
+          "modal_owner": "L2E5",
+          "dominance": 0.6667
+        },
+        "diag /": {
+          "modal_owner": "L2E4",
+          "dominance": 0.9167
+        }
+      },
+      "mean_sustained_dominance": 0.7917,
+      "rf_similarity": {
+        "mean": 0.5216,
+        "max": 0.9198
+      },
+      "adaptive_threshold_summary": {
+        "enabled": true,
+        "final_a_mean": 435.2813,
+        "final_a_max": 1775.9477,
+        "final_a_nonzero_count": 3
+      },
+      "l2i_causal_timing": {
+        "delay": 1,
+        "magnitude": 8000.0,
+        "pending_count": 0,
+        "delivered_log_count": 10
+      },
+      "influence_distribution": {
+        "applied": false,
+        "influence_min": 1.0,
+        "influence_median": 1.7964,
+        "influence_max": 3.4877,
+        "safe": true
+      }
+    },
+    {
+      "schedule": "short_interleaved",
+      "geometry": "jittered_influence_off",
+      "adaptive_threshold": false,
+      "weight_seed": 1,
+      "topology_seed": 1,
+      "distinct_owners": 3,
+      "per_pattern_consistency": {
+        "row 1": 0.5,
+        "col 1": 0.3,
+        "diag \\": 0.6,
+        "diag /": 0.6
+      },
+      "mean_ambiguity_rate": 0.025,
+      "mean_latency_margin": 3.838,
+      "forgetting": {
+        "row 1": true,
+        "col 1": true,
+        "diag \\": true,
+        "diag /": true
+      },
+      "silent_cells": [
+        "L2E0",
+        "L2E1",
+        "L2E6"
+      ],
+      "recruitable_cells": [
+        "L2E3",
+        "L2E7"
+      ],
+      "collisions": {
+        "L2E5": [
+          "row 1",
+          "diag \\"
+        ]
+      },
+      "l2i_activity": {
+        "mean_per_presentation": 1.45,
+        "total": 58
+      },
+      "l1i_all_nine_sync_rate": 1.0,
+      "frozen_replay_zero_weight_drift": true,
+      "frozen_first_responder_consistency": {
+        "row 1": 1.0,
+        "col 1": 1.0,
+        "diag \\": 1.0,
+        "diag /": 1.0
+      },
+      "rf_similarity": {
+        "mean": 0.4823,
+        "max": 0.999
+      },
+      "adaptive_threshold_summary": {
+        "enabled": false,
+        "final_a_mean": 0.0,
+        "final_a_max": 0.0,
+        "final_a_nonzero_count": 0
+      },
+      "l2i_causal_timing": {
+        "delay": 1,
+        "magnitude": 8000.0,
+        "pending_count": 1,
+        "delivered_log_count": 10
+      },
+      "influence_distribution": {
+        "applied": false,
+        "influence_min": 1.0,
+        "influence_median": 1.7964,
+        "influence_max": 3.4877,
+        "safe": true
+      }
+    },
+    {
+      "schedule": "long_saturation",
+      "geometry": "jittered_influence_off",
+      "adaptive_threshold": false,
+      "weight_seed": 1,
+      "topology_seed": 1,
+      "distinct_owners": 1,
+      "dead_cells": 5,
+      "per_pattern_dominance": {
+        "row 1": {
+          "modal_owner": "L2E2",
+          "dominance": 1.0
+        },
+        "col 1": {
+          "modal_owner": "L2E2",
+          "dominance": 0.6667
+        },
+        "diag \\": {
+          "modal_owner": "L2E2",
+          "dominance": 0.6667
+        },
+        "diag /": {
+          "modal_owner": "L2E2",
+          "dominance": 0.5
+        }
+      },
+      "mean_sustained_dominance": 0.7084,
+      "rf_similarity": {
+        "mean": 0.5142,
+        "max": 0.9436
+      },
+      "adaptive_threshold_summary": {
+        "enabled": false,
+        "final_a_mean": 0.0,
+        "final_a_max": 0.0,
+        "final_a_nonzero_count": 0
+      },
+      "l2i_causal_timing": {
+        "delay": 1,
+        "magnitude": 8000.0,
+        "pending_count": 0,
+        "delivered_log_count": 10
+      },
+      "influence_distribution": {
+        "applied": false,
+        "influence_min": 1.0,
+        "influence_median": 1.7964,
+        "influence_max": 3.4877,
+        "safe": true
+      }
+    },
+    {
+      "schedule": "short_interleaved",
+      "geometry": "jittered_influence_off",
+      "adaptive_threshold": false,
+      "weight_seed": 1,
+      "topology_seed": 2,
+      "distinct_owners": 3,
+      "per_pattern_consistency": {
+        "row 1": 0.5,
+        "col 1": 0.3,
+        "diag \\": 0.6,
+        "diag /": 0.6
+      },
+      "mean_ambiguity_rate": 0.025,
+      "mean_latency_margin": 3.838,
+      "forgetting": {
+        "row 1": true,
+        "col 1": true,
+        "diag \\": true,
+        "diag /": true
+      },
+      "silent_cells": [
+        "L2E0",
+        "L2E1",
+        "L2E6"
+      ],
+      "recruitable_cells": [
+        "L2E3",
+        "L2E7"
+      ],
+      "collisions": {
+        "L2E5": [
+          "row 1",
+          "diag \\"
+        ]
+      },
+      "l2i_activity": {
+        "mean_per_presentation": 1.45,
+        "total": 58
+      },
+      "l1i_all_nine_sync_rate": 1.0,
+      "frozen_replay_zero_weight_drift": true,
+      "frozen_first_responder_consistency": {
+        "row 1": 1.0,
+        "col 1": 1.0,
+        "diag \\": 1.0,
+        "diag /": 1.0
+      },
+      "rf_similarity": {
+        "mean": 0.4823,
+        "max": 0.999
+      },
+      "adaptive_threshold_summary": {
+        "enabled": false,
+        "final_a_mean": 0.0,
+        "final_a_max": 0.0,
+        "final_a_nonzero_count": 0
+      },
+      "l2i_causal_timing": {
+        "delay": 1,
+        "magnitude": 8000.0,
+        "pending_count": 1,
+        "delivered_log_count": 10
+      },
+      "influence_distribution": {
+        "applied": false,
+        "influence_min": 1.0,
+        "influence_median": 1.7964,
+        "influence_max": 3.4877,
+        "safe": true
+      }
+    },
+    {
+      "schedule": "long_saturation",
+      "geometry": "jittered_influence_off",
+      "adaptive_threshold": false,
+      "weight_seed": 1,
+      "topology_seed": 2,
+      "distinct_owners": 1,
+      "dead_cells": 5,
+      "per_pattern_dominance": {
+        "row 1": {
+          "modal_owner": "L2E2",
+          "dominance": 1.0
+        },
+        "col 1": {
+          "modal_owner": "L2E2",
+          "dominance": 0.6667
+        },
+        "diag \\": {
+          "modal_owner": "L2E2",
+          "dominance": 0.6667
+        },
+        "diag /": {
+          "modal_owner": "L2E2",
+          "dominance": 0.5
+        }
+      },
+      "mean_sustained_dominance": 0.7084,
+      "rf_similarity": {
+        "mean": 0.5142,
+        "max": 0.9436
+      },
+      "adaptive_threshold_summary": {
+        "enabled": false,
+        "final_a_mean": 0.0,
+        "final_a_max": 0.0,
+        "final_a_nonzero_count": 0
+      },
+      "l2i_causal_timing": {
+        "delay": 1,
+        "magnitude": 8000.0,
+        "pending_count": 0,
+        "delivered_log_count": 10
+      },
+      "influence_distribution": {
+        "applied": false,
+        "influence_min": 1.0,
+        "influence_median": 1.7964,
+        "influence_max": 3.4877,
+        "safe": true
+      }
+    },
+    {
+      "schedule": "short_interleaved",
+      "geometry": "jittered_influence_off",
+      "adaptive_threshold": false,
+      "weight_seed": 2,
+      "topology_seed": 1,
+      "distinct_owners": 4,
+      "per_pattern_consistency": {
+        "row 1": 0.5,
+        "col 1": 0.5,
+        "diag \\": 0.5,
+        "diag /": 0.3
+      },
+      "mean_ambiguity_rate": 0.0,
+      "mean_latency_margin": 4.385,
+      "forgetting": {
+        "row 1": true,
+        "col 1": true,
+        "diag \\": true,
+        "diag /": true
+      },
+      "silent_cells": [
+        "L2E4"
+      ],
+      "recruitable_cells": [
+        "L2E3",
+        "L2E6",
+        "L2E7"
+      ],
+      "collisions": {},
+      "l2i_activity": {
+        "mean_per_presentation": 1.325,
+        "total": 53
+      },
+      "l1i_all_nine_sync_rate": 1.0,
+      "frozen_replay_zero_weight_drift": true,
+      "frozen_first_responder_consistency": {
+        "row 1": 1.0,
+        "col 1": 1.0,
+        "diag \\": 1.0,
+        "diag /": 1.0
+      },
+      "rf_similarity": {
+        "mean": 0.4744,
+        "max": 0.994
+      },
+      "adaptive_threshold_summary": {
+        "enabled": false,
+        "final_a_mean": 0.0,
+        "final_a_max": 0.0,
+        "final_a_nonzero_count": 0
+      },
+      "l2i_causal_timing": {
+        "delay": 1,
+        "magnitude": 8000.0,
+        "pending_count": 0,
+        "delivered_log_count": 10
+      },
+      "influence_distribution": {
+        "applied": false,
+        "influence_min": 1.0,
+        "influence_median": 1.7964,
+        "influence_max": 3.4877,
+        "safe": true
+      }
+    },
+    {
+      "schedule": "long_saturation",
+      "geometry": "jittered_influence_off",
+      "adaptive_threshold": false,
+      "weight_seed": 2,
+      "topology_seed": 1,
+      "distinct_owners": 2,
+      "dead_cells": 5,
+      "per_pattern_dominance": {
+        "row 1": {
+          "modal_owner": "L2E0",
+          "dominance": 0.6667
+        },
+        "col 1": {
+          "modal_owner": "L2E1",
+          "dominance": 0.75
+        },
+        "diag \\": {
+          "modal_owner": "L2E0",
+          "dominance": 1.0
+        },
+        "diag /": {
+          "modal_owner": "L2E0",
+          "dominance": 1.0
+        }
+      },
+      "mean_sustained_dominance": 0.8542,
+      "rf_similarity": {
+        "mean": 0.3472,
+        "max": 0.9991
+      },
+      "adaptive_threshold_summary": {
+        "enabled": false,
+        "final_a_mean": 0.0,
+        "final_a_max": 0.0,
+        "final_a_nonzero_count": 0
+      },
+      "l2i_causal_timing": {
+        "delay": 1,
+        "magnitude": 8000.0,
+        "pending_count": 0,
+        "delivered_log_count": 10
+      },
+      "influence_distribution": {
+        "applied": false,
+        "influence_min": 1.0,
+        "influence_median": 1.7964,
+        "influence_max": 3.4877,
+        "safe": true
+      }
+    },
+    {
+      "schedule": "short_interleaved",
+      "geometry": "jittered_influence_off",
+      "adaptive_threshold": false,
+      "weight_seed": 2,
+      "topology_seed": 2,
+      "distinct_owners": 4,
+      "per_pattern_consistency": {
+        "row 1": 0.5,
+        "col 1": 0.5,
+        "diag \\": 0.5,
+        "diag /": 0.3
+      },
+      "mean_ambiguity_rate": 0.0,
+      "mean_latency_margin": 4.385,
+      "forgetting": {
+        "row 1": true,
+        "col 1": true,
+        "diag \\": true,
+        "diag /": true
+      },
+      "silent_cells": [
+        "L2E4"
+      ],
+      "recruitable_cells": [
+        "L2E3",
+        "L2E6",
+        "L2E7"
+      ],
+      "collisions": {},
+      "l2i_activity": {
+        "mean_per_presentation": 1.325,
+        "total": 53
+      },
+      "l1i_all_nine_sync_rate": 1.0,
+      "frozen_replay_zero_weight_drift": true,
+      "frozen_first_responder_consistency": {
+        "row 1": 1.0,
+        "col 1": 1.0,
+        "diag \\": 1.0,
+        "diag /": 1.0
+      },
+      "rf_similarity": {
+        "mean": 0.4744,
+        "max": 0.994
+      },
+      "adaptive_threshold_summary": {
+        "enabled": false,
+        "final_a_mean": 0.0,
+        "final_a_max": 0.0,
+        "final_a_nonzero_count": 0
+      },
+      "l2i_causal_timing": {
+        "delay": 1,
+        "magnitude": 8000.0,
+        "pending_count": 0,
+        "delivered_log_count": 10
+      },
+      "influence_distribution": {
+        "applied": false,
+        "influence_min": 1.0,
+        "influence_median": 1.7964,
+        "influence_max": 3.4877,
+        "safe": true
+      }
+    },
+    {
+      "schedule": "long_saturation",
+      "geometry": "jittered_influence_off",
+      "adaptive_threshold": false,
+      "weight_seed": 2,
+      "topology_seed": 2,
+      "distinct_owners": 2,
+      "dead_cells": 5,
+      "per_pattern_dominance": {
+        "row 1": {
+          "modal_owner": "L2E0",
+          "dominance": 0.6667
+        },
+        "col 1": {
+          "modal_owner": "L2E1",
+          "dominance": 0.75
+        },
+        "diag \\": {
+          "modal_owner": "L2E0",
+          "dominance": 1.0
+        },
+        "diag /": {
+          "modal_owner": "L2E0",
+          "dominance": 1.0
+        }
+      },
+      "mean_sustained_dominance": 0.8542,
+      "rf_similarity": {
+        "mean": 0.3472,
+        "max": 0.9991
+      },
+      "adaptive_threshold_summary": {
+        "enabled": false,
+        "final_a_mean": 0.0,
+        "final_a_max": 0.0,
+        "final_a_nonzero_count": 0
+      },
+      "l2i_causal_timing": {
+        "delay": 1,
+        "magnitude": 8000.0,
+        "pending_count": 0,
+        "delivered_log_count": 10
+      },
+      "influence_distribution": {
+        "applied": false,
+        "influence_min": 1.0,
+        "influence_median": 1.7964,
+        "influence_max": 3.4877,
+        "safe": true
+      }
+    },
+    {
+      "schedule": "short_interleaved",
+      "geometry": "jittered_influence_off",
+      "adaptive_threshold": false,
+      "weight_seed": 3,
+      "topology_seed": 1,
+      "distinct_owners": 3,
+      "per_pattern_consistency": {
+        "row 1": 0.6,
+        "col 1": 0.8,
+        "diag \\": 0.7,
+        "diag /": 0.3
+      },
+      "mean_ambiguity_rate": 0.0,
+      "mean_latency_margin": 4.161,
+      "forgetting": {
+        "row 1": true,
+        "col 1": false,
+        "diag \\": false,
+        "diag /": true
+      },
+      "silent_cells": [
+        "L2E0",
+        "L2E1"
+      ],
+      "recruitable_cells": [
+        "L2E2",
+        "L2E4",
+        "L2E7"
+      ],
+      "collisions": {
+        "L2E3": [
+          "col 1",
+          "diag /"
+        ]
+      },
+      "l2i_activity": {
+        "mean_per_presentation": 1.4,
+        "total": 56
+      },
+      "l1i_all_nine_sync_rate": 1.0,
+      "frozen_replay_zero_weight_drift": true,
+      "frozen_first_responder_consistency": {
+        "row 1": 1.0,
+        "col 1": 0.75,
+        "diag \\": 1.0,
+        "diag /": 1.0
+      },
+      "rf_similarity": {
+        "mean": 0.5034,
+        "max": 0.9915
+      },
+      "adaptive_threshold_summary": {
+        "enabled": false,
+        "final_a_mean": 0.0,
+        "final_a_max": 0.0,
+        "final_a_nonzero_count": 0
+      },
+      "l2i_causal_timing": {
+        "delay": 1,
+        "magnitude": 8000.0,
+        "pending_count": 0,
+        "delivered_log_count": 10
+      },
+      "influence_distribution": {
+        "applied": false,
+        "influence_min": 1.0,
+        "influence_median": 1.7964,
+        "influence_max": 3.4877,
+        "safe": true
+      }
+    },
+    {
+      "schedule": "long_saturation",
+      "geometry": "jittered_influence_off",
+      "adaptive_threshold": false,
+      "weight_seed": 3,
+      "topology_seed": 1,
+      "distinct_owners": 2,
+      "dead_cells": 6,
+      "per_pattern_dominance": {
+        "row 1": {
+          "modal_owner": "L2E5",
+          "dominance": 0.75
+        },
+        "col 1": {
+          "modal_owner": "L2E3",
+          "dominance": 1.0
+        },
+        "diag \\": {
+          "modal_owner": "L2E3",
+          "dominance": 1.0
+        },
+        "diag /": {
+          "modal_owner": "L2E3",
+          "dominance": 1.0
+        }
+      },
+      "mean_sustained_dominance": 0.9375,
+      "rf_similarity": {
+        "mean": 0.4313,
+        "max": 0.9997
+      },
+      "adaptive_threshold_summary": {
+        "enabled": false,
+        "final_a_mean": 0.0,
+        "final_a_max": 0.0,
+        "final_a_nonzero_count": 0
+      },
+      "l2i_causal_timing": {
+        "delay": 1,
+        "magnitude": 8000.0,
+        "pending_count": 0,
+        "delivered_log_count": 10
+      },
+      "influence_distribution": {
+        "applied": false,
+        "influence_min": 1.0,
+        "influence_median": 1.7964,
+        "influence_max": 3.4877,
+        "safe": true
+      }
+    },
+    {
+      "schedule": "short_interleaved",
+      "geometry": "jittered_influence_off",
+      "adaptive_threshold": false,
+      "weight_seed": 3,
+      "topology_seed": 2,
+      "distinct_owners": 3,
+      "per_pattern_consistency": {
+        "row 1": 0.6,
+        "col 1": 0.8,
+        "diag \\": 0.7,
+        "diag /": 0.3
+      },
+      "mean_ambiguity_rate": 0.0,
+      "mean_latency_margin": 4.161,
+      "forgetting": {
+        "row 1": true,
+        "col 1": false,
+        "diag \\": false,
+        "diag /": true
+      },
+      "silent_cells": [
+        "L2E0",
+        "L2E1"
+      ],
+      "recruitable_cells": [
+        "L2E2",
+        "L2E4",
+        "L2E7"
+      ],
+      "collisions": {
+        "L2E3": [
+          "col 1",
+          "diag /"
+        ]
+      },
+      "l2i_activity": {
+        "mean_per_presentation": 1.4,
+        "total": 56
+      },
+      "l1i_all_nine_sync_rate": 1.0,
+      "frozen_replay_zero_weight_drift": true,
+      "frozen_first_responder_consistency": {
+        "row 1": 1.0,
+        "col 1": 0.75,
+        "diag \\": 1.0,
+        "diag /": 1.0
+      },
+      "rf_similarity": {
+        "mean": 0.5034,
+        "max": 0.9915
+      },
+      "adaptive_threshold_summary": {
+        "enabled": false,
+        "final_a_mean": 0.0,
+        "final_a_max": 0.0,
+        "final_a_nonzero_count": 0
+      },
+      "l2i_causal_timing": {
+        "delay": 1,
+        "magnitude": 8000.0,
+        "pending_count": 0,
+        "delivered_log_count": 10
+      },
+      "influence_distribution": {
+        "applied": false,
+        "influence_min": 1.0,
+        "influence_median": 1.7964,
+        "influence_max": 3.4877,
+        "safe": true
+      }
+    },
+    {
+      "schedule": "long_saturation",
+      "geometry": "jittered_influence_off",
+      "adaptive_threshold": false,
+      "weight_seed": 3,
+      "topology_seed": 2,
+      "distinct_owners": 2,
+      "dead_cells": 6,
+      "per_pattern_dominance": {
+        "row 1": {
+          "modal_owner": "L2E5",
+          "dominance": 0.75
+        },
+        "col 1": {
+          "modal_owner": "L2E3",
+          "dominance": 1.0
+        },
+        "diag \\": {
+          "modal_owner": "L2E3",
+          "dominance": 1.0
+        },
+        "diag /": {
+          "modal_owner": "L2E3",
+          "dominance": 1.0
+        }
+      },
+      "mean_sustained_dominance": 0.9375,
+      "rf_similarity": {
+        "mean": 0.4313,
+        "max": 0.9997
+      },
+      "adaptive_threshold_summary": {
+        "enabled": false,
+        "final_a_mean": 0.0,
+        "final_a_max": 0.0,
+        "final_a_nonzero_count": 0
+      },
+      "l2i_causal_timing": {
+        "delay": 1,
+        "magnitude": 8000.0,
+        "pending_count": 0,
+        "delivered_log_count": 10
+      },
+      "influence_distribution": {
+        "applied": false,
+        "influence_min": 1.0,
+        "influence_median": 1.7964,
+        "influence_max": 3.4877,
+        "safe": true
+      }
+    },
+    {
+      "schedule": "short_interleaved",
+      "geometry": "jittered_influence_off",
+      "adaptive_threshold": true,
+      "weight_seed": 1,
+      "topology_seed": 1,
+      "distinct_owners": 3,
+      "per_pattern_consistency": {
+        "row 1": 0.5,
+        "col 1": 0.6,
+        "diag \\": 0.5,
+        "diag /": 0.9
+      },
+      "mean_ambiguity_rate": 0.0,
+      "mean_latency_margin": 3.167,
+      "forgetting": {
+        "row 1": false,
+        "col 1": false,
+        "diag \\": false,
+        "diag /": false
+      },
+      "silent_cells": [
+        "L2E0",
+        "L2E1",
+        "L2E6"
+      ],
+      "recruitable_cells": [
+        "L2E3",
+        "L2E7"
+      ],
+      "collisions": {
+        "L2E4": [
+          "col 1",
+          "diag \\"
+        ]
+      },
+      "l2i_activity": {
+        "mean_per_presentation": 1.325,
+        "total": 53
+      },
+      "l1i_all_nine_sync_rate": 1.0,
+      "frozen_replay_zero_weight_drift": true,
+      "frozen_first_responder_consistency": {
+        "row 1": 0.5,
+        "col 1": 0.5,
+        "diag \\": 0.75,
+        "diag /": 0.5
+      },
+      "rf_similarity": {
+        "mean": 0.4989,
+        "max": 1.0
+      },
+      "adaptive_threshold_summary": {
+        "enabled": true,
+        "final_a_mean": 348.3283,
+        "final_a_max": 959.451,
+        "final_a_nonzero_count": 4
+      },
+      "l2i_causal_timing": {
+        "delay": 1,
+        "magnitude": 8000.0,
+        "pending_count": 0,
+        "delivered_log_count": 10
+      },
+      "influence_distribution": {
+        "applied": false,
+        "influence_min": 1.0,
+        "influence_median": 1.7964,
+        "influence_max": 3.4877,
+        "safe": true
+      }
+    },
+    {
+      "schedule": "long_saturation",
+      "geometry": "jittered_influence_off",
+      "adaptive_threshold": true,
+      "weight_seed": 1,
+      "topology_seed": 1,
+      "distinct_owners": 3,
+      "dead_cells": 4,
+      "per_pattern_dominance": {
+        "row 1": {
+          "modal_owner": "L2E4",
+          "dominance": 0.5
+        },
+        "col 1": {
+          "modal_owner": "L2E3",
+          "dominance": 0.5
+        },
+        "diag \\": {
+          "modal_owner": "L2E4",
+          "dominance": 0.6667
+        },
+        "diag /": {
+          "modal_owner": "L2E5",
+          "dominance": 0.75
+        }
+      },
+      "mean_sustained_dominance": 0.6042,
+      "rf_similarity": {
+        "mean": 0.5085,
+        "max": 0.9972
+      },
+      "adaptive_threshold_summary": {
+        "enabled": true,
+        "final_a_mean": 405.9097,
+        "final_a_max": 1758.5773,
+        "final_a_nonzero_count": 2
+      },
+      "l2i_causal_timing": {
+        "delay": 1,
+        "magnitude": 8000.0,
+        "pending_count": 0,
+        "delivered_log_count": 10
+      },
+      "influence_distribution": {
+        "applied": false,
+        "influence_min": 1.0,
+        "influence_median": 1.7964,
+        "influence_max": 3.4877,
+        "safe": true
+      }
+    },
+    {
+      "schedule": "short_interleaved",
+      "geometry": "jittered_influence_off",
+      "adaptive_threshold": true,
+      "weight_seed": 1,
+      "topology_seed": 2,
+      "distinct_owners": 3,
+      "per_pattern_consistency": {
+        "row 1": 0.5,
+        "col 1": 0.6,
+        "diag \\": 0.5,
+        "diag /": 0.9
+      },
+      "mean_ambiguity_rate": 0.0,
+      "mean_latency_margin": 3.167,
+      "forgetting": {
+        "row 1": false,
+        "col 1": false,
+        "diag \\": false,
+        "diag /": false
+      },
+      "silent_cells": [
+        "L2E0",
+        "L2E1",
+        "L2E6"
+      ],
+      "recruitable_cells": [
+        "L2E3",
+        "L2E7"
+      ],
+      "collisions": {
+        "L2E4": [
+          "col 1",
+          "diag \\"
+        ]
+      },
+      "l2i_activity": {
+        "mean_per_presentation": 1.325,
+        "total": 53
+      },
+      "l1i_all_nine_sync_rate": 1.0,
+      "frozen_replay_zero_weight_drift": true,
+      "frozen_first_responder_consistency": {
+        "row 1": 0.5,
+        "col 1": 0.5,
+        "diag \\": 0.75,
+        "diag /": 0.5
+      },
+      "rf_similarity": {
+        "mean": 0.4989,
+        "max": 1.0
+      },
+      "adaptive_threshold_summary": {
+        "enabled": true,
+        "final_a_mean": 348.3283,
+        "final_a_max": 959.451,
+        "final_a_nonzero_count": 4
+      },
+      "l2i_causal_timing": {
+        "delay": 1,
+        "magnitude": 8000.0,
+        "pending_count": 0,
+        "delivered_log_count": 10
+      },
+      "influence_distribution": {
+        "applied": false,
+        "influence_min": 1.0,
+        "influence_median": 1.7964,
+        "influence_max": 3.4877,
+        "safe": true
+      }
+    },
+    {
+      "schedule": "long_saturation",
+      "geometry": "jittered_influence_off",
+      "adaptive_threshold": true,
+      "weight_seed": 1,
+      "topology_seed": 2,
+      "distinct_owners": 3,
+      "dead_cells": 4,
+      "per_pattern_dominance": {
+        "row 1": {
+          "modal_owner": "L2E4",
+          "dominance": 0.5
+        },
+        "col 1": {
+          "modal_owner": "L2E3",
+          "dominance": 0.5
+        },
+        "diag \\": {
+          "modal_owner": "L2E4",
+          "dominance": 0.6667
+        },
+        "diag /": {
+          "modal_owner": "L2E5",
+          "dominance": 0.75
+        }
+      },
+      "mean_sustained_dominance": 0.6042,
+      "rf_similarity": {
+        "mean": 0.5085,
+        "max": 0.9972
+      },
+      "adaptive_threshold_summary": {
+        "enabled": true,
+        "final_a_mean": 405.9097,
+        "final_a_max": 1758.5773,
+        "final_a_nonzero_count": 2
+      },
+      "l2i_causal_timing": {
+        "delay": 1,
+        "magnitude": 8000.0,
+        "pending_count": 0,
+        "delivered_log_count": 10
+      },
+      "influence_distribution": {
+        "applied": false,
+        "influence_min": 1.0,
+        "influence_median": 1.7964,
+        "influence_max": 3.4877,
+        "safe": true
+      }
+    },
+    {
+      "schedule": "short_interleaved",
+      "geometry": "jittered_influence_off",
+      "adaptive_threshold": true,
+      "weight_seed": 2,
+      "topology_seed": 1,
+      "distinct_owners": 4,
+      "per_pattern_consistency": {
+        "row 1": 0.6,
+        "col 1": 0.3,
+        "diag \\": 0.8,
+        "diag /": 0.4
+      },
+      "mean_ambiguity_rate": 0.0,
+      "mean_latency_margin": 4.472,
+      "forgetting": {
+        "row 1": true,
+        "col 1": true,
+        "diag \\": false,
+        "diag /": true
+      },
+      "silent_cells": [
+        "L2E4"
+      ],
+      "recruitable_cells": [
+        "L2E0",
+        "L2E6",
+        "L2E7"
+      ],
+      "collisions": {},
+      "l2i_activity": {
+        "mean_per_presentation": 1.2,
+        "total": 48
+      },
+      "l1i_all_nine_sync_rate": 1.0,
+      "frozen_replay_zero_weight_drift": true,
+      "frozen_first_responder_consistency": {
+        "row 1": 1.0,
+        "col 1": 0.5,
+        "diag \\": 1.0,
+        "diag /": 0.75
+      },
+      "rf_similarity": {
+        "mean": 0.449,
+        "max": 0.9995
+      },
+      "adaptive_threshold_summary": {
+        "enabled": true,
+        "final_a_mean": 258.8922,
+        "final_a_max": 566.6784,
+        "final_a_nonzero_count": 7
+      },
+      "l2i_causal_timing": {
+        "delay": 1,
+        "magnitude": 8000.0,
+        "pending_count": 0,
+        "delivered_log_count": 10
+      },
+      "influence_distribution": {
+        "applied": false,
+        "influence_min": 1.0,
+        "influence_median": 1.7964,
+        "influence_max": 3.4877,
+        "safe": true
+      }
+    },
+    {
+      "schedule": "long_saturation",
+      "geometry": "jittered_influence_off",
+      "adaptive_threshold": true,
+      "weight_seed": 2,
+      "topology_seed": 1,
+      "distinct_owners": 3,
+      "dead_cells": 5,
+      "per_pattern_dominance": {
+        "row 1": {
+          "modal_owner": "L2E3",
+          "dominance": 1.0
+        },
+        "col 1": {
+          "modal_owner": "L2E1",
+          "dominance": 0.6667
+        },
+        "diag \\": {
+          "modal_owner": "L2E5",
+          "dominance": 0.75
+        },
+        "diag /": {
+          "modal_owner": "L2E3",
+          "dominance": 1.0
+        }
+      },
+      "mean_sustained_dominance": 0.8542,
+      "rf_similarity": {
+        "mean": 0.4124,
+        "max": 0.9894
+      },
+      "adaptive_threshold_summary": {
+        "enabled": true,
+        "final_a_mean": 254.3786,
+        "final_a_max": 2034.8993,
+        "final_a_nonzero_count": 2
+      },
+      "l2i_causal_timing": {
+        "delay": 1,
+        "magnitude": 8000.0,
+        "pending_count": 0,
+        "delivered_log_count": 10
+      },
+      "influence_distribution": {
+        "applied": false,
+        "influence_min": 1.0,
+        "influence_median": 1.7964,
+        "influence_max": 3.4877,
+        "safe": true
+      }
+    },
+    {
+      "schedule": "short_interleaved",
+      "geometry": "jittered_influence_off",
+      "adaptive_threshold": true,
+      "weight_seed": 2,
+      "topology_seed": 2,
+      "distinct_owners": 4,
+      "per_pattern_consistency": {
+        "row 1": 0.6,
+        "col 1": 0.3,
+        "diag \\": 0.8,
+        "diag /": 0.4
+      },
+      "mean_ambiguity_rate": 0.0,
+      "mean_latency_margin": 4.472,
+      "forgetting": {
+        "row 1": true,
+        "col 1": true,
+        "diag \\": false,
+        "diag /": true
+      },
+      "silent_cells": [
+        "L2E4"
+      ],
+      "recruitable_cells": [
+        "L2E0",
+        "L2E6",
+        "L2E7"
+      ],
+      "collisions": {},
+      "l2i_activity": {
+        "mean_per_presentation": 1.2,
+        "total": 48
+      },
+      "l1i_all_nine_sync_rate": 1.0,
+      "frozen_replay_zero_weight_drift": true,
+      "frozen_first_responder_consistency": {
+        "row 1": 1.0,
+        "col 1": 0.5,
+        "diag \\": 1.0,
+        "diag /": 0.75
+      },
+      "rf_similarity": {
+        "mean": 0.449,
+        "max": 0.9995
+      },
+      "adaptive_threshold_summary": {
+        "enabled": true,
+        "final_a_mean": 258.8922,
+        "final_a_max": 566.6784,
+        "final_a_nonzero_count": 7
+      },
+      "l2i_causal_timing": {
+        "delay": 1,
+        "magnitude": 8000.0,
+        "pending_count": 0,
+        "delivered_log_count": 10
+      },
+      "influence_distribution": {
+        "applied": false,
+        "influence_min": 1.0,
+        "influence_median": 1.7964,
+        "influence_max": 3.4877,
+        "safe": true
+      }
+    },
+    {
+      "schedule": "long_saturation",
+      "geometry": "jittered_influence_off",
+      "adaptive_threshold": true,
+      "weight_seed": 2,
+      "topology_seed": 2,
+      "distinct_owners": 3,
+      "dead_cells": 5,
+      "per_pattern_dominance": {
+        "row 1": {
+          "modal_owner": "L2E3",
+          "dominance": 1.0
+        },
+        "col 1": {
+          "modal_owner": "L2E1",
+          "dominance": 0.6667
+        },
+        "diag \\": {
+          "modal_owner": "L2E5",
+          "dominance": 0.75
+        },
+        "diag /": {
+          "modal_owner": "L2E3",
+          "dominance": 1.0
+        }
+      },
+      "mean_sustained_dominance": 0.8542,
+      "rf_similarity": {
+        "mean": 0.4124,
+        "max": 0.9894
+      },
+      "adaptive_threshold_summary": {
+        "enabled": true,
+        "final_a_mean": 254.3786,
+        "final_a_max": 2034.8993,
+        "final_a_nonzero_count": 2
+      },
+      "l2i_causal_timing": {
+        "delay": 1,
+        "magnitude": 8000.0,
+        "pending_count": 0,
+        "delivered_log_count": 10
+      },
+      "influence_distribution": {
+        "applied": false,
+        "influence_min": 1.0,
+        "influence_median": 1.7964,
+        "influence_max": 3.4877,
+        "safe": true
+      }
+    },
+    {
+      "schedule": "short_interleaved",
+      "geometry": "jittered_influence_off",
+      "adaptive_threshold": true,
+      "weight_seed": 3,
+      "topology_seed": 1,
+      "distinct_owners": 4,
+      "per_pattern_consistency": {
+        "row 1": 0.6,
+        "col 1": 0.5,
+        "diag \\": 0.8,
+        "diag /": 0.8
+      },
+      "mean_ambiguity_rate": 0.025,
+      "mean_latency_margin": 3.371,
+      "forgetting": {
+        "row 1": true,
+        "col 1": false,
+        "diag \\": false,
+        "diag /": false
+      },
+      "silent_cells": [
+        "L2E0",
+        "L2E1"
+      ],
+      "recruitable_cells": [
+        "L2E2",
+        "L2E7"
+      ],
+      "collisions": {},
+      "l2i_activity": {
+        "mean_per_presentation": 1.175,
+        "total": 47
+      },
+      "l1i_all_nine_sync_rate": 1.0,
+      "frozen_replay_zero_weight_drift": true,
+      "frozen_first_responder_consistency": {
+        "row 1": 0.5,
+        "col 1": 1.0,
+        "diag \\": 0.75,
+        "diag /": 1.0
+      },
+      "rf_similarity": {
+        "mean": 0.5218,
+        "max": 0.9086
+      },
+      "adaptive_threshold_summary": {
+        "enabled": true,
+        "final_a_mean": 274.0861,
+        "final_a_max": 935.4247,
+        "final_a_nonzero_count": 5
+      },
+      "l2i_causal_timing": {
+        "delay": 1,
+        "magnitude": 8000.0,
+        "pending_count": 0,
+        "delivered_log_count": 10
+      },
+      "influence_distribution": {
+        "applied": false,
+        "influence_min": 1.0,
+        "influence_median": 1.7964,
+        "influence_max": 3.4877,
+        "safe": true
+      }
+    },
+    {
+      "schedule": "long_saturation",
+      "geometry": "jittered_influence_off",
+      "adaptive_threshold": true,
+      "weight_seed": 3,
+      "topology_seed": 1,
+      "distinct_owners": 3,
+      "dead_cells": 4,
+      "per_pattern_dominance": {
+        "row 1": {
+          "modal_owner": "L2E5",
+          "dominance": 0.6667
+        },
+        "col 1": {
+          "modal_owner": "L2E3",
+          "dominance": 0.9167
+        },
+        "diag \\": {
+          "modal_owner": "L2E5",
+          "dominance": 0.6667
+        },
+        "diag /": {
+          "modal_owner": "L2E4",
+          "dominance": 0.9167
+        }
+      },
+      "mean_sustained_dominance": 0.7917,
+      "rf_similarity": {
+        "mean": 0.5216,
+        "max": 0.9198
+      },
+      "adaptive_threshold_summary": {
+        "enabled": true,
+        "final_a_mean": 435.2813,
+        "final_a_max": 1775.9477,
+        "final_a_nonzero_count": 3
+      },
+      "l2i_causal_timing": {
+        "delay": 1,
+        "magnitude": 8000.0,
+        "pending_count": 0,
+        "delivered_log_count": 10
+      },
+      "influence_distribution": {
+        "applied": false,
+        "influence_min": 1.0,
+        "influence_median": 1.7964,
+        "influence_max": 3.4877,
+        "safe": true
+      }
+    },
+    {
+      "schedule": "short_interleaved",
+      "geometry": "jittered_influence_off",
+      "adaptive_threshold": true,
+      "weight_seed": 3,
+      "topology_seed": 2,
+      "distinct_owners": 4,
+      "per_pattern_consistency": {
+        "row 1": 0.6,
+        "col 1": 0.5,
+        "diag \\": 0.8,
+        "diag /": 0.8
+      },
+      "mean_ambiguity_rate": 0.025,
+      "mean_latency_margin": 3.371,
+      "forgetting": {
+        "row 1": true,
+        "col 1": false,
+        "diag \\": false,
+        "diag /": false
+      },
+      "silent_cells": [
+        "L2E0",
+        "L2E1"
+      ],
+      "recruitable_cells": [
+        "L2E2",
+        "L2E7"
+      ],
+      "collisions": {},
+      "l2i_activity": {
+        "mean_per_presentation": 1.175,
+        "total": 47
+      },
+      "l1i_all_nine_sync_rate": 1.0,
+      "frozen_replay_zero_weight_drift": true,
+      "frozen_first_responder_consistency": {
+        "row 1": 0.5,
+        "col 1": 1.0,
+        "diag \\": 0.75,
+        "diag /": 1.0
+      },
+      "rf_similarity": {
+        "mean": 0.5218,
+        "max": 0.9086
+      },
+      "adaptive_threshold_summary": {
+        "enabled": true,
+        "final_a_mean": 274.0861,
+        "final_a_max": 935.4247,
+        "final_a_nonzero_count": 5
+      },
+      "l2i_causal_timing": {
+        "delay": 1,
+        "magnitude": 8000.0,
+        "pending_count": 0,
+        "delivered_log_count": 10
+      },
+      "influence_distribution": {
+        "applied": false,
+        "influence_min": 1.0,
+        "influence_median": 1.7964,
+        "influence_max": 3.4877,
+        "safe": true
+      }
+    },
+    {
+      "schedule": "long_saturation",
+      "geometry": "jittered_influence_off",
+      "adaptive_threshold": true,
+      "weight_seed": 3,
+      "topology_seed": 2,
+      "distinct_owners": 3,
+      "dead_cells": 4,
+      "per_pattern_dominance": {
+        "row 1": {
+          "modal_owner": "L2E5",
+          "dominance": 0.6667
+        },
+        "col 1": {
+          "modal_owner": "L2E3",
+          "dominance": 0.9167
+        },
+        "diag \\": {
+          "modal_owner": "L2E5",
+          "dominance": 0.6667
+        },
+        "diag /": {
+          "modal_owner": "L2E4",
+          "dominance": 0.9167
+        }
+      },
+      "mean_sustained_dominance": 0.7917,
+      "rf_similarity": {
+        "mean": 0.5216,
+        "max": 0.9198
+      },
+      "adaptive_threshold_summary": {
+        "enabled": true,
+        "final_a_mean": 435.2813,
+        "final_a_max": 1775.9477,
+        "final_a_nonzero_count": 3
+      },
+      "l2i_causal_timing": {
+        "delay": 1,
+        "magnitude": 8000.0,
+        "pending_count": 0,
+        "delivered_log_count": 10
+      },
+      "influence_distribution": {
+        "applied": false,
+        "influence_min": 1.0,
+        "influence_median": 1.7964,
+        "influence_max": 3.4877,
+        "safe": true
+      }
+    },
+    {
+      "schedule": "short_interleaved",
+      "geometry": "symmetric_influence_on",
+      "adaptive_threshold": false,
+      "weight_seed": 1,
+      "topology_seed": 1,
+      "distinct_owners": 2,
+      "per_pattern_consistency": {
+        "row 1": 0.7,
+        "col 1": 0.4,
+        "diag \\": 0.4,
+        "diag /": 0.7
+      },
+      "mean_ambiguity_rate": 0.125,
+      "mean_latency_margin": 2.4,
+      "forgetting": {
+        "row 1": false,
+        "col 1": true,
+        "diag \\": true,
+        "diag /": false
+      },
+      "silent_cells": [
+        "L2E0",
+        "L2E1"
+      ],
+      "recruitable_cells": [
+        "L2E2",
+        "L2E3",
+        "L2E6",
+        "L2E7"
+      ],
+      "collisions": {
+        "L2E4": [
+          "row 1",
+          "col 1",
+          "diag /"
+        ]
+      },
+      "l2i_activity": {
+        "mean_per_presentation": 2.7,
+        "total": 108
+      },
+      "l1i_all_nine_sync_rate": 1.0,
+      "frozen_replay_zero_weight_drift": true,
+      "frozen_first_responder_consistency": {
+        "row 1": 1.0,
+        "col 1": 0.75,
+        "diag \\": 1.0,
+        "diag /": 1.0
+      },
+      "rf_similarity": {
+        "mean": 0.4743,
+        "max": 0.9998
+      },
+      "adaptive_threshold_summary": {
+        "enabled": false,
+        "final_a_mean": 0.0,
+        "final_a_max": 0.0,
+        "final_a_nonzero_count": 0
+      },
+      "l2i_causal_timing": {
+        "delay": 1,
+        "magnitude": 8000.0,
+        "pending_count": 0,
+        "delivered_log_count": 10
+      },
+      "influence_distribution": {
+        "applied": true,
+        "influence_min": 1.0,
+        "influence_median": 1.7964,
+        "influence_max": 3.4877,
+        "safe": true
+      }
+    },
+    {
+      "schedule": "long_saturation",
+      "geometry": "symmetric_influence_on",
+      "adaptive_threshold": false,
+      "weight_seed": 1,
+      "topology_seed": 1,
+      "distinct_owners": 3,
+      "dead_cells": 4,
+      "per_pattern_dominance": {
+        "row 1": {
+          "modal_owner": "L2E4",
+          "dominance": 0.75
+        },
+        "col 1": {
+          "modal_owner": "L2E6",
+          "dominance": 0.9167
+        },
+        "diag \\": {
+          "modal_owner": "L2E5",
+          "dominance": 0.9167
+        },
+        "diag /": {
+          "modal_owner": "L2E5",
+          "dominance": 1.0
+        }
+      },
+      "mean_sustained_dominance": 0.8959,
+      "rf_similarity": {
+        "mean": 0.3947,
+        "max": 0.9955
+      },
+      "adaptive_threshold_summary": {
+        "enabled": false,
+        "final_a_mean": 0.0,
+        "final_a_max": 0.0,
+        "final_a_nonzero_count": 0
+      },
+      "l2i_causal_timing": {
+        "delay": 1,
+        "magnitude": 8000.0,
+        "pending_count": 0,
+        "delivered_log_count": 10
+      },
+      "influence_distribution": {
+        "applied": true,
+        "influence_min": 1.0,
+        "influence_median": 1.7964,
+        "influence_max": 3.4877,
+        "safe": true
+      }
+    },
+    {
+      "schedule": "short_interleaved",
+      "geometry": "symmetric_influence_on",
+      "adaptive_threshold": false,
+      "weight_seed": 1,
+      "topology_seed": 2,
+      "distinct_owners": 2,
+      "per_pattern_consistency": {
+        "row 1": 0.7,
+        "col 1": 0.4,
+        "diag \\": 0.4,
+        "diag /": 0.7
+      },
+      "mean_ambiguity_rate": 0.125,
+      "mean_latency_margin": 2.4,
+      "forgetting": {
+        "row 1": false,
+        "col 1": true,
+        "diag \\": true,
+        "diag /": false
+      },
+      "silent_cells": [
+        "L2E0",
+        "L2E1"
+      ],
+      "recruitable_cells": [
+        "L2E2",
+        "L2E3",
+        "L2E6",
+        "L2E7"
+      ],
+      "collisions": {
+        "L2E4": [
+          "row 1",
+          "col 1",
+          "diag /"
+        ]
+      },
+      "l2i_activity": {
+        "mean_per_presentation": 2.7,
+        "total": 108
+      },
+      "l1i_all_nine_sync_rate": 1.0,
+      "frozen_replay_zero_weight_drift": true,
+      "frozen_first_responder_consistency": {
+        "row 1": 1.0,
+        "col 1": 0.75,
+        "diag \\": 1.0,
+        "diag /": 1.0
+      },
+      "rf_similarity": {
+        "mean": 0.4743,
+        "max": 0.9998
+      },
+      "adaptive_threshold_summary": {
+        "enabled": false,
+        "final_a_mean": 0.0,
+        "final_a_max": 0.0,
+        "final_a_nonzero_count": 0
+      },
+      "l2i_causal_timing": {
+        "delay": 1,
+        "magnitude": 8000.0,
+        "pending_count": 0,
+        "delivered_log_count": 10
+      },
+      "influence_distribution": {
+        "applied": true,
+        "influence_min": 1.0,
+        "influence_median": 1.7964,
+        "influence_max": 3.4877,
+        "safe": true
+      }
+    },
+    {
+      "schedule": "long_saturation",
+      "geometry": "symmetric_influence_on",
+      "adaptive_threshold": false,
+      "weight_seed": 1,
+      "topology_seed": 2,
+      "distinct_owners": 3,
+      "dead_cells": 4,
+      "per_pattern_dominance": {
+        "row 1": {
+          "modal_owner": "L2E4",
+          "dominance": 0.75
+        },
+        "col 1": {
+          "modal_owner": "L2E6",
+          "dominance": 0.9167
+        },
+        "diag \\": {
+          "modal_owner": "L2E5",
+          "dominance": 0.9167
+        },
+        "diag /": {
+          "modal_owner": "L2E5",
+          "dominance": 1.0
+        }
+      },
+      "mean_sustained_dominance": 0.8959,
+      "rf_similarity": {
+        "mean": 0.3947,
+        "max": 0.9955
+      },
+      "adaptive_threshold_summary": {
+        "enabled": false,
+        "final_a_mean": 0.0,
+        "final_a_max": 0.0,
+        "final_a_nonzero_count": 0
+      },
+      "l2i_causal_timing": {
+        "delay": 1,
+        "magnitude": 8000.0,
+        "pending_count": 0,
+        "delivered_log_count": 10
+      },
+      "influence_distribution": {
+        "applied": true,
+        "influence_min": 1.0,
+        "influence_median": 1.7964,
+        "influence_max": 3.4877,
+        "safe": true
+      }
+    },
+    {
+      "schedule": "short_interleaved",
+      "geometry": "symmetric_influence_on",
+      "adaptive_threshold": false,
+      "weight_seed": 2,
+      "topology_seed": 1,
+      "distinct_owners": 3,
+      "per_pattern_consistency": {
+        "row 1": 0.6,
+        "col 1": 0.9,
+        "diag \\": 0.4,
+        "diag /": 0.6
+      },
+      "mean_ambiguity_rate": 0.025,
+      "mean_latency_margin": 2.225,
+      "forgetting": {
+        "row 1": false,
+        "col 1": false,
+        "diag \\": true,
+        "diag /": true
+      },
+      "silent_cells": [
+        "L2E2",
+        "L2E4"
+      ],
+      "recruitable_cells": [
+        "L2E1",
+        "L2E5",
+        "L2E7"
+      ],
+      "collisions": {
+        "L2E3": [
+          "col 1",
+          "diag /"
+        ]
+      },
+      "l2i_activity": {
+        "mean_per_presentation": 3.15,
+        "total": 126
+      },
+      "l1i_all_nine_sync_rate": 1.0,
+      "frozen_replay_zero_weight_drift": true,
+      "frozen_first_responder_consistency": {
+        "row 1": 1.0,
+        "col 1": 1.0,
+        "diag \\": 1.0,
+        "diag /": 1.0
+      },
+      "rf_similarity": {
+        "mean": 0.4813,
+        "max": 0.9993
+      },
+      "adaptive_threshold_summary": {
+        "enabled": false,
+        "final_a_mean": 0.0,
+        "final_a_max": 0.0,
+        "final_a_nonzero_count": 0
+      },
+      "l2i_causal_timing": {
+        "delay": 1,
+        "magnitude": 8000.0,
+        "pending_count": 1,
+        "delivered_log_count": 10
+      },
+      "influence_distribution": {
+        "applied": true,
+        "influence_min": 1.0,
+        "influence_median": 1.7964,
+        "influence_max": 3.4877,
+        "safe": true
+      }
+    },
+    {
+      "schedule": "long_saturation",
+      "geometry": "symmetric_influence_on",
+      "adaptive_threshold": false,
+      "weight_seed": 2,
+      "topology_seed": 1,
+      "distinct_owners": 2,
+      "dead_cells": 4,
+      "per_pattern_dominance": {
+        "row 1": {
+          "modal_owner": "L2E3",
+          "dominance": 0.5
+        },
+        "col 1": {
+          "modal_owner": "L2E3",
+          "dominance": 1.0
+        },
+        "diag \\": {
+          "modal_owner": "L2E3",
+          "dominance": 0.8333
+        },
+        "diag /": {
+          "modal_owner": "L2E5",
+          "dominance": 0.9167
+        }
+      },
+      "mean_sustained_dominance": 0.8125,
+      "rf_similarity": {
+        "mean": 0.4571,
+        "max": 0.998
+      },
+      "adaptive_threshold_summary": {
+        "enabled": false,
+        "final_a_mean": 0.0,
+        "final_a_max": 0.0,
+        "final_a_nonzero_count": 0
+      },
+      "l2i_causal_timing": {
+        "delay": 1,
+        "magnitude": 8000.0,
+        "pending_count": 0,
+        "delivered_log_count": 10
+      },
+      "influence_distribution": {
+        "applied": true,
+        "influence_min": 1.0,
+        "influence_median": 1.7964,
+        "influence_max": 3.4877,
+        "safe": true
+      }
+    },
+    {
+      "schedule": "short_interleaved",
+      "geometry": "symmetric_influence_on",
+      "adaptive_threshold": false,
+      "weight_seed": 2,
+      "topology_seed": 2,
+      "distinct_owners": 3,
+      "per_pattern_consistency": {
+        "row 1": 0.6,
+        "col 1": 0.9,
+        "diag \\": 0.4,
+        "diag /": 0.6
+      },
+      "mean_ambiguity_rate": 0.025,
+      "mean_latency_margin": 2.225,
+      "forgetting": {
+        "row 1": false,
+        "col 1": false,
+        "diag \\": true,
+        "diag /": true
+      },
+      "silent_cells": [
+        "L2E2",
+        "L2E4"
+      ],
+      "recruitable_cells": [
+        "L2E1",
+        "L2E5",
+        "L2E7"
+      ],
+      "collisions": {
+        "L2E3": [
+          "col 1",
+          "diag /"
+        ]
+      },
+      "l2i_activity": {
+        "mean_per_presentation": 3.15,
+        "total": 126
+      },
+      "l1i_all_nine_sync_rate": 1.0,
+      "frozen_replay_zero_weight_drift": true,
+      "frozen_first_responder_consistency": {
+        "row 1": 1.0,
+        "col 1": 1.0,
+        "diag \\": 1.0,
+        "diag /": 1.0
+      },
+      "rf_similarity": {
+        "mean": 0.4813,
+        "max": 0.9993
+      },
+      "adaptive_threshold_summary": {
+        "enabled": false,
+        "final_a_mean": 0.0,
+        "final_a_max": 0.0,
+        "final_a_nonzero_count": 0
+      },
+      "l2i_causal_timing": {
+        "delay": 1,
+        "magnitude": 8000.0,
+        "pending_count": 1,
+        "delivered_log_count": 10
+      },
+      "influence_distribution": {
+        "applied": true,
+        "influence_min": 1.0,
+        "influence_median": 1.7964,
+        "influence_max": 3.4877,
+        "safe": true
+      }
+    },
+    {
+      "schedule": "long_saturation",
+      "geometry": "symmetric_influence_on",
+      "adaptive_threshold": false,
+      "weight_seed": 2,
+      "topology_seed": 2,
+      "distinct_owners": 2,
+      "dead_cells": 4,
+      "per_pattern_dominance": {
+        "row 1": {
+          "modal_owner": "L2E3",
+          "dominance": 0.5
+        },
+        "col 1": {
+          "modal_owner": "L2E3",
+          "dominance": 1.0
+        },
+        "diag \\": {
+          "modal_owner": "L2E3",
+          "dominance": 0.8333
+        },
+        "diag /": {
+          "modal_owner": "L2E5",
+          "dominance": 0.9167
+        }
+      },
+      "mean_sustained_dominance": 0.8125,
+      "rf_similarity": {
+        "mean": 0.4571,
+        "max": 0.998
+      },
+      "adaptive_threshold_summary": {
+        "enabled": false,
+        "final_a_mean": 0.0,
+        "final_a_max": 0.0,
+        "final_a_nonzero_count": 0
+      },
+      "l2i_causal_timing": {
+        "delay": 1,
+        "magnitude": 8000.0,
+        "pending_count": 0,
+        "delivered_log_count": 10
+      },
+      "influence_distribution": {
+        "applied": true,
+        "influence_min": 1.0,
+        "influence_median": 1.7964,
+        "influence_max": 3.4877,
+        "safe": true
+      }
+    },
+    {
+      "schedule": "short_interleaved",
+      "geometry": "symmetric_influence_on",
+      "adaptive_threshold": false,
+      "weight_seed": 3,
+      "topology_seed": 1,
+      "distinct_owners": 2,
+      "per_pattern_consistency": {
+        "row 1": 0.3,
+        "col 1": 0.4,
+        "diag \\": 0.6,
+        "diag /": 0.5
+      },
+      "mean_ambiguity_rate": 0.075,
+      "mean_latency_margin": 1.675,
+      "forgetting": {
+        "row 1": true,
+        "col 1": true,
+        "diag \\": true,
+        "diag /": true
+      },
+      "silent_cells": [
+        "L2E0",
+        "L2E1",
+        "L2E2"
+      ],
+      "recruitable_cells": [
+        "L2E3",
+        "L2E5",
+        "L2E7"
+      ],
+      "collisions": {
+        "L2E6": [
+          "col 1",
+          "diag \\",
+          "diag /"
+        ]
+      },
+      "l2i_activity": {
+        "mean_per_presentation": 2.775,
+        "total": 111
+      },
+      "l1i_all_nine_sync_rate": 1.0,
+      "frozen_replay_zero_weight_drift": true,
+      "frozen_first_responder_consistency": {
+        "row 1": 0.5,
+        "col 1": 0.75,
+        "diag \\": 1.0,
+        "diag /": 0.5
+      },
+      "rf_similarity": {
+        "mean": 0.4878,
+        "max": 0.9969
+      },
+      "adaptive_threshold_summary": {
+        "enabled": false,
+        "final_a_mean": 0.0,
+        "final_a_max": 0.0,
+        "final_a_nonzero_count": 0
+      },
+      "l2i_causal_timing": {
+        "delay": 1,
+        "magnitude": 8000.0,
+        "pending_count": 0,
+        "delivered_log_count": 10
+      },
+      "influence_distribution": {
+        "applied": true,
+        "influence_min": 1.0,
+        "influence_median": 1.7964,
+        "influence_max": 3.4877,
+        "safe": true
+      }
+    },
+    {
+      "schedule": "long_saturation",
+      "geometry": "symmetric_influence_on",
+      "adaptive_threshold": false,
+      "weight_seed": 3,
+      "topology_seed": 1,
+      "distinct_owners": 2,
+      "dead_cells": 4,
+      "per_pattern_dominance": {
+        "row 1": {
+          "modal_owner": "L2E3",
+          "dominance": 0.75
+        },
+        "col 1": {
+          "modal_owner": "L2E5",
+          "dominance": 1.0
+        },
+        "diag \\": {
+          "modal_owner": "L2E3",
+          "dominance": 1.0
+        },
+        "diag /": {
+          "modal_owner": "L2E3",
+          "dominance": 1.0
+        }
+      },
+      "mean_sustained_dominance": 0.9375,
+      "rf_similarity": {
+        "mean": 0.4986,
+        "max": 0.9769
+      },
+      "adaptive_threshold_summary": {
+        "enabled": false,
+        "final_a_mean": 0.0,
+        "final_a_max": 0.0,
+        "final_a_nonzero_count": 0
+      },
+      "l2i_causal_timing": {
+        "delay": 1,
+        "magnitude": 8000.0,
+        "pending_count": 0,
+        "delivered_log_count": 10
+      },
+      "influence_distribution": {
+        "applied": true,
+        "influence_min": 1.0,
+        "influence_median": 1.7964,
+        "influence_max": 3.4877,
+        "safe": true
+      }
+    },
+    {
+      "schedule": "short_interleaved",
+      "geometry": "symmetric_influence_on",
+      "adaptive_threshold": false,
+      "weight_seed": 3,
+      "topology_seed": 2,
+      "distinct_owners": 2,
+      "per_pattern_consistency": {
+        "row 1": 0.3,
+        "col 1": 0.4,
+        "diag \\": 0.6,
+        "diag /": 0.5
+      },
+      "mean_ambiguity_rate": 0.075,
+      "mean_latency_margin": 1.675,
+      "forgetting": {
+        "row 1": true,
+        "col 1": true,
+        "diag \\": true,
+        "diag /": true
+      },
+      "silent_cells": [
+        "L2E0",
+        "L2E1",
+        "L2E2"
+      ],
+      "recruitable_cells": [
+        "L2E3",
+        "L2E5",
+        "L2E7"
+      ],
+      "collisions": {
+        "L2E6": [
+          "col 1",
+          "diag \\",
+          "diag /"
+        ]
+      },
+      "l2i_activity": {
+        "mean_per_presentation": 2.775,
+        "total": 111
+      },
+      "l1i_all_nine_sync_rate": 1.0,
+      "frozen_replay_zero_weight_drift": true,
+      "frozen_first_responder_consistency": {
+        "row 1": 0.5,
+        "col 1": 0.75,
+        "diag \\": 1.0,
+        "diag /": 0.5
+      },
+      "rf_similarity": {
+        "mean": 0.4878,
+        "max": 0.9969
+      },
+      "adaptive_threshold_summary": {
+        "enabled": false,
+        "final_a_mean": 0.0,
+        "final_a_max": 0.0,
+        "final_a_nonzero_count": 0
+      },
+      "l2i_causal_timing": {
+        "delay": 1,
+        "magnitude": 8000.0,
+        "pending_count": 0,
+        "delivered_log_count": 10
+      },
+      "influence_distribution": {
+        "applied": true,
+        "influence_min": 1.0,
+        "influence_median": 1.7964,
+        "influence_max": 3.4877,
+        "safe": true
+      }
+    },
+    {
+      "schedule": "long_saturation",
+      "geometry": "symmetric_influence_on",
+      "adaptive_threshold": false,
+      "weight_seed": 3,
+      "topology_seed": 2,
+      "distinct_owners": 2,
+      "dead_cells": 4,
+      "per_pattern_dominance": {
+        "row 1": {
+          "modal_owner": "L2E3",
+          "dominance": 0.75
+        },
+        "col 1": {
+          "modal_owner": "L2E5",
+          "dominance": 1.0
+        },
+        "diag \\": {
+          "modal_owner": "L2E3",
+          "dominance": 1.0
+        },
+        "diag /": {
+          "modal_owner": "L2E3",
+          "dominance": 1.0
+        }
+      },
+      "mean_sustained_dominance": 0.9375,
+      "rf_similarity": {
+        "mean": 0.4986,
+        "max": 0.9769
+      },
+      "adaptive_threshold_summary": {
+        "enabled": false,
+        "final_a_mean": 0.0,
+        "final_a_max": 0.0,
+        "final_a_nonzero_count": 0
+      },
+      "l2i_causal_timing": {
+        "delay": 1,
+        "magnitude": 8000.0,
+        "pending_count": 0,
+        "delivered_log_count": 10
+      },
+      "influence_distribution": {
+        "applied": true,
+        "influence_min": 1.0,
+        "influence_median": 1.7964,
+        "influence_max": 3.4877,
+        "safe": true
+      }
+    },
+    {
+      "schedule": "short_interleaved",
+      "geometry": "symmetric_influence_on",
+      "adaptive_threshold": true,
+      "weight_seed": 1,
+      "topology_seed": 1,
+      "distinct_owners": 2,
+      "per_pattern_consistency": {
+        "row 1": 0.7,
+        "col 1": 0.5,
+        "diag \\": 0.3,
+        "diag /": 0.5
+      },
+      "mean_ambiguity_rate": 0.0,
+      "mean_latency_margin": 3.05,
+      "forgetting": {
+        "row 1": false,
+        "col 1": false,
+        "diag \\": true,
+        "diag /": true
+      },
+      "silent_cells": [
+        "L2E0",
+        "L2E1"
+      ],
+      "recruitable_cells": [
+        "L2E2",
+        "L2E5",
+        "L2E6",
+        "L2E7"
+      ],
+      "collisions": {
+        "L2E3": [
+          "col 1",
+          "diag \\",
+          "diag /"
+        ]
+      },
+      "l2i_activity": {
+        "mean_per_presentation": 2.675,
+        "total": 107
+      },
+      "l1i_all_nine_sync_rate": 1.0,
+      "frozen_replay_zero_weight_drift": true,
+      "frozen_first_responder_consistency": {
+        "row 1": 0.5,
+        "col 1": 0.75,
+        "diag \\": 0.75,
+        "diag /": 0.5
+      },
+      "rf_similarity": {
+        "mean": 0.4758,
+        "max": 0.9285
+      },
+      "adaptive_threshold_summary": {
+        "enabled": true,
+        "final_a_mean": 498.9291,
+        "final_a_max": 2172.9142,
+        "final_a_nonzero_count": 5
+      },
+      "l2i_causal_timing": {
+        "delay": 1,
+        "magnitude": 8000.0,
+        "pending_count": 0,
+        "delivered_log_count": 10
+      },
+      "influence_distribution": {
+        "applied": true,
+        "influence_min": 1.0,
+        "influence_median": 1.7964,
+        "influence_max": 3.4877,
+        "safe": true
+      }
+    },
+    {
+      "schedule": "long_saturation",
+      "geometry": "symmetric_influence_on",
+      "adaptive_threshold": true,
+      "weight_seed": 1,
+      "topology_seed": 1,
+      "distinct_owners": 3,
+      "dead_cells": 4,
+      "per_pattern_dominance": {
+        "row 1": {
+          "modal_owner": "L2E3",
+          "dominance": 0.9167
+        },
+        "col 1": {
+          "modal_owner": "L2E6",
+          "dominance": 1.0
+        },
+        "diag \\": {
+          "modal_owner": "L2E7",
+          "dominance": 0.8333
+        },
+        "diag /": {
+          "modal_owner": "L2E3",
+          "dominance": 1.0
+        }
+      },
+      "mean_sustained_dominance": 0.9375,
+      "rf_similarity": {
+        "mean": 0.3739,
+        "max": 0.9312
+      },
+      "adaptive_threshold_summary": {
+        "enabled": true,
+        "final_a_mean": 392.159,
+        "final_a_max": 3137.0674,
+        "final_a_nonzero_count": 2
+      },
+      "l2i_causal_timing": {
+        "delay": 1,
+        "magnitude": 8000.0,
+        "pending_count": 0,
+        "delivered_log_count": 10
+      },
+      "influence_distribution": {
+        "applied": true,
+        "influence_min": 1.0,
+        "influence_median": 1.7964,
+        "influence_max": 3.4877,
+        "safe": true
+      }
+    },
+    {
+      "schedule": "short_interleaved",
+      "geometry": "symmetric_influence_on",
+      "adaptive_threshold": true,
+      "weight_seed": 1,
+      "topology_seed": 2,
+      "distinct_owners": 2,
+      "per_pattern_consistency": {
+        "row 1": 0.7,
+        "col 1": 0.5,
+        "diag \\": 0.3,
+        "diag /": 0.5
+      },
+      "mean_ambiguity_rate": 0.0,
+      "mean_latency_margin": 3.05,
+      "forgetting": {
+        "row 1": false,
+        "col 1": false,
+        "diag \\": true,
+        "diag /": true
+      },
+      "silent_cells": [
+        "L2E0",
+        "L2E1"
+      ],
+      "recruitable_cells": [
+        "L2E2",
+        "L2E5",
+        "L2E6",
+        "L2E7"
+      ],
+      "collisions": {
+        "L2E3": [
+          "col 1",
+          "diag \\",
+          "diag /"
+        ]
+      },
+      "l2i_activity": {
+        "mean_per_presentation": 2.675,
+        "total": 107
+      },
+      "l1i_all_nine_sync_rate": 1.0,
+      "frozen_replay_zero_weight_drift": true,
+      "frozen_first_responder_consistency": {
+        "row 1": 0.5,
+        "col 1": 0.75,
+        "diag \\": 0.75,
+        "diag /": 0.5
+      },
+      "rf_similarity": {
+        "mean": 0.4758,
+        "max": 0.9285
+      },
+      "adaptive_threshold_summary": {
+        "enabled": true,
+        "final_a_mean": 498.9291,
+        "final_a_max": 2172.9142,
+        "final_a_nonzero_count": 5
+      },
+      "l2i_causal_timing": {
+        "delay": 1,
+        "magnitude": 8000.0,
+        "pending_count": 0,
+        "delivered_log_count": 10
+      },
+      "influence_distribution": {
+        "applied": true,
+        "influence_min": 1.0,
+        "influence_median": 1.7964,
+        "influence_max": 3.4877,
+        "safe": true
+      }
+    },
+    {
+      "schedule": "long_saturation",
+      "geometry": "symmetric_influence_on",
+      "adaptive_threshold": true,
+      "weight_seed": 1,
+      "topology_seed": 2,
+      "distinct_owners": 3,
+      "dead_cells": 4,
+      "per_pattern_dominance": {
+        "row 1": {
+          "modal_owner": "L2E3",
+          "dominance": 0.9167
+        },
+        "col 1": {
+          "modal_owner": "L2E6",
+          "dominance": 1.0
+        },
+        "diag \\": {
+          "modal_owner": "L2E7",
+          "dominance": 0.8333
+        },
+        "diag /": {
+          "modal_owner": "L2E3",
+          "dominance": 1.0
+        }
+      },
+      "mean_sustained_dominance": 0.9375,
+      "rf_similarity": {
+        "mean": 0.3739,
+        "max": 0.9312
+      },
+      "adaptive_threshold_summary": {
+        "enabled": true,
+        "final_a_mean": 392.159,
+        "final_a_max": 3137.0674,
+        "final_a_nonzero_count": 2
+      },
+      "l2i_causal_timing": {
+        "delay": 1,
+        "magnitude": 8000.0,
+        "pending_count": 0,
+        "delivered_log_count": 10
+      },
+      "influence_distribution": {
+        "applied": true,
+        "influence_min": 1.0,
+        "influence_median": 1.7964,
+        "influence_max": 3.4877,
+        "safe": true
+      }
+    },
+    {
+      "schedule": "short_interleaved",
+      "geometry": "symmetric_influence_on",
+      "adaptive_threshold": true,
+      "weight_seed": 2,
+      "topology_seed": 1,
+      "distinct_owners": 2,
+      "per_pattern_consistency": {
+        "row 1": 0.5,
+        "col 1": 0.5,
+        "diag \\": 0.5,
+        "diag /": 0.8
+      },
+      "mean_ambiguity_rate": 0.025,
+      "mean_latency_margin": 2.525,
+      "forgetting": {
+        "row 1": false,
+        "col 1": true,
+        "diag \\": true,
+        "diag /": false
+      },
+      "silent_cells": [
+        "L2E2",
+        "L2E4",
+        "L2E5",
+        "L2E6"
+      ],
+      "recruitable_cells": [
+        "L2E1",
+        "L2E7"
+      ],
+      "collisions": {
+        "L2E3": [
+          "col 1",
+          "diag \\",
+          "diag /"
+        ]
+      },
+      "l2i_activity": {
+        "mean_per_presentation": 2.75,
+        "total": 110
+      },
+      "l1i_all_nine_sync_rate": 1.0,
+      "frozen_replay_zero_weight_drift": true,
+      "frozen_first_responder_consistency": {
+        "row 1": 0.75,
+        "col 1": 0.5,
+        "diag \\": 0.75,
+        "diag /": 0.75
+      },
+      "rf_similarity": {
+        "mean": 0.477,
+        "max": 0.9963
+      },
+      "adaptive_threshold_summary": {
+        "enabled": true,
+        "final_a_mean": 431.903,
+        "final_a_max": 1674.3041,
+        "final_a_nonzero_count": 4
+      },
+      "l2i_causal_timing": {
+        "delay": 1,
+        "magnitude": 8000.0,
+        "pending_count": 0,
+        "delivered_log_count": 10
+      },
+      "influence_distribution": {
+        "applied": true,
+        "influence_min": 1.0,
+        "influence_median": 1.7964,
+        "influence_max": 3.4877,
+        "safe": true
+      }
+    },
+    {
+      "schedule": "long_saturation",
+      "geometry": "symmetric_influence_on",
+      "adaptive_threshold": true,
+      "weight_seed": 2,
+      "topology_seed": 1,
+      "distinct_owners": 2,
+      "dead_cells": 6,
+      "per_pattern_dominance": {
+        "row 1": {
+          "modal_owner": "L2E0",
+          "dominance": 1.0
+        },
+        "col 1": {
+          "modal_owner": "L2E3",
+          "dominance": 1.0
+        },
+        "diag \\": {
+          "modal_owner": "L2E3",
+          "dominance": 1.0
+        },
+        "diag /": {
+          "modal_owner": "L2E3",
+          "dominance": 1.0
+        }
+      },
+      "mean_sustained_dominance": 1.0,
+      "rf_similarity": {
+        "mean": 0.4429,
+        "max": 0.9964
+      },
+      "adaptive_threshold_summary": {
+        "enabled": true,
+        "final_a_mean": 392.1191,
+        "final_a_max": 3136.9531,
+        "final_a_nonzero_count": 1
+      },
+      "l2i_causal_timing": {
+        "delay": 1,
+        "magnitude": 8000.0,
+        "pending_count": 0,
+        "delivered_log_count": 10
+      },
+      "influence_distribution": {
+        "applied": true,
+        "influence_min": 1.0,
+        "influence_median": 1.7964,
+        "influence_max": 3.4877,
+        "safe": true
+      }
+    },
+    {
+      "schedule": "short_interleaved",
+      "geometry": "symmetric_influence_on",
+      "adaptive_threshold": true,
+      "weight_seed": 2,
+      "topology_seed": 2,
+      "distinct_owners": 2,
+      "per_pattern_consistency": {
+        "row 1": 0.5,
+        "col 1": 0.5,
+        "diag \\": 0.5,
+        "diag /": 0.8
+      },
+      "mean_ambiguity_rate": 0.025,
+      "mean_latency_margin": 2.525,
+      "forgetting": {
+        "row 1": false,
+        "col 1": true,
+        "diag \\": true,
+        "diag /": false
+      },
+      "silent_cells": [
+        "L2E2",
+        "L2E4",
+        "L2E5",
+        "L2E6"
+      ],
+      "recruitable_cells": [
+        "L2E1",
+        "L2E7"
+      ],
+      "collisions": {
+        "L2E3": [
+          "col 1",
+          "diag \\",
+          "diag /"
+        ]
+      },
+      "l2i_activity": {
+        "mean_per_presentation": 2.75,
+        "total": 110
+      },
+      "l1i_all_nine_sync_rate": 1.0,
+      "frozen_replay_zero_weight_drift": true,
+      "frozen_first_responder_consistency": {
+        "row 1": 0.75,
+        "col 1": 0.5,
+        "diag \\": 0.75,
+        "diag /": 0.75
+      },
+      "rf_similarity": {
+        "mean": 0.477,
+        "max": 0.9963
+      },
+      "adaptive_threshold_summary": {
+        "enabled": true,
+        "final_a_mean": 431.903,
+        "final_a_max": 1674.3041,
+        "final_a_nonzero_count": 4
+      },
+      "l2i_causal_timing": {
+        "delay": 1,
+        "magnitude": 8000.0,
+        "pending_count": 0,
+        "delivered_log_count": 10
+      },
+      "influence_distribution": {
+        "applied": true,
+        "influence_min": 1.0,
+        "influence_median": 1.7964,
+        "influence_max": 3.4877,
+        "safe": true
+      }
+    },
+    {
+      "schedule": "long_saturation",
+      "geometry": "symmetric_influence_on",
+      "adaptive_threshold": true,
+      "weight_seed": 2,
+      "topology_seed": 2,
+      "distinct_owners": 2,
+      "dead_cells": 6,
+      "per_pattern_dominance": {
+        "row 1": {
+          "modal_owner": "L2E0",
+          "dominance": 1.0
+        },
+        "col 1": {
+          "modal_owner": "L2E3",
+          "dominance": 1.0
+        },
+        "diag \\": {
+          "modal_owner": "L2E3",
+          "dominance": 1.0
+        },
+        "diag /": {
+          "modal_owner": "L2E3",
+          "dominance": 1.0
+        }
+      },
+      "mean_sustained_dominance": 1.0,
+      "rf_similarity": {
+        "mean": 0.4429,
+        "max": 0.9964
+      },
+      "adaptive_threshold_summary": {
+        "enabled": true,
+        "final_a_mean": 392.1191,
+        "final_a_max": 3136.9531,
+        "final_a_nonzero_count": 1
+      },
+      "l2i_causal_timing": {
+        "delay": 1,
+        "magnitude": 8000.0,
+        "pending_count": 0,
+        "delivered_log_count": 10
+      },
+      "influence_distribution": {
+        "applied": true,
+        "influence_min": 1.0,
+        "influence_median": 1.7964,
+        "influence_max": 3.4877,
+        "safe": true
+      }
+    },
+    {
+      "schedule": "short_interleaved",
+      "geometry": "symmetric_influence_on",
+      "adaptive_threshold": true,
+      "weight_seed": 3,
+      "topology_seed": 1,
+      "distinct_owners": 2,
+      "per_pattern_consistency": {
+        "row 1": 0.5,
+        "col 1": 0.5,
+        "diag \\": 0.6,
+        "diag /": 0.6
+      },
+      "mean_ambiguity_rate": 0.075,
+      "mean_latency_margin": 2.275,
+      "forgetting": {
+        "row 1": false,
+        "col 1": true,
+        "diag \\": false,
+        "diag /": false
+      },
+      "silent_cells": [
+        "L2E0",
+        "L2E1",
+        "L2E2"
+      ],
+      "recruitable_cells": [
+        "L2E3",
+        "L2E4",
+        "L2E7"
+      ],
+      "collisions": {
+        "L2E5": [
+          "row 1",
+          "col 1",
+          "diag /"
+        ]
+      },
+      "l2i_activity": {
+        "mean_per_presentation": 2.6,
+        "total": 104
+      },
+      "l1i_all_nine_sync_rate": 1.0,
+      "frozen_replay_zero_weight_drift": true,
+      "frozen_first_responder_consistency": {
+        "row 1": 0.5,
+        "col 1": 0.5,
+        "diag \\": 1.0,
+        "diag /": 0.75
+      },
+      "rf_similarity": {
+        "mean": 0.4483,
+        "max": 0.9998
+      },
+      "adaptive_threshold_summary": {
+        "enabled": true,
+        "final_a_mean": 491.2935,
+        "final_a_max": 1882.9694,
+        "final_a_nonzero_count": 5
+      },
+      "l2i_causal_timing": {
+        "delay": 1,
+        "magnitude": 8000.0,
+        "pending_count": 0,
+        "delivered_log_count": 10
+      },
+      "influence_distribution": {
+        "applied": true,
+        "influence_min": 1.0,
+        "influence_median": 1.7964,
+        "influence_max": 3.4877,
+        "safe": true
+      }
+    },
+    {
+      "schedule": "long_saturation",
+      "geometry": "symmetric_influence_on",
+      "adaptive_threshold": true,
+      "weight_seed": 3,
+      "topology_seed": 1,
+      "distinct_owners": 4,
+      "dead_cells": 3,
+      "per_pattern_dominance": {
+        "row 1": {
+          "modal_owner": "L2E4",
+          "dominance": 0.8333
+        },
+        "col 1": {
+          "modal_owner": "L2E3",
+          "dominance": 1.0
+        },
+        "diag \\": {
+          "modal_owner": "L2E6",
+          "dominance": 0.9167
+        },
+        "diag /": {
+          "modal_owner": "L2E5",
+          "dominance": 1.0
+        }
+      },
+      "mean_sustained_dominance": 0.9375,
+      "rf_similarity": {
+        "mean": 0.4016,
+        "max": 0.9742
+      },
+      "adaptive_threshold_summary": {
+        "enabled": true,
+        "final_a_mean": 424.8239,
+        "final_a_max": 3398.4353,
+        "final_a_nonzero_count": 2
+      },
+      "l2i_causal_timing": {
+        "delay": 1,
+        "magnitude": 8000.0,
+        "pending_count": 1,
+        "delivered_log_count": 10
+      },
+      "influence_distribution": {
+        "applied": true,
+        "influence_min": 1.0,
+        "influence_median": 1.7964,
+        "influence_max": 3.4877,
+        "safe": true
+      }
+    },
+    {
+      "schedule": "short_interleaved",
+      "geometry": "symmetric_influence_on",
+      "adaptive_threshold": true,
+      "weight_seed": 3,
+      "topology_seed": 2,
+      "distinct_owners": 2,
+      "per_pattern_consistency": {
+        "row 1": 0.5,
+        "col 1": 0.5,
+        "diag \\": 0.6,
+        "diag /": 0.6
+      },
+      "mean_ambiguity_rate": 0.075,
+      "mean_latency_margin": 2.275,
+      "forgetting": {
+        "row 1": false,
+        "col 1": true,
+        "diag \\": false,
+        "diag /": false
+      },
+      "silent_cells": [
+        "L2E0",
+        "L2E1",
+        "L2E2"
+      ],
+      "recruitable_cells": [
+        "L2E3",
+        "L2E4",
+        "L2E7"
+      ],
+      "collisions": {
+        "L2E5": [
+          "row 1",
+          "col 1",
+          "diag /"
+        ]
+      },
+      "l2i_activity": {
+        "mean_per_presentation": 2.6,
+        "total": 104
+      },
+      "l1i_all_nine_sync_rate": 1.0,
+      "frozen_replay_zero_weight_drift": true,
+      "frozen_first_responder_consistency": {
+        "row 1": 0.5,
+        "col 1": 0.5,
+        "diag \\": 1.0,
+        "diag /": 0.75
+      },
+      "rf_similarity": {
+        "mean": 0.4483,
+        "max": 0.9998
+      },
+      "adaptive_threshold_summary": {
+        "enabled": true,
+        "final_a_mean": 491.2935,
+        "final_a_max": 1882.9694,
+        "final_a_nonzero_count": 5
+      },
+      "l2i_causal_timing": {
+        "delay": 1,
+        "magnitude": 8000.0,
+        "pending_count": 0,
+        "delivered_log_count": 10
+      },
+      "influence_distribution": {
+        "applied": true,
+        "influence_min": 1.0,
+        "influence_median": 1.7964,
+        "influence_max": 3.4877,
+        "safe": true
+      }
+    },
+    {
+      "schedule": "long_saturation",
+      "geometry": "symmetric_influence_on",
+      "adaptive_threshold": true,
+      "weight_seed": 3,
+      "topology_seed": 2,
+      "distinct_owners": 4,
+      "dead_cells": 3,
+      "per_pattern_dominance": {
+        "row 1": {
+          "modal_owner": "L2E4",
+          "dominance": 0.8333
+        },
+        "col 1": {
+          "modal_owner": "L2E3",
+          "dominance": 1.0
+        },
+        "diag \\": {
+          "modal_owner": "L2E6",
+          "dominance": 0.9167
+        },
+        "diag /": {
+          "modal_owner": "L2E5",
+          "dominance": 1.0
+        }
+      },
+      "mean_sustained_dominance": 0.9375,
+      "rf_similarity": {
+        "mean": 0.4016,
+        "max": 0.9742
+      },
+      "adaptive_threshold_summary": {
+        "enabled": true,
+        "final_a_mean": 424.8239,
+        "final_a_max": 3398.4353,
+        "final_a_nonzero_count": 2
+      },
+      "l2i_causal_timing": {
+        "delay": 1,
+        "magnitude": 8000.0,
+        "pending_count": 1,
+        "delivered_log_count": 10
+      },
+      "influence_distribution": {
+        "applied": true,
+        "influence_min": 1.0,
+        "influence_median": 1.7964,
+        "influence_max": 3.4877,
+        "safe": true
+      }
+    },
+    {
+      "schedule": "short_interleaved",
+      "geometry": "jittered_influence_on",
+      "adaptive_threshold": false,
+      "weight_seed": 1,
+      "topology_seed": 1,
+      "distinct_owners": 2,
+      "per_pattern_consistency": {
+        "row 1": 0.7,
+        "col 1": 0.6,
+        "diag \\": 0.6,
+        "diag /": 1.0
+      },
+      "mean_ambiguity_rate": 0.025,
+      "mean_latency_margin": 2.371,
+      "forgetting": {
+        "row 1": false,
+        "col 1": false,
+        "diag \\": true,
+        "diag /": false
+      },
+      "silent_cells": [
+        "L2E0",
+        "L2E4",
+        "L2E7"
+      ],
+      "recruitable_cells": [
+        "L2E1",
+        "L2E2",
+        "L2E5"
+      ],
+      "collisions": {
+        "L2E6": [
+          "col 1",
+          "diag \\",
+          "diag /"
+        ]
+      },
+      "l2i_activity": {
+        "mean_per_presentation": 3.375,
+        "total": 135
+      },
+      "l1i_all_nine_sync_rate": 1.0,
+      "frozen_replay_zero_weight_drift": true,
+      "frozen_first_responder_consistency": {
+        "row 1": 1.0,
+        "col 1": 1.0,
+        "diag \\": 1.0,
+        "diag /": 1.0
+      },
+      "rf_similarity": {
+        "mean": 0.4355,
+        "max": 0.9998
+      },
+      "adaptive_threshold_summary": {
+        "enabled": false,
+        "final_a_mean": 0.0,
+        "final_a_max": 0.0,
+        "final_a_nonzero_count": 0
+      },
+      "l2i_causal_timing": {
+        "delay": 1,
+        "magnitude": 8000.0,
+        "pending_count": 1,
+        "delivered_log_count": 10
+      },
+      "influence_distribution": {
+        "applied": true,
+        "influence_min": 0.9615,
+        "influence_median": 2.0825,
+        "influence_max": 3.4718,
+        "safe": true
+      }
+    },
+    {
+      "schedule": "long_saturation",
+      "geometry": "jittered_influence_on",
+      "adaptive_threshold": false,
+      "weight_seed": 1,
+      "topology_seed": 1,
+      "distinct_owners": 3,
+      "dead_cells": 4,
+      "per_pattern_dominance": {
+        "row 1": {
+          "modal_owner": "L2E3",
+          "dominance": 0.8333
+        },
+        "col 1": {
+          "modal_owner": "L2E1",
+          "dominance": 0.8333
+        },
+        "diag \\": {
+          "modal_owner": "L2E6",
+          "dominance": 1.0
+        },
+        "diag /": {
+          "modal_owner": "L2E6",
+          "dominance": 1.0
+        }
+      },
+      "mean_sustained_dominance": 0.9166,
+      "rf_similarity": {
+        "mean": 0.4047,
+        "max": 0.9983
+      },
+      "adaptive_threshold_summary": {
+        "enabled": false,
+        "final_a_mean": 0.0,
+        "final_a_max": 0.0,
+        "final_a_nonzero_count": 0
+      },
+      "l2i_causal_timing": {
+        "delay": 1,
+        "magnitude": 8000.0,
+        "pending_count": 1,
+        "delivered_log_count": 10
+      },
+      "influence_distribution": {
+        "applied": true,
+        "influence_min": 0.9615,
+        "influence_median": 2.0825,
+        "influence_max": 3.4718,
+        "safe": true
+      }
+    },
+    {
+      "schedule": "short_interleaved",
+      "geometry": "jittered_influence_on",
+      "adaptive_threshold": false,
+      "weight_seed": 1,
+      "topology_seed": 2,
+      "distinct_owners": 1,
+      "per_pattern_consistency": {
+        "row 1": 0.6,
+        "col 1": 0.8,
+        "diag \\": 0.7,
+        "diag /": 0.8
+      },
+      "mean_ambiguity_rate": 0.05,
+      "mean_latency_margin": 1.65,
+      "forgetting": {
+        "row 1": true,
+        "col 1": false,
+        "diag \\": false,
+        "diag /": false
+      },
+      "silent_cells": [
+        "L2E1",
+        "L2E3",
+        "L2E6",
+        "L2E7"
+      ],
+      "recruitable_cells": [
+        "L2E0",
+        "L2E2",
+        "L2E5"
+      ],
+      "collisions": {
+        "L2E4": [
+          "row 1",
+          "col 1",
+          "diag \\",
+          "diag /"
+        ]
+      },
+      "l2i_activity": {
+        "mean_per_presentation": 3.525,
+        "total": 141
+      },
+      "l1i_all_nine_sync_rate": 1.0,
+      "frozen_replay_zero_weight_drift": true,
+      "frozen_first_responder_consistency": {
+        "row 1": 1.0,
+        "col 1": 1.0,
+        "diag \\": 1.0,
+        "diag /": 1.0
+      },
+      "rf_similarity": {
+        "mean": 0.5023,
+        "max": 1.0
+      },
+      "adaptive_threshold_summary": {
+        "enabled": false,
+        "final_a_mean": 0.0,
+        "final_a_max": 0.0,
+        "final_a_nonzero_count": 0
+      },
+      "l2i_causal_timing": {
+        "delay": 1,
+        "magnitude": 8000.0,
+        "pending_count": 0,
+        "delivered_log_count": 10
+      },
+      "influence_distribution": {
+        "applied": true,
+        "influence_min": 0.9144,
+        "influence_median": 2.0455,
+        "influence_max": 3.3848,
+        "safe": true
+      }
+    },
+    {
+      "schedule": "long_saturation",
+      "geometry": "jittered_influence_on",
+      "adaptive_threshold": false,
+      "weight_seed": 1,
+      "topology_seed": 2,
+      "distinct_owners": 2,
+      "dead_cells": 6,
+      "per_pattern_dominance": {
+        "row 1": {
+          "modal_owner": "L2E4",
+          "dominance": 0.5833
+        },
+        "col 1": {
+          "modal_owner": "L2E4",
+          "dominance": 0.5833
+        },
+        "diag \\": {
+          "modal_owner": "L2E2",
+          "dominance": 0.75
+        },
+        "diag /": {
+          "modal_owner": "L2E2",
+          "dominance": 1.0
+        }
+      },
+      "mean_sustained_dominance": 0.7291,
+      "rf_similarity": {
+        "mean": 0.5432,
+        "max": 0.9654
+      },
+      "adaptive_threshold_summary": {
+        "enabled": false,
+        "final_a_mean": 0.0,
+        "final_a_max": 0.0,
+        "final_a_nonzero_count": 0
+      },
+      "l2i_causal_timing": {
+        "delay": 1,
+        "magnitude": 8000.0,
+        "pending_count": 1,
+        "delivered_log_count": 10
+      },
+      "influence_distribution": {
+        "applied": true,
+        "influence_min": 0.9144,
+        "influence_median": 2.0455,
+        "influence_max": 3.3848,
+        "safe": true
+      }
+    },
+    {
+      "schedule": "short_interleaved",
+      "geometry": "jittered_influence_on",
+      "adaptive_threshold": false,
+      "weight_seed": 2,
+      "topology_seed": 1,
+      "distinct_owners": 2,
+      "per_pattern_consistency": {
+        "row 1": 0.7,
+        "col 1": 0.4,
+        "diag \\": 0.5,
+        "diag /": 0.5
+      },
+      "mean_ambiguity_rate": 0.0,
+      "mean_latency_margin": 1.926,
+      "forgetting": {
+        "row 1": true,
+        "col 1": true,
+        "diag \\": true,
+        "diag /": true
+      },
+      "silent_cells": [
+        "L2E2",
+        "L2E4",
+        "L2E5",
+        "L2E7"
+      ],
+      "recruitable_cells": [
+        "L2E1",
+        "L2E6"
+      ],
+      "collisions": {
+        "L2E0": [
+          "col 1",
+          "diag \\",
+          "diag /"
+        ]
+      },
+      "l2i_activity": {
+        "mean_per_presentation": 4.975,
+        "total": 199
+      },
+      "l1i_all_nine_sync_rate": 1.0,
+      "frozen_replay_zero_weight_drift": true,
+      "frozen_first_responder_consistency": {
+        "row 1": 1.0,
+        "col 1": 1.0,
+        "diag \\": 1.0,
+        "diag /": 1.0
+      },
+      "rf_similarity": {
+        "mean": 0.4252,
+        "max": 0.9811
+      },
+      "adaptive_threshold_summary": {
+        "enabled": false,
+        "final_a_mean": 0.0,
+        "final_a_max": 0.0,
+        "final_a_nonzero_count": 0
+      },
+      "l2i_causal_timing": {
+        "delay": 1,
+        "magnitude": 8000.0,
+        "pending_count": 1,
+        "delivered_log_count": 10
+      },
+      "influence_distribution": {
+        "applied": true,
+        "influence_min": 0.9615,
+        "influence_median": 2.0825,
+        "influence_max": 3.4718,
+        "safe": true
+      }
+    },
+    {
+      "schedule": "long_saturation",
+      "geometry": "jittered_influence_on",
+      "adaptive_threshold": false,
+      "weight_seed": 2,
+      "topology_seed": 1,
+      "distinct_owners": 1,
+      "dead_cells": 7,
+      "per_pattern_dominance": {
+        "row 1": {
+          "modal_owner": "L2E0",
+          "dominance": 1.0
+        },
+        "col 1": {
+          "modal_owner": "L2E0",
+          "dominance": 1.0
+        },
+        "diag \\": {
+          "modal_owner": "L2E0",
+          "dominance": 1.0
+        },
+        "diag /": {
+          "modal_owner": "L2E0",
+          "dominance": 1.0
+        }
+      },
+      "mean_sustained_dominance": 1.0,
+      "rf_similarity": {
+        "mean": 0.425,
+        "max": 0.9674
+      },
+      "adaptive_threshold_summary": {
+        "enabled": false,
+        "final_a_mean": 0.0,
+        "final_a_max": 0.0,
+        "final_a_nonzero_count": 0
+      },
+      "l2i_causal_timing": {
+        "delay": 1,
+        "magnitude": 8000.0,
+        "pending_count": 0,
+        "delivered_log_count": 10
+      },
+      "influence_distribution": {
+        "applied": true,
+        "influence_min": 0.9615,
+        "influence_median": 2.0825,
+        "influence_max": 3.4718,
+        "safe": true
+      }
+    },
+    {
+      "schedule": "short_interleaved",
+      "geometry": "jittered_influence_on",
+      "adaptive_threshold": false,
+      "weight_seed": 2,
+      "topology_seed": 2,
+      "distinct_owners": 1,
+      "per_pattern_consistency": {
+        "row 1": 0.6,
+        "col 1": 0.7,
+        "diag \\": 0.6,
+        "diag /": 0.6
+      },
+      "mean_ambiguity_rate": 0.0,
+      "mean_latency_margin": 1.8,
+      "forgetting": {
+        "row 1": true,
+        "col 1": true,
+        "diag \\": true,
+        "diag /": true
+      },
+      "silent_cells": [
+        "L2E1",
+        "L2E2"
+      ],
+      "recruitable_cells": [
+        "L2E0",
+        "L2E3",
+        "L2E4",
+        "L2E5",
+        "L2E7"
+      ],
+      "collisions": {
+        "L2E6": [
+          "row 1",
+          "col 1",
+          "diag \\",
+          "diag /"
+        ]
+      },
+      "l2i_activity": {
+        "mean_per_presentation": 3.8,
+        "total": 152
+      },
+      "l1i_all_nine_sync_rate": 1.0,
+      "frozen_replay_zero_weight_drift": true,
+      "frozen_first_responder_consistency": {
+        "row 1": 1.0,
+        "col 1": 1.0,
+        "diag \\": 1.0,
+        "diag /": 1.0
+      },
+      "rf_similarity": {
+        "mean": 0.4414,
+        "max": 0.9999
+      },
+      "adaptive_threshold_summary": {
+        "enabled": false,
+        "final_a_mean": 0.0,
+        "final_a_max": 0.0,
+        "final_a_nonzero_count": 0
+      },
+      "l2i_causal_timing": {
+        "delay": 1,
+        "magnitude": 8000.0,
+        "pending_count": 0,
+        "delivered_log_count": 10
+      },
+      "influence_distribution": {
+        "applied": true,
+        "influence_min": 0.9144,
+        "influence_median": 2.0455,
+        "influence_max": 3.3848,
+        "safe": true
+      }
+    },
+    {
+      "schedule": "long_saturation",
+      "geometry": "jittered_influence_on",
+      "adaptive_threshold": false,
+      "weight_seed": 2,
+      "topology_seed": 2,
+      "distinct_owners": 2,
+      "dead_cells": 6,
+      "per_pattern_dominance": {
+        "row 1": {
+          "modal_owner": "L2E6",
+          "dominance": 0.5
+        },
+        "col 1": {
+          "modal_owner": "L2E6",
+          "dominance": 1.0
+        },
+        "diag \\": {
+          "modal_owner": "L2E0",
+          "dominance": 0.5833
+        },
+        "diag /": {
+          "modal_owner": "L2E6",
+          "dominance": 0.6667
+        }
+      },
+      "mean_sustained_dominance": 0.6875,
+      "rf_similarity": {
+        "mean": 0.4192,
+        "max": 0.9989
+      },
+      "adaptive_threshold_summary": {
+        "enabled": false,
+        "final_a_mean": 0.0,
+        "final_a_max": 0.0,
+        "final_a_nonzero_count": 0
+      },
+      "l2i_causal_timing": {
+        "delay": 1,
+        "magnitude": 8000.0,
+        "pending_count": 1,
+        "delivered_log_count": 10
+      },
+      "influence_distribution": {
+        "applied": true,
+        "influence_min": 0.9144,
+        "influence_median": 2.0455,
+        "influence_max": 3.3848,
+        "safe": true
+      }
+    },
+    {
+      "schedule": "short_interleaved",
+      "geometry": "jittered_influence_on",
+      "adaptive_threshold": false,
+      "weight_seed": 3,
+      "topology_seed": 1,
+      "distinct_owners": 1,
+      "per_pattern_consistency": {
+        "row 1": 0.4,
+        "col 1": 0.6,
+        "diag \\": 0.6,
+        "diag /": 0.6
+      },
+      "mean_ambiguity_rate": 0.0,
+      "mean_latency_margin": 1.875,
+      "forgetting": {
+        "row 1": false,
+        "col 1": false,
+        "diag \\": false,
+        "diag /": false
+      },
+      "silent_cells": [
+        "L2E1"
+      ],
+      "recruitable_cells": [
+        "L2E0",
+        "L2E2",
+        "L2E4",
+        "L2E5",
+        "L2E6",
+        "L2E7"
+      ],
+      "collisions": {
+        "L2E3": [
+          "row 1",
+          "col 1",
+          "diag \\",
+          "diag /"
+        ]
+      },
+      "l2i_activity": {
+        "mean_per_presentation": 3.275,
+        "total": 131
+      },
+      "l1i_all_nine_sync_rate": 1.0,
+      "frozen_replay_zero_weight_drift": true,
+      "frozen_first_responder_consistency": {
+        "row 1": 1.0,
+        "col 1": 1.0,
+        "diag \\": 1.0,
+        "diag /": 1.0
+      },
+      "rf_similarity": {
+        "mean": 0.4412,
+        "max": 0.9626
+      },
+      "adaptive_threshold_summary": {
+        "enabled": false,
+        "final_a_mean": 0.0,
+        "final_a_max": 0.0,
+        "final_a_nonzero_count": 0
+      },
+      "l2i_causal_timing": {
+        "delay": 1,
+        "magnitude": 8000.0,
+        "pending_count": 0,
+        "delivered_log_count": 10
+      },
+      "influence_distribution": {
+        "applied": true,
+        "influence_min": 0.9615,
+        "influence_median": 2.0825,
+        "influence_max": 3.4718,
+        "safe": true
+      }
+    },
+    {
+      "schedule": "long_saturation",
+      "geometry": "jittered_influence_on",
+      "adaptive_threshold": false,
+      "weight_seed": 3,
+      "topology_seed": 1,
+      "distinct_owners": 4,
+      "dead_cells": 3,
+      "per_pattern_dominance": {
+        "row 1": {
+          "modal_owner": "L2E7",
+          "dominance": 0.6667
+        },
+        "col 1": {
+          "modal_owner": "L2E4",
+          "dominance": 0.75
+        },
+        "diag \\": {
+          "modal_owner": "L2E2",
+          "dominance": 0.75
+        },
+        "diag /": {
+          "modal_owner": "L2E3",
+          "dominance": 0.6667
+        }
+      },
+      "mean_sustained_dominance": 0.7084,
+      "rf_similarity": {
+        "mean": 0.3793,
+        "max": 0.9585
+      },
+      "adaptive_threshold_summary": {
+        "enabled": false,
+        "final_a_mean": 0.0,
+        "final_a_max": 0.0,
+        "final_a_nonzero_count": 0
+      },
+      "l2i_causal_timing": {
+        "delay": 1,
+        "magnitude": 8000.0,
+        "pending_count": 1,
+        "delivered_log_count": 10
+      },
+      "influence_distribution": {
+        "applied": true,
+        "influence_min": 0.9615,
+        "influence_median": 2.0825,
+        "influence_max": 3.4718,
+        "safe": true
+      }
+    },
+    {
+      "schedule": "short_interleaved",
+      "geometry": "jittered_influence_on",
+      "adaptive_threshold": false,
+      "weight_seed": 3,
+      "topology_seed": 2,
+      "distinct_owners": 2,
+      "per_pattern_consistency": {
+        "row 1": 0.4,
+        "col 1": 0.4,
+        "diag \\": 0.5,
+        "diag /": 0.6
+      },
+      "mean_ambiguity_rate": 0.05,
+      "mean_latency_margin": 1.621,
+      "forgetting": {
+        "row 1": true,
+        "col 1": true,
+        "diag \\": false,
+        "diag /": true
+      },
+      "silent_cells": [
+        "L2E1",
+        "L2E2",
+        "L2E3",
+        "L2E7"
+      ],
+      "recruitable_cells": [
+        "L2E0",
+        "L2E5"
+      ],
+      "collisions": {
+        "L2E4": [
+          "row 1",
+          "diag \\"
+        ],
+        "L2E6": [
+          "col 1",
+          "diag /"
+        ]
+      },
+      "l2i_activity": {
+        "mean_per_presentation": 4.525,
+        "total": 181
+      },
+      "l1i_all_nine_sync_rate": 1.0,
+      "frozen_replay_zero_weight_drift": true,
+      "frozen_first_responder_consistency": {
+        "row 1": 1.0,
+        "col 1": 1.0,
+        "diag \\": 1.0,
+        "diag /": 1.0
+      },
+      "rf_similarity": {
+        "mean": 0.57,
+        "max": 0.9889
+      },
+      "adaptive_threshold_summary": {
+        "enabled": false,
+        "final_a_mean": 0.0,
+        "final_a_max": 0.0,
+        "final_a_nonzero_count": 0
+      },
+      "l2i_causal_timing": {
+        "delay": 1,
+        "magnitude": 8000.0,
+        "pending_count": 0,
+        "delivered_log_count": 10
+      },
+      "influence_distribution": {
+        "applied": true,
+        "influence_min": 0.9144,
+        "influence_median": 2.0455,
+        "influence_max": 3.3848,
+        "safe": true
+      }
+    },
+    {
+      "schedule": "long_saturation",
+      "geometry": "jittered_influence_on",
+      "adaptive_threshold": false,
+      "weight_seed": 3,
+      "topology_seed": 2,
+      "distinct_owners": 1,
+      "dead_cells": 7,
+      "per_pattern_dominance": {
+        "row 1": {
+          "modal_owner": "L2E4",
+          "dominance": 1.0
+        },
+        "col 1": {
+          "modal_owner": "L2E4",
+          "dominance": 1.0
+        },
+        "diag \\": {
+          "modal_owner": "L2E4",
+          "dominance": 1.0
+        },
+        "diag /": {
+          "modal_owner": "L2E4",
+          "dominance": 1.0
+        }
+      },
+      "mean_sustained_dominance": 1.0,
+      "rf_similarity": {
+        "mean": 0.6011,
+        "max": 0.9463
+      },
+      "adaptive_threshold_summary": {
+        "enabled": false,
+        "final_a_mean": 0.0,
+        "final_a_max": 0.0,
+        "final_a_nonzero_count": 0
+      },
+      "l2i_causal_timing": {
+        "delay": 1,
+        "magnitude": 8000.0,
+        "pending_count": 1,
+        "delivered_log_count": 10
+      },
+      "influence_distribution": {
+        "applied": true,
+        "influence_min": 0.9144,
+        "influence_median": 2.0455,
+        "influence_max": 3.3848,
+        "safe": true
+      }
+    },
+    {
+      "schedule": "short_interleaved",
+      "geometry": "jittered_influence_on",
+      "adaptive_threshold": true,
+      "weight_seed": 1,
+      "topology_seed": 1,
+      "distinct_owners": 3,
+      "per_pattern_consistency": {
+        "row 1": 0.7,
+        "col 1": 0.3,
+        "diag \\": 0.4,
+        "diag /": 0.6
+      },
+      "mean_ambiguity_rate": 0.025,
+      "mean_latency_margin": 2.25,
+      "forgetting": {
+        "row 1": false,
+        "col 1": true,
+        "diag \\": true,
+        "diag /": true
+      },
+      "silent_cells": [
+        "L2E1",
+        "L2E7"
+      ],
+      "recruitable_cells": [
+        "L2E2",
+        "L2E4",
+        "L2E5"
+      ],
+      "collisions": {
+        "L2E3": [
+          "row 1",
+          "diag \\"
+        ]
+      },
+      "l2i_activity": {
+        "mean_per_presentation": 3.15,
+        "total": 126
+      },
+      "l1i_all_nine_sync_rate": 1.0,
+      "frozen_replay_zero_weight_drift": true,
+      "frozen_first_responder_consistency": {
+        "row 1": 0.75,
+        "col 1": 0.5,
+        "diag \\": 0.5,
+        "diag /": 1.0
+      },
+      "rf_similarity": {
+        "mean": 0.5247,
+        "max": 0.9988
+      },
+      "adaptive_threshold_summary": {
+        "enabled": true,
+        "final_a_mean": 610.1672,
+        "final_a_max": 2404.3828,
+        "final_a_nonzero_count": 4
+      },
+      "l2i_causal_timing": {
+        "delay": 1,
+        "magnitude": 8000.0,
+        "pending_count": 0,
+        "delivered_log_count": 10
+      },
+      "influence_distribution": {
+        "applied": true,
+        "influence_min": 0.9615,
+        "influence_median": 2.0825,
+        "influence_max": 3.4718,
+        "safe": true
+      }
+    },
+    {
+      "schedule": "long_saturation",
+      "geometry": "jittered_influence_on",
+      "adaptive_threshold": true,
+      "weight_seed": 1,
+      "topology_seed": 1,
+      "distinct_owners": 2,
+      "dead_cells": 5,
+      "per_pattern_dominance": {
+        "row 1": {
+          "modal_owner": "L2E3",
+          "dominance": 0.8333
+        },
+        "col 1": {
+          "modal_owner": "L2E0",
+          "dominance": 0.3333
+        },
+        "diag \\": {
+          "modal_owner": "L2E3",
+          "dominance": 0.75
+        },
+        "diag /": {
+          "modal_owner": "L2E3",
+          "dominance": 1.0
+        }
+      },
+      "mean_sustained_dominance": 0.7291,
+      "rf_similarity": {
+        "mean": 0.5581,
+        "max": 0.9988
+      },
+      "adaptive_threshold_summary": {
+        "enabled": true,
+        "final_a_mean": 470.4935,
+        "final_a_max": 1957.2192,
+        "final_a_nonzero_count": 2
+      },
+      "l2i_causal_timing": {
+        "delay": 1,
+        "magnitude": 8000.0,
+        "pending_count": 0,
+        "delivered_log_count": 10
+      },
+      "influence_distribution": {
+        "applied": true,
+        "influence_min": 0.9615,
+        "influence_median": 2.0825,
+        "influence_max": 3.4718,
+        "safe": true
+      }
+    },
+    {
+      "schedule": "short_interleaved",
+      "geometry": "jittered_influence_on",
+      "adaptive_threshold": true,
+      "weight_seed": 1,
+      "topology_seed": 2,
+      "distinct_owners": 3,
+      "per_pattern_consistency": {
+        "row 1": 0.4,
+        "col 1": 0.5,
+        "diag \\": 0.4,
+        "diag /": 0.4
+      },
+      "mean_ambiguity_rate": 0.0,
+      "mean_latency_margin": 1.925,
+      "forgetting": {
+        "row 1": true,
+        "col 1": false,
+        "diag \\": true,
+        "diag /": true
+      },
+      "silent_cells": [
+        "L2E1",
+        "L2E3",
+        "L2E6",
+        "L2E7"
+      ],
+      "recruitable_cells": [
+        "L2E0"
+      ],
+      "collisions": {
+        "L2E4": [
+          "row 1",
+          "col 1"
+        ]
+      },
+      "l2i_activity": {
+        "mean_per_presentation": 2.825,
+        "total": 113
+      },
+      "l1i_all_nine_sync_rate": 1.0,
+      "frozen_replay_zero_weight_drift": true,
+      "frozen_first_responder_consistency": {
+        "row 1": 0.5,
+        "col 1": 0.75,
+        "diag \\": 0.5,
+        "diag /": 0.5
+      },
+      "rf_similarity": {
+        "mean": 0.4829,
+        "max": 1.0
+      },
+      "adaptive_threshold_summary": {
+        "enabled": true,
+        "final_a_mean": 564.2239,
+        "final_a_max": 1652.0795,
+        "final_a_nonzero_count": 4
+      },
+      "l2i_causal_timing": {
+        "delay": 1,
+        "magnitude": 8000.0,
+        "pending_count": 0,
+        "delivered_log_count": 10
+      },
+      "influence_distribution": {
+        "applied": true,
+        "influence_min": 0.9144,
+        "influence_median": 2.0455,
+        "influence_max": 3.3848,
+        "safe": true
+      }
+    },
+    {
+      "schedule": "long_saturation",
+      "geometry": "jittered_influence_on",
+      "adaptive_threshold": true,
+      "weight_seed": 1,
+      "topology_seed": 2,
+      "distinct_owners": 2,
+      "dead_cells": 5,
+      "per_pattern_dominance": {
+        "row 1": {
+          "modal_owner": "L2E0",
+          "dominance": 0.5833
+        },
+        "col 1": {
+          "modal_owner": "L2E5",
+          "dominance": 0.9167
+        },
+        "diag \\": {
+          "modal_owner": "L2E5",
+          "dominance": 1.0
+        },
+        "diag /": {
+          "modal_owner": "L2E5",
+          "dominance": 1.0
+        }
+      },
+      "mean_sustained_dominance": 0.875,
+      "rf_similarity": {
+        "mean": 0.5234,
+        "max": 0.9984
+      },
+      "adaptive_threshold_summary": {
+        "enabled": true,
+        "final_a_mean": 480.4585,
+        "final_a_max": 2037.006,
+        "final_a_nonzero_count": 2
+      },
+      "l2i_causal_timing": {
+        "delay": 1,
+        "magnitude": 8000.0,
+        "pending_count": 0,
+        "delivered_log_count": 10
+      },
+      "influence_distribution": {
+        "applied": true,
+        "influence_min": 0.9144,
+        "influence_median": 2.0455,
+        "influence_max": 3.3848,
+        "safe": true
+      }
+    },
+    {
+      "schedule": "short_interleaved",
+      "geometry": "jittered_influence_on",
+      "adaptive_threshold": true,
+      "weight_seed": 2,
+      "topology_seed": 1,
+      "distinct_owners": 2,
+      "per_pattern_consistency": {
+        "row 1": 0.5,
+        "col 1": 0.5,
+        "diag \\": 0.9,
+        "diag /": 0.6
+      },
+      "mean_ambiguity_rate": 0.0,
+      "mean_latency_margin": 2.5,
+      "forgetting": {
+        "row 1": true,
+        "col 1": true,
+        "diag \\": false,
+        "diag /": false
+      },
+      "silent_cells": [
+        "L2E2",
+        "L2E4",
+        "L2E6"
+      ],
+      "recruitable_cells": [
+        "L2E0",
+        "L2E1",
+        "L2E5"
+      ],
+      "collisions": {
+        "L2E3": [
+          "col 1",
+          "diag \\",
+          "diag /"
+        ]
+      },
+      "l2i_activity": {
+        "mean_per_presentation": 3.3,
+        "total": 132
+      },
+      "l1i_all_nine_sync_rate": 1.0,
+      "frozen_replay_zero_weight_drift": true,
+      "frozen_first_responder_consistency": {
+        "row 1": 0.5,
+        "col 1": 0.5,
+        "diag \\": 0.5,
+        "diag /": 0.5
+      },
+      "rf_similarity": {
+        "mean": 0.4309,
+        "max": 1.0
+      },
+      "adaptive_threshold_summary": {
+        "enabled": true,
+        "final_a_mean": 580.8276,
+        "final_a_max": 2124.9063,
+        "final_a_nonzero_count": 5
+      },
+      "l2i_causal_timing": {
+        "delay": 1,
+        "magnitude": 8000.0,
+        "pending_count": 1,
+        "delivered_log_count": 10
+      },
+      "influence_distribution": {
+        "applied": true,
+        "influence_min": 0.9615,
+        "influence_median": 2.0825,
+        "influence_max": 3.4718,
+        "safe": true
+      }
+    },
+    {
+      "schedule": "long_saturation",
+      "geometry": "jittered_influence_on",
+      "adaptive_threshold": true,
+      "weight_seed": 2,
+      "topology_seed": 1,
+      "distinct_owners": 3,
+      "dead_cells": 3,
+      "per_pattern_dominance": {
+        "row 1": {
+          "modal_owner": "L2E0",
+          "dominance": 0.4167
+        },
+        "col 1": {
+          "modal_owner": "L2E1",
+          "dominance": 0.4167
+        },
+        "diag \\": {
+          "modal_owner": "L2E3",
+          "dominance": 1.0
+        },
+        "diag /": {
+          "modal_owner": "L2E3",
+          "dominance": 1.0
+        }
+      },
+      "mean_sustained_dominance": 0.7084,
+      "rf_similarity": {
+        "mean": 0.4106,
+        "max": 1.0
+      },
+      "adaptive_threshold_summary": {
+        "enabled": true,
+        "final_a_mean": 509.659,
+        "final_a_max": 2120.1378,
+        "final_a_nonzero_count": 2
+      },
+      "l2i_causal_timing": {
+        "delay": 1,
+        "magnitude": 8000.0,
+        "pending_count": 1,
+        "delivered_log_count": 10
+      },
+      "influence_distribution": {
+        "applied": true,
+        "influence_min": 0.9615,
+        "influence_median": 2.0825,
+        "influence_max": 3.4718,
+        "safe": true
+      }
+    },
+    {
+      "schedule": "short_interleaved",
+      "geometry": "jittered_influence_on",
+      "adaptive_threshold": true,
+      "weight_seed": 2,
+      "topology_seed": 2,
+      "distinct_owners": 2,
+      "per_pattern_consistency": {
+        "row 1": 0.5,
+        "col 1": 0.5,
+        "diag \\": 0.7,
+        "diag /": 0.7
+      },
+      "mean_ambiguity_rate": 0.0,
+      "mean_latency_margin": 2.6,
+      "forgetting": {
+        "row 1": true,
+        "col 1": true,
+        "diag \\": false,
+        "diag /": false
+      },
+      "silent_cells": [
+        "L2E2",
+        "L2E7"
+      ],
+      "recruitable_cells": [
+        "L2E1",
+        "L2E3",
+        "L2E4",
+        "L2E6"
+      ],
+      "collisions": {
+        "L2E0": [
+          "col 1",
+          "diag \\",
+          "diag /"
+        ]
+      },
+      "l2i_activity": {
+        "mean_per_presentation": 3.125,
+        "total": 125
+      },
+      "l1i_all_nine_sync_rate": 1.0,
+      "frozen_replay_zero_weight_drift": true,
+      "frozen_first_responder_consistency": {
+        "row 1": 1.0,
+        "col 1": 1.0,
+        "diag \\": 1.0,
+        "diag /": 1.0
+      },
+      "rf_similarity": {
+        "mean": 0.416,
+        "max": 0.9996
+      },
+      "adaptive_threshold_summary": {
+        "enabled": true,
+        "final_a_mean": 470.4945,
+        "final_a_max": 1926.8542,
+        "final_a_nonzero_count": 5
+      },
+      "l2i_causal_timing": {
+        "delay": 1,
+        "magnitude": 8000.0,
+        "pending_count": 0,
+        "delivered_log_count": 10
+      },
+      "influence_distribution": {
+        "applied": true,
+        "influence_min": 0.9144,
+        "influence_median": 2.0455,
+        "influence_max": 3.3848,
+        "safe": true
+      }
+    },
+    {
+      "schedule": "long_saturation",
+      "geometry": "jittered_influence_on",
+      "adaptive_threshold": true,
+      "weight_seed": 2,
+      "topology_seed": 2,
+      "distinct_owners": 2,
+      "dead_cells": 3,
+      "per_pattern_dominance": {
+        "row 1": {
+          "modal_owner": "L2E0",
+          "dominance": 0.6667
+        },
+        "col 1": {
+          "modal_owner": "L2E6",
+          "dominance": 0.6667
+        },
+        "diag \\": {
+          "modal_owner": "L2E0",
+          "dominance": 0.9167
+        },
+        "diag /": {
+          "modal_owner": "L2E0",
+          "dominance": 1.0
+        }
+      },
+      "mean_sustained_dominance": 0.8125,
+      "rf_similarity": {
+        "mean": 0.3873,
+        "max": 0.9999
+      },
+      "adaptive_threshold_summary": {
+        "enabled": true,
+        "final_a_mean": 392.1654,
+        "final_a_max": 3137.323,
+        "final_a_nonzero_count": 1
+      },
+      "l2i_causal_timing": {
+        "delay": 1,
+        "magnitude": 8000.0,
+        "pending_count": 0,
+        "delivered_log_count": 10
+      },
+      "influence_distribution": {
+        "applied": true,
+        "influence_min": 0.9144,
+        "influence_median": 2.0455,
+        "influence_max": 3.3848,
+        "safe": true
+      }
+    },
+    {
+      "schedule": "short_interleaved",
+      "geometry": "jittered_influence_on",
+      "adaptive_threshold": true,
+      "weight_seed": 3,
+      "topology_seed": 1,
+      "distinct_owners": 2,
+      "per_pattern_consistency": {
+        "row 1": 0.4,
+        "col 1": 0.7,
+        "diag \\": 0.5,
+        "diag /": 0.4
+      },
+      "mean_ambiguity_rate": 0.075,
+      "mean_latency_margin": 1.7,
+      "forgetting": {
+        "row 1": false,
+        "col 1": false,
+        "diag \\": true,
+        "diag /": true
+      },
+      "silent_cells": [
+        "L2E1",
+        "L2E4"
+      ],
+      "recruitable_cells": [
+        "L2E2",
+        "L2E5",
+        "L2E6",
+        "L2E7"
+      ],
+      "collisions": {
+        "L2E3": [
+          "row 1",
+          "col 1",
+          "diag \\"
+        ]
+      },
+      "l2i_activity": {
+        "mean_per_presentation": 3.3,
+        "total": 132
+      },
+      "l1i_all_nine_sync_rate": 1.0,
+      "frozen_replay_zero_weight_drift": true,
+      "frozen_first_responder_consistency": {
+        "row 1": 0.5,
+        "col 1": 0.75,
+        "diag \\": 0.75,
+        "diag /": 0.5
+      },
+      "rf_similarity": {
+        "mean": 0.3817,
+        "max": 0.9975
+      },
+      "adaptive_threshold_summary": {
+        "enabled": true,
+        "final_a_mean": 639.3958,
+        "final_a_max": 2166.9544,
+        "final_a_nonzero_count": 6
+      },
+      "l2i_causal_timing": {
+        "delay": 1,
+        "magnitude": 8000.0,
+        "pending_count": 1,
+        "delivered_log_count": 10
+      },
+      "influence_distribution": {
+        "applied": true,
+        "influence_min": 0.9615,
+        "influence_median": 2.0825,
+        "influence_max": 3.4718,
+        "safe": true
+      }
+    },
+    {
+      "schedule": "long_saturation",
+      "geometry": "jittered_influence_on",
+      "adaptive_threshold": true,
+      "weight_seed": 3,
+      "topology_seed": 1,
+      "distinct_owners": 2,
+      "dead_cells": 4,
+      "per_pattern_dominance": {
+        "row 1": {
+          "modal_owner": "L2E6",
+          "dominance": 0.5
+        },
+        "col 1": {
+          "modal_owner": "L2E3",
+          "dominance": 0.9167
+        },
+        "diag \\": {
+          "modal_owner": "L2E6",
+          "dominance": 0.8333
+        },
+        "diag /": {
+          "modal_owner": "L2E6",
+          "dominance": 0.9167
+        }
+      },
+      "mean_sustained_dominance": 0.7917,
+      "rf_similarity": {
+        "mean": 0.3408,
+        "max": 0.9595
+      },
+      "adaptive_threshold_summary": {
+        "enabled": true,
+        "final_a_mean": 408.1946,
+        "final_a_max": 3265.3338,
+        "final_a_nonzero_count": 3
+      },
+      "l2i_causal_timing": {
+        "delay": 1,
+        "magnitude": 8000.0,
+        "pending_count": 0,
+        "delivered_log_count": 10
+      },
+      "influence_distribution": {
+        "applied": true,
+        "influence_min": 0.9615,
+        "influence_median": 2.0825,
+        "influence_max": 3.4718,
+        "safe": true
+      }
+    },
+    {
+      "schedule": "short_interleaved",
+      "geometry": "jittered_influence_on",
+      "adaptive_threshold": true,
+      "weight_seed": 3,
+      "topology_seed": 2,
+      "distinct_owners": 1,
+      "per_pattern_consistency": {
+        "row 1": 0.4,
+        "col 1": 0.5,
+        "diag \\": 0.7,
+        "diag /": 0.5
+      },
+      "mean_ambiguity_rate": 0.0,
+      "mean_latency_margin": 2.075,
+      "forgetting": {
+        "row 1": true,
+        "col 1": false,
+        "diag \\": true,
+        "diag /": true
+      },
+      "silent_cells": [
+        "L2E1",
+        "L2E2",
+        "L2E3"
+      ],
+      "recruitable_cells": [
+        "L2E0",
+        "L2E4",
+        "L2E5",
+        "L2E7"
+      ],
+      "collisions": {
+        "L2E6": [
+          "row 1",
+          "col 1",
+          "diag \\",
+          "diag /"
+        ]
+      },
+      "l2i_activity": {
+        "mean_per_presentation": 2.975,
+        "total": 119
+      },
+      "l1i_all_nine_sync_rate": 1.0,
+      "frozen_replay_zero_weight_drift": true,
+      "frozen_first_responder_consistency": {
+        "row 1": 0.5,
+        "col 1": 1.0,
+        "diag \\": 0.5,
+        "diag /": 0.75
+      },
+      "rf_similarity": {
+        "mean": 0.5032,
+        "max": 0.9997
+      },
+      "adaptive_threshold_summary": {
+        "enabled": true,
+        "final_a_mean": 743.3197,
+        "final_a_max": 2088.7917,
+        "final_a_nonzero_count": 4
+      },
+      "l2i_causal_timing": {
+        "delay": 1,
+        "magnitude": 8000.0,
+        "pending_count": 0,
+        "delivered_log_count": 10
+      },
+      "influence_distribution": {
+        "applied": true,
+        "influence_min": 0.9144,
+        "influence_median": 2.0455,
+        "influence_max": 3.3848,
+        "safe": true
+      }
+    },
+    {
+      "schedule": "long_saturation",
+      "geometry": "jittered_influence_on",
+      "adaptive_threshold": true,
+      "weight_seed": 3,
+      "topology_seed": 2,
+      "distinct_owners": 3,
+      "dead_cells": 5,
+      "per_pattern_dominance": {
+        "row 1": {
+          "modal_owner": "L2E5",
+          "dominance": 0.4167
+        },
+        "col 1": {
+          "modal_owner": "L2E0",
+          "dominance": 0.5
+        },
+        "diag \\": {
+          "modal_owner": "L2E6",
+          "dominance": 0.4167
+        },
+        "diag /": {
+          "modal_owner": "L2E0",
+          "dominance": 0.5
+        }
+      },
+      "mean_sustained_dominance": 0.4584,
+      "rf_similarity": {
+        "mean": 0.5722,
+        "max": 0.9995
+      },
+      "adaptive_threshold_summary": {
+        "enabled": true,
+        "final_a_mean": 550.9583,
+        "final_a_max": 1618.1113,
+        "final_a_nonzero_count": 3
+      },
+      "l2i_causal_timing": {
+        "delay": 1,
+        "magnitude": 8000.0,
+        "pending_count": 0,
+        "delivered_log_count": 10
+      },
+      "influence_distribution": {
+        "applied": true,
+        "influence_min": 0.9144,
+        "influence_median": 2.0455,
+        "influence_max": 3.3848,
+        "safe": true
+      }
+    }
+  ]
+}

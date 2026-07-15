@@ -21,9 +21,10 @@
   causal, delayed L2E→L2I→L2E events)
 - Phase 8 END checkpoint commit: `c0ac363` (exact local free-energy learning)
 - Phase 9 END checkpoint commit: `3dd6f4c` (causal L1I predictive feedback)
-- This update corresponds to the **Phase 10 END** checkpoint (adaptive-
-  threshold ablation) — commit hash filled in after this commit lands, see
-  repo log.
+- Phase 10 END checkpoint commit: `d333945` (adaptive-threshold ablation)
+- This update corresponds to the **Phase 11 END** checkpoint (controlled
+  multi-seed validation) — commit hash filled in after this commit lands,
+  see repo log.
 - Base branch `july14` is untouched and remains the protected base.
 - `four-pattern` branch exists (checked out in a separate worktree at
   `/home/charisxiong/Documents/others`) and is explicitly NOT merged here —
@@ -226,6 +227,32 @@ cancelled by manual input -- so probe evaluation can never alter subsequent
 training. Isolation between neurons and deterministic replay are both
 verified directly.
 
+**Current phase (Phase 11, complete) — Controlled multi-seed validation, per
+the corrected Phases 6-12 prompt file:** MEASUREMENT ONLY, no neural
+parameter tuned. Crossed 4 geometry conditions (symmetric/jittered ×
+influence off/on, where "influence" is the original L1E→L2E distance-
+weighting pathway; Phase 4's four separate experimental pathways stay off,
+per the standing "do not enable every pathway together" rule -- a documented
+judgment call) × `adaptive_threshold` off/on (Phase 10) × 3 weight seeds × 2
+topology seeds × 2 schedules (short-interleaved / long-saturation) = 96 runs,
+all built from `DASHBOARD_PRESET` (not raw constructor defaults -- a real
+confound caught and fixed mid-phase before trusting any number: the first,
+discarded pass used raw defaults and produced systematically weaker,
+non-representative results). `N_OUT` stayed 8 throughout. **The stated
+success criterion (four distinct stable owners with spare neurons
+recruitable) was not robustly met in any condition** -- the best cell
+(short-interleaved, influence off, adaptive threshold on) reached it in 4/6
+seed-topology combinations, a real and repeated improvement over the same
+condition without adaptive threshold (2/6), but per the instruction's own
+"do not count one lucky seed as success," 4/6 is a partial result, not a
+pass. Full findings, aggregated tables, and explicit observations-vs-
+conclusions sections are in `Phase11_Multiseed_Validation_Report.md`; raw
+data in `phase11_validation_report.json` (96 records); the harness itself
+(`phase11_validation.py`) and its saved report are both validated by
+`test_phase11_validation.py` (6 tests: report shape/no-gaps, `N_OUT`
+invariance, a mechanical null-result sanity check, harness determinism, and
+a re-derivation of the report's own headline success count from raw data).
+
 ## Completed (this session)
 
 Phase 0 (branch/docs setup):
@@ -376,13 +403,60 @@ Membrane. L2E-only wiring in `_build()`, new engine constructor params
 in `present_probe`/`_end_probe` (unconditional restore regardless of how the
 probe ends). Added `test_adaptive_threshold.py` (16 new tests).
 
+Phase 11 (controlled multi-seed validation; see "Files changed" below):
+built `phase11_validation.py` (a new, self-contained measurement harness,
+reusing `diagnostic_schedule.py`'s already-tested per-presentation recording
+function for the short-interleaved schedule rather than reimplementing it)
+and ran the full 96-run cross (4 geometry x 2 adaptive_threshold x 3 weight
+seeds x 2 topology seeds x 2 schedules). Caught and fixed a real confound
+mid-phase (engines were being built from raw constructor defaults instead of
+`DASHBOARD_PRESET`) before trusting any result -- the corrected, final sweep
+is the one reported. Wrote up full findings with explicit observations vs.
+conclusions sections and a failures-recorded-honestly section in
+`Phase11_Multiseed_Validation_Report.md`. Added `test_phase11_validation.py`
+(6 tests) validating the saved report's shape, `N_OUT` invariance, a
+mechanical sanity check, and harness determinism.
+
 ## In progress
 
-**Phase 10 (adaptive-threshold ablation) is COMPLETE** — single-milestone
-phase, phase-end regressions run, this is the phase-end checkpoint per
-`CLAUDE.md`. No further phase is currently queued.
+**Phase 11 (controlled multi-seed validation) is COMPLETE** — single-
+milestone phase, phase-end regressions run, this is the phase-end checkpoint
+per `CLAUDE.md`. No further phase is currently queued.
 
-## Files changed (Phase 10 — adaptive-threshold ablation, this checkpoint)
+## Files changed (Phase 11 — controlled multi-seed validation, this checkpoint)
+
+- `phase11_validation.py` (new) — the measurement harness. Defines the 4
+  `GEOMETRY_CONDITIONS`, crosses them with `adaptive_threshold`,
+  `WEIGHT_SEEDS=[1,2,3]`, `TOPOLOGY_SEEDS=[1,2]`, and the two schedules.
+  `_engine_kwargs()` builds every engine from `DASHBOARD_PRESET` with only
+  the tested dimensions overridden (the mid-phase fix). Short-interleaved
+  reuses `diagnostic_schedule._present_and_record`/`summarize` directly;
+  long-saturation is a scaled-down version of `sustained_dominance.py`'s
+  honest per-cycle-winner protocol. Per-run helpers compute receptive-field
+  cosine similarity, the adaptive-threshold final-state summary, L2I causal-
+  timing snapshot, and the L1E->L2E influence distribution (with an explicit
+  `applied` flag, since distance/influence VALUES are computed from geometry
+  regardless of whether the pathway is actually consumed by delivery).
+  `--quick` mode (2 seeds, 1 topology seed, 4 cycles) is for fast
+  smoke-testing script changes only -- NOT the data behind the saved report.
+- `phase11_validation_report.json` (new, generated, tracked) — the 96 raw
+  records from the full (non-quick) run.
+- `Phase11_Multiseed_Validation_Report.md` (new) — the written report: method
+  (including the `DASHBOARD_PRESET` fix, documented as a correction, not
+  hidden), the success-criterion table per condition, aggregated observation
+  tables, a clearly separate "Conclusions (interpretive)" section, and a
+  "Failures recorded (not glossed over)" section.
+- `test_phase11_validation.py` (new) — 6 tests: the saved report file exists
+  and parses; every expected (schedule, geometry, adaptive_threshold,
+  weight_seed, topology_seed) combination is present exactly once (96, no
+  duplicates, no gaps); `N_OUT` stayed 8 in every record; geometry alone
+  (symmetric vs. jittered) produces byte-identical metrics when influence is
+  off (a direct proof of the report's own mechanical null-result finding);
+  the harness itself is deterministic (same condition/seed/steps run twice
+  -> identical measurements); and the report's stated best-cell success
+  count (4/6) is independently re-derived from the raw JSON, not hand-typed.
+
+### Phase 10 (prior checkpoint `d333945`)
 
 - `neuron_flexible.py`:
   - New `__init__` state: `adaptive_threshold` (bool, default False),
@@ -941,7 +1015,34 @@ No neural equation and no preset VALUE was changed. `CLAUDE_HANDOFF.md`
 
 ## Tests
 
-### Phase 10 (this checkpoint)
+### Phase 11 (this checkpoint)
+
+- `test_phase11_validation.py` (new, focused): **6/6 passed**.
+- `pytest -q` (full suite): **254 passed, 5 failed** (248 prior + 6 new =
+  254; same 5 pre-existing `test_flow_rate.py`/`test_assembly_flow_credit.py`
+  failures as every prior checkpoint, untouched).
+- **The report's own inputs were validated, not just generated:**
+  `test_report_has_every_expected_combination_with_no_gaps` confirms all 96
+  expected (schedule, geometry, adaptive_threshold, weight_seed,
+  topology_seed) combinations are present exactly once -- no run silently
+  dropped or duplicated; `test_success_criterion_evaluation_matches_recorded_data`
+  independently re-derives the report's headline "4/6" best-cell number
+  straight from the raw JSON, catching any hand-typo between the data and
+  the written report.
+- **The mid-phase confound fix is directly tested:**
+  `test_geometry_alone_is_a_null_result_when_influence_is_off` proves, via a
+  real (if small) run, that symmetric and jittered geometry are byte-
+  identical in every measured metric when influence is off -- the mechanical
+  finding the full report's Conclusion 3 depends on.
+- **Harness determinism:** `test_harness_is_deterministic` runs the identical
+  condition/seed/steps twice and confirms bit-identical measurements -- no
+  hidden RNG in the measurement code itself (separate from the engine's own,
+  already-covered determinism).
+- **No engine/mechanism code was touched this phase** -- `phase11_validation.py`
+  and its test file are the only new files; `git status` confirms zero
+  modified `.py` files outside them.
+
+### Phase 10 (prior checkpoint `d333945`)
 
 - `test_adaptive_threshold.py` (new, focused): **16/16 passed**.
 - `pytest -q` (full suite): **248 passed, 5 failed** (232 prior + 16 new =
@@ -1344,13 +1445,41 @@ No neural equation and no preset VALUE was changed. `CLAUDE_HANDOFF.md`
 
 ## Known problems
 
-- **`adaptive_threshold` is default OFF and its EFFECT is unmeasured.** Phase
-  10 built the mechanism, verified it in isolation, and confirmed it does
-  nothing when off -- it deliberately did NOT run consolidation/retention
-  experiments (that is explicitly Phase 11's job: "cross each condition with
-  adaptive threshold off/on"). `delta_threshold_frac=0.05`/`tau_threshold=25`
-  are reasonable, undocumented-as-optimal defaults; do not read them as
-  tuned/recommended values.
+- **RESOLVED (measured, Phase 11): `adaptive_threshold`'s effect is now
+  characterized, and it is a MIXED result, not a clean win.** It raised mean
+  distinct_owners in 6 of 8 condition-pairs (most in long-saturation:
+  1.67->3.00), left one nearly flat, and actively REDUCED it in one
+  (short-interleaved, symmetric geometry + influence on: 2.33->2.00). Its
+  Phase 10 defaults (`delta_threshold_frac=0.05`/`tau_threshold=25`) were
+  used as-is throughout Phase 11 -- still not tuned/recommended values, now
+  with actual measured behavior attached rather than "unmeasured." See
+  `Phase11_Multiseed_Validation_Report.md` for the full breakdown.
+- **The central ownership-consolidation problem remains open.** Phase 11's
+  96-run sweep found NO condition (of 16 schedule x geometry x
+  adaptive-threshold combinations) that robustly meets "four distinct stable
+  owners with spare neurons recruitable" across all 6 seed-topology
+  combinations. The best cell (short-interleaved, influence off, adaptive
+  threshold on) reaches it in 4/6 -- a real, repeated improvement over the
+  same condition without adaptive threshold (2/6), but explicitly NOT counted
+  as a pass per the phase's own "do not count one lucky seed" instruction.
+  This is the same central failure the Phase 1 audit first identified,
+  narrowed down across six intervening phases of causal-dynamics work
+  (Phases 6-10) without being solved by any of them individually or in
+  combination -- consistent with each of those phases' own scope (none of
+  them claimed to solve one-to-one ownership; each replaced a specific
+  mechanism with a more physically-grounded one).
+- **Distance-weighting "influence" has a schedule-DEPENDENT effect, not a
+  uniform one.** Turning it on REDUCED distinct_owners in short-interleaved
+  (3.33->2.33 symmetric, 3.33->1.50 jittered) but modestly INCREASED it in
+  long-saturation (1.67->2.33 symmetric, 1.67->2.17 jittered), both at
+  adaptive_threshold=False. Reported as-observed; not resolved or tuned
+  toward either direction.
+- **Geometry alone (symmetric vs. jittered) has ZERO measured effect on any
+  metric unless an influence pathway is actively consuming it** -- confirmed
+  bit-identical across every metric in Phase 11's data whenever
+  `distance_weighting` is off. This reconfirms (does not newly discover) the
+  Phase 3/4 architecture: position is purely structural/cosmetic until a
+  distance-weighted delivery pathway reads it.
 - **L1I still has no real per-unit geometric/causal differentiation by
   default.** All 9 units share one literal feedback weight vector and
   receive an identical `l2e` delivery, so their synchrony (confirmed again
@@ -1532,15 +1661,26 @@ No neural equation and no preset VALUE was changed. `CLAUDE_HANDOFF.md`
 
 ## Next action
 
-Phase 10 is closed. Per the corrected Phases 6-12 prompt file (see
+Phase 11 is closed. Per the corrected Phases 6-12 prompt file (see
 Branch/HEAD) and the user's explicit "continue autonomously through Phases
-7-12" instruction, **Phase 11 (controlled multi-seed validation) is next**
-and is being started immediately in this same session. Phase 11 will
-exercise `adaptive_threshold` off/on as one of its crossed conditions -- this
-is where its effect first gets measured.
+7-12" instruction, **Phase 12 (final local review; do not publish) is next**
+and is being started immediately in this same session. Phase 12 must not
+implement new mechanisms or tune around Phase 11's results -- it reviews the
+Phase 11 evidence against the stated success criteria, verifies
+configuration/probe/determinism/backend-UI-agreement/no-software-tiebreak
+invariants across the whole branch, and produces a final local
+review+handoff document. No push, merge, or PR.
 
 Other candidates for a future phase, none started, all needing their own
 explicit go-ahead:
+- Investigate the central ownership-consolidation problem directly (Phase
+  11's 96-run sweep confirms it is still open in every configuration tested)
+  -- NOT by tuning `l2_inhibition_frac`/`delta_threshold_frac`/etc. to force
+  a metric, per the standing "no software exception" guidance that has
+  shaped every phase since Phase 7.
+- Investigate the schedule-dependent direction-flip of distance-weighting
+  influence on distinct_owners (helps long-saturation, hurts
+  short-interleaved) -- Phase 11 measured it but did not investigate why.
 - Enable Phase 4's `infl_l2e_l1i` pathway (a real, demonstrated, geometric
   per-unit differentiator for L1I) as a default/canonical behavior, if
   genuine per-unit L1I differentiation is wanted rather than the current
