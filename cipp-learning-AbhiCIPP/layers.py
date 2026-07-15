@@ -14,7 +14,7 @@ class InputLayer:
     
     def __init__(self, n_neurons, threshold=1000 / UNIT, refractory_period=2,
                  learning_rate=0.05, weight_cap=1000 / UNIT, leak_rate=10 / LEAK_SCALE,
-                 n_feedback_inputs=0):
+                 n_feedback_inputs=0, n_prediction_inputs=0):
         """
         Initialize input layer.
 
@@ -28,13 +28,18 @@ class InputLayer:
             n_feedback_inputs: Number of top-down feedback synapses on each
                 inhibitory neuron (e.g. one per higher-layer E neuron, for the
                 E2->I1 "quiet the inputs" loop). 0 keeps a single inert input.
+            n_prediction_inputs: Number of extra replay/prediction excitatory
+                inputs appended to each L1 excitatory neuron after the paired
+                inhibitory gate and external sensory input. Default 0 preserves
+                the legacy 2-slot L1E layout exactly.
         """
         self.n_neurons = n_neurons
         self.n_feedback_inputs = n_feedback_inputs
+        self.n_prediction_inputs = n_prediction_inputs
 
         # Create excitatory neurons (each receives input from its inhibitory neuron + external)
         self.excitatory_neurons = [
-            Neuron(n_inputs=2, threshold=threshold, refractory_period=refractory_period,
+            Neuron(n_inputs=2 + n_prediction_inputs, threshold=threshold, refractory_period=refractory_period,
                    learning_rate=learning_rate, weight_cap=weight_cap, leak_rate=leak_rate)
             for _ in range(n_neurons)
         ]
@@ -89,7 +94,7 @@ class InputLayer:
             
             # For now, we'll set this up to receive external input and 
             # the inhibitory connection will be handled when we know the I neuron's state
-            E_input = np.array([0.0, external_inputs[i]])  # [from_I, external]
+            E_input = np.array([0.0, external_inputs[i], *([0.0] * self.n_prediction_inputs)])
             self.excitatory_neurons[i].receive_input(E_input)
             
             # Inhibitory neuron receives input (will be set by L2 feedback connections)

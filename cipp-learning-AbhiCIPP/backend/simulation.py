@@ -43,7 +43,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from layers import InputLayer                       # noqa: E402
 from cortical_column_flexible import CorticalColumn  # noqa: E402
-from neuron_flexible import UNIT, LEAK_SCALE         # noqa: E402  fixed-point convention
+from neuron_flexible import UNIT, LEAK_SCALE, Neuron  # noqa: E402  fixed-point convention
 from snn import NeuronConfig                          # noqa: E402  engine-sourced neuron config
 
 
@@ -88,6 +88,14 @@ STATUS_RECENT_WINDOW = 200
 # are independent.
 N_PIX = 9
 N_OUT = 8
+PRED_CONTROL_NORMAL = 'normal'
+PRED_CONTROL_DISABLED = 'disabled'
+PRED_CONTROL_SHUFFLED = 'shuffled'
+PREDICTION_CONTROL_MODES = (
+    PRED_CONTROL_NORMAL,
+    PRED_CONTROL_DISABLED,
+    PRED_CONTROL_SHUFFLED,
+)
 
 # 3D layout for the L2 output neurons -- evenly spaced ring in the XY plane.
 import math as _math
@@ -772,6 +780,22 @@ class SimulationEngine:
                  # (those Lecture 14 proposals are explicitly deferred, not
                  # implemented here).
                  pretrained_l2i_recruitment: bool = False,
+                 # Phase 19A (LPS Lecture 14 corrected prediction scaffold;
+                 # see Phase18b_Lecture14_Prediction_Architecture_Contract_
+                 # Corrected.md). Default OFF reproduces the exact baseline
+                 # topology and step() behavior. When True: builds nine
+                 # prediction excitatory neurons P0..P8, one per input column,
+                 # stores an 8x9 positive-bounded L2Ej->Pi decoder matrix, and
+                 # enables a fixed local Pi->L1Ei replay path. Physical timing
+                 # stays causal and delayed only: L2Ej at t can affect Pi no
+                 # earlier than t+1, and Pi at t can affect its paired L1Ei no
+                 # earlier than t+1 (so a sensory L2E spike at t replays no
+                 # earlier than t+2). This checkpoint is a SCAFFOLD ONLY:
+                 # decoder learning is deliberately NOT implemented here.
+                 prediction_excitatory_enabled: bool = False,
+                 # Reserved for a future explicitly-justified local L2E->P
+                 # decoder-learning equation. Phase 19A does not use it.
+                 eta_pred: float = 0.05,
                  # Capacity rule for the minimal experiment (see the prompt's
                  # "Threshold, Cap, Floor" section). l2e_weight_cap_frac sets each
                  # L2E positive feedforward weight cap to frac*thr_l2, so three
@@ -917,6 +941,8 @@ class SimulationEngine:
                            loser_depression_protection=loser_depression_protection,
                            loser_depression_protection_ca_ref=loser_depression_protection_ca_ref,
                            pretrained_l2i_recruitment=pretrained_l2i_recruitment,
+                           prediction_excitatory_enabled=prediction_excitatory_enabled,
+                           eta_pred=eta_pred,
                            l2e_weight_cap_frac=l2e_weight_cap_frac,
                            pos_weight_floor=pos_weight_floor,
                            l2e_init_mode=l2e_init_mode,
@@ -959,15 +985,18 @@ class SimulationEngine:
         thr_l2i = thr_l2 * p['l2i_threshold_frac']   # L2I's own firing threshold
         thr_l1i = thr_l2i * p['l1i_threshold_frac']  # 1.0 => L1I exactly matches L2I
 
+        self.prediction_excitatory_enabled = bool(p['prediction_excitatory_enabled'])
         self.l1 = InputLayer(n_neurons=N_PIX, threshold=thr_l1,
                              refractory_period=p['refractory'], learning_rate=p['learning_rate'],
                              weight_cap=thr_l1, leak_rate=p['leak_l1'],
-                             n_feedback_inputs=N_OUT)
+                             n_feedback_inputs=N_OUT,
+                             n_prediction_inputs=(1 if self.prediction_excitatory_enabled else 0))
         # L1E: pre-trained pixel encoders — fixed weights, no learning.
         # Fixed-point scale: gate -1*UNIT, excitatory drive +1*UNIT, so one pixel
         # spike delivers UNIT charge == thr_l1 and fires the encoder in one hit.
         for e in self.l1.excitatory_neurons:
-            e.weights = np.array([-1.0, 1.0]) * UNIT
+            replay_tail = [1.0] if self.prediction_excitatory_enabled else []
+            e.weights = np.array([-1.0, 1.0, *replay_tail]) * UNIT
             e.learning_rate = 0.0
             e.weight_budget = None
             # The local-inhibition gate (index 0, magnitude UNIT) is meant to sit
@@ -1002,6 +1031,35 @@ class SimulationEngine:
             inh.weights = l1i_feedback_init.copy()
             inh.leak_rate = L1I_LEAK_RATE if p['l1i_leak_enabled'] else 0.0
             inh.refractory_period = L1I_FEEDBACK_REFRACTORY
+
+        # Phase 19A: nine per-input-column prediction neurons P0..P8 plus a
+        # stored 8x9 L2E->P decoder matrix. The decoder weights live on each
+        # Pi's incoming vector for serialization convenience, but Phase 19A
+        # does NOT update them -- they are scaffold state only. The future
+        # unresolved local-learning question is pixel-specific: Pi would need a
+        # postsynaptic local "pixel i was present" teaching signal at the
+        # moment a causal L2E event arrives, not a global reconstruction loss
+        # or pattern label. That signal is not yet specified here.
+        self.eta_pred = float(p['eta_pred'])
+        self.prediction_replay_enabled = self.prediction_excitatory_enabled
+        self.prediction_decoder_control = PRED_CONTROL_NORMAL
+        self.prediction_weight_cap = float(UNIT * thr_l1)
+        self.prediction_replay_weight = float(UNIT * thr_l1)
+        self._prediction_shuffle_perm = tuple(np.roll(np.arange(N_PIX), 1))
+        self.l1p: list = []
+        if self.prediction_excitatory_enabled:
+            for _i in range(N_PIX):
+                pn = Neuron(n_inputs=N_OUT, threshold=thr_l1,
+                           refractory_period=p['refractory'], learning_rate=0.0,
+                           weight_cap=thr_l1, leak_rate=p['leak_l1'])
+                pn._weights_array = np.zeros(N_OUT)
+                self.l1p.append(pn)
+        self._prediction_pending_decoder: list[dict] = []
+        self._prediction_pending_replay: list[dict] = []
+        self._prediction_last_decoder_arrivals: list[dict] = []
+        self._prediction_last_decoder_integrated: list[dict] = []
+        self._prediction_last_replay_arrivals: list[dict] = []
+        self._prediction_last_replay_deliveries: list[dict] = []
 
         # L2E leak is independently switchable from the shared L2I neuron's fast
         # evidence-window leak.
@@ -1445,6 +1503,13 @@ class SimulationEngine:
             self.meta[nid] = dict(id=nid, label=f'inh {i}', layer='L1', type='I',
                                   threshold=self.params['threshold'],
                                   pos=[round(float(l1i_xy[i, 0]), 4), round(float(l1i_xy[i, 1]), 4), -2.0])
+        if self.prediction_excitatory_enabled:
+            for i in range(N_PIX):
+                nid = f'P{i}'
+                self.neurons[nid] = self.l1p[i]
+                self.meta[nid] = dict(id=nid, label=f'pred {i}', layer='L1', type='P',
+                                      pixel_index=i, threshold=self.params['threshold'],
+                                      pos=[round(float(l1e_xy[i, 0]), 4), round(float(l1e_xy[i, 1]), 4), 1.0])
         for j in range(N_OUT):
             nid = f'L2E{j}'
             self.neurons[nid] = self.l2.excitatory_neurons[j]
@@ -1477,6 +1542,14 @@ class SimulationEngine:
         for j in range(N_OUT):
             for i in range(N_PIX):
                 self.synapses.append(dict(id=f'fb{j}->{i}', source=f'L2E{j}', target=f'L1I{i}', kind='feedback'))
+        if self.prediction_excitatory_enabled:
+            for j in range(N_OUT):
+                for i in range(N_PIX):
+                    self.synapses.append(dict(id=f'decoder{j}->{i}', source=f'L2E{j}',
+                                              target=f'P{i}', kind='decoder'))
+            for i in range(N_PIX):
+                self.synapses.append(dict(id=f'pred{i}->{i}', source=f'P{i}',
+                                          target=f'L1E{i}', kind='prediction_replay'))
 
     def _apply_l2e_distances(self):
         """Populate each L2E's per-afferent DELIVERY distance: euclidean(L2E_home,
@@ -1554,12 +1627,14 @@ class SimulationEngine:
             inh.distance_power, inh.distance_ref, inh.distance_min = power, ref, d_min
             inh.distance = d_row
 
-        # ---- L1I -> L1E: paired distance (index 0 real, index 1 neutralized) ----
+        # ---- L1I -> L1E: paired distance (index 0 real, every excitatory input
+        # slot neutralized so sensory and optional replay channels never inherit
+        # this inhibitory-path attenuation bookkeeping) ----
         for i, e in enumerate(self.l1.excitatory_neurons):
             d_pair = float(np.linalg.norm(l1e_xyz[i] - l1i_xyz[i]))
             e.distance_weighting = bool(p['infl_l1i_l1e'])
             e.distance_power, e.distance_ref, e.distance_min = power, ref, d_min
-            e.distance = np.array([d_pair, ref])
+            e.distance = np.array([d_pair, *([ref] * (len(e.weights) - 1))])
 
         # Cached for pathway_influence_report() -- avoids recomputing geometry.
         self._pathway_geometry = dict(l2e_xyz=l2e_xyz, l1i_xyz=l1i_xyz,
@@ -1732,7 +1807,10 @@ class SimulationEngine:
                'loser_depression_protection', 'loser_depression_protection_ca_ref',
                # Phase 17: pre-trained, task-independent L2E->L2I recruitment
                # (LPS Lecture 14 mapping; separate from every mechanism above).
-               'pretrained_l2i_recruitment')
+               'pretrained_l2i_recruitment',
+               # Phase 19: corrected per-input-column prediction architecture
+               # (LPS Lecture 14 mapping; separate from every mechanism above).
+               'prediction_excitatory_enabled', 'eta_pred')
 
     def apply_config(self, overrides: dict):
         """Merge tunable overrides into self.params and rebuild the network in
@@ -1757,7 +1835,7 @@ class SimulationEngine:
                      'l1i_leak_enabled', 'symmetric_geometry', 'legacy_distance_compat',
                      'infl_l2e_l2i', 'infl_l2i_l2e', 'infl_l2e_l1i', 'infl_l1i_l1e',
                      'adaptive_threshold', 'loser_depression_protection',
-                     'pretrained_l2i_recruitment'):
+                     'pretrained_l2i_recruitment', 'prediction_excitatory_enabled'):
                 v = bool(v)
             elif k in ('seed', 'refractory', 'l2_charge_chunks', 'l2_inhibition_delay'):
                 v = int(v)
@@ -1896,6 +1974,110 @@ class SimulationEngine:
             self._pulses[neuron_id] = self._pulses.get(neuron_id, 0.0) + magnitude
         self._log('control', f'stimulate {neuron_id} (+{magnitude:g}{", hold" if continuous else ""})')
 
+    def _stored_prediction_decoder_matrix(self) -> np.ndarray:
+        mat = np.zeros((N_OUT, N_PIX))
+        if not self.prediction_excitatory_enabled:
+            return mat
+        for i, pn in enumerate(self.l1p):
+            mat[:, i] = pn._weights_array.astype(float)
+        return mat
+
+    def _effective_prediction_decoder_matrix(self) -> np.ndarray:
+        mat = self._stored_prediction_decoder_matrix()
+        if self.prediction_decoder_control == PRED_CONTROL_DISABLED:
+            return np.zeros_like(mat)
+        if self.prediction_decoder_control == PRED_CONTROL_SHUFFLED:
+            return mat[:, self._prediction_shuffle_perm]
+        return mat
+
+    def _prediction_decoder_dict(self, mat: np.ndarray) -> dict[str, list[float]]:
+        return {f'L2E{j}': [round(float(mat[j, i]), 4) for i in range(N_PIX)] for j in range(N_OUT)}
+
+    def set_prediction_decoder_weight(self, l2e_index: int, pixel_index: int, value: float):
+        if not self.prediction_excitatory_enabled:
+            raise RuntimeError('prediction excitatory scaffold is disabled')
+        if not (0 <= l2e_index < N_OUT):
+            raise IndexError(l2e_index)
+        if not (0 <= pixel_index < N_PIX):
+            raise IndexError(pixel_index)
+        clipped = min(max(float(value), 0.0), self.prediction_weight_cap)
+        self.l1p[pixel_index]._weights_array[l2e_index] = clipped
+
+    def set_prediction_decoder_control(self, mode: str):
+        if mode not in PREDICTION_CONTROL_MODES:
+            raise ValueError(mode)
+        self.prediction_decoder_control = mode
+        self._log('control', f'prediction decoder control: {mode}')
+
+    def _schedule_prediction_decoder_events(self, l2e, t: int):
+        self._prediction_pending_decoder = []
+        if not self.prediction_excitatory_enabled:
+            return
+        eff = self._effective_prediction_decoder_matrix()
+        pending = []
+        for j in range(N_OUT):
+            if not l2e[j]:
+                continue
+            for i in range(N_PIX):
+                w = float(eff[j, i])
+                if w <= WEIGHT_EPS:
+                    continue
+                pending.append(dict(id=f'decoder{j}->{i}', source=f'L2E{j}', target=f'P{i}',
+                                    source_index=j, pixel_index=i, scheduled_step=t,
+                                    arrival_step=t + 1, weight=round(w, 4),
+                                    control=self.prediction_decoder_control))
+        self._prediction_pending_decoder = pending
+
+    def _deliver_prediction_decoder_events(self, t: int) -> np.ndarray:
+        self._prediction_last_decoder_arrivals = [dict(rec) for rec in self._prediction_pending_decoder]
+        self._prediction_last_decoder_integrated = []
+        charge = np.zeros(N_PIX)
+        sources = [[] for _ in range(N_PIX)]
+        for rec in self._prediction_last_decoder_arrivals:
+            i = int(rec['pixel_index'])
+            charge[i] += float(rec['weight'])
+            sources[i].append(rec['source'])
+        for i, pn in enumerate(self.l1p):
+            if charge[i] <= WEIGHT_EPS:
+                continue
+            v_pre = float(pn.potential)
+            applied = pn.refractory_timer <= 0
+            if applied:
+                pn.potential += charge[i]
+            self._prediction_last_decoder_integrated.append(
+                dict(target=f'P{i}', pixel_index=i, arrival_step=t,
+                     sources=list(sources[i]), charge=round(float(charge[i]), 4),
+                     applied=applied, refractory=int(pn.refractory_timer),
+                     v_pre=round(v_pre, 4), v_post=round(float(pn.potential), 4)))
+        return charge
+
+    def _schedule_prediction_replay_events(self, p_spiked, t: int):
+        self._prediction_pending_replay = []
+        if not (self.prediction_excitatory_enabled and self.prediction_replay_enabled):
+            return
+        self._prediction_pending_replay = [
+            dict(id=f'pred{i}->{i}', source=f'P{i}', target=f'L1E{i}', pixel_index=i,
+                 scheduled_step=t, arrival_step=t + 1,
+                 weight=round(float(self.prediction_replay_weight), 4))
+            for i in range(N_PIX) if p_spiked[i]
+        ]
+
+    def _prediction_replay_inputs(self, t: int) -> np.ndarray:
+        self._prediction_last_replay_arrivals = [dict(rec) for rec in self._prediction_pending_replay]
+        self._prediction_last_replay_deliveries = []
+        replay = np.zeros(N_PIX)
+        if not (self.prediction_excitatory_enabled and self.prediction_replay_enabled):
+            return replay
+        for rec in self._prediction_last_replay_arrivals:
+            i = int(rec['pixel_index'])
+            replay[i] = 1.0
+            self._prediction_last_replay_deliveries.append(
+                dict(source=rec['source'], target=rec['target'], pixel_index=i,
+                     delivery_step=t, replay_input=1.0,
+                     replay_weight=round(float(self.prediction_replay_weight), 4),
+                     sensory_pixel_active=bool(self.input_vec[i] > 0.5)))
+        return replay
+
     def _resolve_l2_competition(self, l2, l2e, t):
         """PHASE 7 -- causal L2E->L2I->L2E competition (replaces the retired
         argmax immediate-reset tiebreak; see July_14_Geometric_Influence_
@@ -2030,15 +2212,31 @@ class SimulationEngine:
         # step and now due, BEFORE this step's own L1E/L2E processing -- same
         # one-step-register precedent as l1i_feedback_delay below.
         l2_inhibition_delivered = self._deliver_scheduled_l2_inhibition(t)
+
+        # Phase 19A: deliver already-scheduled prediction events only. Decoder
+        # arrivals were queued by last step's physical L2E spikes, so they land
+        # at t+1 only; replay arrivals were queued by last step's physical P
+        # spikes, so they land at t+1 relative to P and therefore no earlier
+        # than t+2 relative to the original L2E event.
+        p_spiked = np.zeros(N_PIX)
+        replay_inputs = np.zeros(N_PIX)
+        if self.prediction_excitatory_enabled:
+            self._deliver_prediction_decoder_events(t)
+            replay_inputs = self._prediction_replay_inputs(t)
+
         for i, e in enumerate(l1.excitatory_neurons):
             ext = 1.0 if (input_arrives and self.input_vec[i] > 0.5) else 0.0
-            e.receive_input(np.array([0.0, ext]))
+            if self.prediction_excitatory_enabled:
+                e.receive_input(np.array([0.0, ext, replay_inputs[i]]))
+            else:
+                e.receive_input(np.array([0.0, ext]))
             # L1I feedback is a one-step delayed pulse. With constant presentation,
             # a pulse at t exactly cancels its paired pixel drive at t+1 and is then
             # consumed when this register is replaced at the end of the step.
             inh = float(self.l1i_feedback_delay[i]) if input_arrives else 0.0
             if inh > 0.5:
-                for ev in e.apply_inhibition(np.array([1.0, 0.0])):
+                inh_vec = np.array([1.0, *([0.0] * (len(e.weights) - 1))])
+                for ev in e.apply_inhibition(inh_vec):
                     self._inh_events.append((f'L1E{i}', ev))
 
         # Phase 9: capture the delivery/effect record for the FIRST L1I
@@ -2053,6 +2251,14 @@ class SimulationEngine:
             self._l1i_delivery_capture_pending = False
 
         self._apply_stim()
+
+        if self.prediction_excitatory_enabled:
+            for i, pn in enumerate(self.l1p):
+                if p_spiked[i]:
+                    continue
+                if pn.check_threshold():
+                    pn.fire()
+                    p_spiked[i] = 1.0
 
         # 2a. L1E fires (no competition).
         l1e = np.array([1.0 if e.check_threshold() else 0.0 for e in l1.excitatory_neurons])
@@ -2166,6 +2372,9 @@ class SimulationEngine:
         # mutate any neuron; dynamic_state() reports the later live membrane phase.
         self.l2_charge = {f'L2E{j}': float(e.potential) for j, e in enumerate(l2.excitatory_neurons)}
 
+        if self.prediction_excitatory_enabled:
+            self._schedule_prediction_decoder_events(l2e, t)
+
         # 2d. Deliver L2E winner spike immediately to all L1I neurons (feedback).
         #     l2e is length N_OUT with a 1 at the winner index, matching each
         #     L1I neuron's N_OUT-dimensional afferent weight vector. (t carries the
@@ -2203,6 +2412,8 @@ class SimulationEngine:
                 for i in range(N_PIX):
                     self.emitted.append(f'fb{j}->{i}')
                 self.emitted.append(f'{j}->inh')
+        for rec in self._prediction_last_decoder_arrivals:
+            self.emitted.append(rec['id'])
         # Phase 7: the L2I->L2E fanout edge now flashes on actual DELIVERY
         # (this step's due deliveries, applied above at the top of step()),
         # not on an immediate same-step reset.
@@ -2211,6 +2422,8 @@ class SimulationEngine:
         for i in range(N_PIX):
             if l1i[i]:
                 self.emitted.append(f'li{i}')
+        for rec in self._prediction_last_replay_arrivals:
+            self.emitted.append(rec['id'])
 
         # 4. Advance membrane state (leak + refractory countdown).
         for e in l1.excitatory_neurons:
@@ -2220,9 +2433,13 @@ class SimulationEngine:
         for e in l2.excitatory_neurons:
             e.update()
         l2.inhibitory_neuron.update()
+        if self.prediction_excitatory_enabled:
+            for pn in self.l1p:
+                pn.update()
+            self._schedule_prediction_replay_events(p_spiked, t)
 
         # 5. Bookkeeping.
-        self._record_spikes(l1e, l1i, l2e, l2i)
+        self._record_spikes(l1e, l1i, l2e, l2i, p_spiked if self.prediction_excitatory_enabled else None)
         # Phase 10: adaptive-threshold trajectory (end-of-step a_i, post-decay).
         for j, e in enumerate(l2.excitatory_neurons):
             self.threshold_adapt_history[f'L2E{j}'].append(round(float(e.threshold_adapt), 4))
@@ -2275,10 +2492,16 @@ class SimulationEngine:
         for nid, mag in self._holds.items():
             self.neurons[nid].potential += mag
 
-    def _record_spikes(self, l1e, l1i, l2e, l2i):
+    def _record_spikes(self, l1e, l1i, l2e, l2i, pred=None):
         for i in range(N_PIX):
             self.spiked[f'L1E{i}'] = bool(l1e[i]); self.freq[f'L1E{i}'].append(l1e[i])
             self.spiked[f'L1I{i}'] = bool(l1i[i]); self.freq[f'L1I{i}'].append(l1i[i])
+        # Phase 19: P population spike/frequency tracking, same convention as
+        # every other population -- untouched (pred is None) when
+        # prediction_excitatory_enabled is off.
+        if pred is not None:
+            for i in range(N_PIX):
+                self.spiked[f'P{i}'] = bool(pred[i]); self.freq[f'P{i}'].append(pred[i])
         for j in range(N_OUT):
             self.spiked[f'L2E{j}'] = bool(l2e[j]); self.freq[f'L2E{j}'].append(l2e[j])
         self.spiked['L2I'] = bool(l2i); self.freq['L2I'].append(l2i)
@@ -2529,6 +2752,14 @@ class SimulationEngine:
             fbw = self.l1.inhibitory_neurons[i].weights
             for j in range(N_OUT):
                 w[f'fb{j}->{i}'] = float(fbw[j])
+        # Phase 19A: stored decoder matrix plus fixed local replay edges.
+        if self.prediction_excitatory_enabled:
+            stored = self._stored_prediction_decoder_matrix()
+            for j in range(N_OUT):
+                for i in range(N_PIX):
+                    w[f'decoder{j}->{i}'] = float(stored[j, i])
+            for i in range(N_PIX):
+                w[f'pred{i}->{i}'] = float(self.prediction_replay_weight)
         return w
 
     def _detect_weight_changes(self):
@@ -2668,9 +2899,23 @@ class SimulationEngine:
                                  legacy_distance_compat_active=(
                                      self.params['legacy_distance_compat']
                                      and not self.params['symmetric_geometry'])),
-                    grid=dict(rows=3, cols=3), params=self.params)
+                    grid=dict(rows=3, cols=3),
+                    prediction=dict(
+                        enabled=self.prediction_excitatory_enabled,
+                        decoder_shape=[N_OUT, N_PIX],
+                        p_ids=[f'P{i}' for i in range(N_PIX)] if self.prediction_excitatory_enabled else [],
+                        pixel_mapping={f'P{i}': i for i in range(N_PIX)} if self.prediction_excitatory_enabled else {},
+                        replay_weight=round(float(self.prediction_replay_weight), 4)
+                        if self.prediction_excitatory_enabled else None,
+                        learning_note=('Phase 19A scaffolds storage/delivery only; a future local '
+                                       'L2E->P rule needs a pixel-local teaching signal for Pi, '
+                                       'not labels or a global reconstruction error.')
+                    ),
+                    params=self.params)
 
     def dynamic_state(self) -> dict:
+        stored_decoder = self._stored_prediction_decoder_matrix()
+        effective_decoder = self._effective_prediction_decoder_matrix()
         neurons = []
         for nid, n in self.neurons.items():
             # Report one coherent phase for every population: the live membrane at
@@ -2781,6 +3026,30 @@ class SimulationEngine:
                                 for rec in self._l2i_pending],
                         last_delivery=self._last_l2_inhibition_delivery,
                         log=list(self._l2_inhibition_log)[-10:]),
+                    prediction=dict(
+                        enabled=self.prediction_excitatory_enabled,
+                        replay_enabled=self.prediction_replay_enabled,
+                        decoder_control=self.prediction_decoder_control,
+                        plasticity_frozen=self.plasticity_frozen,
+                        sensory_input_present=bool(np.any(self.input_vec > 0.5)),
+                        p_ids=[f'P{i}' for i in range(N_PIX)] if self.prediction_excitatory_enabled else [],
+                        pixel_mapping={f'P{i}': i for i in range(N_PIX)} if self.prediction_excitatory_enabled else {},
+                        stored_decoder=self._prediction_decoder_dict(stored_decoder),
+                        effective_decoder=self._prediction_decoder_dict(effective_decoder),
+                        local_replay={f'P{i}': dict(target=f'L1E{i}',
+                                                    weight=round(float(self.prediction_replay_weight), 4))
+                                      for i in range(N_PIX)} if self.prediction_excitatory_enabled else {},
+                        pending=dict(decoder=list(self._prediction_pending_decoder),
+                                     replay=list(self._prediction_pending_replay)),
+                        arrived=dict(decoder=list(self._prediction_last_decoder_arrivals),
+                                     replay=list(self._prediction_last_replay_arrivals)),
+                        integrated=dict(decoder=list(self._prediction_last_decoder_integrated)),
+                        delivered=dict(replay=list(self._prediction_last_replay_deliveries)),
+                        weight_cap=round(float(self.prediction_weight_cap), 4)
+                        if self.prediction_excitatory_enabled else None,
+                        learning_note=('Phase 19A does not implement active L2E->P plasticity. '
+                                       'A future local rule must use only signals local to Pi and '
+                                       'its incoming decoder synapses.')),
                     # Phase 10: adaptive-threshold ablation state/trajectory
                     # (L2E only; a_i and its history stay 0/empty for every
                     # other population always, and for L2E itself whenever the

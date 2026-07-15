@@ -760,6 +760,44 @@ promotion-bar scorecard are in
 `phase17_lecture14_audit.json` and `phase17_controlled_comparison_summary.json`
 (both committed).
 
+**Current phase (Phase 19A, corrected scaffold checkpoint) — Per-input-column
+prediction population with delayed local replay, default OFF.** This
+explicitly supersedes the abandoned "one predictor per L2E, broadcast to all
+9 L1E" main-line topology. The implemented scaffold now matches the corrected
+Lecture 14 contract's first reconstruction milestone:
+
+- exactly nine prediction neurons `P0..P8`, each permanently mapped to one
+  input column / pixel;
+- stored positive-bounded `L2Ej -> Pi` decoder matrix (`decoder{j}->{i}`),
+  exposed/serialized but **not learned** in Phase 19A;
+- fixed local `Pi -> L1Ei` replay only (`pred{i}->{i}`), no `P -> L1I`, no
+  `P -> P`, no broadcast `P -> all L1E`;
+- causal delay preserved end-to-end: `L2E@t -> P@t+1 -> L1E@t+2`, with no
+  same-step `L2E -> P -> L1E` shortcut;
+- backend observability added for prediction neuron state, stored/effective
+  decoder matrices, control mode (`normal` / `disabled` / `shuffled`), and
+  queued/arrived/integrated/delivered prediction events.
+
+**Important explicit boundary:** no active `L2E -> P` plasticity equation is
+implemented in this checkpoint. The earlier candidate rule was removed from the
+runtime path. The unresolved local-learning requirement is now documented
+directly in code and in `Phase19A_Corrected_Prediction_Scaffold.md`: a future
+decoder rule needs a pixel-local teaching signal telling `Pi` whether *pixel i*
+was truly present when a causal `L2E` event arrived, without labels, owner
+tables, argmax routing, or global reconstruction error.
+
+**Verification:** focused corrected-topology tests in
+`test_prediction_phase19.py` pass `11/11` (feature-off baseline equivalence,
+exactly nine `P` neurons, full `8x9` decoder connectivity, strict local replay,
+no `P -> L1I`, no same-step `L2E -> P` or `P -> L1E`, frozen replay does not
+mutate weights/confidence/specialization state, disabled/shuffled controls do
+not mutate the stored matrix, legacy L1I/L2I causal behavior unchanged when
+prediction is inert). Full script-style suite re-run under the available local
+virtualenv passed `29/30`; the lone non-pass,
+`test_phase13b_tracer_timing.py`, failed to start because that environment
+does not have `pytest` installed (`ModuleNotFoundError: No module named
+'pytest'`), not because of a new Phase 19A neural-dynamics regression.
+
 ## Completed (this session)
 
 Phase 0 (branch/docs setup):
