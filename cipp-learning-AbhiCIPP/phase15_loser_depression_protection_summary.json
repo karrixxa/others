@@ -1,0 +1,4717 @@
+{
+  "weight_seeds": [
+    1,
+    2,
+    3,
+    4,
+    5
+  ],
+  "topology_seeds": [
+    1,
+    2,
+    3
+  ],
+  "grid_results": [
+    {
+      "config": "A_default",
+      "weight_seed": 1,
+      "topology_seed": 1,
+      "scenario": "long_hold_switch",
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E1",
+        "L2E2",
+        "L2E6",
+        "L2E7"
+      ],
+      "first_spike_latency": {
+        "L2E0": null,
+        "L2E1": null,
+        "L2E2": null,
+        "L2E3": 10,
+        "L2E4": 9,
+        "L2E5": 7,
+        "L2E6": null,
+        "L2E7": null
+      },
+      "status": {
+        "L2E0": "unrecruited",
+        "L2E1": "unrecruited",
+        "L2E2": "unrecruited",
+        "L2E3": "quiet",
+        "L2E4": "quiet",
+        "L2E5": "active",
+        "L2E6": "unrecruited",
+        "L2E7": "unrecruited"
+      },
+      "active_count": 1,
+      "quiet_count": 2,
+      "unrecruited_count": 5,
+      "tyrant": "L2E5",
+      "tyrant_share": 0.4313,
+      "depression_by_maturity": {
+        "0.75-1.00": {
+          "n": 1440,
+          "mean_delta_abs": 0.8423
+        }
+      },
+      "physical_inhibition_applied_count": 1800,
+      "physical_inhibition_skipped_refractory_count": 0,
+      "first_delivery_event": {
+        "neuron": "L2E0",
+        "t": 11,
+        "applied": true,
+        "v_pre": 7900.766999301922,
+        "v_post": 0.0,
+        "magnitude": 8000.0
+      },
+      "multi_firer_rate": 0.1575,
+      "multi_firer_steps": 126,
+      "total_steps": 800,
+      "eventually_fired_after_never_early": {
+        "L2E0": false,
+        "L2E1": false,
+        "L2E2": false,
+        "L2E6": false,
+        "L2E7": false
+      }
+    },
+    {
+      "config": "A_default",
+      "weight_seed": 1,
+      "topology_seed": 1,
+      "scenario": "interleaved_40",
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E1"
+      ],
+      "first_spike_latency": {
+        "L2E0": null,
+        "L2E1": null,
+        "L2E2": 31,
+        "L2E3": 10,
+        "L2E4": 9,
+        "L2E5": 7,
+        "L2E6": 34,
+        "L2E7": 48
+      },
+      "status": {
+        "L2E0": "unrecruited",
+        "L2E1": "unrecruited",
+        "L2E2": "quiet",
+        "L2E3": "quiet",
+        "L2E4": "active",
+        "L2E5": "active",
+        "L2E6": "active",
+        "L2E7": "active"
+      },
+      "active_count": 4,
+      "quiet_count": 2,
+      "unrecruited_count": 2,
+      "tyrant": "L2E5",
+      "tyrant_share": 0.5185,
+      "depression_by_maturity": {
+        "0.75-1.00": {
+          "n": 4706,
+          "mean_delta_abs": 1.5202
+        }
+      },
+      "physical_inhibition_applied_count": 5392,
+      "physical_inhibition_skipped_refractory_count": 0,
+      "first_delivery_event": {
+        "neuron": "L2E0",
+        "t": 11,
+        "applied": true,
+        "v_pre": 7900.766999301922,
+        "v_post": 0.0,
+        "magnitude": 8000.0
+      },
+      "multi_firer_rate": 0.0072,
+      "multi_firer_steps": 23,
+      "total_steps": 3200,
+      "eventually_fired_after_never_early": null,
+      "distinct_owners": 4,
+      "per_pattern_consistency": {
+        "row 1": 0.675,
+        "col 1": 0.5,
+        "diag \\": 0.55,
+        "diag /": 0.8
+      },
+      "collisions": {},
+      "forgetting": {
+        "row 1": false,
+        "col 1": false,
+        "diag \\": false,
+        "diag /": false
+      },
+      "silent_cells": [
+        "L2E0",
+        "L2E1"
+      ],
+      "recruitable_cells": [
+        "L2E2",
+        "L2E3"
+      ],
+      "mean_ambiguity_rate": 0.0312
+    },
+    {
+      "config": "A_default",
+      "weight_seed": 1,
+      "topology_seed": 2,
+      "scenario": "long_hold_switch",
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E1",
+        "L2E2",
+        "L2E6",
+        "L2E7"
+      ],
+      "first_spike_latency": {
+        "L2E0": null,
+        "L2E1": null,
+        "L2E2": null,
+        "L2E3": 10,
+        "L2E4": 9,
+        "L2E5": 7,
+        "L2E6": null,
+        "L2E7": null
+      },
+      "status": {
+        "L2E0": "unrecruited",
+        "L2E1": "unrecruited",
+        "L2E2": "unrecruited",
+        "L2E3": "quiet",
+        "L2E4": "quiet",
+        "L2E5": "active",
+        "L2E6": "unrecruited",
+        "L2E7": "unrecruited"
+      },
+      "active_count": 1,
+      "quiet_count": 2,
+      "unrecruited_count": 5,
+      "tyrant": "L2E5",
+      "tyrant_share": 0.4313,
+      "depression_by_maturity": {
+        "0.75-1.00": {
+          "n": 1440,
+          "mean_delta_abs": 0.8423
+        }
+      },
+      "physical_inhibition_applied_count": 1800,
+      "physical_inhibition_skipped_refractory_count": 0,
+      "first_delivery_event": {
+        "neuron": "L2E0",
+        "t": 11,
+        "applied": true,
+        "v_pre": 7900.766999301922,
+        "v_post": 0.0,
+        "magnitude": 8000.0
+      },
+      "multi_firer_rate": 0.1575,
+      "multi_firer_steps": 126,
+      "total_steps": 800,
+      "eventually_fired_after_never_early": {
+        "L2E0": false,
+        "L2E1": false,
+        "L2E2": false,
+        "L2E6": false,
+        "L2E7": false
+      }
+    },
+    {
+      "config": "A_default",
+      "weight_seed": 1,
+      "topology_seed": 2,
+      "scenario": "interleaved_40",
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E1"
+      ],
+      "first_spike_latency": {
+        "L2E0": null,
+        "L2E1": null,
+        "L2E2": 31,
+        "L2E3": 10,
+        "L2E4": 9,
+        "L2E5": 7,
+        "L2E6": 34,
+        "L2E7": 48
+      },
+      "status": {
+        "L2E0": "unrecruited",
+        "L2E1": "unrecruited",
+        "L2E2": "quiet",
+        "L2E3": "quiet",
+        "L2E4": "active",
+        "L2E5": "active",
+        "L2E6": "active",
+        "L2E7": "active"
+      },
+      "active_count": 4,
+      "quiet_count": 2,
+      "unrecruited_count": 2,
+      "tyrant": "L2E5",
+      "tyrant_share": 0.5185,
+      "depression_by_maturity": {
+        "0.75-1.00": {
+          "n": 4706,
+          "mean_delta_abs": 1.5202
+        }
+      },
+      "physical_inhibition_applied_count": 5392,
+      "physical_inhibition_skipped_refractory_count": 0,
+      "first_delivery_event": {
+        "neuron": "L2E0",
+        "t": 11,
+        "applied": true,
+        "v_pre": 7900.766999301922,
+        "v_post": 0.0,
+        "magnitude": 8000.0
+      },
+      "multi_firer_rate": 0.0072,
+      "multi_firer_steps": 23,
+      "total_steps": 3200,
+      "eventually_fired_after_never_early": null,
+      "distinct_owners": 4,
+      "per_pattern_consistency": {
+        "row 1": 0.675,
+        "col 1": 0.5,
+        "diag \\": 0.55,
+        "diag /": 0.8
+      },
+      "collisions": {},
+      "forgetting": {
+        "row 1": false,
+        "col 1": false,
+        "diag \\": false,
+        "diag /": false
+      },
+      "silent_cells": [
+        "L2E0",
+        "L2E1"
+      ],
+      "recruitable_cells": [
+        "L2E2",
+        "L2E3"
+      ],
+      "mean_ambiguity_rate": 0.0312
+    },
+    {
+      "config": "A_default",
+      "weight_seed": 1,
+      "topology_seed": 3,
+      "scenario": "long_hold_switch",
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E1",
+        "L2E2",
+        "L2E6",
+        "L2E7"
+      ],
+      "first_spike_latency": {
+        "L2E0": null,
+        "L2E1": null,
+        "L2E2": null,
+        "L2E3": 10,
+        "L2E4": 9,
+        "L2E5": 7,
+        "L2E6": null,
+        "L2E7": null
+      },
+      "status": {
+        "L2E0": "unrecruited",
+        "L2E1": "unrecruited",
+        "L2E2": "unrecruited",
+        "L2E3": "quiet",
+        "L2E4": "quiet",
+        "L2E5": "active",
+        "L2E6": "unrecruited",
+        "L2E7": "unrecruited"
+      },
+      "active_count": 1,
+      "quiet_count": 2,
+      "unrecruited_count": 5,
+      "tyrant": "L2E5",
+      "tyrant_share": 0.4313,
+      "depression_by_maturity": {
+        "0.75-1.00": {
+          "n": 1440,
+          "mean_delta_abs": 0.8423
+        }
+      },
+      "physical_inhibition_applied_count": 1800,
+      "physical_inhibition_skipped_refractory_count": 0,
+      "first_delivery_event": {
+        "neuron": "L2E0",
+        "t": 11,
+        "applied": true,
+        "v_pre": 7900.766999301922,
+        "v_post": 0.0,
+        "magnitude": 8000.0
+      },
+      "multi_firer_rate": 0.1575,
+      "multi_firer_steps": 126,
+      "total_steps": 800,
+      "eventually_fired_after_never_early": {
+        "L2E0": false,
+        "L2E1": false,
+        "L2E2": false,
+        "L2E6": false,
+        "L2E7": false
+      }
+    },
+    {
+      "config": "A_default",
+      "weight_seed": 1,
+      "topology_seed": 3,
+      "scenario": "interleaved_40",
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E1"
+      ],
+      "first_spike_latency": {
+        "L2E0": null,
+        "L2E1": null,
+        "L2E2": 31,
+        "L2E3": 10,
+        "L2E4": 9,
+        "L2E5": 7,
+        "L2E6": 34,
+        "L2E7": 48
+      },
+      "status": {
+        "L2E0": "unrecruited",
+        "L2E1": "unrecruited",
+        "L2E2": "quiet",
+        "L2E3": "quiet",
+        "L2E4": "active",
+        "L2E5": "active",
+        "L2E6": "active",
+        "L2E7": "active"
+      },
+      "active_count": 4,
+      "quiet_count": 2,
+      "unrecruited_count": 2,
+      "tyrant": "L2E5",
+      "tyrant_share": 0.5185,
+      "depression_by_maturity": {
+        "0.75-1.00": {
+          "n": 4706,
+          "mean_delta_abs": 1.5202
+        }
+      },
+      "physical_inhibition_applied_count": 5392,
+      "physical_inhibition_skipped_refractory_count": 0,
+      "first_delivery_event": {
+        "neuron": "L2E0",
+        "t": 11,
+        "applied": true,
+        "v_pre": 7900.766999301922,
+        "v_post": 0.0,
+        "magnitude": 8000.0
+      },
+      "multi_firer_rate": 0.0072,
+      "multi_firer_steps": 23,
+      "total_steps": 3200,
+      "eventually_fired_after_never_early": null,
+      "distinct_owners": 4,
+      "per_pattern_consistency": {
+        "row 1": 0.675,
+        "col 1": 0.5,
+        "diag \\": 0.55,
+        "diag /": 0.8
+      },
+      "collisions": {},
+      "forgetting": {
+        "row 1": false,
+        "col 1": false,
+        "diag \\": false,
+        "diag /": false
+      },
+      "silent_cells": [
+        "L2E0",
+        "L2E1"
+      ],
+      "recruitable_cells": [
+        "L2E2",
+        "L2E3"
+      ],
+      "mean_ambiguity_rate": 0.0312
+    },
+    {
+      "config": "A_default",
+      "weight_seed": 2,
+      "topology_seed": 1,
+      "scenario": "long_hold_switch",
+      "never_fired_neurons": [
+        "L2E1",
+        "L2E2",
+        "L2E4",
+        "L2E5",
+        "L2E6"
+      ],
+      "first_spike_latency": {
+        "L2E0": 7,
+        "L2E1": null,
+        "L2E2": null,
+        "L2E3": 9,
+        "L2E4": null,
+        "L2E5": null,
+        "L2E6": null,
+        "L2E7": 8
+      },
+      "status": {
+        "L2E0": "quiet",
+        "L2E1": "unrecruited",
+        "L2E2": "unrecruited",
+        "L2E3": "quiet",
+        "L2E4": "unrecruited",
+        "L2E5": "unrecruited",
+        "L2E6": "unrecruited",
+        "L2E7": "active"
+      },
+      "active_count": 1,
+      "quiet_count": 2,
+      "unrecruited_count": 5,
+      "tyrant": "L2E7",
+      "tyrant_share": 0.4978,
+      "depression_by_maturity": {
+        "0.75-1.00": {
+          "n": 1528,
+          "mean_delta_abs": 1.0759
+        }
+      },
+      "physical_inhibition_applied_count": 1832,
+      "physical_inhibition_skipped_refractory_count": 0,
+      "first_delivery_event": {
+        "neuron": "L2E0",
+        "t": 10,
+        "applied": true,
+        "v_pre": 636.2703401359381,
+        "v_post": 0.0,
+        "magnitude": 8000.0
+      },
+      "multi_firer_rate": 0.0938,
+      "multi_firer_steps": 75,
+      "total_steps": 800,
+      "eventually_fired_after_never_early": {
+        "L2E1": false,
+        "L2E2": false,
+        "L2E4": false,
+        "L2E5": false,
+        "L2E6": false
+      }
+    },
+    {
+      "config": "A_default",
+      "weight_seed": 2,
+      "topology_seed": 1,
+      "scenario": "interleaved_40",
+      "never_fired_neurons": [
+        "L2E2",
+        "L2E4"
+      ],
+      "first_spike_latency": {
+        "L2E0": 7,
+        "L2E1": 30,
+        "L2E2": null,
+        "L2E3": 9,
+        "L2E4": null,
+        "L2E5": 32,
+        "L2E6": 30,
+        "L2E7": 8
+      },
+      "status": {
+        "L2E0": "active",
+        "L2E1": "quiet",
+        "L2E2": "unrecruited",
+        "L2E3": "active",
+        "L2E4": "unrecruited",
+        "L2E5": "active",
+        "L2E6": "active",
+        "L2E7": "quiet"
+      },
+      "active_count": 4,
+      "quiet_count": 2,
+      "unrecruited_count": 2,
+      "tyrant": "L2E3",
+      "tyrant_share": 0.5589,
+      "depression_by_maturity": {
+        "0.75-1.00": {
+          "n": 5116,
+          "mean_delta_abs": 1.3061
+        }
+      },
+      "physical_inhibition_applied_count": 5848,
+      "physical_inhibition_skipped_refractory_count": 0,
+      "first_delivery_event": {
+        "neuron": "L2E0",
+        "t": 10,
+        "applied": true,
+        "v_pre": 636.2703401359381,
+        "v_post": 0.0,
+        "magnitude": 8000.0
+      },
+      "multi_firer_rate": 0.0006,
+      "multi_firer_steps": 2,
+      "total_steps": 3200,
+      "eventually_fired_after_never_early": null,
+      "distinct_owners": 4,
+      "per_pattern_consistency": {
+        "row 1": 0.675,
+        "col 1": 0.975,
+        "diag \\": 0.6,
+        "diag /": 0.6
+      },
+      "collisions": {},
+      "forgetting": {
+        "row 1": false,
+        "col 1": false,
+        "diag \\": false,
+        "diag /": false
+      },
+      "silent_cells": [
+        "L2E2",
+        "L2E4"
+      ],
+      "recruitable_cells": [
+        "L2E1",
+        "L2E7"
+      ],
+      "mean_ambiguity_rate": 0.0063
+    },
+    {
+      "config": "A_default",
+      "weight_seed": 2,
+      "topology_seed": 2,
+      "scenario": "long_hold_switch",
+      "never_fired_neurons": [
+        "L2E1",
+        "L2E2",
+        "L2E4",
+        "L2E5",
+        "L2E6"
+      ],
+      "first_spike_latency": {
+        "L2E0": 7,
+        "L2E1": null,
+        "L2E2": null,
+        "L2E3": 9,
+        "L2E4": null,
+        "L2E5": null,
+        "L2E6": null,
+        "L2E7": 8
+      },
+      "status": {
+        "L2E0": "quiet",
+        "L2E1": "unrecruited",
+        "L2E2": "unrecruited",
+        "L2E3": "quiet",
+        "L2E4": "unrecruited",
+        "L2E5": "unrecruited",
+        "L2E6": "unrecruited",
+        "L2E7": "active"
+      },
+      "active_count": 1,
+      "quiet_count": 2,
+      "unrecruited_count": 5,
+      "tyrant": "L2E7",
+      "tyrant_share": 0.4978,
+      "depression_by_maturity": {
+        "0.75-1.00": {
+          "n": 1528,
+          "mean_delta_abs": 1.0759
+        }
+      },
+      "physical_inhibition_applied_count": 1832,
+      "physical_inhibition_skipped_refractory_count": 0,
+      "first_delivery_event": {
+        "neuron": "L2E0",
+        "t": 10,
+        "applied": true,
+        "v_pre": 636.2703401359381,
+        "v_post": 0.0,
+        "magnitude": 8000.0
+      },
+      "multi_firer_rate": 0.0938,
+      "multi_firer_steps": 75,
+      "total_steps": 800,
+      "eventually_fired_after_never_early": {
+        "L2E1": false,
+        "L2E2": false,
+        "L2E4": false,
+        "L2E5": false,
+        "L2E6": false
+      }
+    },
+    {
+      "config": "A_default",
+      "weight_seed": 2,
+      "topology_seed": 2,
+      "scenario": "interleaved_40",
+      "never_fired_neurons": [
+        "L2E2",
+        "L2E4"
+      ],
+      "first_spike_latency": {
+        "L2E0": 7,
+        "L2E1": 30,
+        "L2E2": null,
+        "L2E3": 9,
+        "L2E4": null,
+        "L2E5": 32,
+        "L2E6": 30,
+        "L2E7": 8
+      },
+      "status": {
+        "L2E0": "active",
+        "L2E1": "quiet",
+        "L2E2": "unrecruited",
+        "L2E3": "active",
+        "L2E4": "unrecruited",
+        "L2E5": "active",
+        "L2E6": "active",
+        "L2E7": "quiet"
+      },
+      "active_count": 4,
+      "quiet_count": 2,
+      "unrecruited_count": 2,
+      "tyrant": "L2E3",
+      "tyrant_share": 0.5589,
+      "depression_by_maturity": {
+        "0.75-1.00": {
+          "n": 5116,
+          "mean_delta_abs": 1.3061
+        }
+      },
+      "physical_inhibition_applied_count": 5848,
+      "physical_inhibition_skipped_refractory_count": 0,
+      "first_delivery_event": {
+        "neuron": "L2E0",
+        "t": 10,
+        "applied": true,
+        "v_pre": 636.2703401359381,
+        "v_post": 0.0,
+        "magnitude": 8000.0
+      },
+      "multi_firer_rate": 0.0006,
+      "multi_firer_steps": 2,
+      "total_steps": 3200,
+      "eventually_fired_after_never_early": null,
+      "distinct_owners": 4,
+      "per_pattern_consistency": {
+        "row 1": 0.675,
+        "col 1": 0.975,
+        "diag \\": 0.6,
+        "diag /": 0.6
+      },
+      "collisions": {},
+      "forgetting": {
+        "row 1": false,
+        "col 1": false,
+        "diag \\": false,
+        "diag /": false
+      },
+      "silent_cells": [
+        "L2E2",
+        "L2E4"
+      ],
+      "recruitable_cells": [
+        "L2E1",
+        "L2E7"
+      ],
+      "mean_ambiguity_rate": 0.0063
+    },
+    {
+      "config": "A_default",
+      "weight_seed": 2,
+      "topology_seed": 3,
+      "scenario": "long_hold_switch",
+      "never_fired_neurons": [
+        "L2E1",
+        "L2E2",
+        "L2E4",
+        "L2E5",
+        "L2E6"
+      ],
+      "first_spike_latency": {
+        "L2E0": 7,
+        "L2E1": null,
+        "L2E2": null,
+        "L2E3": 9,
+        "L2E4": null,
+        "L2E5": null,
+        "L2E6": null,
+        "L2E7": 8
+      },
+      "status": {
+        "L2E0": "quiet",
+        "L2E1": "unrecruited",
+        "L2E2": "unrecruited",
+        "L2E3": "quiet",
+        "L2E4": "unrecruited",
+        "L2E5": "unrecruited",
+        "L2E6": "unrecruited",
+        "L2E7": "active"
+      },
+      "active_count": 1,
+      "quiet_count": 2,
+      "unrecruited_count": 5,
+      "tyrant": "L2E7",
+      "tyrant_share": 0.4978,
+      "depression_by_maturity": {
+        "0.75-1.00": {
+          "n": 1528,
+          "mean_delta_abs": 1.0759
+        }
+      },
+      "physical_inhibition_applied_count": 1832,
+      "physical_inhibition_skipped_refractory_count": 0,
+      "first_delivery_event": {
+        "neuron": "L2E0",
+        "t": 10,
+        "applied": true,
+        "v_pre": 636.2703401359381,
+        "v_post": 0.0,
+        "magnitude": 8000.0
+      },
+      "multi_firer_rate": 0.0938,
+      "multi_firer_steps": 75,
+      "total_steps": 800,
+      "eventually_fired_after_never_early": {
+        "L2E1": false,
+        "L2E2": false,
+        "L2E4": false,
+        "L2E5": false,
+        "L2E6": false
+      }
+    },
+    {
+      "config": "A_default",
+      "weight_seed": 2,
+      "topology_seed": 3,
+      "scenario": "interleaved_40",
+      "never_fired_neurons": [
+        "L2E2",
+        "L2E4"
+      ],
+      "first_spike_latency": {
+        "L2E0": 7,
+        "L2E1": 30,
+        "L2E2": null,
+        "L2E3": 9,
+        "L2E4": null,
+        "L2E5": 32,
+        "L2E6": 30,
+        "L2E7": 8
+      },
+      "status": {
+        "L2E0": "active",
+        "L2E1": "quiet",
+        "L2E2": "unrecruited",
+        "L2E3": "active",
+        "L2E4": "unrecruited",
+        "L2E5": "active",
+        "L2E6": "active",
+        "L2E7": "quiet"
+      },
+      "active_count": 4,
+      "quiet_count": 2,
+      "unrecruited_count": 2,
+      "tyrant": "L2E3",
+      "tyrant_share": 0.5589,
+      "depression_by_maturity": {
+        "0.75-1.00": {
+          "n": 5116,
+          "mean_delta_abs": 1.3061
+        }
+      },
+      "physical_inhibition_applied_count": 5848,
+      "physical_inhibition_skipped_refractory_count": 0,
+      "first_delivery_event": {
+        "neuron": "L2E0",
+        "t": 10,
+        "applied": true,
+        "v_pre": 636.2703401359381,
+        "v_post": 0.0,
+        "magnitude": 8000.0
+      },
+      "multi_firer_rate": 0.0006,
+      "multi_firer_steps": 2,
+      "total_steps": 3200,
+      "eventually_fired_after_never_early": null,
+      "distinct_owners": 4,
+      "per_pattern_consistency": {
+        "row 1": 0.675,
+        "col 1": 0.975,
+        "diag \\": 0.6,
+        "diag /": 0.6
+      },
+      "collisions": {},
+      "forgetting": {
+        "row 1": false,
+        "col 1": false,
+        "diag \\": false,
+        "diag /": false
+      },
+      "silent_cells": [
+        "L2E2",
+        "L2E4"
+      ],
+      "recruitable_cells": [
+        "L2E1",
+        "L2E7"
+      ],
+      "mean_ambiguity_rate": 0.0063
+    },
+    {
+      "config": "A_default",
+      "weight_seed": 3,
+      "topology_seed": 1,
+      "scenario": "long_hold_switch",
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E1",
+        "L2E2",
+        "L2E4",
+        "L2E6"
+      ],
+      "first_spike_latency": {
+        "L2E0": null,
+        "L2E1": null,
+        "L2E2": null,
+        "L2E3": 11,
+        "L2E4": null,
+        "L2E5": 7,
+        "L2E6": null,
+        "L2E7": 10
+      },
+      "status": {
+        "L2E0": "unrecruited",
+        "L2E1": "unrecruited",
+        "L2E2": "unrecruited",
+        "L2E3": "quiet",
+        "L2E4": "unrecruited",
+        "L2E5": "active",
+        "L2E6": "unrecruited",
+        "L2E7": "active"
+      },
+      "active_count": 2,
+      "quiet_count": 1,
+      "unrecruited_count": 5,
+      "tyrant": "L2E5",
+      "tyrant_share": 0.4975,
+      "depression_by_maturity": {
+        "0.75-1.00": {
+          "n": 1796,
+          "mean_delta_abs": 0.8584
+        }
+      },
+      "physical_inhibition_applied_count": 2352,
+      "physical_inhibition_skipped_refractory_count": 0,
+      "first_delivery_event": {
+        "neuron": "L2E0",
+        "t": 12,
+        "applied": true,
+        "v_pre": 7358.269526215411,
+        "v_post": 0.0,
+        "magnitude": 8000.0
+      },
+      "multi_firer_rate": 0.2913,
+      "multi_firer_steps": 233,
+      "total_steps": 800,
+      "eventually_fired_after_never_early": {
+        "L2E0": false,
+        "L2E1": false,
+        "L2E2": false,
+        "L2E4": false,
+        "L2E6": false
+      }
+    },
+    {
+      "config": "A_default",
+      "weight_seed": 3,
+      "topology_seed": 1,
+      "scenario": "interleaved_40",
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E1",
+        "L2E2"
+      ],
+      "first_spike_latency": {
+        "L2E0": null,
+        "L2E1": null,
+        "L2E2": null,
+        "L2E3": 11,
+        "L2E4": 69,
+        "L2E5": 7,
+        "L2E6": 34,
+        "L2E7": 10
+      },
+      "status": {
+        "L2E0": "unrecruited",
+        "L2E1": "unrecruited",
+        "L2E2": "unrecruited",
+        "L2E3": "active",
+        "L2E4": "active",
+        "L2E5": "active",
+        "L2E6": "quiet",
+        "L2E7": "quiet"
+      },
+      "active_count": 3,
+      "quiet_count": 2,
+      "unrecruited_count": 3,
+      "tyrant": "L2E3",
+      "tyrant_share": 0.6051,
+      "depression_by_maturity": {
+        "0.75-1.00": {
+          "n": 5294,
+          "mean_delta_abs": 1.1972
+        }
+      },
+      "physical_inhibition_applied_count": 6064,
+      "physical_inhibition_skipped_refractory_count": 0,
+      "first_delivery_event": {
+        "neuron": "L2E0",
+        "t": 12,
+        "applied": true,
+        "v_pre": 7358.269526215411,
+        "v_post": 0.0,
+        "magnitude": 8000.0
+      },
+      "multi_firer_rate": 0.005,
+      "multi_firer_steps": 16,
+      "total_steps": 3200,
+      "eventually_fired_after_never_early": null,
+      "distinct_owners": 3,
+      "per_pattern_consistency": {
+        "row 1": 0.475,
+        "col 1": 0.45,
+        "diag \\": 0.8,
+        "diag /": 0.775
+      },
+      "collisions": {
+        "L2E3": [
+          "diag \\",
+          "diag /"
+        ]
+      },
+      "forgetting": {
+        "row 1": true,
+        "col 1": true,
+        "diag \\": false,
+        "diag /": false
+      },
+      "silent_cells": [
+        "L2E0",
+        "L2E1",
+        "L2E2"
+      ],
+      "recruitable_cells": [
+        "L2E6",
+        "L2E7"
+      ],
+      "mean_ambiguity_rate": 0.025
+    },
+    {
+      "config": "A_default",
+      "weight_seed": 3,
+      "topology_seed": 2,
+      "scenario": "long_hold_switch",
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E1",
+        "L2E2",
+        "L2E4",
+        "L2E6"
+      ],
+      "first_spike_latency": {
+        "L2E0": null,
+        "L2E1": null,
+        "L2E2": null,
+        "L2E3": 11,
+        "L2E4": null,
+        "L2E5": 7,
+        "L2E6": null,
+        "L2E7": 10
+      },
+      "status": {
+        "L2E0": "unrecruited",
+        "L2E1": "unrecruited",
+        "L2E2": "unrecruited",
+        "L2E3": "quiet",
+        "L2E4": "unrecruited",
+        "L2E5": "active",
+        "L2E6": "unrecruited",
+        "L2E7": "active"
+      },
+      "active_count": 2,
+      "quiet_count": 1,
+      "unrecruited_count": 5,
+      "tyrant": "L2E5",
+      "tyrant_share": 0.4975,
+      "depression_by_maturity": {
+        "0.75-1.00": {
+          "n": 1796,
+          "mean_delta_abs": 0.8584
+        }
+      },
+      "physical_inhibition_applied_count": 2352,
+      "physical_inhibition_skipped_refractory_count": 0,
+      "first_delivery_event": {
+        "neuron": "L2E0",
+        "t": 12,
+        "applied": true,
+        "v_pre": 7358.269526215411,
+        "v_post": 0.0,
+        "magnitude": 8000.0
+      },
+      "multi_firer_rate": 0.2913,
+      "multi_firer_steps": 233,
+      "total_steps": 800,
+      "eventually_fired_after_never_early": {
+        "L2E0": false,
+        "L2E1": false,
+        "L2E2": false,
+        "L2E4": false,
+        "L2E6": false
+      }
+    },
+    {
+      "config": "A_default",
+      "weight_seed": 3,
+      "topology_seed": 2,
+      "scenario": "interleaved_40",
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E1",
+        "L2E2"
+      ],
+      "first_spike_latency": {
+        "L2E0": null,
+        "L2E1": null,
+        "L2E2": null,
+        "L2E3": 11,
+        "L2E4": 69,
+        "L2E5": 7,
+        "L2E6": 34,
+        "L2E7": 10
+      },
+      "status": {
+        "L2E0": "unrecruited",
+        "L2E1": "unrecruited",
+        "L2E2": "unrecruited",
+        "L2E3": "active",
+        "L2E4": "active",
+        "L2E5": "active",
+        "L2E6": "quiet",
+        "L2E7": "quiet"
+      },
+      "active_count": 3,
+      "quiet_count": 2,
+      "unrecruited_count": 3,
+      "tyrant": "L2E3",
+      "tyrant_share": 0.6051,
+      "depression_by_maturity": {
+        "0.75-1.00": {
+          "n": 5294,
+          "mean_delta_abs": 1.1972
+        }
+      },
+      "physical_inhibition_applied_count": 6064,
+      "physical_inhibition_skipped_refractory_count": 0,
+      "first_delivery_event": {
+        "neuron": "L2E0",
+        "t": 12,
+        "applied": true,
+        "v_pre": 7358.269526215411,
+        "v_post": 0.0,
+        "magnitude": 8000.0
+      },
+      "multi_firer_rate": 0.005,
+      "multi_firer_steps": 16,
+      "total_steps": 3200,
+      "eventually_fired_after_never_early": null,
+      "distinct_owners": 3,
+      "per_pattern_consistency": {
+        "row 1": 0.475,
+        "col 1": 0.45,
+        "diag \\": 0.8,
+        "diag /": 0.775
+      },
+      "collisions": {
+        "L2E3": [
+          "diag \\",
+          "diag /"
+        ]
+      },
+      "forgetting": {
+        "row 1": true,
+        "col 1": true,
+        "diag \\": false,
+        "diag /": false
+      },
+      "silent_cells": [
+        "L2E0",
+        "L2E1",
+        "L2E2"
+      ],
+      "recruitable_cells": [
+        "L2E6",
+        "L2E7"
+      ],
+      "mean_ambiguity_rate": 0.025
+    },
+    {
+      "config": "A_default",
+      "weight_seed": 3,
+      "topology_seed": 3,
+      "scenario": "long_hold_switch",
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E1",
+        "L2E2",
+        "L2E4",
+        "L2E6"
+      ],
+      "first_spike_latency": {
+        "L2E0": null,
+        "L2E1": null,
+        "L2E2": null,
+        "L2E3": 11,
+        "L2E4": null,
+        "L2E5": 7,
+        "L2E6": null,
+        "L2E7": 10
+      },
+      "status": {
+        "L2E0": "unrecruited",
+        "L2E1": "unrecruited",
+        "L2E2": "unrecruited",
+        "L2E3": "quiet",
+        "L2E4": "unrecruited",
+        "L2E5": "active",
+        "L2E6": "unrecruited",
+        "L2E7": "active"
+      },
+      "active_count": 2,
+      "quiet_count": 1,
+      "unrecruited_count": 5,
+      "tyrant": "L2E5",
+      "tyrant_share": 0.4975,
+      "depression_by_maturity": {
+        "0.75-1.00": {
+          "n": 1796,
+          "mean_delta_abs": 0.8584
+        }
+      },
+      "physical_inhibition_applied_count": 2352,
+      "physical_inhibition_skipped_refractory_count": 0,
+      "first_delivery_event": {
+        "neuron": "L2E0",
+        "t": 12,
+        "applied": true,
+        "v_pre": 7358.269526215411,
+        "v_post": 0.0,
+        "magnitude": 8000.0
+      },
+      "multi_firer_rate": 0.2913,
+      "multi_firer_steps": 233,
+      "total_steps": 800,
+      "eventually_fired_after_never_early": {
+        "L2E0": false,
+        "L2E1": false,
+        "L2E2": false,
+        "L2E4": false,
+        "L2E6": false
+      }
+    },
+    {
+      "config": "A_default",
+      "weight_seed": 3,
+      "topology_seed": 3,
+      "scenario": "interleaved_40",
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E1",
+        "L2E2"
+      ],
+      "first_spike_latency": {
+        "L2E0": null,
+        "L2E1": null,
+        "L2E2": null,
+        "L2E3": 11,
+        "L2E4": 69,
+        "L2E5": 7,
+        "L2E6": 34,
+        "L2E7": 10
+      },
+      "status": {
+        "L2E0": "unrecruited",
+        "L2E1": "unrecruited",
+        "L2E2": "unrecruited",
+        "L2E3": "active",
+        "L2E4": "active",
+        "L2E5": "active",
+        "L2E6": "quiet",
+        "L2E7": "quiet"
+      },
+      "active_count": 3,
+      "quiet_count": 2,
+      "unrecruited_count": 3,
+      "tyrant": "L2E3",
+      "tyrant_share": 0.6051,
+      "depression_by_maturity": {
+        "0.75-1.00": {
+          "n": 5294,
+          "mean_delta_abs": 1.1972
+        }
+      },
+      "physical_inhibition_applied_count": 6064,
+      "physical_inhibition_skipped_refractory_count": 0,
+      "first_delivery_event": {
+        "neuron": "L2E0",
+        "t": 12,
+        "applied": true,
+        "v_pre": 7358.269526215411,
+        "v_post": 0.0,
+        "magnitude": 8000.0
+      },
+      "multi_firer_rate": 0.005,
+      "multi_firer_steps": 16,
+      "total_steps": 3200,
+      "eventually_fired_after_never_early": null,
+      "distinct_owners": 3,
+      "per_pattern_consistency": {
+        "row 1": 0.475,
+        "col 1": 0.45,
+        "diag \\": 0.8,
+        "diag /": 0.775
+      },
+      "collisions": {
+        "L2E3": [
+          "diag \\",
+          "diag /"
+        ]
+      },
+      "forgetting": {
+        "row 1": true,
+        "col 1": true,
+        "diag \\": false,
+        "diag /": false
+      },
+      "silent_cells": [
+        "L2E0",
+        "L2E1",
+        "L2E2"
+      ],
+      "recruitable_cells": [
+        "L2E6",
+        "L2E7"
+      ],
+      "mean_ambiguity_rate": 0.025
+    },
+    {
+      "config": "A_default",
+      "weight_seed": 4,
+      "topology_seed": 1,
+      "scenario": "long_hold_switch",
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E2",
+        "L2E5",
+        "L2E6",
+        "L2E7"
+      ],
+      "first_spike_latency": {
+        "L2E0": null,
+        "L2E1": 7,
+        "L2E2": null,
+        "L2E3": 11,
+        "L2E4": 8,
+        "L2E5": null,
+        "L2E6": null,
+        "L2E7": null
+      },
+      "status": {
+        "L2E0": "unrecruited",
+        "L2E1": "active",
+        "L2E2": "unrecruited",
+        "L2E3": "quiet",
+        "L2E4": "quiet",
+        "L2E5": "unrecruited",
+        "L2E6": "unrecruited",
+        "L2E7": "unrecruited"
+      },
+      "active_count": 1,
+      "quiet_count": 2,
+      "unrecruited_count": 5,
+      "tyrant": "L2E1",
+      "tyrant_share": 0.5338,
+      "depression_by_maturity": {
+        "0.75-1.00": {
+          "n": 1511,
+          "mean_delta_abs": 0.9766
+        }
+      },
+      "physical_inhibition_applied_count": 1768,
+      "physical_inhibition_skipped_refractory_count": 0,
+      "first_delivery_event": {
+        "neuron": "L2E0",
+        "t": 12,
+        "applied": true,
+        "v_pre": 7425.987503423475,
+        "v_post": 0.0,
+        "magnitude": 8000.0
+      },
+      "multi_firer_rate": 0.045,
+      "multi_firer_steps": 36,
+      "total_steps": 800,
+      "eventually_fired_after_never_early": {
+        "L2E0": false,
+        "L2E2": false,
+        "L2E5": false,
+        "L2E6": false,
+        "L2E7": false
+      }
+    },
+    {
+      "config": "A_default",
+      "weight_seed": 4,
+      "topology_seed": 1,
+      "scenario": "interleaved_40",
+      "never_fired_neurons": [
+        "L2E2",
+        "L2E5",
+        "L2E6"
+      ],
+      "first_spike_latency": {
+        "L2E0": 55,
+        "L2E1": 7,
+        "L2E2": null,
+        "L2E3": 11,
+        "L2E4": 8,
+        "L2E5": null,
+        "L2E6": null,
+        "L2E7": 31
+      },
+      "status": {
+        "L2E0": "active",
+        "L2E1": "active",
+        "L2E2": "unrecruited",
+        "L2E3": "quiet",
+        "L2E4": "active",
+        "L2E5": "unrecruited",
+        "L2E6": "unrecruited",
+        "L2E7": "active"
+      },
+      "active_count": 4,
+      "quiet_count": 1,
+      "unrecruited_count": 3,
+      "tyrant": "L2E1",
+      "tyrant_share": 0.4063,
+      "depression_by_maturity": {
+        "0.75-1.00": {
+          "n": 4903,
+          "mean_delta_abs": 1.7277
+        }
+      },
+      "physical_inhibition_applied_count": 5640,
+      "physical_inhibition_skipped_refractory_count": 0,
+      "first_delivery_event": {
+        "neuron": "L2E0",
+        "t": 12,
+        "applied": true,
+        "v_pre": 7425.987503423475,
+        "v_post": 0.0,
+        "magnitude": 8000.0
+      },
+      "multi_firer_rate": 0.01,
+      "multi_firer_steps": 32,
+      "total_steps": 3200,
+      "eventually_fired_after_never_early": null,
+      "distinct_owners": 4,
+      "per_pattern_consistency": {
+        "row 1": 0.525,
+        "col 1": 0.425,
+        "diag \\": 0.45,
+        "diag /": 0.925
+      },
+      "collisions": {},
+      "forgetting": {
+        "row 1": true,
+        "col 1": true,
+        "diag \\": true,
+        "diag /": false
+      },
+      "silent_cells": [
+        "L2E2",
+        "L2E5",
+        "L2E6"
+      ],
+      "recruitable_cells": [
+        "L2E3"
+      ],
+      "mean_ambiguity_rate": 0.0375
+    },
+    {
+      "config": "A_default",
+      "weight_seed": 4,
+      "topology_seed": 2,
+      "scenario": "long_hold_switch",
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E2",
+        "L2E5",
+        "L2E6",
+        "L2E7"
+      ],
+      "first_spike_latency": {
+        "L2E0": null,
+        "L2E1": 7,
+        "L2E2": null,
+        "L2E3": 11,
+        "L2E4": 8,
+        "L2E5": null,
+        "L2E6": null,
+        "L2E7": null
+      },
+      "status": {
+        "L2E0": "unrecruited",
+        "L2E1": "active",
+        "L2E2": "unrecruited",
+        "L2E3": "quiet",
+        "L2E4": "quiet",
+        "L2E5": "unrecruited",
+        "L2E6": "unrecruited",
+        "L2E7": "unrecruited"
+      },
+      "active_count": 1,
+      "quiet_count": 2,
+      "unrecruited_count": 5,
+      "tyrant": "L2E1",
+      "tyrant_share": 0.5338,
+      "depression_by_maturity": {
+        "0.75-1.00": {
+          "n": 1511,
+          "mean_delta_abs": 0.9766
+        }
+      },
+      "physical_inhibition_applied_count": 1768,
+      "physical_inhibition_skipped_refractory_count": 0,
+      "first_delivery_event": {
+        "neuron": "L2E0",
+        "t": 12,
+        "applied": true,
+        "v_pre": 7425.987503423475,
+        "v_post": 0.0,
+        "magnitude": 8000.0
+      },
+      "multi_firer_rate": 0.045,
+      "multi_firer_steps": 36,
+      "total_steps": 800,
+      "eventually_fired_after_never_early": {
+        "L2E0": false,
+        "L2E2": false,
+        "L2E5": false,
+        "L2E6": false,
+        "L2E7": false
+      }
+    },
+    {
+      "config": "A_default",
+      "weight_seed": 4,
+      "topology_seed": 2,
+      "scenario": "interleaved_40",
+      "never_fired_neurons": [
+        "L2E2",
+        "L2E5",
+        "L2E6"
+      ],
+      "first_spike_latency": {
+        "L2E0": 55,
+        "L2E1": 7,
+        "L2E2": null,
+        "L2E3": 11,
+        "L2E4": 8,
+        "L2E5": null,
+        "L2E6": null,
+        "L2E7": 31
+      },
+      "status": {
+        "L2E0": "active",
+        "L2E1": "active",
+        "L2E2": "unrecruited",
+        "L2E3": "quiet",
+        "L2E4": "active",
+        "L2E5": "unrecruited",
+        "L2E6": "unrecruited",
+        "L2E7": "active"
+      },
+      "active_count": 4,
+      "quiet_count": 1,
+      "unrecruited_count": 3,
+      "tyrant": "L2E1",
+      "tyrant_share": 0.4063,
+      "depression_by_maturity": {
+        "0.75-1.00": {
+          "n": 4903,
+          "mean_delta_abs": 1.7277
+        }
+      },
+      "physical_inhibition_applied_count": 5640,
+      "physical_inhibition_skipped_refractory_count": 0,
+      "first_delivery_event": {
+        "neuron": "L2E0",
+        "t": 12,
+        "applied": true,
+        "v_pre": 7425.987503423475,
+        "v_post": 0.0,
+        "magnitude": 8000.0
+      },
+      "multi_firer_rate": 0.01,
+      "multi_firer_steps": 32,
+      "total_steps": 3200,
+      "eventually_fired_after_never_early": null,
+      "distinct_owners": 4,
+      "per_pattern_consistency": {
+        "row 1": 0.525,
+        "col 1": 0.425,
+        "diag \\": 0.45,
+        "diag /": 0.925
+      },
+      "collisions": {},
+      "forgetting": {
+        "row 1": true,
+        "col 1": true,
+        "diag \\": true,
+        "diag /": false
+      },
+      "silent_cells": [
+        "L2E2",
+        "L2E5",
+        "L2E6"
+      ],
+      "recruitable_cells": [
+        "L2E3"
+      ],
+      "mean_ambiguity_rate": 0.0375
+    },
+    {
+      "config": "A_default",
+      "weight_seed": 4,
+      "topology_seed": 3,
+      "scenario": "long_hold_switch",
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E2",
+        "L2E5",
+        "L2E6",
+        "L2E7"
+      ],
+      "first_spike_latency": {
+        "L2E0": null,
+        "L2E1": 7,
+        "L2E2": null,
+        "L2E3": 11,
+        "L2E4": 8,
+        "L2E5": null,
+        "L2E6": null,
+        "L2E7": null
+      },
+      "status": {
+        "L2E0": "unrecruited",
+        "L2E1": "active",
+        "L2E2": "unrecruited",
+        "L2E3": "quiet",
+        "L2E4": "quiet",
+        "L2E5": "unrecruited",
+        "L2E6": "unrecruited",
+        "L2E7": "unrecruited"
+      },
+      "active_count": 1,
+      "quiet_count": 2,
+      "unrecruited_count": 5,
+      "tyrant": "L2E1",
+      "tyrant_share": 0.5338,
+      "depression_by_maturity": {
+        "0.75-1.00": {
+          "n": 1511,
+          "mean_delta_abs": 0.9766
+        }
+      },
+      "physical_inhibition_applied_count": 1768,
+      "physical_inhibition_skipped_refractory_count": 0,
+      "first_delivery_event": {
+        "neuron": "L2E0",
+        "t": 12,
+        "applied": true,
+        "v_pre": 7425.987503423475,
+        "v_post": 0.0,
+        "magnitude": 8000.0
+      },
+      "multi_firer_rate": 0.045,
+      "multi_firer_steps": 36,
+      "total_steps": 800,
+      "eventually_fired_after_never_early": {
+        "L2E0": false,
+        "L2E2": false,
+        "L2E5": false,
+        "L2E6": false,
+        "L2E7": false
+      }
+    },
+    {
+      "config": "A_default",
+      "weight_seed": 4,
+      "topology_seed": 3,
+      "scenario": "interleaved_40",
+      "never_fired_neurons": [
+        "L2E2",
+        "L2E5",
+        "L2E6"
+      ],
+      "first_spike_latency": {
+        "L2E0": 55,
+        "L2E1": 7,
+        "L2E2": null,
+        "L2E3": 11,
+        "L2E4": 8,
+        "L2E5": null,
+        "L2E6": null,
+        "L2E7": 31
+      },
+      "status": {
+        "L2E0": "active",
+        "L2E1": "active",
+        "L2E2": "unrecruited",
+        "L2E3": "quiet",
+        "L2E4": "active",
+        "L2E5": "unrecruited",
+        "L2E6": "unrecruited",
+        "L2E7": "active"
+      },
+      "active_count": 4,
+      "quiet_count": 1,
+      "unrecruited_count": 3,
+      "tyrant": "L2E1",
+      "tyrant_share": 0.4063,
+      "depression_by_maturity": {
+        "0.75-1.00": {
+          "n": 4903,
+          "mean_delta_abs": 1.7277
+        }
+      },
+      "physical_inhibition_applied_count": 5640,
+      "physical_inhibition_skipped_refractory_count": 0,
+      "first_delivery_event": {
+        "neuron": "L2E0",
+        "t": 12,
+        "applied": true,
+        "v_pre": 7425.987503423475,
+        "v_post": 0.0,
+        "magnitude": 8000.0
+      },
+      "multi_firer_rate": 0.01,
+      "multi_firer_steps": 32,
+      "total_steps": 3200,
+      "eventually_fired_after_never_early": null,
+      "distinct_owners": 4,
+      "per_pattern_consistency": {
+        "row 1": 0.525,
+        "col 1": 0.425,
+        "diag \\": 0.45,
+        "diag /": 0.925
+      },
+      "collisions": {},
+      "forgetting": {
+        "row 1": true,
+        "col 1": true,
+        "diag \\": true,
+        "diag /": false
+      },
+      "silent_cells": [
+        "L2E2",
+        "L2E5",
+        "L2E6"
+      ],
+      "recruitable_cells": [
+        "L2E3"
+      ],
+      "mean_ambiguity_rate": 0.0375
+    },
+    {
+      "config": "A_default",
+      "weight_seed": 5,
+      "topology_seed": 1,
+      "scenario": "long_hold_switch",
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E1",
+        "L2E2",
+        "L2E6",
+        "L2E7"
+      ],
+      "first_spike_latency": {
+        "L2E0": null,
+        "L2E1": null,
+        "L2E2": null,
+        "L2E3": 9,
+        "L2E4": 7,
+        "L2E5": 10,
+        "L2E6": null,
+        "L2E7": null
+      },
+      "status": {
+        "L2E0": "unrecruited",
+        "L2E1": "unrecruited",
+        "L2E2": "unrecruited",
+        "L2E3": "active",
+        "L2E4": "quiet",
+        "L2E5": "active",
+        "L2E6": "unrecruited",
+        "L2E7": "unrecruited"
+      },
+      "active_count": 2,
+      "quiet_count": 1,
+      "unrecruited_count": 5,
+      "tyrant": "L2E3",
+      "tyrant_share": 0.3669,
+      "depression_by_maturity": {
+        "0.75-1.00": {
+          "n": 1416,
+          "mean_delta_abs": 0.4918
+        }
+      },
+      "physical_inhibition_applied_count": 1896,
+      "physical_inhibition_skipped_refractory_count": 0,
+      "first_delivery_event": {
+        "neuron": "L2E0",
+        "t": 11,
+        "applied": true,
+        "v_pre": 5918.095951281426,
+        "v_post": 0.0,
+        "magnitude": 8000.0
+      },
+      "multi_firer_rate": 0.2775,
+      "multi_firer_steps": 222,
+      "total_steps": 800,
+      "eventually_fired_after_never_early": {
+        "L2E0": false,
+        "L2E1": false,
+        "L2E2": false,
+        "L2E6": false,
+        "L2E7": false
+      }
+    },
+    {
+      "config": "A_default",
+      "weight_seed": 5,
+      "topology_seed": 1,
+      "scenario": "interleaved_40",
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E1",
+        "L2E2"
+      ],
+      "first_spike_latency": {
+        "L2E0": null,
+        "L2E1": null,
+        "L2E2": null,
+        "L2E3": 9,
+        "L2E4": 7,
+        "L2E5": 10,
+        "L2E6": 31,
+        "L2E7": 30
+      },
+      "status": {
+        "L2E0": "unrecruited",
+        "L2E1": "unrecruited",
+        "L2E2": "unrecruited",
+        "L2E3": "active",
+        "L2E4": "active",
+        "L2E5": "quiet",
+        "L2E6": "active",
+        "L2E7": "quiet"
+      },
+      "active_count": 3,
+      "quiet_count": 2,
+      "unrecruited_count": 3,
+      "tyrant": "L2E3",
+      "tyrant_share": 0.6,
+      "depression_by_maturity": {
+        "0.75-1.00": {
+          "n": 5574,
+          "mean_delta_abs": 0.9452
+        }
+      },
+      "physical_inhibition_applied_count": 6480,
+      "physical_inhibition_skipped_refractory_count": 0,
+      "first_delivery_event": {
+        "neuron": "L2E0",
+        "t": 11,
+        "applied": true,
+        "v_pre": 5918.095951281426,
+        "v_post": 0.0,
+        "magnitude": 8000.0
+      },
+      "multi_firer_rate": 0.0306,
+      "multi_firer_steps": 98,
+      "total_steps": 3200,
+      "eventually_fired_after_never_early": null,
+      "distinct_owners": 3,
+      "per_pattern_consistency": {
+        "row 1": 0.6,
+        "col 1": 0.85,
+        "diag \\": 0.825,
+        "diag /": 0.575
+      },
+      "collisions": {
+        "L2E3": [
+          "col 1",
+          "diag \\"
+        ]
+      },
+      "forgetting": {
+        "row 1": false,
+        "col 1": false,
+        "diag \\": false,
+        "diag /": false
+      },
+      "silent_cells": [
+        "L2E0",
+        "L2E1",
+        "L2E2"
+      ],
+      "recruitable_cells": [
+        "L2E5",
+        "L2E7"
+      ],
+      "mean_ambiguity_rate": 0.0562
+    },
+    {
+      "config": "A_default",
+      "weight_seed": 5,
+      "topology_seed": 2,
+      "scenario": "long_hold_switch",
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E1",
+        "L2E2",
+        "L2E6",
+        "L2E7"
+      ],
+      "first_spike_latency": {
+        "L2E0": null,
+        "L2E1": null,
+        "L2E2": null,
+        "L2E3": 9,
+        "L2E4": 7,
+        "L2E5": 10,
+        "L2E6": null,
+        "L2E7": null
+      },
+      "status": {
+        "L2E0": "unrecruited",
+        "L2E1": "unrecruited",
+        "L2E2": "unrecruited",
+        "L2E3": "active",
+        "L2E4": "quiet",
+        "L2E5": "active",
+        "L2E6": "unrecruited",
+        "L2E7": "unrecruited"
+      },
+      "active_count": 2,
+      "quiet_count": 1,
+      "unrecruited_count": 5,
+      "tyrant": "L2E3",
+      "tyrant_share": 0.3669,
+      "depression_by_maturity": {
+        "0.75-1.00": {
+          "n": 1416,
+          "mean_delta_abs": 0.4918
+        }
+      },
+      "physical_inhibition_applied_count": 1896,
+      "physical_inhibition_skipped_refractory_count": 0,
+      "first_delivery_event": {
+        "neuron": "L2E0",
+        "t": 11,
+        "applied": true,
+        "v_pre": 5918.095951281426,
+        "v_post": 0.0,
+        "magnitude": 8000.0
+      },
+      "multi_firer_rate": 0.2775,
+      "multi_firer_steps": 222,
+      "total_steps": 800,
+      "eventually_fired_after_never_early": {
+        "L2E0": false,
+        "L2E1": false,
+        "L2E2": false,
+        "L2E6": false,
+        "L2E7": false
+      }
+    },
+    {
+      "config": "A_default",
+      "weight_seed": 5,
+      "topology_seed": 2,
+      "scenario": "interleaved_40",
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E1",
+        "L2E2"
+      ],
+      "first_spike_latency": {
+        "L2E0": null,
+        "L2E1": null,
+        "L2E2": null,
+        "L2E3": 9,
+        "L2E4": 7,
+        "L2E5": 10,
+        "L2E6": 31,
+        "L2E7": 30
+      },
+      "status": {
+        "L2E0": "unrecruited",
+        "L2E1": "unrecruited",
+        "L2E2": "unrecruited",
+        "L2E3": "active",
+        "L2E4": "active",
+        "L2E5": "quiet",
+        "L2E6": "active",
+        "L2E7": "quiet"
+      },
+      "active_count": 3,
+      "quiet_count": 2,
+      "unrecruited_count": 3,
+      "tyrant": "L2E3",
+      "tyrant_share": 0.6,
+      "depression_by_maturity": {
+        "0.75-1.00": {
+          "n": 5574,
+          "mean_delta_abs": 0.9452
+        }
+      },
+      "physical_inhibition_applied_count": 6480,
+      "physical_inhibition_skipped_refractory_count": 0,
+      "first_delivery_event": {
+        "neuron": "L2E0",
+        "t": 11,
+        "applied": true,
+        "v_pre": 5918.095951281426,
+        "v_post": 0.0,
+        "magnitude": 8000.0
+      },
+      "multi_firer_rate": 0.0306,
+      "multi_firer_steps": 98,
+      "total_steps": 3200,
+      "eventually_fired_after_never_early": null,
+      "distinct_owners": 3,
+      "per_pattern_consistency": {
+        "row 1": 0.6,
+        "col 1": 0.85,
+        "diag \\": 0.825,
+        "diag /": 0.575
+      },
+      "collisions": {
+        "L2E3": [
+          "col 1",
+          "diag \\"
+        ]
+      },
+      "forgetting": {
+        "row 1": false,
+        "col 1": false,
+        "diag \\": false,
+        "diag /": false
+      },
+      "silent_cells": [
+        "L2E0",
+        "L2E1",
+        "L2E2"
+      ],
+      "recruitable_cells": [
+        "L2E5",
+        "L2E7"
+      ],
+      "mean_ambiguity_rate": 0.0562
+    },
+    {
+      "config": "A_default",
+      "weight_seed": 5,
+      "topology_seed": 3,
+      "scenario": "long_hold_switch",
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E1",
+        "L2E2",
+        "L2E6",
+        "L2E7"
+      ],
+      "first_spike_latency": {
+        "L2E0": null,
+        "L2E1": null,
+        "L2E2": null,
+        "L2E3": 9,
+        "L2E4": 7,
+        "L2E5": 10,
+        "L2E6": null,
+        "L2E7": null
+      },
+      "status": {
+        "L2E0": "unrecruited",
+        "L2E1": "unrecruited",
+        "L2E2": "unrecruited",
+        "L2E3": "active",
+        "L2E4": "quiet",
+        "L2E5": "active",
+        "L2E6": "unrecruited",
+        "L2E7": "unrecruited"
+      },
+      "active_count": 2,
+      "quiet_count": 1,
+      "unrecruited_count": 5,
+      "tyrant": "L2E3",
+      "tyrant_share": 0.3669,
+      "depression_by_maturity": {
+        "0.75-1.00": {
+          "n": 1416,
+          "mean_delta_abs": 0.4918
+        }
+      },
+      "physical_inhibition_applied_count": 1896,
+      "physical_inhibition_skipped_refractory_count": 0,
+      "first_delivery_event": {
+        "neuron": "L2E0",
+        "t": 11,
+        "applied": true,
+        "v_pre": 5918.095951281426,
+        "v_post": 0.0,
+        "magnitude": 8000.0
+      },
+      "multi_firer_rate": 0.2775,
+      "multi_firer_steps": 222,
+      "total_steps": 800,
+      "eventually_fired_after_never_early": {
+        "L2E0": false,
+        "L2E1": false,
+        "L2E2": false,
+        "L2E6": false,
+        "L2E7": false
+      }
+    },
+    {
+      "config": "A_default",
+      "weight_seed": 5,
+      "topology_seed": 3,
+      "scenario": "interleaved_40",
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E1",
+        "L2E2"
+      ],
+      "first_spike_latency": {
+        "L2E0": null,
+        "L2E1": null,
+        "L2E2": null,
+        "L2E3": 9,
+        "L2E4": 7,
+        "L2E5": 10,
+        "L2E6": 31,
+        "L2E7": 30
+      },
+      "status": {
+        "L2E0": "unrecruited",
+        "L2E1": "unrecruited",
+        "L2E2": "unrecruited",
+        "L2E3": "active",
+        "L2E4": "active",
+        "L2E5": "quiet",
+        "L2E6": "active",
+        "L2E7": "quiet"
+      },
+      "active_count": 3,
+      "quiet_count": 2,
+      "unrecruited_count": 3,
+      "tyrant": "L2E3",
+      "tyrant_share": 0.6,
+      "depression_by_maturity": {
+        "0.75-1.00": {
+          "n": 5574,
+          "mean_delta_abs": 0.9452
+        }
+      },
+      "physical_inhibition_applied_count": 6480,
+      "physical_inhibition_skipped_refractory_count": 0,
+      "first_delivery_event": {
+        "neuron": "L2E0",
+        "t": 11,
+        "applied": true,
+        "v_pre": 5918.095951281426,
+        "v_post": 0.0,
+        "magnitude": 8000.0
+      },
+      "multi_firer_rate": 0.0306,
+      "multi_firer_steps": 98,
+      "total_steps": 3200,
+      "eventually_fired_after_never_early": null,
+      "distinct_owners": 3,
+      "per_pattern_consistency": {
+        "row 1": 0.6,
+        "col 1": 0.85,
+        "diag \\": 0.825,
+        "diag /": 0.575
+      },
+      "collisions": {
+        "L2E3": [
+          "col 1",
+          "diag \\"
+        ]
+      },
+      "forgetting": {
+        "row 1": false,
+        "col 1": false,
+        "diag \\": false,
+        "diag /": false
+      },
+      "silent_cells": [
+        "L2E0",
+        "L2E1",
+        "L2E2"
+      ],
+      "recruitable_cells": [
+        "L2E5",
+        "L2E7"
+      ],
+      "mean_ambiguity_rate": 0.0562
+    },
+    {
+      "config": "B_protection",
+      "weight_seed": 1,
+      "topology_seed": 1,
+      "scenario": "long_hold_switch",
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E1",
+        "L2E2",
+        "L2E6",
+        "L2E7"
+      ],
+      "first_spike_latency": {
+        "L2E0": null,
+        "L2E1": null,
+        "L2E2": null,
+        "L2E3": 10,
+        "L2E4": 9,
+        "L2E5": 7,
+        "L2E6": null,
+        "L2E7": null
+      },
+      "status": {
+        "L2E0": "unrecruited",
+        "L2E1": "unrecruited",
+        "L2E2": "unrecruited",
+        "L2E3": "quiet",
+        "L2E4": "quiet",
+        "L2E5": "active",
+        "L2E6": "unrecruited",
+        "L2E7": "unrecruited"
+      },
+      "active_count": 1,
+      "quiet_count": 2,
+      "unrecruited_count": 5,
+      "tyrant": "L2E5",
+      "tyrant_share": 0.4313,
+      "depression_by_maturity": {
+        "0.00-0.25": {
+          "n": 1125,
+          "mean_delta_abs": 0.0
+        },
+        "0.25-0.50": {
+          "n": 2,
+          "mean_delta_abs": 0.5542
+        },
+        "0.75-1.00": {
+          "n": 313,
+          "mean_delta_abs": 2.9011
+        }
+      },
+      "physical_inhibition_applied_count": 1800,
+      "physical_inhibition_skipped_refractory_count": 0,
+      "first_delivery_event": {
+        "neuron": "L2E0",
+        "t": 11,
+        "applied": true,
+        "v_pre": 7900.766999301922,
+        "v_post": 0.0,
+        "magnitude": 8000.0
+      },
+      "multi_firer_rate": 0.1575,
+      "multi_firer_steps": 126,
+      "total_steps": 800,
+      "eventually_fired_after_never_early": {
+        "L2E0": false,
+        "L2E1": false,
+        "L2E2": false,
+        "L2E6": false,
+        "L2E7": false
+      }
+    },
+    {
+      "config": "B_protection",
+      "weight_seed": 1,
+      "topology_seed": 1,
+      "scenario": "interleaved_40",
+      "never_fired_neurons": [
+        "L2E1"
+      ],
+      "first_spike_latency": {
+        "L2E0": 80,
+        "L2E1": null,
+        "L2E2": 31,
+        "L2E3": 10,
+        "L2E4": 9,
+        "L2E5": 7,
+        "L2E6": 34,
+        "L2E7": 48
+      },
+      "status": {
+        "L2E0": "active",
+        "L2E1": "unrecruited",
+        "L2E2": "quiet",
+        "L2E3": "quiet",
+        "L2E4": "active",
+        "L2E5": "active",
+        "L2E6": "active",
+        "L2E7": "active"
+      },
+      "active_count": 5,
+      "quiet_count": 2,
+      "unrecruited_count": 1,
+      "tyrant": "L2E5",
+      "tyrant_share": 0.4789,
+      "depression_by_maturity": {
+        "0.00-0.25": {
+          "n": 1730,
+          "mean_delta_abs": 0.0166
+        },
+        "0.25-0.50": {
+          "n": 38,
+          "mean_delta_abs": 0.9302
+        },
+        "0.75-1.00": {
+          "n": 3042,
+          "mean_delta_abs": 2.7996
+        },
+        "0.50-0.75": {
+          "n": 28,
+          "mean_delta_abs": 1.716
+        }
+      },
+      "physical_inhibition_applied_count": 5536,
+      "physical_inhibition_skipped_refractory_count": 0,
+      "first_delivery_event": {
+        "neuron": "L2E0",
+        "t": 11,
+        "applied": true,
+        "v_pre": 7900.766999301922,
+        "v_post": 0.0,
+        "magnitude": 8000.0
+      },
+      "multi_firer_rate": 0.0347,
+      "multi_firer_steps": 111,
+      "total_steps": 3200,
+      "eventually_fired_after_never_early": null,
+      "distinct_owners": 4,
+      "per_pattern_consistency": {
+        "row 1": 0.5,
+        "col 1": 0.5,
+        "diag \\": 0.55,
+        "diag /": 1.0
+      },
+      "collisions": {},
+      "forgetting": {
+        "row 1": true,
+        "col 1": true,
+        "diag \\": false,
+        "diag /": false
+      },
+      "silent_cells": [
+        "L2E1"
+      ],
+      "recruitable_cells": [
+        "L2E2",
+        "L2E3",
+        "L2E4"
+      ],
+      "mean_ambiguity_rate": 0.125
+    },
+    {
+      "config": "B_protection",
+      "weight_seed": 1,
+      "topology_seed": 2,
+      "scenario": "long_hold_switch",
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E1",
+        "L2E2",
+        "L2E6",
+        "L2E7"
+      ],
+      "first_spike_latency": {
+        "L2E0": null,
+        "L2E1": null,
+        "L2E2": null,
+        "L2E3": 10,
+        "L2E4": 9,
+        "L2E5": 7,
+        "L2E6": null,
+        "L2E7": null
+      },
+      "status": {
+        "L2E0": "unrecruited",
+        "L2E1": "unrecruited",
+        "L2E2": "unrecruited",
+        "L2E3": "quiet",
+        "L2E4": "quiet",
+        "L2E5": "active",
+        "L2E6": "unrecruited",
+        "L2E7": "unrecruited"
+      },
+      "active_count": 1,
+      "quiet_count": 2,
+      "unrecruited_count": 5,
+      "tyrant": "L2E5",
+      "tyrant_share": 0.4313,
+      "depression_by_maturity": {
+        "0.00-0.25": {
+          "n": 1125,
+          "mean_delta_abs": 0.0
+        },
+        "0.25-0.50": {
+          "n": 2,
+          "mean_delta_abs": 0.5542
+        },
+        "0.75-1.00": {
+          "n": 313,
+          "mean_delta_abs": 2.9011
+        }
+      },
+      "physical_inhibition_applied_count": 1800,
+      "physical_inhibition_skipped_refractory_count": 0,
+      "first_delivery_event": {
+        "neuron": "L2E0",
+        "t": 11,
+        "applied": true,
+        "v_pre": 7900.766999301922,
+        "v_post": 0.0,
+        "magnitude": 8000.0
+      },
+      "multi_firer_rate": 0.1575,
+      "multi_firer_steps": 126,
+      "total_steps": 800,
+      "eventually_fired_after_never_early": {
+        "L2E0": false,
+        "L2E1": false,
+        "L2E2": false,
+        "L2E6": false,
+        "L2E7": false
+      }
+    },
+    {
+      "config": "B_protection",
+      "weight_seed": 1,
+      "topology_seed": 2,
+      "scenario": "interleaved_40",
+      "never_fired_neurons": [
+        "L2E1"
+      ],
+      "first_spike_latency": {
+        "L2E0": 80,
+        "L2E1": null,
+        "L2E2": 31,
+        "L2E3": 10,
+        "L2E4": 9,
+        "L2E5": 7,
+        "L2E6": 34,
+        "L2E7": 48
+      },
+      "status": {
+        "L2E0": "active",
+        "L2E1": "unrecruited",
+        "L2E2": "quiet",
+        "L2E3": "quiet",
+        "L2E4": "active",
+        "L2E5": "active",
+        "L2E6": "active",
+        "L2E7": "active"
+      },
+      "active_count": 5,
+      "quiet_count": 2,
+      "unrecruited_count": 1,
+      "tyrant": "L2E5",
+      "tyrant_share": 0.4789,
+      "depression_by_maturity": {
+        "0.00-0.25": {
+          "n": 1730,
+          "mean_delta_abs": 0.0166
+        },
+        "0.25-0.50": {
+          "n": 38,
+          "mean_delta_abs": 0.9302
+        },
+        "0.75-1.00": {
+          "n": 3042,
+          "mean_delta_abs": 2.7996
+        },
+        "0.50-0.75": {
+          "n": 28,
+          "mean_delta_abs": 1.716
+        }
+      },
+      "physical_inhibition_applied_count": 5536,
+      "physical_inhibition_skipped_refractory_count": 0,
+      "first_delivery_event": {
+        "neuron": "L2E0",
+        "t": 11,
+        "applied": true,
+        "v_pre": 7900.766999301922,
+        "v_post": 0.0,
+        "magnitude": 8000.0
+      },
+      "multi_firer_rate": 0.0347,
+      "multi_firer_steps": 111,
+      "total_steps": 3200,
+      "eventually_fired_after_never_early": null,
+      "distinct_owners": 4,
+      "per_pattern_consistency": {
+        "row 1": 0.5,
+        "col 1": 0.5,
+        "diag \\": 0.55,
+        "diag /": 1.0
+      },
+      "collisions": {},
+      "forgetting": {
+        "row 1": true,
+        "col 1": true,
+        "diag \\": false,
+        "diag /": false
+      },
+      "silent_cells": [
+        "L2E1"
+      ],
+      "recruitable_cells": [
+        "L2E2",
+        "L2E3",
+        "L2E4"
+      ],
+      "mean_ambiguity_rate": 0.125
+    },
+    {
+      "config": "B_protection",
+      "weight_seed": 1,
+      "topology_seed": 3,
+      "scenario": "long_hold_switch",
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E1",
+        "L2E2",
+        "L2E6",
+        "L2E7"
+      ],
+      "first_spike_latency": {
+        "L2E0": null,
+        "L2E1": null,
+        "L2E2": null,
+        "L2E3": 10,
+        "L2E4": 9,
+        "L2E5": 7,
+        "L2E6": null,
+        "L2E7": null
+      },
+      "status": {
+        "L2E0": "unrecruited",
+        "L2E1": "unrecruited",
+        "L2E2": "unrecruited",
+        "L2E3": "quiet",
+        "L2E4": "quiet",
+        "L2E5": "active",
+        "L2E6": "unrecruited",
+        "L2E7": "unrecruited"
+      },
+      "active_count": 1,
+      "quiet_count": 2,
+      "unrecruited_count": 5,
+      "tyrant": "L2E5",
+      "tyrant_share": 0.4313,
+      "depression_by_maturity": {
+        "0.00-0.25": {
+          "n": 1125,
+          "mean_delta_abs": 0.0
+        },
+        "0.25-0.50": {
+          "n": 2,
+          "mean_delta_abs": 0.5542
+        },
+        "0.75-1.00": {
+          "n": 313,
+          "mean_delta_abs": 2.9011
+        }
+      },
+      "physical_inhibition_applied_count": 1800,
+      "physical_inhibition_skipped_refractory_count": 0,
+      "first_delivery_event": {
+        "neuron": "L2E0",
+        "t": 11,
+        "applied": true,
+        "v_pre": 7900.766999301922,
+        "v_post": 0.0,
+        "magnitude": 8000.0
+      },
+      "multi_firer_rate": 0.1575,
+      "multi_firer_steps": 126,
+      "total_steps": 800,
+      "eventually_fired_after_never_early": {
+        "L2E0": false,
+        "L2E1": false,
+        "L2E2": false,
+        "L2E6": false,
+        "L2E7": false
+      }
+    },
+    {
+      "config": "B_protection",
+      "weight_seed": 1,
+      "topology_seed": 3,
+      "scenario": "interleaved_40",
+      "never_fired_neurons": [
+        "L2E1"
+      ],
+      "first_spike_latency": {
+        "L2E0": 80,
+        "L2E1": null,
+        "L2E2": 31,
+        "L2E3": 10,
+        "L2E4": 9,
+        "L2E5": 7,
+        "L2E6": 34,
+        "L2E7": 48
+      },
+      "status": {
+        "L2E0": "active",
+        "L2E1": "unrecruited",
+        "L2E2": "quiet",
+        "L2E3": "quiet",
+        "L2E4": "active",
+        "L2E5": "active",
+        "L2E6": "active",
+        "L2E7": "active"
+      },
+      "active_count": 5,
+      "quiet_count": 2,
+      "unrecruited_count": 1,
+      "tyrant": "L2E5",
+      "tyrant_share": 0.4789,
+      "depression_by_maturity": {
+        "0.00-0.25": {
+          "n": 1730,
+          "mean_delta_abs": 0.0166
+        },
+        "0.25-0.50": {
+          "n": 38,
+          "mean_delta_abs": 0.9302
+        },
+        "0.75-1.00": {
+          "n": 3042,
+          "mean_delta_abs": 2.7996
+        },
+        "0.50-0.75": {
+          "n": 28,
+          "mean_delta_abs": 1.716
+        }
+      },
+      "physical_inhibition_applied_count": 5536,
+      "physical_inhibition_skipped_refractory_count": 0,
+      "first_delivery_event": {
+        "neuron": "L2E0",
+        "t": 11,
+        "applied": true,
+        "v_pre": 7900.766999301922,
+        "v_post": 0.0,
+        "magnitude": 8000.0
+      },
+      "multi_firer_rate": 0.0347,
+      "multi_firer_steps": 111,
+      "total_steps": 3200,
+      "eventually_fired_after_never_early": null,
+      "distinct_owners": 4,
+      "per_pattern_consistency": {
+        "row 1": 0.5,
+        "col 1": 0.5,
+        "diag \\": 0.55,
+        "diag /": 1.0
+      },
+      "collisions": {},
+      "forgetting": {
+        "row 1": true,
+        "col 1": true,
+        "diag \\": false,
+        "diag /": false
+      },
+      "silent_cells": [
+        "L2E1"
+      ],
+      "recruitable_cells": [
+        "L2E2",
+        "L2E3",
+        "L2E4"
+      ],
+      "mean_ambiguity_rate": 0.125
+    },
+    {
+      "config": "B_protection",
+      "weight_seed": 2,
+      "topology_seed": 1,
+      "scenario": "long_hold_switch",
+      "never_fired_neurons": [
+        "L2E1",
+        "L2E2",
+        "L2E4",
+        "L2E5",
+        "L2E6"
+      ],
+      "first_spike_latency": {
+        "L2E0": 7,
+        "L2E1": null,
+        "L2E2": null,
+        "L2E3": 9,
+        "L2E4": null,
+        "L2E5": null,
+        "L2E6": null,
+        "L2E7": 8
+      },
+      "status": {
+        "L2E0": "quiet",
+        "L2E1": "unrecruited",
+        "L2E2": "unrecruited",
+        "L2E3": "quiet",
+        "L2E4": "unrecruited",
+        "L2E5": "unrecruited",
+        "L2E6": "unrecruited",
+        "L2E7": "active"
+      },
+      "active_count": 1,
+      "quiet_count": 2,
+      "unrecruited_count": 5,
+      "tyrant": "L2E7",
+      "tyrant_share": 0.4978,
+      "depression_by_maturity": {
+        "0.25-0.50": {
+          "n": 25,
+          "mean_delta_abs": 0.2767
+        },
+        "0.00-0.25": {
+          "n": 1180,
+          "mean_delta_abs": 0.0027
+        },
+        "0.75-1.00": {
+          "n": 312,
+          "mean_delta_abs": 3.94
+        },
+        "0.50-0.75": {
+          "n": 11,
+          "mean_delta_abs": 1.2581
+        }
+      },
+      "physical_inhibition_applied_count": 1832,
+      "physical_inhibition_skipped_refractory_count": 0,
+      "first_delivery_event": {
+        "neuron": "L2E0",
+        "t": 10,
+        "applied": true,
+        "v_pre": 636.2703401359381,
+        "v_post": 0.0,
+        "magnitude": 8000.0
+      },
+      "multi_firer_rate": 0.0938,
+      "multi_firer_steps": 75,
+      "total_steps": 800,
+      "eventually_fired_after_never_early": {
+        "L2E1": false,
+        "L2E2": false,
+        "L2E4": false,
+        "L2E5": false,
+        "L2E6": false
+      }
+    },
+    {
+      "config": "B_protection",
+      "weight_seed": 2,
+      "topology_seed": 1,
+      "scenario": "interleaved_40",
+      "never_fired_neurons": [
+        "L2E2",
+        "L2E4"
+      ],
+      "first_spike_latency": {
+        "L2E0": 7,
+        "L2E1": 30,
+        "L2E2": null,
+        "L2E3": 9,
+        "L2E4": null,
+        "L2E5": 33,
+        "L2E6": 31,
+        "L2E7": 8
+      },
+      "status": {
+        "L2E0": "active",
+        "L2E1": "active",
+        "L2E2": "unrecruited",
+        "L2E3": "active",
+        "L2E4": "unrecruited",
+        "L2E5": "quiet",
+        "L2E6": "quiet",
+        "L2E7": "quiet"
+      },
+      "active_count": 3,
+      "quiet_count": 3,
+      "unrecruited_count": 2,
+      "tyrant": "L2E3",
+      "tyrant_share": 0.6177,
+      "depression_by_maturity": {
+        "0.25-0.50": {
+          "n": 56,
+          "mean_delta_abs": 1.1182
+        },
+        "0.00-0.25": {
+          "n": 3292,
+          "mean_delta_abs": 0.0137
+        },
+        "0.75-1.00": {
+          "n": 1967,
+          "mean_delta_abs": 2.6487
+        },
+        "0.50-0.75": {
+          "n": 36,
+          "mean_delta_abs": 1.6227
+        }
+      },
+      "physical_inhibition_applied_count": 6128,
+      "physical_inhibition_skipped_refractory_count": 0,
+      "first_delivery_event": {
+        "neuron": "L2E0",
+        "t": 10,
+        "applied": true,
+        "v_pre": 636.2703401359381,
+        "v_post": 0.0,
+        "magnitude": 8000.0
+      },
+      "multi_firer_rate": 0.0041,
+      "multi_firer_steps": 13,
+      "total_steps": 3200,
+      "eventually_fired_after_never_early": null,
+      "distinct_owners": 3,
+      "per_pattern_consistency": {
+        "row 1": 0.575,
+        "col 1": 0.9,
+        "diag \\": 0.7,
+        "diag /": 0.5
+      },
+      "collisions": {
+        "L2E3": [
+          "col 1",
+          "diag \\"
+        ]
+      },
+      "forgetting": {
+        "row 1": true,
+        "col 1": false,
+        "diag \\": false,
+        "diag /": true
+      },
+      "silent_cells": [
+        "L2E2",
+        "L2E4"
+      ],
+      "recruitable_cells": [
+        "L2E5",
+        "L2E6",
+        "L2E7"
+      ],
+      "mean_ambiguity_rate": 0.0188
+    },
+    {
+      "config": "B_protection",
+      "weight_seed": 2,
+      "topology_seed": 2,
+      "scenario": "long_hold_switch",
+      "never_fired_neurons": [
+        "L2E1",
+        "L2E2",
+        "L2E4",
+        "L2E5",
+        "L2E6"
+      ],
+      "first_spike_latency": {
+        "L2E0": 7,
+        "L2E1": null,
+        "L2E2": null,
+        "L2E3": 9,
+        "L2E4": null,
+        "L2E5": null,
+        "L2E6": null,
+        "L2E7": 8
+      },
+      "status": {
+        "L2E0": "quiet",
+        "L2E1": "unrecruited",
+        "L2E2": "unrecruited",
+        "L2E3": "quiet",
+        "L2E4": "unrecruited",
+        "L2E5": "unrecruited",
+        "L2E6": "unrecruited",
+        "L2E7": "active"
+      },
+      "active_count": 1,
+      "quiet_count": 2,
+      "unrecruited_count": 5,
+      "tyrant": "L2E7",
+      "tyrant_share": 0.4978,
+      "depression_by_maturity": {
+        "0.25-0.50": {
+          "n": 25,
+          "mean_delta_abs": 0.2767
+        },
+        "0.00-0.25": {
+          "n": 1180,
+          "mean_delta_abs": 0.0027
+        },
+        "0.75-1.00": {
+          "n": 312,
+          "mean_delta_abs": 3.94
+        },
+        "0.50-0.75": {
+          "n": 11,
+          "mean_delta_abs": 1.2581
+        }
+      },
+      "physical_inhibition_applied_count": 1832,
+      "physical_inhibition_skipped_refractory_count": 0,
+      "first_delivery_event": {
+        "neuron": "L2E0",
+        "t": 10,
+        "applied": true,
+        "v_pre": 636.2703401359381,
+        "v_post": 0.0,
+        "magnitude": 8000.0
+      },
+      "multi_firer_rate": 0.0938,
+      "multi_firer_steps": 75,
+      "total_steps": 800,
+      "eventually_fired_after_never_early": {
+        "L2E1": false,
+        "L2E2": false,
+        "L2E4": false,
+        "L2E5": false,
+        "L2E6": false
+      }
+    },
+    {
+      "config": "B_protection",
+      "weight_seed": 2,
+      "topology_seed": 2,
+      "scenario": "interleaved_40",
+      "never_fired_neurons": [
+        "L2E2",
+        "L2E4"
+      ],
+      "first_spike_latency": {
+        "L2E0": 7,
+        "L2E1": 30,
+        "L2E2": null,
+        "L2E3": 9,
+        "L2E4": null,
+        "L2E5": 33,
+        "L2E6": 31,
+        "L2E7": 8
+      },
+      "status": {
+        "L2E0": "active",
+        "L2E1": "active",
+        "L2E2": "unrecruited",
+        "L2E3": "active",
+        "L2E4": "unrecruited",
+        "L2E5": "quiet",
+        "L2E6": "quiet",
+        "L2E7": "quiet"
+      },
+      "active_count": 3,
+      "quiet_count": 3,
+      "unrecruited_count": 2,
+      "tyrant": "L2E3",
+      "tyrant_share": 0.6177,
+      "depression_by_maturity": {
+        "0.25-0.50": {
+          "n": 56,
+          "mean_delta_abs": 1.1182
+        },
+        "0.00-0.25": {
+          "n": 3292,
+          "mean_delta_abs": 0.0137
+        },
+        "0.75-1.00": {
+          "n": 1967,
+          "mean_delta_abs": 2.6487
+        },
+        "0.50-0.75": {
+          "n": 36,
+          "mean_delta_abs": 1.6227
+        }
+      },
+      "physical_inhibition_applied_count": 6128,
+      "physical_inhibition_skipped_refractory_count": 0,
+      "first_delivery_event": {
+        "neuron": "L2E0",
+        "t": 10,
+        "applied": true,
+        "v_pre": 636.2703401359381,
+        "v_post": 0.0,
+        "magnitude": 8000.0
+      },
+      "multi_firer_rate": 0.0041,
+      "multi_firer_steps": 13,
+      "total_steps": 3200,
+      "eventually_fired_after_never_early": null,
+      "distinct_owners": 3,
+      "per_pattern_consistency": {
+        "row 1": 0.575,
+        "col 1": 0.9,
+        "diag \\": 0.7,
+        "diag /": 0.5
+      },
+      "collisions": {
+        "L2E3": [
+          "col 1",
+          "diag \\"
+        ]
+      },
+      "forgetting": {
+        "row 1": true,
+        "col 1": false,
+        "diag \\": false,
+        "diag /": true
+      },
+      "silent_cells": [
+        "L2E2",
+        "L2E4"
+      ],
+      "recruitable_cells": [
+        "L2E5",
+        "L2E6",
+        "L2E7"
+      ],
+      "mean_ambiguity_rate": 0.0188
+    },
+    {
+      "config": "B_protection",
+      "weight_seed": 2,
+      "topology_seed": 3,
+      "scenario": "long_hold_switch",
+      "never_fired_neurons": [
+        "L2E1",
+        "L2E2",
+        "L2E4",
+        "L2E5",
+        "L2E6"
+      ],
+      "first_spike_latency": {
+        "L2E0": 7,
+        "L2E1": null,
+        "L2E2": null,
+        "L2E3": 9,
+        "L2E4": null,
+        "L2E5": null,
+        "L2E6": null,
+        "L2E7": 8
+      },
+      "status": {
+        "L2E0": "quiet",
+        "L2E1": "unrecruited",
+        "L2E2": "unrecruited",
+        "L2E3": "quiet",
+        "L2E4": "unrecruited",
+        "L2E5": "unrecruited",
+        "L2E6": "unrecruited",
+        "L2E7": "active"
+      },
+      "active_count": 1,
+      "quiet_count": 2,
+      "unrecruited_count": 5,
+      "tyrant": "L2E7",
+      "tyrant_share": 0.4978,
+      "depression_by_maturity": {
+        "0.25-0.50": {
+          "n": 25,
+          "mean_delta_abs": 0.2767
+        },
+        "0.00-0.25": {
+          "n": 1180,
+          "mean_delta_abs": 0.0027
+        },
+        "0.75-1.00": {
+          "n": 312,
+          "mean_delta_abs": 3.94
+        },
+        "0.50-0.75": {
+          "n": 11,
+          "mean_delta_abs": 1.2581
+        }
+      },
+      "physical_inhibition_applied_count": 1832,
+      "physical_inhibition_skipped_refractory_count": 0,
+      "first_delivery_event": {
+        "neuron": "L2E0",
+        "t": 10,
+        "applied": true,
+        "v_pre": 636.2703401359381,
+        "v_post": 0.0,
+        "magnitude": 8000.0
+      },
+      "multi_firer_rate": 0.0938,
+      "multi_firer_steps": 75,
+      "total_steps": 800,
+      "eventually_fired_after_never_early": {
+        "L2E1": false,
+        "L2E2": false,
+        "L2E4": false,
+        "L2E5": false,
+        "L2E6": false
+      }
+    },
+    {
+      "config": "B_protection",
+      "weight_seed": 2,
+      "topology_seed": 3,
+      "scenario": "interleaved_40",
+      "never_fired_neurons": [
+        "L2E2",
+        "L2E4"
+      ],
+      "first_spike_latency": {
+        "L2E0": 7,
+        "L2E1": 30,
+        "L2E2": null,
+        "L2E3": 9,
+        "L2E4": null,
+        "L2E5": 33,
+        "L2E6": 31,
+        "L2E7": 8
+      },
+      "status": {
+        "L2E0": "active",
+        "L2E1": "active",
+        "L2E2": "unrecruited",
+        "L2E3": "active",
+        "L2E4": "unrecruited",
+        "L2E5": "quiet",
+        "L2E6": "quiet",
+        "L2E7": "quiet"
+      },
+      "active_count": 3,
+      "quiet_count": 3,
+      "unrecruited_count": 2,
+      "tyrant": "L2E3",
+      "tyrant_share": 0.6177,
+      "depression_by_maturity": {
+        "0.25-0.50": {
+          "n": 56,
+          "mean_delta_abs": 1.1182
+        },
+        "0.00-0.25": {
+          "n": 3292,
+          "mean_delta_abs": 0.0137
+        },
+        "0.75-1.00": {
+          "n": 1967,
+          "mean_delta_abs": 2.6487
+        },
+        "0.50-0.75": {
+          "n": 36,
+          "mean_delta_abs": 1.6227
+        }
+      },
+      "physical_inhibition_applied_count": 6128,
+      "physical_inhibition_skipped_refractory_count": 0,
+      "first_delivery_event": {
+        "neuron": "L2E0",
+        "t": 10,
+        "applied": true,
+        "v_pre": 636.2703401359381,
+        "v_post": 0.0,
+        "magnitude": 8000.0
+      },
+      "multi_firer_rate": 0.0041,
+      "multi_firer_steps": 13,
+      "total_steps": 3200,
+      "eventually_fired_after_never_early": null,
+      "distinct_owners": 3,
+      "per_pattern_consistency": {
+        "row 1": 0.575,
+        "col 1": 0.9,
+        "diag \\": 0.7,
+        "diag /": 0.5
+      },
+      "collisions": {
+        "L2E3": [
+          "col 1",
+          "diag \\"
+        ]
+      },
+      "forgetting": {
+        "row 1": true,
+        "col 1": false,
+        "diag \\": false,
+        "diag /": true
+      },
+      "silent_cells": [
+        "L2E2",
+        "L2E4"
+      ],
+      "recruitable_cells": [
+        "L2E5",
+        "L2E6",
+        "L2E7"
+      ],
+      "mean_ambiguity_rate": 0.0188
+    },
+    {
+      "config": "B_protection",
+      "weight_seed": 3,
+      "topology_seed": 1,
+      "scenario": "long_hold_switch",
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E1",
+        "L2E2",
+        "L2E4",
+        "L2E6"
+      ],
+      "first_spike_latency": {
+        "L2E0": null,
+        "L2E1": null,
+        "L2E2": null,
+        "L2E3": 11,
+        "L2E4": null,
+        "L2E5": 7,
+        "L2E6": null,
+        "L2E7": 10
+      },
+      "status": {
+        "L2E0": "unrecruited",
+        "L2E1": "unrecruited",
+        "L2E2": "unrecruited",
+        "L2E3": "quiet",
+        "L2E4": "unrecruited",
+        "L2E5": "active",
+        "L2E6": "unrecruited",
+        "L2E7": "quiet"
+      },
+      "active_count": 1,
+      "quiet_count": 2,
+      "unrecruited_count": 5,
+      "tyrant": "L2E5",
+      "tyrant_share": 0.5113,
+      "depression_by_maturity": {
+        "0.00-0.25": {
+          "n": 1529,
+          "mean_delta_abs": 0.0014
+        },
+        "0.25-0.50": {
+          "n": 31,
+          "mean_delta_abs": 0.5014
+        },
+        "0.75-1.00": {
+          "n": 234,
+          "mean_delta_abs": 4.7609
+        },
+        "0.50-0.75": {
+          "n": 21,
+          "mean_delta_abs": 1.0122
+        }
+      },
+      "physical_inhibition_applied_count": 2352,
+      "physical_inhibition_skipped_refractory_count": 0,
+      "first_delivery_event": {
+        "neuron": "L2E0",
+        "t": 12,
+        "applied": true,
+        "v_pre": 7358.269526215411,
+        "v_post": 0.0,
+        "magnitude": 8000.0
+      },
+      "multi_firer_rate": 0.2687,
+      "multi_firer_steps": 215,
+      "total_steps": 800,
+      "eventually_fired_after_never_early": {
+        "L2E0": false,
+        "L2E1": false,
+        "L2E2": false,
+        "L2E4": false,
+        "L2E6": false
+      }
+    },
+    {
+      "config": "B_protection",
+      "weight_seed": 3,
+      "topology_seed": 1,
+      "scenario": "interleaved_40",
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E1",
+        "L2E2"
+      ],
+      "first_spike_latency": {
+        "L2E0": null,
+        "L2E1": null,
+        "L2E2": null,
+        "L2E3": 11,
+        "L2E4": 68,
+        "L2E5": 7,
+        "L2E6": 34,
+        "L2E7": 10
+      },
+      "status": {
+        "L2E0": "unrecruited",
+        "L2E1": "unrecruited",
+        "L2E2": "unrecruited",
+        "L2E3": "active",
+        "L2E4": "active",
+        "L2E5": "active",
+        "L2E6": "active",
+        "L2E7": "active"
+      },
+      "active_count": 5,
+      "quiet_count": 0,
+      "unrecruited_count": 3,
+      "tyrant": "L2E3",
+      "tyrant_share": 0.475,
+      "depression_by_maturity": {
+        "0.00-0.25": {
+          "n": 1981,
+          "mean_delta_abs": 0.0
+        },
+        "0.25-0.50": {
+          "n": 5,
+          "mean_delta_abs": 1.5339
+        },
+        "0.75-1.00": {
+          "n": 2603,
+          "mean_delta_abs": 2.6348
+        },
+        "0.50-0.75": {
+          "n": 11,
+          "mean_delta_abs": 1.2181
+        }
+      },
+      "physical_inhibition_applied_count": 5264,
+      "physical_inhibition_skipped_refractory_count": 0,
+      "first_delivery_event": {
+        "neuron": "L2E0",
+        "t": 12,
+        "applied": true,
+        "v_pre": 7358.269526215411,
+        "v_post": 0.0,
+        "magnitude": 8000.0
+      },
+      "multi_firer_rate": 0.0034,
+      "multi_firer_steps": 11,
+      "total_steps": 3200,
+      "eventually_fired_after_never_early": null,
+      "distinct_owners": 3,
+      "per_pattern_consistency": {
+        "row 1": 0.45,
+        "col 1": 0.475,
+        "diag \\": 0.5,
+        "diag /": 0.475
+      },
+      "collisions": {
+        "L2E3": [
+          "row 1",
+          "col 1"
+        ]
+      },
+      "forgetting": {
+        "row 1": true,
+        "col 1": true,
+        "diag \\": true,
+        "diag /": true
+      },
+      "silent_cells": [
+        "L2E0",
+        "L2E1",
+        "L2E2"
+      ],
+      "recruitable_cells": [
+        "L2E5",
+        "L2E6"
+      ],
+      "mean_ambiguity_rate": 0.0
+    },
+    {
+      "config": "B_protection",
+      "weight_seed": 3,
+      "topology_seed": 2,
+      "scenario": "long_hold_switch",
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E1",
+        "L2E2",
+        "L2E4",
+        "L2E6"
+      ],
+      "first_spike_latency": {
+        "L2E0": null,
+        "L2E1": null,
+        "L2E2": null,
+        "L2E3": 11,
+        "L2E4": null,
+        "L2E5": 7,
+        "L2E6": null,
+        "L2E7": 10
+      },
+      "status": {
+        "L2E0": "unrecruited",
+        "L2E1": "unrecruited",
+        "L2E2": "unrecruited",
+        "L2E3": "quiet",
+        "L2E4": "unrecruited",
+        "L2E5": "active",
+        "L2E6": "unrecruited",
+        "L2E7": "quiet"
+      },
+      "active_count": 1,
+      "quiet_count": 2,
+      "unrecruited_count": 5,
+      "tyrant": "L2E5",
+      "tyrant_share": 0.5113,
+      "depression_by_maturity": {
+        "0.00-0.25": {
+          "n": 1529,
+          "mean_delta_abs": 0.0014
+        },
+        "0.25-0.50": {
+          "n": 31,
+          "mean_delta_abs": 0.5014
+        },
+        "0.75-1.00": {
+          "n": 234,
+          "mean_delta_abs": 4.7609
+        },
+        "0.50-0.75": {
+          "n": 21,
+          "mean_delta_abs": 1.0122
+        }
+      },
+      "physical_inhibition_applied_count": 2352,
+      "physical_inhibition_skipped_refractory_count": 0,
+      "first_delivery_event": {
+        "neuron": "L2E0",
+        "t": 12,
+        "applied": true,
+        "v_pre": 7358.269526215411,
+        "v_post": 0.0,
+        "magnitude": 8000.0
+      },
+      "multi_firer_rate": 0.2687,
+      "multi_firer_steps": 215,
+      "total_steps": 800,
+      "eventually_fired_after_never_early": {
+        "L2E0": false,
+        "L2E1": false,
+        "L2E2": false,
+        "L2E4": false,
+        "L2E6": false
+      }
+    },
+    {
+      "config": "B_protection",
+      "weight_seed": 3,
+      "topology_seed": 2,
+      "scenario": "interleaved_40",
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E1",
+        "L2E2"
+      ],
+      "first_spike_latency": {
+        "L2E0": null,
+        "L2E1": null,
+        "L2E2": null,
+        "L2E3": 11,
+        "L2E4": 68,
+        "L2E5": 7,
+        "L2E6": 34,
+        "L2E7": 10
+      },
+      "status": {
+        "L2E0": "unrecruited",
+        "L2E1": "unrecruited",
+        "L2E2": "unrecruited",
+        "L2E3": "active",
+        "L2E4": "active",
+        "L2E5": "active",
+        "L2E6": "active",
+        "L2E7": "active"
+      },
+      "active_count": 5,
+      "quiet_count": 0,
+      "unrecruited_count": 3,
+      "tyrant": "L2E3",
+      "tyrant_share": 0.475,
+      "depression_by_maturity": {
+        "0.00-0.25": {
+          "n": 1981,
+          "mean_delta_abs": 0.0
+        },
+        "0.25-0.50": {
+          "n": 5,
+          "mean_delta_abs": 1.5339
+        },
+        "0.75-1.00": {
+          "n": 2603,
+          "mean_delta_abs": 2.6348
+        },
+        "0.50-0.75": {
+          "n": 11,
+          "mean_delta_abs": 1.2181
+        }
+      },
+      "physical_inhibition_applied_count": 5264,
+      "physical_inhibition_skipped_refractory_count": 0,
+      "first_delivery_event": {
+        "neuron": "L2E0",
+        "t": 12,
+        "applied": true,
+        "v_pre": 7358.269526215411,
+        "v_post": 0.0,
+        "magnitude": 8000.0
+      },
+      "multi_firer_rate": 0.0034,
+      "multi_firer_steps": 11,
+      "total_steps": 3200,
+      "eventually_fired_after_never_early": null,
+      "distinct_owners": 3,
+      "per_pattern_consistency": {
+        "row 1": 0.45,
+        "col 1": 0.475,
+        "diag \\": 0.5,
+        "diag /": 0.475
+      },
+      "collisions": {
+        "L2E3": [
+          "row 1",
+          "col 1"
+        ]
+      },
+      "forgetting": {
+        "row 1": true,
+        "col 1": true,
+        "diag \\": true,
+        "diag /": true
+      },
+      "silent_cells": [
+        "L2E0",
+        "L2E1",
+        "L2E2"
+      ],
+      "recruitable_cells": [
+        "L2E5",
+        "L2E6"
+      ],
+      "mean_ambiguity_rate": 0.0
+    },
+    {
+      "config": "B_protection",
+      "weight_seed": 3,
+      "topology_seed": 3,
+      "scenario": "long_hold_switch",
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E1",
+        "L2E2",
+        "L2E4",
+        "L2E6"
+      ],
+      "first_spike_latency": {
+        "L2E0": null,
+        "L2E1": null,
+        "L2E2": null,
+        "L2E3": 11,
+        "L2E4": null,
+        "L2E5": 7,
+        "L2E6": null,
+        "L2E7": 10
+      },
+      "status": {
+        "L2E0": "unrecruited",
+        "L2E1": "unrecruited",
+        "L2E2": "unrecruited",
+        "L2E3": "quiet",
+        "L2E4": "unrecruited",
+        "L2E5": "active",
+        "L2E6": "unrecruited",
+        "L2E7": "quiet"
+      },
+      "active_count": 1,
+      "quiet_count": 2,
+      "unrecruited_count": 5,
+      "tyrant": "L2E5",
+      "tyrant_share": 0.5113,
+      "depression_by_maturity": {
+        "0.00-0.25": {
+          "n": 1529,
+          "mean_delta_abs": 0.0014
+        },
+        "0.25-0.50": {
+          "n": 31,
+          "mean_delta_abs": 0.5014
+        },
+        "0.75-1.00": {
+          "n": 234,
+          "mean_delta_abs": 4.7609
+        },
+        "0.50-0.75": {
+          "n": 21,
+          "mean_delta_abs": 1.0122
+        }
+      },
+      "physical_inhibition_applied_count": 2352,
+      "physical_inhibition_skipped_refractory_count": 0,
+      "first_delivery_event": {
+        "neuron": "L2E0",
+        "t": 12,
+        "applied": true,
+        "v_pre": 7358.269526215411,
+        "v_post": 0.0,
+        "magnitude": 8000.0
+      },
+      "multi_firer_rate": 0.2687,
+      "multi_firer_steps": 215,
+      "total_steps": 800,
+      "eventually_fired_after_never_early": {
+        "L2E0": false,
+        "L2E1": false,
+        "L2E2": false,
+        "L2E4": false,
+        "L2E6": false
+      }
+    },
+    {
+      "config": "B_protection",
+      "weight_seed": 3,
+      "topology_seed": 3,
+      "scenario": "interleaved_40",
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E1",
+        "L2E2"
+      ],
+      "first_spike_latency": {
+        "L2E0": null,
+        "L2E1": null,
+        "L2E2": null,
+        "L2E3": 11,
+        "L2E4": 68,
+        "L2E5": 7,
+        "L2E6": 34,
+        "L2E7": 10
+      },
+      "status": {
+        "L2E0": "unrecruited",
+        "L2E1": "unrecruited",
+        "L2E2": "unrecruited",
+        "L2E3": "active",
+        "L2E4": "active",
+        "L2E5": "active",
+        "L2E6": "active",
+        "L2E7": "active"
+      },
+      "active_count": 5,
+      "quiet_count": 0,
+      "unrecruited_count": 3,
+      "tyrant": "L2E3",
+      "tyrant_share": 0.475,
+      "depression_by_maturity": {
+        "0.00-0.25": {
+          "n": 1981,
+          "mean_delta_abs": 0.0
+        },
+        "0.25-0.50": {
+          "n": 5,
+          "mean_delta_abs": 1.5339
+        },
+        "0.75-1.00": {
+          "n": 2603,
+          "mean_delta_abs": 2.6348
+        },
+        "0.50-0.75": {
+          "n": 11,
+          "mean_delta_abs": 1.2181
+        }
+      },
+      "physical_inhibition_applied_count": 5264,
+      "physical_inhibition_skipped_refractory_count": 0,
+      "first_delivery_event": {
+        "neuron": "L2E0",
+        "t": 12,
+        "applied": true,
+        "v_pre": 7358.269526215411,
+        "v_post": 0.0,
+        "magnitude": 8000.0
+      },
+      "multi_firer_rate": 0.0034,
+      "multi_firer_steps": 11,
+      "total_steps": 3200,
+      "eventually_fired_after_never_early": null,
+      "distinct_owners": 3,
+      "per_pattern_consistency": {
+        "row 1": 0.45,
+        "col 1": 0.475,
+        "diag \\": 0.5,
+        "diag /": 0.475
+      },
+      "collisions": {
+        "L2E3": [
+          "row 1",
+          "col 1"
+        ]
+      },
+      "forgetting": {
+        "row 1": true,
+        "col 1": true,
+        "diag \\": true,
+        "diag /": true
+      },
+      "silent_cells": [
+        "L2E0",
+        "L2E1",
+        "L2E2"
+      ],
+      "recruitable_cells": [
+        "L2E5",
+        "L2E6"
+      ],
+      "mean_ambiguity_rate": 0.0
+    },
+    {
+      "config": "B_protection",
+      "weight_seed": 4,
+      "topology_seed": 1,
+      "scenario": "long_hold_switch",
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E2",
+        "L2E5",
+        "L2E6",
+        "L2E7"
+      ],
+      "first_spike_latency": {
+        "L2E0": null,
+        "L2E1": 7,
+        "L2E2": null,
+        "L2E3": 11,
+        "L2E4": 8,
+        "L2E5": null,
+        "L2E6": null,
+        "L2E7": null
+      },
+      "status": {
+        "L2E0": "unrecruited",
+        "L2E1": "active",
+        "L2E2": "unrecruited",
+        "L2E3": "quiet",
+        "L2E4": "quiet",
+        "L2E5": "unrecruited",
+        "L2E6": "unrecruited",
+        "L2E7": "unrecruited"
+      },
+      "active_count": 1,
+      "quiet_count": 2,
+      "unrecruited_count": 5,
+      "tyrant": "L2E1",
+      "tyrant_share": 0.5338,
+      "depression_by_maturity": {
+        "0.00-0.25": {
+          "n": 1182,
+          "mean_delta_abs": 0.0071
+        },
+        "0.25-0.50": {
+          "n": 23,
+          "mean_delta_abs": 0.9245
+        },
+        "0.75-1.00": {
+          "n": 294,
+          "mean_delta_abs": 3.3766
+        },
+        "0.50-0.75": {
+          "n": 13,
+          "mean_delta_abs": 1.8763
+        }
+      },
+      "physical_inhibition_applied_count": 1768,
+      "physical_inhibition_skipped_refractory_count": 0,
+      "first_delivery_event": {
+        "neuron": "L2E0",
+        "t": 12,
+        "applied": true,
+        "v_pre": 7425.987503423475,
+        "v_post": 0.0,
+        "magnitude": 8000.0
+      },
+      "multi_firer_rate": 0.0437,
+      "multi_firer_steps": 35,
+      "total_steps": 800,
+      "eventually_fired_after_never_early": {
+        "L2E0": false,
+        "L2E2": false,
+        "L2E5": false,
+        "L2E6": false,
+        "L2E7": false
+      }
+    },
+    {
+      "config": "B_protection",
+      "weight_seed": 4,
+      "topology_seed": 1,
+      "scenario": "interleaved_40",
+      "never_fired_neurons": [
+        "L2E2",
+        "L2E6"
+      ],
+      "first_spike_latency": {
+        "L2E0": 56,
+        "L2E1": 7,
+        "L2E2": null,
+        "L2E3": 11,
+        "L2E4": 8,
+        "L2E5": 32,
+        "L2E6": null,
+        "L2E7": 31
+      },
+      "status": {
+        "L2E0": "quiet",
+        "L2E1": "quiet",
+        "L2E2": "unrecruited",
+        "L2E3": "active",
+        "L2E4": "active",
+        "L2E5": "quiet",
+        "L2E6": "unrecruited",
+        "L2E7": "quiet"
+      },
+      "active_count": 2,
+      "quiet_count": 4,
+      "unrecruited_count": 2,
+      "tyrant": "L2E3",
+      "tyrant_share": 0.663,
+      "depression_by_maturity": {
+        "0.00-0.25": {
+          "n": 4140,
+          "mean_delta_abs": 0.0079
+        },
+        "0.25-0.50": {
+          "n": 67,
+          "mean_delta_abs": 0.6523
+        },
+        "0.75-1.00": {
+          "n": 1156,
+          "mean_delta_abs": 2.9644
+        },
+        "0.50-0.75": {
+          "n": 39,
+          "mean_delta_abs": 1.5903
+        }
+      },
+      "physical_inhibition_applied_count": 6184,
+      "physical_inhibition_skipped_refractory_count": 0,
+      "first_delivery_event": {
+        "neuron": "L2E0",
+        "t": 12,
+        "applied": true,
+        "v_pre": 7425.987503423475,
+        "v_post": 0.0,
+        "magnitude": 8000.0
+      },
+      "multi_firer_rate": 0.0028,
+      "multi_firer_steps": 9,
+      "total_steps": 3200,
+      "eventually_fired_after_never_early": null,
+      "distinct_owners": 2,
+      "per_pattern_consistency": {
+        "row 1": 0.625,
+        "col 1": 0.95,
+        "diag \\": 0.75,
+        "diag /": 0.875
+      },
+      "collisions": {
+        "L2E3": [
+          "col 1",
+          "diag \\",
+          "diag /"
+        ]
+      },
+      "forgetting": {
+        "row 1": false,
+        "col 1": false,
+        "diag \\": false,
+        "diag /": false
+      },
+      "silent_cells": [
+        "L2E2",
+        "L2E6",
+        "L2E7"
+      ],
+      "recruitable_cells": [
+        "L2E0",
+        "L2E1",
+        "L2E5"
+      ],
+      "mean_ambiguity_rate": 0.025
+    },
+    {
+      "config": "B_protection",
+      "weight_seed": 4,
+      "topology_seed": 2,
+      "scenario": "long_hold_switch",
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E2",
+        "L2E5",
+        "L2E6",
+        "L2E7"
+      ],
+      "first_spike_latency": {
+        "L2E0": null,
+        "L2E1": 7,
+        "L2E2": null,
+        "L2E3": 11,
+        "L2E4": 8,
+        "L2E5": null,
+        "L2E6": null,
+        "L2E7": null
+      },
+      "status": {
+        "L2E0": "unrecruited",
+        "L2E1": "active",
+        "L2E2": "unrecruited",
+        "L2E3": "quiet",
+        "L2E4": "quiet",
+        "L2E5": "unrecruited",
+        "L2E6": "unrecruited",
+        "L2E7": "unrecruited"
+      },
+      "active_count": 1,
+      "quiet_count": 2,
+      "unrecruited_count": 5,
+      "tyrant": "L2E1",
+      "tyrant_share": 0.5338,
+      "depression_by_maturity": {
+        "0.00-0.25": {
+          "n": 1182,
+          "mean_delta_abs": 0.0071
+        },
+        "0.25-0.50": {
+          "n": 23,
+          "mean_delta_abs": 0.9245
+        },
+        "0.75-1.00": {
+          "n": 294,
+          "mean_delta_abs": 3.3766
+        },
+        "0.50-0.75": {
+          "n": 13,
+          "mean_delta_abs": 1.8763
+        }
+      },
+      "physical_inhibition_applied_count": 1768,
+      "physical_inhibition_skipped_refractory_count": 0,
+      "first_delivery_event": {
+        "neuron": "L2E0",
+        "t": 12,
+        "applied": true,
+        "v_pre": 7425.987503423475,
+        "v_post": 0.0,
+        "magnitude": 8000.0
+      },
+      "multi_firer_rate": 0.0437,
+      "multi_firer_steps": 35,
+      "total_steps": 800,
+      "eventually_fired_after_never_early": {
+        "L2E0": false,
+        "L2E2": false,
+        "L2E5": false,
+        "L2E6": false,
+        "L2E7": false
+      }
+    },
+    {
+      "config": "B_protection",
+      "weight_seed": 4,
+      "topology_seed": 2,
+      "scenario": "interleaved_40",
+      "never_fired_neurons": [
+        "L2E2",
+        "L2E6"
+      ],
+      "first_spike_latency": {
+        "L2E0": 56,
+        "L2E1": 7,
+        "L2E2": null,
+        "L2E3": 11,
+        "L2E4": 8,
+        "L2E5": 32,
+        "L2E6": null,
+        "L2E7": 31
+      },
+      "status": {
+        "L2E0": "quiet",
+        "L2E1": "quiet",
+        "L2E2": "unrecruited",
+        "L2E3": "active",
+        "L2E4": "active",
+        "L2E5": "quiet",
+        "L2E6": "unrecruited",
+        "L2E7": "quiet"
+      },
+      "active_count": 2,
+      "quiet_count": 4,
+      "unrecruited_count": 2,
+      "tyrant": "L2E3",
+      "tyrant_share": 0.663,
+      "depression_by_maturity": {
+        "0.00-0.25": {
+          "n": 4140,
+          "mean_delta_abs": 0.0079
+        },
+        "0.25-0.50": {
+          "n": 67,
+          "mean_delta_abs": 0.6523
+        },
+        "0.75-1.00": {
+          "n": 1156,
+          "mean_delta_abs": 2.9644
+        },
+        "0.50-0.75": {
+          "n": 39,
+          "mean_delta_abs": 1.5903
+        }
+      },
+      "physical_inhibition_applied_count": 6184,
+      "physical_inhibition_skipped_refractory_count": 0,
+      "first_delivery_event": {
+        "neuron": "L2E0",
+        "t": 12,
+        "applied": true,
+        "v_pre": 7425.987503423475,
+        "v_post": 0.0,
+        "magnitude": 8000.0
+      },
+      "multi_firer_rate": 0.0028,
+      "multi_firer_steps": 9,
+      "total_steps": 3200,
+      "eventually_fired_after_never_early": null,
+      "distinct_owners": 2,
+      "per_pattern_consistency": {
+        "row 1": 0.625,
+        "col 1": 0.95,
+        "diag \\": 0.75,
+        "diag /": 0.875
+      },
+      "collisions": {
+        "L2E3": [
+          "col 1",
+          "diag \\",
+          "diag /"
+        ]
+      },
+      "forgetting": {
+        "row 1": false,
+        "col 1": false,
+        "diag \\": false,
+        "diag /": false
+      },
+      "silent_cells": [
+        "L2E2",
+        "L2E6",
+        "L2E7"
+      ],
+      "recruitable_cells": [
+        "L2E0",
+        "L2E1",
+        "L2E5"
+      ],
+      "mean_ambiguity_rate": 0.025
+    },
+    {
+      "config": "B_protection",
+      "weight_seed": 4,
+      "topology_seed": 3,
+      "scenario": "long_hold_switch",
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E2",
+        "L2E5",
+        "L2E6",
+        "L2E7"
+      ],
+      "first_spike_latency": {
+        "L2E0": null,
+        "L2E1": 7,
+        "L2E2": null,
+        "L2E3": 11,
+        "L2E4": 8,
+        "L2E5": null,
+        "L2E6": null,
+        "L2E7": null
+      },
+      "status": {
+        "L2E0": "unrecruited",
+        "L2E1": "active",
+        "L2E2": "unrecruited",
+        "L2E3": "quiet",
+        "L2E4": "quiet",
+        "L2E5": "unrecruited",
+        "L2E6": "unrecruited",
+        "L2E7": "unrecruited"
+      },
+      "active_count": 1,
+      "quiet_count": 2,
+      "unrecruited_count": 5,
+      "tyrant": "L2E1",
+      "tyrant_share": 0.5338,
+      "depression_by_maturity": {
+        "0.00-0.25": {
+          "n": 1182,
+          "mean_delta_abs": 0.0071
+        },
+        "0.25-0.50": {
+          "n": 23,
+          "mean_delta_abs": 0.9245
+        },
+        "0.75-1.00": {
+          "n": 294,
+          "mean_delta_abs": 3.3766
+        },
+        "0.50-0.75": {
+          "n": 13,
+          "mean_delta_abs": 1.8763
+        }
+      },
+      "physical_inhibition_applied_count": 1768,
+      "physical_inhibition_skipped_refractory_count": 0,
+      "first_delivery_event": {
+        "neuron": "L2E0",
+        "t": 12,
+        "applied": true,
+        "v_pre": 7425.987503423475,
+        "v_post": 0.0,
+        "magnitude": 8000.0
+      },
+      "multi_firer_rate": 0.0437,
+      "multi_firer_steps": 35,
+      "total_steps": 800,
+      "eventually_fired_after_never_early": {
+        "L2E0": false,
+        "L2E2": false,
+        "L2E5": false,
+        "L2E6": false,
+        "L2E7": false
+      }
+    },
+    {
+      "config": "B_protection",
+      "weight_seed": 4,
+      "topology_seed": 3,
+      "scenario": "interleaved_40",
+      "never_fired_neurons": [
+        "L2E2",
+        "L2E6"
+      ],
+      "first_spike_latency": {
+        "L2E0": 56,
+        "L2E1": 7,
+        "L2E2": null,
+        "L2E3": 11,
+        "L2E4": 8,
+        "L2E5": 32,
+        "L2E6": null,
+        "L2E7": 31
+      },
+      "status": {
+        "L2E0": "quiet",
+        "L2E1": "quiet",
+        "L2E2": "unrecruited",
+        "L2E3": "active",
+        "L2E4": "active",
+        "L2E5": "quiet",
+        "L2E6": "unrecruited",
+        "L2E7": "quiet"
+      },
+      "active_count": 2,
+      "quiet_count": 4,
+      "unrecruited_count": 2,
+      "tyrant": "L2E3",
+      "tyrant_share": 0.663,
+      "depression_by_maturity": {
+        "0.00-0.25": {
+          "n": 4140,
+          "mean_delta_abs": 0.0079
+        },
+        "0.25-0.50": {
+          "n": 67,
+          "mean_delta_abs": 0.6523
+        },
+        "0.75-1.00": {
+          "n": 1156,
+          "mean_delta_abs": 2.9644
+        },
+        "0.50-0.75": {
+          "n": 39,
+          "mean_delta_abs": 1.5903
+        }
+      },
+      "physical_inhibition_applied_count": 6184,
+      "physical_inhibition_skipped_refractory_count": 0,
+      "first_delivery_event": {
+        "neuron": "L2E0",
+        "t": 12,
+        "applied": true,
+        "v_pre": 7425.987503423475,
+        "v_post": 0.0,
+        "magnitude": 8000.0
+      },
+      "multi_firer_rate": 0.0028,
+      "multi_firer_steps": 9,
+      "total_steps": 3200,
+      "eventually_fired_after_never_early": null,
+      "distinct_owners": 2,
+      "per_pattern_consistency": {
+        "row 1": 0.625,
+        "col 1": 0.95,
+        "diag \\": 0.75,
+        "diag /": 0.875
+      },
+      "collisions": {
+        "L2E3": [
+          "col 1",
+          "diag \\",
+          "diag /"
+        ]
+      },
+      "forgetting": {
+        "row 1": false,
+        "col 1": false,
+        "diag \\": false,
+        "diag /": false
+      },
+      "silent_cells": [
+        "L2E2",
+        "L2E6",
+        "L2E7"
+      ],
+      "recruitable_cells": [
+        "L2E0",
+        "L2E1",
+        "L2E5"
+      ],
+      "mean_ambiguity_rate": 0.025
+    },
+    {
+      "config": "B_protection",
+      "weight_seed": 5,
+      "topology_seed": 1,
+      "scenario": "long_hold_switch",
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E1",
+        "L2E2",
+        "L2E6",
+        "L2E7"
+      ],
+      "first_spike_latency": {
+        "L2E0": null,
+        "L2E1": null,
+        "L2E2": null,
+        "L2E3": 9,
+        "L2E4": 7,
+        "L2E5": 10,
+        "L2E6": null,
+        "L2E7": null
+      },
+      "status": {
+        "L2E0": "unrecruited",
+        "L2E1": "unrecruited",
+        "L2E2": "unrecruited",
+        "L2E3": "active",
+        "L2E4": "quiet",
+        "L2E5": "active",
+        "L2E6": "unrecruited",
+        "L2E7": "unrecruited"
+      },
+      "active_count": 2,
+      "quiet_count": 1,
+      "unrecruited_count": 5,
+      "tyrant": "L2E3",
+      "tyrant_share": 0.3669,
+      "depression_by_maturity": {
+        "0.00-0.25": {
+          "n": 1185,
+          "mean_delta_abs": 0.0
+        },
+        "0.25-0.50": {
+          "n": 2,
+          "mean_delta_abs": 0.8007
+        },
+        "0.75-1.00": {
+          "n": 229,
+          "mean_delta_abs": 1.6934
+        }
+      },
+      "physical_inhibition_applied_count": 1896,
+      "physical_inhibition_skipped_refractory_count": 0,
+      "first_delivery_event": {
+        "neuron": "L2E0",
+        "t": 11,
+        "applied": true,
+        "v_pre": 5918.095951281426,
+        "v_post": 0.0,
+        "magnitude": 8000.0
+      },
+      "multi_firer_rate": 0.2775,
+      "multi_firer_steps": 222,
+      "total_steps": 800,
+      "eventually_fired_after_never_early": {
+        "L2E0": false,
+        "L2E1": false,
+        "L2E2": false,
+        "L2E6": false,
+        "L2E7": false
+      }
+    },
+    {
+      "config": "B_protection",
+      "weight_seed": 5,
+      "topology_seed": 1,
+      "scenario": "interleaved_40",
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E2"
+      ],
+      "first_spike_latency": {
+        "L2E0": null,
+        "L2E1": 77,
+        "L2E2": null,
+        "L2E3": 9,
+        "L2E4": 7,
+        "L2E5": 10,
+        "L2E6": 31,
+        "L2E7": 30
+      },
+      "status": {
+        "L2E0": "unrecruited",
+        "L2E1": "active",
+        "L2E2": "unrecruited",
+        "L2E3": "quiet",
+        "L2E4": "active",
+        "L2E5": "quiet",
+        "L2E6": "active",
+        "L2E7": "active"
+      },
+      "active_count": 4,
+      "quiet_count": 2,
+      "unrecruited_count": 2,
+      "tyrant": "L2E6",
+      "tyrant_share": 0.5306,
+      "depression_by_maturity": {
+        "0.00-0.25": {
+          "n": 2643,
+          "mean_delta_abs": 0.0101
+        },
+        "0.25-0.50": {
+          "n": 39,
+          "mean_delta_abs": 0.7494
+        },
+        "0.75-1.00": {
+          "n": 2406,
+          "mean_delta_abs": 2.6118
+        },
+        "0.50-0.75": {
+          "n": 27,
+          "mean_delta_abs": 1.5842
+        }
+      },
+      "physical_inhibition_applied_count": 5856,
+      "physical_inhibition_skipped_refractory_count": 0,
+      "first_delivery_event": {
+        "neuron": "L2E0",
+        "t": 11,
+        "applied": true,
+        "v_pre": 5918.095951281426,
+        "v_post": 0.0,
+        "magnitude": 8000.0
+      },
+      "multi_firer_rate": 0.0028,
+      "multi_firer_steps": 9,
+      "total_steps": 3200,
+      "eventually_fired_after_never_early": null,
+      "distinct_owners": 4,
+      "per_pattern_consistency": {
+        "row 1": 0.675,
+        "col 1": 0.8,
+        "diag \\": 0.65,
+        "diag /": 0.625
+      },
+      "collisions": {},
+      "forgetting": {
+        "row 1": false,
+        "col 1": false,
+        "diag \\": false,
+        "diag /": false
+      },
+      "silent_cells": [
+        "L2E0",
+        "L2E2"
+      ],
+      "recruitable_cells": [
+        "L2E3",
+        "L2E5"
+      ],
+      "mean_ambiguity_rate": 0.0125
+    },
+    {
+      "config": "B_protection",
+      "weight_seed": 5,
+      "topology_seed": 2,
+      "scenario": "long_hold_switch",
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E1",
+        "L2E2",
+        "L2E6",
+        "L2E7"
+      ],
+      "first_spike_latency": {
+        "L2E0": null,
+        "L2E1": null,
+        "L2E2": null,
+        "L2E3": 9,
+        "L2E4": 7,
+        "L2E5": 10,
+        "L2E6": null,
+        "L2E7": null
+      },
+      "status": {
+        "L2E0": "unrecruited",
+        "L2E1": "unrecruited",
+        "L2E2": "unrecruited",
+        "L2E3": "active",
+        "L2E4": "quiet",
+        "L2E5": "active",
+        "L2E6": "unrecruited",
+        "L2E7": "unrecruited"
+      },
+      "active_count": 2,
+      "quiet_count": 1,
+      "unrecruited_count": 5,
+      "tyrant": "L2E3",
+      "tyrant_share": 0.3669,
+      "depression_by_maturity": {
+        "0.00-0.25": {
+          "n": 1185,
+          "mean_delta_abs": 0.0
+        },
+        "0.25-0.50": {
+          "n": 2,
+          "mean_delta_abs": 0.8007
+        },
+        "0.75-1.00": {
+          "n": 229,
+          "mean_delta_abs": 1.6934
+        }
+      },
+      "physical_inhibition_applied_count": 1896,
+      "physical_inhibition_skipped_refractory_count": 0,
+      "first_delivery_event": {
+        "neuron": "L2E0",
+        "t": 11,
+        "applied": true,
+        "v_pre": 5918.095951281426,
+        "v_post": 0.0,
+        "magnitude": 8000.0
+      },
+      "multi_firer_rate": 0.2775,
+      "multi_firer_steps": 222,
+      "total_steps": 800,
+      "eventually_fired_after_never_early": {
+        "L2E0": false,
+        "L2E1": false,
+        "L2E2": false,
+        "L2E6": false,
+        "L2E7": false
+      }
+    },
+    {
+      "config": "B_protection",
+      "weight_seed": 5,
+      "topology_seed": 2,
+      "scenario": "interleaved_40",
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E2"
+      ],
+      "first_spike_latency": {
+        "L2E0": null,
+        "L2E1": 77,
+        "L2E2": null,
+        "L2E3": 9,
+        "L2E4": 7,
+        "L2E5": 10,
+        "L2E6": 31,
+        "L2E7": 30
+      },
+      "status": {
+        "L2E0": "unrecruited",
+        "L2E1": "active",
+        "L2E2": "unrecruited",
+        "L2E3": "quiet",
+        "L2E4": "active",
+        "L2E5": "quiet",
+        "L2E6": "active",
+        "L2E7": "active"
+      },
+      "active_count": 4,
+      "quiet_count": 2,
+      "unrecruited_count": 2,
+      "tyrant": "L2E6",
+      "tyrant_share": 0.5306,
+      "depression_by_maturity": {
+        "0.00-0.25": {
+          "n": 2643,
+          "mean_delta_abs": 0.0101
+        },
+        "0.25-0.50": {
+          "n": 39,
+          "mean_delta_abs": 0.7494
+        },
+        "0.75-1.00": {
+          "n": 2406,
+          "mean_delta_abs": 2.6118
+        },
+        "0.50-0.75": {
+          "n": 27,
+          "mean_delta_abs": 1.5842
+        }
+      },
+      "physical_inhibition_applied_count": 5856,
+      "physical_inhibition_skipped_refractory_count": 0,
+      "first_delivery_event": {
+        "neuron": "L2E0",
+        "t": 11,
+        "applied": true,
+        "v_pre": 5918.095951281426,
+        "v_post": 0.0,
+        "magnitude": 8000.0
+      },
+      "multi_firer_rate": 0.0028,
+      "multi_firer_steps": 9,
+      "total_steps": 3200,
+      "eventually_fired_after_never_early": null,
+      "distinct_owners": 4,
+      "per_pattern_consistency": {
+        "row 1": 0.675,
+        "col 1": 0.8,
+        "diag \\": 0.65,
+        "diag /": 0.625
+      },
+      "collisions": {},
+      "forgetting": {
+        "row 1": false,
+        "col 1": false,
+        "diag \\": false,
+        "diag /": false
+      },
+      "silent_cells": [
+        "L2E0",
+        "L2E2"
+      ],
+      "recruitable_cells": [
+        "L2E3",
+        "L2E5"
+      ],
+      "mean_ambiguity_rate": 0.0125
+    },
+    {
+      "config": "B_protection",
+      "weight_seed": 5,
+      "topology_seed": 3,
+      "scenario": "long_hold_switch",
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E1",
+        "L2E2",
+        "L2E6",
+        "L2E7"
+      ],
+      "first_spike_latency": {
+        "L2E0": null,
+        "L2E1": null,
+        "L2E2": null,
+        "L2E3": 9,
+        "L2E4": 7,
+        "L2E5": 10,
+        "L2E6": null,
+        "L2E7": null
+      },
+      "status": {
+        "L2E0": "unrecruited",
+        "L2E1": "unrecruited",
+        "L2E2": "unrecruited",
+        "L2E3": "active",
+        "L2E4": "quiet",
+        "L2E5": "active",
+        "L2E6": "unrecruited",
+        "L2E7": "unrecruited"
+      },
+      "active_count": 2,
+      "quiet_count": 1,
+      "unrecruited_count": 5,
+      "tyrant": "L2E3",
+      "tyrant_share": 0.3669,
+      "depression_by_maturity": {
+        "0.00-0.25": {
+          "n": 1185,
+          "mean_delta_abs": 0.0
+        },
+        "0.25-0.50": {
+          "n": 2,
+          "mean_delta_abs": 0.8007
+        },
+        "0.75-1.00": {
+          "n": 229,
+          "mean_delta_abs": 1.6934
+        }
+      },
+      "physical_inhibition_applied_count": 1896,
+      "physical_inhibition_skipped_refractory_count": 0,
+      "first_delivery_event": {
+        "neuron": "L2E0",
+        "t": 11,
+        "applied": true,
+        "v_pre": 5918.095951281426,
+        "v_post": 0.0,
+        "magnitude": 8000.0
+      },
+      "multi_firer_rate": 0.2775,
+      "multi_firer_steps": 222,
+      "total_steps": 800,
+      "eventually_fired_after_never_early": {
+        "L2E0": false,
+        "L2E1": false,
+        "L2E2": false,
+        "L2E6": false,
+        "L2E7": false
+      }
+    },
+    {
+      "config": "B_protection",
+      "weight_seed": 5,
+      "topology_seed": 3,
+      "scenario": "interleaved_40",
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E2"
+      ],
+      "first_spike_latency": {
+        "L2E0": null,
+        "L2E1": 77,
+        "L2E2": null,
+        "L2E3": 9,
+        "L2E4": 7,
+        "L2E5": 10,
+        "L2E6": 31,
+        "L2E7": 30
+      },
+      "status": {
+        "L2E0": "unrecruited",
+        "L2E1": "active",
+        "L2E2": "unrecruited",
+        "L2E3": "quiet",
+        "L2E4": "active",
+        "L2E5": "quiet",
+        "L2E6": "active",
+        "L2E7": "active"
+      },
+      "active_count": 4,
+      "quiet_count": 2,
+      "unrecruited_count": 2,
+      "tyrant": "L2E6",
+      "tyrant_share": 0.5306,
+      "depression_by_maturity": {
+        "0.00-0.25": {
+          "n": 2643,
+          "mean_delta_abs": 0.0101
+        },
+        "0.25-0.50": {
+          "n": 39,
+          "mean_delta_abs": 0.7494
+        },
+        "0.75-1.00": {
+          "n": 2406,
+          "mean_delta_abs": 2.6118
+        },
+        "0.50-0.75": {
+          "n": 27,
+          "mean_delta_abs": 1.5842
+        }
+      },
+      "physical_inhibition_applied_count": 5856,
+      "physical_inhibition_skipped_refractory_count": 0,
+      "first_delivery_event": {
+        "neuron": "L2E0",
+        "t": 11,
+        "applied": true,
+        "v_pre": 5918.095951281426,
+        "v_post": 0.0,
+        "magnitude": 8000.0
+      },
+      "multi_firer_rate": 0.0028,
+      "multi_firer_steps": 9,
+      "total_steps": 3200,
+      "eventually_fired_after_never_early": null,
+      "distinct_owners": 4,
+      "per_pattern_consistency": {
+        "row 1": 0.675,
+        "col 1": 0.8,
+        "diag \\": 0.65,
+        "diag /": 0.625
+      },
+      "collisions": {},
+      "forgetting": {
+        "row 1": false,
+        "col 1": false,
+        "diag \\": false,
+        "diag /": false
+      },
+      "silent_cells": [
+        "L2E0",
+        "L2E2"
+      ],
+      "recruitable_cells": [
+        "L2E3",
+        "L2E5"
+      ],
+      "mean_ambiguity_rate": 0.0125
+    }
+  ]
+}

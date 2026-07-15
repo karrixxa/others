@@ -732,6 +732,27 @@ class SimulationEngine:
                  adaptive_threshold: bool = False,
                  delta_threshold_frac: float = 0.05,
                  tau_threshold: float = 25.0,
+                 # Phase 15: local developmental protection from L2I loser
+                 # depression (see Neuron.apply_delayed_inhibition/
+                 # _loser_depression_maturity). SEPARATE from adaptive_threshold,
+                 # structural_free_energy, and homeostasis above -- not a rename
+                 # or silent reuse of any of them. Uses ONLY each L2E's own
+                 # self.ca (the slow EMA of its own physical spiking, already
+                 # computed unconditionally every step regardless of the
+                 # homeostasis flag -- see Neuron.update); a neuron with little/
+                 # no firing history has its structural WEIGHT-DEPRESSION gain
+                 # scaled down by a smooth maturity = clamp(ca/ca_ref, 0, 1), but
+                 # the physical inhibitory membrane transient is UNCHANGED
+                 # regardless. Default OFF reproduces every prior phase's
+                 # apply_delayed_inhibition gain exactly (gate multiplies by
+                 # exactly 1.0 when off). loser_depression_protection_ca_ref
+                 # 0.02 is a single, reasonable, NOT-swept-per-seed default: with
+                 # ca_rate's own default 0.01 and this repo's typical 20-100 step
+                 # presentation windows, a neuron firing roughly once every ~50
+                 # steps reaches this reference (order-of-magnitude "established,
+                 # repeatedly-firing competitor"), not a per-experiment tuned value.
+                 loser_depression_protection: bool = False,
+                 loser_depression_protection_ca_ref: float = 0.02,
                  # Capacity rule for the minimal experiment (see the prompt's
                  # "Threshold, Cap, Floor" section). l2e_weight_cap_frac sets each
                  # L2E positive feedforward weight cap to frac*thr_l2, so three
@@ -874,6 +895,8 @@ class SimulationEngine:
                            adaptive_threshold=adaptive_threshold,
                            delta_threshold_frac=delta_threshold_frac,
                            tau_threshold=tau_threshold,
+                           loser_depression_protection=loser_depression_protection,
+                           loser_depression_protection_ca_ref=loser_depression_protection_ca_ref,
                            l2e_weight_cap_frac=l2e_weight_cap_frac,
                            pos_weight_floor=pos_weight_floor,
                            l2e_init_mode=l2e_init_mode,
@@ -1133,6 +1156,14 @@ class SimulationEngine:
                 n.adaptive_threshold = p['adaptive_threshold']
                 n.delta_threshold = p['delta_threshold_frac'] * thr_l2
                 n.tau_threshold = p['tau_threshold']
+                # Phase 15: local developmental protection from L2I loser
+                # depression (L2E only; see Neuron.apply_delayed_inhibition/
+                # _loser_depression_maturity). SEPARATE from homeostasis,
+                # structural_free_energy, and adaptive_threshold above --
+                # default off leaves apply_delayed_inhibition's gain
+                # byte-identical to every prior phase.
+                n.loser_depression_protection = p['loser_depression_protection']
+                n.loser_depression_protection_ca_ref = p['loser_depression_protection_ca_ref']
             else:
                 n.weight_budget = None
                 if self.meta[nid]['type'] == 'I':
@@ -1653,7 +1684,11 @@ class SimulationEngine:
                # Phase 7: causal L2E->L2I->L2E delayed-inhibition scheduling.
                'l2_inhibition_delay', 'l2_inhibition_frac',
                # Phase 10: adaptive-threshold ablation (separate from homeostasis).
-               'adaptive_threshold', 'delta_threshold_frac', 'tau_threshold')
+               'adaptive_threshold', 'delta_threshold_frac', 'tau_threshold',
+               # Phase 15: local developmental protection from L2I loser
+               # depression (separate from homeostasis/structural_free_energy/
+               # adaptive_threshold).
+               'loser_depression_protection', 'loser_depression_protection_ca_ref')
 
     def apply_config(self, overrides: dict):
         """Merge tunable overrides into self.params and rebuild the network in
@@ -1677,7 +1712,7 @@ class SimulationEngine:
                      'assembly_flow_credit', 'leak_enabled', 'l2i_leak_enabled',
                      'l1i_leak_enabled', 'symmetric_geometry', 'legacy_distance_compat',
                      'infl_l2e_l2i', 'infl_l2i_l2e', 'infl_l2e_l1i', 'infl_l1i_l1e',
-                     'adaptive_threshold'):
+                     'adaptive_threshold', 'loser_depression_protection'):
                 v = bool(v)
             elif k in ('seed', 'refractory', 'l2_charge_chunks', 'l2_inhibition_delay'):
                 v = int(v)
@@ -1908,7 +1943,13 @@ class SimulationEngine:
                 targets.append(dict(id=f'L2E{j}', applied=out['applied'],
                                     v_pre=round(out['v_pre'], 4), v_post=round(out['v_post'], 4),
                                     p_loss=round(out['p_loss'], 4),
-                                    depressed=len(out['depressed_indices'])))
+                                    depressed=len(out['depressed_indices']),
+                                    # Phase 15: this target's own protection-gate
+                                    # value at this exact event (1.0 when the
+                                    # flag is off) -- exposes the maturity/
+                                    # depression-magnitude relationship directly,
+                                    # never re-derived from anything else.
+                                    maturity=round(out['maturity'], 4)))
             delivery = dict(fire_t=rec['fire_t'], deliver_at=t,
                             contributors=[f'{ct}:{cid}' for ct, cid in rec['contributors']],
                             l2i_v_pre=rec['l2i_v_pre'], l2i_v_post=rec['l2i_v_post'],

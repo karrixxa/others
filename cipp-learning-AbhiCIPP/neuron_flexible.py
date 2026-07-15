@@ -152,6 +152,21 @@ class Neuron(NeuralEntity):
         self.conf_grace = 5000                 # inactive steps before dead-decay engages
         self.inactive_steps = 0                # long grace counter (see update())
         self.loser_depression_events = 0       # diagnostic counter
+        # Local developmental protection from L2I loser depression (opt-in;
+        # see apply_delayed_inhibition and _loser_depression_maturity below).
+        # Uses ONLY this neuron's own self.ca (the slow EMA of its own
+        # spiking, already computed unconditionally every step in update() --
+        # see that method; this reads it, never changes how it is computed,
+        # so homeostasis itself is completely untouched by this flag).
+        # Default OFF: apply_delayed_inhibition's gain is byte-identical to
+        # before whenever this is False. When on, a neuron with little/no
+        # firing history (ca near 0) has its structural WEIGHT-DEPRESSION
+        # gain scaled down by a smooth, continuous maturity gate in [0, 1] --
+        # never a binary "never fired" exception, never a change to the
+        # physical inhibitory transient (V still drops by `magnitude`
+        # regardless), and never potentiation.
+        self.loser_depression_protection = False
+        self.loser_depression_protection_ca_ref = 0.02   # ca value at which maturity reaches 1.0
         # Flow-proportional assembly credit (opt-in; for the E->I "assembly
         # evidence" neurons L2I / L1I -- see _update_weights). On this neuron's
         # OWN fire, credit every incoming positive synapse in proportion to the
@@ -678,13 +693,16 @@ class Neuron(NeuralEntity):
             sources participated in this neuron's current response (weight > 0
             AND last input spike), using the shared direction-aware bounded
             kernel with direction -1 and
-            gain = learning_rate * structural_gate * p_loss * competitive_reset_influence,
+            gain = learning_rate * structural_gate * p_loss * competitive_reset_influence * protection_gate,
             where p_loss = clamp(V_pre / theta, 0, 1) (this neuron's own
-            closeness to firing right now) and competitive_reset_influence is
+            closeness to firing right now), competitive_reset_influence is
             the Phase 4 L2I->L2E distance-influence multiplier (default 1.0,
-            neutral). OFF (non-participating) afferents are never touched.
-            Only runs when loser_depression is enabled; a zero-charge target
-            (p_loss == 0) learns nothing.
+            neutral), and protection_gate is this neuron's OWN
+            `_loser_depression_maturity()` (see that method) when
+            loser_depression_protection is on, else 1.0 (byte-identical to
+            every prior phase). OFF (non-participating) afferents are never
+            touched. Only runs when loser_depression is enabled; a
+            zero-charge target (p_loss == 0) learns nothing.
 
         Refractory targets are SKIPPED ENTIRELY (no transient, no depression,
         no record) -- matching apply_inhibition's own refractory convention,
@@ -692,7 +710,9 @@ class Neuron(NeuralEntity):
         refractory" behaviour: a neuron already discharging from its own recent
         spike is not touched by software a second time. Returns a diagnostic
         record (applied, v_pre, v_post, theta, p_loss, magnitude,
-        depressed_indices, weights_before, delta_weights, weights_after)."""
+        depressed_indices, weights_before, delta_weights, weights_after,
+        maturity -- this neuron's own protection-gate value at the moment of
+        this event, 1.0 when the flag is off)."""
         self._ensure_finalized()
         theta = self.threshold
         v_pre = float(self.potential)
@@ -700,8 +720,10 @@ class Neuron(NeuralEntity):
             return dict(applied=False, v_pre=v_pre, v_post=v_pre, theta=theta,
                        p_loss=0.0, magnitude=float(magnitude),
                        depressed_indices=[], weights_before=np.zeros(0),
-                       delta_weights=np.zeros(0), weights_after=np.zeros(0))
+                       delta_weights=np.zeros(0), weights_after=np.zeros(0),
+                       maturity=1.0)
         p_loss = min(max(v_pre / theta, 0.0), 1.0) if theta > 0 else 0.0
+        maturity = self._loser_depression_maturity() if self.loser_depression_protection else 1.0
 
         depressed_indices: list[int] = []
         weights_before = np.zeros(0)
@@ -719,7 +741,8 @@ class Neuron(NeuralEntity):
                 w_min = self.min_positive_weight if self.min_positive_weight is not None else 0.0
                 gate = (self._structural_free_energy_gate()
                         if self.structural_free_energy else 1.0)
-                gain = self.learning_rate * gate * p_loss * self.competitive_reset_influence
+                gain = (self.learning_rate * gate * p_loss
+                        * self.competitive_reset_influence * maturity)
                 signal = np.full(eligible.size, -1.0)
                 w_after = bounded_signed_update(w_before, w_min, self.weight_cap,
                                                 gain, signal)
@@ -731,14 +754,16 @@ class Neuron(NeuralEntity):
                 self.loser_depression_events += 1
 
         # Bounded transient: floored at rest, never forced below it or clamped
-        # to an exact value -- see the docstring above.
+        # to an exact value -- see the docstring above. UNCONDITIONAL: the
+        # protection gate never reaches here, so the physical membrane event
+        # is identical whether or not loser_depression_protection is on.
         self.potential = max(v_pre - float(magnitude), self.resting_potential)
         v_post = float(self.potential)
         return dict(applied=True, v_pre=v_pre, v_post=v_post, theta=theta,
                     p_loss=p_loss, magnitude=float(magnitude),
                     depressed_indices=depressed_indices,
                     weights_before=weights_before, delta_weights=delta_weights,
-                    weights_after=weights_after)
+                    weights_after=weights_after, maturity=maturity)
 
     def update(self):
         """
@@ -889,6 +914,21 @@ class Neuron(NeuralEntity):
             return 1.0
         maturity = min(max(self._positive_afferent_weight_sum() / theta, 0.0), 1.0)
         return max(self.structural_fe_eta_floor, 1.0 - maturity)
+
+    def _loser_depression_maturity(self):
+        """Local developmental-protection gate in [0, 1] (see __init__ and
+        apply_delayed_inhibition). maturity = clamp(self.ca / ca_ref, 0, 1) --
+        a smooth, continuous ramp from 0 (no physical firing history at all)
+        to 1 (this neuron has an established firing history at or above the
+        reference rate, i.e. an "experienced competitor" who remains fully
+        depressible). Uses ONLY this neuron's own self.ca and its own
+        ca_ref -- no rival's state, no self.winner, no pattern identity, no
+        membrane voltage, no weights. Never binary/thresholded: there is no
+        step discontinuity anywhere in this function."""
+        ref = self.loser_depression_protection_ca_ref
+        if ref <= 0:
+            return 1.0
+        return min(max(self.ca / ref, 0.0), 1.0)
 
     def _maturity(self, w):
         """Local instantaneous maturity m in [0,1] of positive gate weights w:

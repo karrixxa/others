@@ -29,11 +29,13 @@
   measurement only)
 - Phase 13b END checkpoint commit: `4457f3b` (corrected and strengthened
   dashboard behavior diagnostic, measurement only)
-- This update corresponds to the **Phase 14 END** checkpoint (UI-only
-  observability phase — display controls, spike-raster restoration,
-  terminology/provenance clarity; NO neural dynamics, parameters, timing,
-  learning, seeds, or defaults changed — commit hash filled in after this
-  commit lands, see repo log).
+- Phase 14 END checkpoint commit: `30a8cff` (UI-only observability — display
+  controls, spike-raster restoration, terminology/provenance clarity; no
+  neural dynamics/parameters/timing/learning/seeds/defaults changed)
+- This update corresponds to the **Phase 15 END** checkpoint (local
+  developmental protection from L2I loser depression — the first actual
+  neural-dynamics change since Phase 10; new, default-off, NOT promoted —
+  commit hash filled in after this commit lands, see repo log).
 - Base branch `july14` is untouched and remains the protected base.
 - `four-pattern` branch exists (checked out in a separate worktree at
   `/home/charisxiong/Documents/others`) and is explicitly NOT merged here —
@@ -500,6 +502,93 @@ engine file touched.
   weights.js/causal.js/receptive.js were undocumented before this phase;
   fixed opportunistically since this phase's own new files needed the same
   section anyway, not a separate full audit of the whole doc).
+
+**Current phase (Phase 15, complete) — Local developmental protection from
+L2I loser depression, the first actual neural-dynamics change since Phase
+10 (Phases 11-14 were all measurement/UI-only). New, DEFAULT-OFF flag
+`loser_depression_protection` (+ `loser_depression_protection_ca_ref`,
+default 0.02), NOT promoted to the dashboard default -- see Conclusions.**
+
+Preserved exactly, per explicit instruction: random `legacy_wide`
+initialization (untouched, not balanced/equalized), physical threshold
+crossings (Phase 6), delayed causal L2I inhibition (Phase 7), no argmax/
+software WTA anywhere, no assigned owners/pattern labels/neuron-index rules/
+global comparisons, self-spike learning/distance/leak/adaptive-threshold/L1I
+completely untouched (verified directly:
+`test_engine_protection_does_not_touch_l1i_or_distance_or_self_spike`).
+
+**Mechanism:** `Neuron._loser_depression_maturity()` (new) = `clamp(self.ca /
+loser_depression_protection_ca_ref, 0, 1)`. `self.ca` is the neuron's own
+slow EMA of its own physical spiking -- already computed UNCONDITIONALLY
+every step in `Neuron.update()` regardless of the `homeostasis` flag, so
+this phase reads an existing local signal without changing how it's
+computed or touching homeostasis itself. In `apply_delayed_inhibition`, this
+`maturity` multiplies into the structural weight-depression gain alongside
+the existing `structural_gate`/`p_loss`/`competitive_reset_influence`
+factors -- ONLY the plastic weight-depression term; the physical inhibitory
+membrane transient (`V = max(V - magnitude, resting_potential)`) is computed
+unconditionally, after and independent of the depression branch, and never
+reads `maturity` at all. Default off reproduces every prior phase's gain
+exactly (gate hardcoded to 1.0).
+
+**Tests (11, all passing, `test_loser_depression_protection.py`):** the
+gate formula itself; zero maturity fully suppresses weight depression while
+the membrane transient still applies at full magnitude; the membrane
+transient is identical across off/immature/mature; depression magnitude
+rises MONOTONICALLY and smoothly with ca and matches the unprotected
+baseline exactly once ca>=ca_ref ("experienced competitors must still be
+depressible"); no ca value ever potentiates; full isolation between
+neurons; flag-off is byte-identical to omitted-flag at both unit and
+full-150-step-engine-run level; an AST-based locality proof (same technique
+as Phase 8's structural-FE test) that the maturity gate's executable body
+references nothing but `self.ca`/`self.loser_depression_protection_ca_ref`
+-- no rival neuron, no `self.winner`, no pattern identity; L1I weights and
+the distance/influence pathway report are byte-identical with the flag on
+or off. Full suite: 276 passed, 5 failed (same pre-existing set, unchanged).
+
+**Comparison (`phase15_loser_depression_protection.py`):** weight seeds 1-5
+x topology seeds 1-3 x 2 scenarios (20-step equal interleaving/40 rotations;
+long row-hold-600-then-col-switch-200) x 2 configs (A=default,
+B=protection) = 60 runs. **Honest, mixed, NOT-promoted result:**
+- Interleaved schedule: small real improvement in raw recruitment breadth
+  (mean active 3.60->3.80, mean unrecruited 2.60->2.00) but a real
+  DEGRADATION in stable ownership on Phase 11's own success metric (mean
+  distinct_owners 3.6->3.2, collisions 0.40->0.60, forgetting 1.00->1.60,
+  ambiguity 0.0312->0.0363) -- recruitment breadth and ownership stability
+  move in OPPOSITE directions.
+- Long-hold schedule: no improvement, slightly worse (active 1.40->1.20).
+- Tyrant share essentially unchanged in both schedules (~0.47/~0.54) --
+  protection does not address dominance/tyranny.
+- 0 of 75 neurons that had never fired at the row-1 hold's halfway
+  checkpoint ever fired by the end of the run, under EITHER config --
+  protection alone does not rescue an already-failed-to-recruit neuron
+  within this timeframe.
+- No increase in same-step multi-firer rate (if anything marginally lower)
+  -- protection does not destabilize into excessive simultaneous firing.
+- Depression magnitude grouped by maturity bucket (aggregated ~99,000
+  events across all 60 runs) shows a clean monotonic ramp (0.0074 mean |dw|
+  at maturity 0.00-0.25 up to 2.7817 at 0.75-1.00) -- the gate works exactly
+  as designed.
+- Physical inhibition event COUNT is byte-identical between A and B in
+  ALL 15 long-hold-schedule combinations (the never-fired neurons' reduced
+  depression never changes who wins or when L2I fires in that schedule),
+  but diverges in ALL 15 interleaved-schedule combinations -- reported as
+  EXPECTED, not a violation: the instantaneous transient mechanism is
+  unit-proven identical always; the network's downstream trajectory of
+  WHEN L2I fires legitimately diverges once repeated interleaved exposure
+  gives protection's weight-preservation effect room to compound through
+  the closed feedback loop.
+
+**Conclusion: the mechanism does exactly what it was designed to do
+mechanically (smooth, local, correctly-scoped, zero side effects on any
+other mechanism) but does not solve the recruitment problem it targeted,
+and trades a small recruitment gain for real ownership instability in the
+one schedule where it has any effect at all. Left as an opt-in, default-off
+experiment -- NOT promoted to the dashboard default**, consistent with
+every prior phase's finding that the central one-to-one ownership-
+consolidation problem remains open. Full findings and every table are in
+`Phase15_Loser_Depression_Protection_Report.md`; the 60-run grid is in
+`phase15_loser_depression_protection_summary.json` (committed).
 
 ## Completed (this session)
 

@@ -543,6 +543,21 @@ CONFIG_SPEC = [
      "min": 1.0, "max": 200.0, "step": 1.0,
      "desc": "Exponential decay time constant (in steps) for a_i's return toward "
              "zero between spikes. Only used when adaptive threshold is on."},
+    # Phase 15: local developmental protection from L2I loser depression.
+    # SEPARATE from adaptive_threshold/structural_free_energy/homeostasis above.
+    {"key": "loser_depression_protection", "label": "Loser-depression protection (L2E)", "kind": "toggle",
+     "desc": "L2E only. Scales apply_delayed_inhibition's structural WEIGHT-"
+             "DEPRESSION gain by a smooth maturity = clamp(own ca / ca_ref, 0, 1) "
+             "-- a neuron with little/no firing history is depressed less; an "
+             "established, repeatedly-firing competitor (ca >= ca_ref) is "
+             "depressed exactly as before. The physical inhibitory membrane "
+             "event is UNCHANGED either way -- only the plastic weight change is "
+             "gated. OFF (default) is baseline-equivalent: gate multiplies by 1.0."},
+    {"key": "loser_depression_protection_ca_ref", "label": "Protection maturity reference (ca)", "kind": "range",
+     "min": 0.001, "max": 0.2, "step": 0.001,
+     "desc": "The neuron's own ca (slow EMA of its own spiking) at which the "
+             "protection gate reaches 1.0 (full/normal depression strength). "
+             "Only used when loser-depression protection is on."},
 ]
 
 # Dashboard clutter control: the panel exposes every tunable, but most are inert
