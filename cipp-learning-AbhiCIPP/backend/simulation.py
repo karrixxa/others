@@ -796,6 +796,99 @@ class SimulationEngine:
                  # Reserved for a future explicitly-justified local L2E->P
                  # decoder-learning equation. Phase 19A does not use it.
                  eta_pred: float = 0.05,
+                 # Phase 19-v2 (LPS Lecture 14 LOCAL-COINCIDENCE prediction
+                 # architecture; see Phase18b_Lecture14_Local_Coincidence_
+                 # Architecture_Contract.md). A SEPARATE, ADDITIVELY-COEXISTING
+                 # mechanism from prediction_excitatory_enabled above (mutually
+                 # exclusive at _build() time -- enabling both raises, see
+                 # _build_prediction_column_population). Default OFF preserves
+                 # the exact baseline topology/step() behavior. When True:
+                 # builds nine "PC0".."PC8" prediction-column neurons, one per
+                 # input column i, each with nine total afferents:
+                 # eight LEARNED R_j->PCi feedback weights (index 0..7, one per
+                 # L2Ej) plus one FIXED S_i->PCi lateral-coincidence weight
+                 # (index 8, never learned). R_j->PCi delivery is queued and
+                 # arrives exactly one step later (t+1); S_i->PCi delivery is
+                 # SAME-STEP (a direct local physical connection, no delay --
+                 # this is the "lime" connection in the annotated diagram).
+                 # Decoder learning (the R_j->PCi feedback weights) updates
+                 # ONLY on PCi's own physical spike, crediting ONLY the R_j
+                 # sources that actually, causally contributed to that specific
+                 # spike (this step's delayed-register eligibility, read off
+                 # PCi's own _last_input_spikes -- no separate bookkeeping).
+                 # PCi's output (P_i->I_i->S_i in the full architecture) is NOT
+                 # wired in this phase -- shadow mode: a PC spike has zero
+                 # effect on any other neuron.
+                 prediction_column_enabled: bool = False,
+                 # Fixed S_i->PCi lateral weight (index 8, never learned).
+                 # EXPERIMENTAL CANDIDATE value -- see the Phase 19 report for
+                 # the calibration reasoning (must satisfy: a single lateral
+                 # event alone stays subthreshold, i.e. < prediction_threshold).
+                 prediction_lateral_weight: float = 150.0,
+                 # Initial value for every R_j->PCi feedback weight (index
+                 # 0..7). Deliberately small and NONZERO (not exactly 0) so the
+                 # "no-leak" diagnostic control can demonstrate unbounded
+                 # accumulation from repeated feedback-only delivery -- with a
+                 # true zero init, zero delivered repeatedly is still zero, and
+                 # the diagnostic could not show the failure mode it exists to
+                 # demonstrate.
+                 prediction_feedback_init: float = 50.0,
+                 # Saturating ceiling for R_j->PCi feedback weight growth (w_max
+                 # in the delta rule below). Deliberately set slightly ABOVE
+                 # prediction_threshold so a FULLY mature feedback weight can
+                 # eventually fire PCi alone, without any lateral coincidence --
+                 # this is the intended Part 7 "prediction without input"
+                 # end-state, reached only by synapses that have genuinely,
+                 # repeatedly, causally contributed to a real PCi spike.
+                 prediction_feedback_max: float = 1200.0,
+                 # eta_prediction: the R_j->PCi feedback learning rate (delta_w
+                 # = eta * spike(PCi) * eligibility(Rj) * (1 - w/w_max)^2, see
+                 # _apply_prediction_column_learning). Separately named, never
+                 # aliased to learning_rate/eta_pred/l2e_lr_frac.
+                 prediction_learning_rate: float = 0.15,
+                 # PCi's own firing threshold. Separately named from
+                 # threshold/threshold_l2 -- this population's coincidence
+                 # detection is calibrated against ITS OWN scale, not L1/L2's.
+                 # EMPIRICALLY CALIBRATED (see the Phase 19 report's
+                 # feasibility measurement): with the defaults above and this
+                 # preset's actual S_i duty cycle (~90%, refractory=0) and
+                 # R_j duty cycle (~50%), a bare lateral-alone steady state
+                 # settles around ~420-500 and a bare feedback-alone steady
+                 # state (inactive columns) around ~200-210. 500 sits just
+                 # above the lateral-alone ceiling (so PURE sensory-only
+                 # input, without any representation feedback, cannot fire
+                 # PCi on its own) while still reachable when a genuine
+                 # causal R_j coincidence briefly lifts the retained lateral
+                 # charge over the line. At threshold=300 lateral-alone COULD
+                 # eventually cross it (false "coincidence" from sensory
+                 # alone); at threshold=600+ no combination reliably crosses
+                 # it. This window is narrow and the resulting PCi firing
+                 # rate is low and front-loaded (see the report) -- reported
+                 # honestly, not smoothed over.
+                 prediction_threshold: float = 500.0,
+                 # PCi's own membrane leak fraction per step (fixed-point,
+                 # same convention as leak_l1/leak_l2 -- see neuron_flexible.
+                 # Membrane.leak_rate). Deliberately a NEW, separately-tunable
+                 # value -- see the Phase 19 report's feasibility calibration
+                 # for why this needs to be substantially larger than leak_l1
+                 # (0.1): S_i's own duty cycle in this preset is very high
+                 # (frequently >90% of steps, refractory=0), so a weak leak
+                 # would let repeated LATERAL-ALONE delivery alone ratchet PCi
+                 # to threshold with no representation feedback at all --
+                 # exactly the false-positive failure this phase must rule
+                 # out (Part 5's coincidence/leak requirements).
+                 prediction_leak: float = 0.3,
+                 # R_j->PCi feedback delivery delay in steps (t -> t+arrival).
+                 # Fixed at 1 (never same-step) per the architecture's causal
+                 # requirement; exposed as a named constant for clarity/tests,
+                 # not intended to be swept in this phase.
+                 prediction_feedback_delay: int = 1,
+                 # DIAGNOSTIC CONTROL ONLY (Part 5's explicit "no-leak
+                 # diagnostic" requirement) -- forces prediction_leak to 0.0
+                 # regardless of the value above, to reproduce and demonstrate
+                 # the unbounded-accumulation failure mode that motivates the
+                 # real leak. Never used outside that one diagnostic test/run.
+                 prediction_leak_diagnostic_disable: bool = False,
                  # Capacity rule for the minimal experiment (see the prompt's
                  # "Threshold, Cap, Floor" section). l2e_weight_cap_frac sets each
                  # L2E positive feedforward weight cap to frac*thr_l2, so three
@@ -943,6 +1036,15 @@ class SimulationEngine:
                            pretrained_l2i_recruitment=pretrained_l2i_recruitment,
                            prediction_excitatory_enabled=prediction_excitatory_enabled,
                            eta_pred=eta_pred,
+                           prediction_column_enabled=prediction_column_enabled,
+                           prediction_lateral_weight=prediction_lateral_weight,
+                           prediction_feedback_init=prediction_feedback_init,
+                           prediction_feedback_max=prediction_feedback_max,
+                           prediction_learning_rate=prediction_learning_rate,
+                           prediction_threshold=prediction_threshold,
+                           prediction_leak=prediction_leak,
+                           prediction_feedback_delay=prediction_feedback_delay,
+                           prediction_leak_diagnostic_disable=prediction_leak_diagnostic_disable,
                            l2e_weight_cap_frac=l2e_weight_cap_frac,
                            pos_weight_floor=pos_weight_floor,
                            l2e_init_mode=l2e_init_mode,
@@ -1060,6 +1162,25 @@ class SimulationEngine:
         self._prediction_last_decoder_integrated: list[dict] = []
         self._prediction_last_replay_arrivals: list[dict] = []
         self._prediction_last_replay_deliveries: list[dict] = []
+
+        # Phase 19-v2 (LPS Lecture 14 LOCAL-COINCIDENCE prediction
+        # architecture; see Phase18b_Lecture14_Local_Coincidence_Architecture_
+        # Contract.md). A SEPARATE, additively-coexisting mechanism from the
+        # Phase 19A scaffold immediately above -- different attribute
+        # (self.pcol, not self.l1p), different neuron ids (PC0..PC8, not
+        # P0..P8), different synapse ids (colfb{j}->{i}/lat{i}, not
+        # decoder{j}->{i}/pred{i}->{i}). Mutually exclusive at build time: the
+        # two experiments are conceptually incompatible (different afferent
+        # counts, different learning triggers, different lateral wiring) and
+        # both default off, so nobody would legitimately enable both at once
+        # -- this raises loudly rather than silently corrupting self.neurons.
+        if p['prediction_excitatory_enabled'] and p['prediction_column_enabled']:
+            raise ValueError(
+                "prediction_excitatory_enabled (Phase 19A per-column scaffold) "
+                "and prediction_column_enabled (Phase 19-v2 local-coincidence "
+                "architecture) are mutually exclusive experimental prediction "
+                "mechanisms -- enable only one at a time.")
+        self._build_prediction_column_population(p, thr_l1)
 
         # L2E leak is independently switchable from the shared L2I neuron's fast
         # evidence-window leak.
@@ -1326,6 +1447,22 @@ class SimulationEngine:
         # every non-L2E neuron.
         self._apply_experimental_pathway_distances()
 
+        # Phase 19-v2 fix-up: NeuronConfig.apply_to()'s classification is
+        # `is_l2e = not (is_l1e or is_l1i or is_l2i)` (snn/config.py), so any
+        # neuron id that doesn't start with 'L1E'/'L1I' and isn't 'L2I' falls
+        # through and is (mis)classified as an L2E for distance-weighting
+        # purposes -- this generic cfg.apply_to() sweep over self.neurons.
+        # items() (above) runs AFTER PCi neurons are constructed, so it would
+        # otherwise silently turn on distance_weighting (with the LEGACY
+        # L1E->L2E distance_ref, wildly mismatched to PCi's own weight
+        # scale) on every PCi, inflating delivered charge by orders of
+        # magnitude. Reset explicitly here rather than touching the shared
+        # classification logic (out of scope for this phase -- distance/
+        # geometry code is not to be changed).
+        if self.prediction_column_enabled:
+            for pc in self.pcol:
+                pc.distance_weighting = False
+
         # One-step feedback delay. L1I spikes produced at t inhibit paired L1E
         # neurons at t+1 only; the register is replaced every step.
         self.l1i_feedback_delay = np.zeros(N_PIX)
@@ -1466,6 +1603,109 @@ class SimulationEngine:
         self._log('backend', f'network built (seed={p["seed"]}, immediate delivery, '
                              f'{len(self.neurons)} neurons, {len(self.synapses)} synapses)')
 
+    def _build_prediction_column_population(self, p, thr_l1):
+        """Phase 19-v2 (LPS Lecture 14 LOCAL-COINCIDENCE prediction
+        architecture): nine "PC0".."PC8" neurons, one per input column i.
+        Each PCi has nine total afferents:
+
+            index 0..7: LEARNED R_j->PCi feedback weight (one per L2Ej),
+                        init prediction_feedback_init, capped at
+                        prediction_feedback_max.
+            index 8:    FIXED S_i->PCi lateral-coincidence weight (never
+                        learned), value prediction_lateral_weight -- the
+                        "lime" connection in the annotated diagram, present
+                        ONLY for PCi's OWN paired column i (S_j->PCi for
+                        j != i does not exist at all).
+
+        A no-op (self.pcol = []) when prediction_column_enabled is off, so
+        every existing caller/test is byte-identical in that case. See
+        step() for the delivery/learning event and _apply_prediction_column_
+        learning for the delta rule."""
+        self.prediction_column_enabled = bool(p['prediction_column_enabled'])
+        self.prediction_lateral_weight = float(p['prediction_lateral_weight'])
+        self.prediction_feedback_init = float(p['prediction_feedback_init'])
+        self.prediction_feedback_max = float(p['prediction_feedback_max'])
+        self.prediction_learning_rate = float(p['prediction_learning_rate'])
+        self.prediction_threshold = float(p['prediction_threshold'])
+        # DIAGNOSTIC CONTROL ONLY (Part 5's explicit no-leak-diagnostic
+        # requirement): forces the membrane leak to 0.0 regardless of
+        # prediction_leak, to reproduce the unbounded-accumulation failure
+        # mode that motivates having a real leak at all. Never used outside
+        # that one diagnostic test/run.
+        self.prediction_leak = (0.0 if p['prediction_leak_diagnostic_disable']
+                                else float(p['prediction_leak']))
+        self.prediction_feedback_delay = max(1, int(p['prediction_feedback_delay']))
+        self.pcol: list = []
+        if self.prediction_column_enabled:
+            for _i in range(N_PIX):
+                pc = Neuron(n_inputs=N_OUT + 1, threshold=self.prediction_threshold,
+                           refractory_period=p['refractory'], learning_rate=0.0,
+                           weight_cap=self.prediction_feedback_max,
+                           leak_rate=self.prediction_leak)
+                pc._weights_array = np.full(N_OUT + 1, self.prediction_feedback_init)
+                pc._weights_array[N_OUT] = self.prediction_lateral_weight   # fixed lateral, index 8
+                self.pcol.append(pc)
+        # Delayed FIFO queues carrying the queued R_j->PCi feedback AND
+        # S_i->PCi lateral delivery vectors TOGETHER -- same one-step-
+        # register precedent as l1i_feedback_delay, generalized to
+        # prediction_feedback_delay steps. Invariant: exactly
+        # `prediction_feedback_delay` vectors are always queued in EACH deque
+        # between step() calls -- each step popleft()s both fronts (the pair
+        # queued exactly `delay` steps ago, from the SAME originating step)
+        # for delivery, then append()s this step's own l2e/l1e pair to both
+        # backs. Pre-filled with `delay` zero vectors so the first `delay`
+        # steps correctly deliver nothing (no S_i/L2Ej has fired yet).
+        # CORRECTED TIMING (per the offline feasibility review): the lateral
+        # S_i->PCi connection is delayed EXACTLY like the feedback path --
+        # there is no same-step lateral delivery in this engine (see step()
+        # for the full rationale).
+        self.l2e_to_pcol_queue = deque(
+            np.zeros(N_OUT) for _ in range(self.prediction_feedback_delay))
+        self.s_to_pcol_queue = deque(
+            np.zeros(N_PIX) for _ in range(self.prediction_feedback_delay))
+
+    def _apply_prediction_column_learning(self, pc):
+        """Phase 19-v2 decoder-learning event -- runs ONLY on PCi's own
+        physical spike (called from step() immediately after pc.fire()).
+        EXPERIMENTAL CANDIDATE, not a Lecture 14 equation (see
+        Phase18b_Lecture14_Local_Coincidence_Architecture_Contract.md):
+
+            delta_w[j] = eta_prediction * (1 - w[j]/w_max)^2   (eligible j only)
+
+        Two SEPARATE gates, per the corrected design (physical firing and
+        learning are not the same event):
+
+        1. S_i ELIGIBILITY GATE (whole-neuron, checked first): learning
+           requires THIS delivery's own lateral component (index N_OUT, the
+           S_i->PCi term popped from s_to_pcol_queue -- see step()) to have
+           been active. No recent S_i eligibility means NO decoder update
+           at all this event, for ANY R_j index -- even if PCi physically
+           fired from mature feedback alone. This is what keeps "mature
+           feedback-only PCi firing" (the eventual input-free reconstruction
+           capability) from ALSO being treated as evidence that pixel i was
+           truly present -- firing and teaching are deliberately decoupled.
+        2. Per-synapse ELIGIBILITY (R_j credit): among the eight feedback
+           indices, only those whose queued delivery this event actually
+           carried a 1 (read off pc's own _last_input_spikes, set by
+           receive_input earlier this same call -- no separate bookkeeping)
+           grow.
+
+        Monotonic, saturating, POSITIVE-ONLY growth -- this rule never
+        depresses a synapse. The fixed lateral index (N_OUT) is never
+        touched by any learning rule. Reads ONLY this neuron's own
+        _last_input_spikes and its own _weights_array -- no pattern name, no
+        owner table, no argmax, no cross-neuron comparison, no rival state,
+        no software target."""
+        if not (pc._last_input_spikes[N_OUT] > 0.5):
+            return   # no recent S_i eligibility this event -- no update at all
+        eligible = pc._last_input_spikes[:N_OUT] > 0.5
+        if not eligible.any():
+            return
+        w = pc._weights_array[:N_OUT]
+        w_max = self.prediction_feedback_max
+        growth = self.prediction_learning_rate * (1.0 - w[eligible] / w_max) ** 2
+        w[eligible] = np.clip(w[eligible] + growth, 0.0, w_max)
+
     def _compute_geometry(self):
         """Returns (l1e_xy, l1i_xy, l2e_xy), each an (n,2) array of (x,y) --
         z is fixed per population (0.0 / -2.0 / _Z) and applied by the caller,
@@ -1510,6 +1750,13 @@ class SimulationEngine:
                 self.meta[nid] = dict(id=nid, label=f'pred {i}', layer='L1', type='P',
                                       pixel_index=i, threshold=self.params['threshold'],
                                       pos=[round(float(l1e_xy[i, 0]), 4), round(float(l1e_xy[i, 1]), 4), 1.0])
+        if self.prediction_column_enabled:
+            for i in range(N_PIX):
+                nid = f'PC{i}'
+                self.neurons[nid] = self.pcol[i]
+                self.meta[nid] = dict(id=nid, label=f'pred-col {i}', layer='L1', type='P',
+                                      pixel_index=i, threshold=self.prediction_threshold,
+                                      pos=[round(float(l1e_xy[i, 0]), 4), round(float(l1e_xy[i, 1]), 4), 1.5])
         for j in range(N_OUT):
             nid = f'L2E{j}'
             self.neurons[nid] = self.l2.excitatory_neurons[j]
@@ -1550,6 +1797,14 @@ class SimulationEngine:
             for i in range(N_PIX):
                 self.synapses.append(dict(id=f'pred{i}->{i}', source=f'P{i}',
                                           target=f'L1E{i}', kind='prediction_replay'))
+        if self.prediction_column_enabled:
+            for j in range(N_OUT):
+                for i in range(N_PIX):
+                    self.synapses.append(dict(id=f'colfb{j}->{i}', source=f'L2E{j}',
+                                              target=f'PC{i}', kind='col_feedback'))
+            for i in range(N_PIX):
+                self.synapses.append(dict(id=f'lat{i}', source=f'L1E{i}',
+                                          target=f'PC{i}', kind='col_lateral'))
 
     def _apply_l2e_distances(self):
         """Populate each L2E's per-afferent DELIVERY distance: euclidean(L2E_home,
@@ -1810,7 +2065,15 @@ class SimulationEngine:
                'pretrained_l2i_recruitment',
                # Phase 19: corrected per-input-column prediction architecture
                # (LPS Lecture 14 mapping; separate from every mechanism above).
-               'prediction_excitatory_enabled', 'eta_pred')
+               'prediction_excitatory_enabled', 'eta_pred',
+               # Phase 19-v2: local-coincidence prediction-column architecture
+               # (LPS Lecture 14 mapping; mutually exclusive with the flag
+               # immediately above -- see _build_prediction_column_population).
+               'prediction_column_enabled', 'prediction_lateral_weight',
+               'prediction_feedback_init', 'prediction_feedback_max',
+               'prediction_learning_rate', 'prediction_threshold',
+               'prediction_leak', 'prediction_feedback_delay',
+               'prediction_leak_diagnostic_disable')
 
     def apply_config(self, overrides: dict):
         """Merge tunable overrides into self.params and rebuild the network in
@@ -1835,9 +2098,11 @@ class SimulationEngine:
                      'l1i_leak_enabled', 'symmetric_geometry', 'legacy_distance_compat',
                      'infl_l2e_l2i', 'infl_l2i_l2e', 'infl_l2e_l1i', 'infl_l1i_l1e',
                      'adaptive_threshold', 'loser_depression_protection',
-                     'pretrained_l2i_recruitment', 'prediction_excitatory_enabled'):
+                     'pretrained_l2i_recruitment', 'prediction_excitatory_enabled',
+                     'prediction_column_enabled', 'prediction_leak_diagnostic_disable'):
                 v = bool(v)
-            elif k in ('seed', 'refractory', 'l2_charge_chunks', 'l2_inhibition_delay'):
+            elif k in ('seed', 'refractory', 'l2_charge_chunks', 'l2_inhibition_delay',
+                       'prediction_feedback_delay'):
                 v = int(v)
             elif k == 'l2e_init_mode':
                 # Exposed as a dashboard TOGGLE (bool): on -> balanced, off ->
@@ -2266,6 +2531,49 @@ class SimulationEngine:
             if l1e[k]:
                 e.fire()
 
+        # Phase 19-v2 (LPS Lecture 14 LOCAL-COINCIDENCE prediction
+        # architecture; corrected timing per the offline feasibility review
+        # -- exact commit reviewed d91e7f7): PCi delivery + physical fire +
+        # decoder learning. BOTH afferents are QUEUED at the end of the step
+        # that produced them and arrive TOGETHER at t+1 -- there is no
+        # same-step S_i->PCi delivery. A same-step lateral path is not
+        # physically available in this engine's step() ordering (P threshold
+        # checks would otherwise have to run before L1E/L2E resolve this
+        # SAME step, and routing it through _apply_stim() would contaminate
+        # the very sensory evidence that produced the L2E response); queuing
+        # both together removes any phase mismatch between them, which is
+        # what actually makes a nonempty feasible coincidence window exist
+        # (see Phase19_Local_Coincidence_Shadow_Report.md's calibration).
+        #   indices 0..7: R_j->PCi feedback, POPPED from the delayed queue --
+        #                 the L2E vector queued exactly
+        #                 prediction_feedback_delay steps ago.
+        #   index 8:      S_i->PCi lateral coincidence, POPPED from its OWN
+        #                 parallel delayed queue -- the L1E vector queued
+        #                 from the SAME originating step as the L2E vector
+        #                 above (never same-step, never independently timed).
+        # Delivered together in ONE receive_input call so both land on PCi's
+        # membrane in the SAME physical integration step. SHADOW ONLY in
+        # this phase: PCi's own spike has zero effect on any other neuron
+        # (no PCi->Ii->Si wiring yet -- deferred per the contract). Decoder
+        # learning triggers ONLY on PCi's own physical spike -- see
+        # _apply_prediction_column_learning for the delta rule AND the
+        # separate S_i-eligibility gate (mature feedback-only firing must
+        # remain physically possible; LEARNING additionally requires this
+        # delivery's own lateral component to have been active).
+        pcol_spiked = np.zeros(N_PIX)
+        if self.prediction_column_enabled:
+            dec_vec_pcol = self.l2e_to_pcol_queue.popleft()
+            lat_vec_pcol = self.s_to_pcol_queue.popleft()
+            for i, pc in enumerate(self.pcol):
+                combined = np.concatenate([dec_vec_pcol, [lat_vec_pcol[i]]])
+                pc.receive_input(combined, t=t)
+            for i, pc in enumerate(self.pcol):
+                if pc.check_threshold():
+                    pc.fire()
+                    pcol_spiked[i] = 1.0
+                    if not self.plasticity_frozen:
+                        self._apply_prediction_column_learning(pc)
+
         # 2b/2c. Deliver L1E->L2E feedforward charge and resolve L2 competition.
         #     PHASE 7: every L2E that crosses threshold this step FIRES (no
         #     argmax pick, no immediate reset of anyone). Each firer's event is
@@ -2375,6 +2683,18 @@ class SimulationEngine:
         if self.prediction_excitatory_enabled:
             self._schedule_prediction_decoder_events(l2e, t)
 
+        # Phase 19-v2: queue THIS step's L2E spikes AND THIS step's L1E
+        # (S_i) spikes TOGETHER as the PC population's delayed delivery pair
+        # (both arrive prediction_feedback_delay steps from now, on the SAME
+        # future step -- see the popleft() calls above and the queues' FIFO
+        # invariant in _build_prediction_column_population). Queuing both
+        # from the SAME originating step, rather than delivering the lateral
+        # term same-step, is the corrected timing -- see the delivery block
+        # above for the full rationale.
+        if self.prediction_column_enabled:
+            self.l2e_to_pcol_queue.append(l2e.copy())
+            self.s_to_pcol_queue.append(l1e.copy())
+
         # 2d. Deliver L2E winner spike immediately to all L1I neurons (feedback).
         #     l2e is length N_OUT with a 1 at the winner index, matching each
         #     L1I neuron's N_OUT-dimensional afferent weight vector. (t carries the
@@ -2437,9 +2757,14 @@ class SimulationEngine:
             for pn in self.l1p:
                 pn.update()
             self._schedule_prediction_replay_events(p_spiked, t)
+        if self.prediction_column_enabled:
+            for pc in self.pcol:
+                pc.update()
 
         # 5. Bookkeeping.
-        self._record_spikes(l1e, l1i, l2e, l2i, p_spiked if self.prediction_excitatory_enabled else None)
+        self._record_spikes(l1e, l1i, l2e, l2i,
+                           pred=(p_spiked if self.prediction_excitatory_enabled else None),
+                           pred_col=(pcol_spiked if self.prediction_column_enabled else None))
         # Phase 10: adaptive-threshold trajectory (end-of-step a_i, post-decay).
         for j, e in enumerate(l2.excitatory_neurons):
             self.threshold_adapt_history[f'L2E{j}'].append(round(float(e.threshold_adapt), 4))
@@ -2492,7 +2817,7 @@ class SimulationEngine:
         for nid, mag in self._holds.items():
             self.neurons[nid].potential += mag
 
-    def _record_spikes(self, l1e, l1i, l2e, l2i, pred=None):
+    def _record_spikes(self, l1e, l1i, l2e, l2i, pred=None, pred_col=None):
         for i in range(N_PIX):
             self.spiked[f'L1E{i}'] = bool(l1e[i]); self.freq[f'L1E{i}'].append(l1e[i])
             self.spiked[f'L1I{i}'] = bool(l1i[i]); self.freq[f'L1I{i}'].append(l1i[i])
@@ -2502,6 +2827,11 @@ class SimulationEngine:
         if pred is not None:
             for i in range(N_PIX):
                 self.spiked[f'P{i}'] = bool(pred[i]); self.freq[f'P{i}'].append(pred[i])
+        # Phase 19-v2: PC population spike/frequency tracking, same convention
+        # -- untouched (pred_col is None) when prediction_column_enabled is off.
+        if pred_col is not None:
+            for i in range(N_PIX):
+                self.spiked[f'PC{i}'] = bool(pred_col[i]); self.freq[f'PC{i}'].append(pred_col[i])
         for j in range(N_OUT):
             self.spiked[f'L2E{j}'] = bool(l2e[j]); self.freq[f'L2E{j}'].append(l2e[j])
         self.spiked['L2I'] = bool(l2i); self.freq['L2I'].append(l2i)
@@ -2760,6 +3090,16 @@ class SimulationEngine:
                     w[f'decoder{j}->{i}'] = float(stored[j, i])
             for i in range(N_PIX):
                 w[f'pred{i}->{i}'] = float(self.prediction_replay_weight)
+        # Phase 19-v2: learned R_j->PCi feedback matrix plus the fixed
+        # S_i->PCi lateral-coincidence edges (reported for observability;
+        # never learned, never appears in changed_synapses beyond its one
+        # constant value at build time).
+        if self.prediction_column_enabled:
+            for i in range(N_PIX):
+                pcw = self.pcol[i]._weights_array
+                for j in range(N_OUT):
+                    w[f'colfb{j}->{i}'] = float(pcw[j])
+                w[f'lat{i}'] = float(pcw[N_OUT])
         return w
 
     def _detect_weight_changes(self):

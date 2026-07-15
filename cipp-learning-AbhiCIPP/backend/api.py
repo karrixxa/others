@@ -571,6 +571,43 @@ CONFIG_SPEC = [
              "the initial value and learning of L2I's OWN incoming weights "
              "change. OFF (default) is byte-identical to the learned-"
              "recruitment baseline."},
+    # Phase 19-v2 (LPS Lecture 14 LOCAL-COINCIDENCE prediction architecture)
+    # -- mutually exclusive with any other prediction mechanism above.
+    {"key": "prediction_column_enabled", "label": "Prediction columns (PC0-PC8, local coincidence)", "kind": "toggle",
+     "desc": "Adds nine per-input-column prediction neurons PC0..PC8. Each "
+             "PCi has a fixed local S_i->PCi lateral coincidence weight "
+             "(same-step) plus a learned all-to-all R_j->PCi feedback matrix "
+             "(delivered one step later). Decoder learning fires ONLY on "
+             "PCi's own physical spike, crediting only causally-contributing "
+             "R_j sources. SHADOW ONLY: a PCi spike has zero effect on any "
+             "other neuron in this phase (no PCi->Ii->Si wiring yet). OFF "
+             "(default) is byte-identical to the baseline topology."},
+    {"key": "prediction_lateral_weight", "label": "Lateral (S->PC) weight", "kind": "range",
+     "min": 0.0, "max": 500.0, "step": 10.0,
+     "desc": "Fixed, never-learned S_i->PCi lateral coincidence weight."},
+    {"key": "prediction_feedback_init", "label": "Feedback (R->PC) init weight", "kind": "range",
+     "min": 0.0, "max": 200.0, "step": 5.0,
+     "desc": "Initial value for every R_j->PCi feedback weight -- small and "
+             "nonzero so the no-leak diagnostic can demonstrate unbounded "
+             "accumulation."},
+    {"key": "prediction_feedback_max", "label": "Feedback (R->PC) max weight", "kind": "range",
+     "min": 100.0, "max": 2000.0, "step": 50.0,
+     "desc": "Saturating ceiling for R_j->PCi feedback growth."},
+    {"key": "prediction_learning_rate", "label": "PC decoder learning rate", "kind": "range",
+     "min": 0.0, "max": 1.0, "step": 0.01,
+     "desc": "eta_prediction in the R_j->PCi feedback delta rule."},
+    {"key": "prediction_threshold", "label": "PC firing threshold", "kind": "range",
+     "min": 100.0, "max": 3000.0, "step": 50.0,
+     "desc": "PCi's own firing threshold, separate from L1/L2's."},
+    {"key": "prediction_leak", "label": "PC membrane leak", "kind": "range",
+     "min": 0.0, "max": 1.0, "step": 0.01,
+     "desc": "PCi's own membrane leak fraction per step -- must be large "
+             "enough that repeated lateral-alone or feedback-alone delivery "
+             "settles below threshold (see the Phase 19 report)."},
+    {"key": "prediction_leak_diagnostic_disable", "label": "PC no-leak diagnostic", "kind": "toggle",
+     "desc": "DIAGNOSTIC CONTROL ONLY -- forces PC leak to 0.0 regardless of "
+             "the leak value above, to reproduce the unbounded-accumulation "
+             "failure mode that motivates having a real leak at all."},
 ]
 
 # Dashboard clutter control: the panel exposes every tunable, but most are inert

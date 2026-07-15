@@ -64,7 +64,14 @@
   and `Phase19_Local_Coincidence_Shadow_Report.md` (implementation +
   calibration + diagnostic + promotion-bar verdict). New, separate,
   mutually-exclusive-with-every-prior-mechanism flag
-  `prediction_column_enabled` (default OFF, not promoted). Every prior
+  `prediction_column_enabled` (default OFF, not promoted). Pattern
+  selectivity within a single hold is clean (precision 1.0, all 4
+  patterns); across continuous pattern switching (50-cycle diagnostic,
+  `phase19_switch_boundary_diagnostic.py`) a real 2.92% false-prediction
+  rate from previous-pattern carryover exists with no gap/clearing (0% with
+  either a washout gap or an explicit boundary-clear diagnostic control,
+  neither adopted as the primary mechanism) -- promotion bar to `PCi->Ii`
+  does NOT fully pass; `PCi->Ii->Si` stays unimplemented. Every prior
   prototype (eight-predictor, Phase 18b's first correction, Phase 19A) is
   preserved unmerged on its own backup branch, never deleted or rewritten --
   see `backup/phase19-candidate-a-wip`, `backup/phase19-eight-predictor-wip`,
