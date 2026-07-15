@@ -19,8 +19,9 @@
   physical L2E threshold crossing)
 - Phase 7 END checkpoint commit: `d946ff0` (physical L2I competition —
   causal, delayed L2E→L2I→L2E events)
-- This update corresponds to the **Phase 8 END** checkpoint (exact local
-  free-energy learning) — commit hash filled in after this commit lands, see
+- Phase 8 END checkpoint commit: `c0ac363` (exact local free-energy learning)
+- This update corresponds to the **Phase 9 END** checkpoint (causal L1I
+  predictive feedback) — commit hash filled in after this commit lands, see
   repo log.
 - Base branch `july14` is untouched and remains the protected base.
 - `four-pattern` branch exists (checked out in a separate worktree at
@@ -166,6 +167,37 @@ directly with a forced tie. Frozen probes are unaffected (the existing
 `plasticity_frozen` guard at the top of `_update_weights` is unconditional
 and was never touched).
 
+**Current phase (Phase 9, complete) — Causal L1I predictive feedback, per the
+corrected Phases 6-12 prompt file:** audited the existing L2E→L1I and
+L1I→L1E paths before changing anything (documented below). Found and fixed a
+genuine correctness gap in the shared `_credit_source` helper: it only
+checked whether the presentation's very FIRST L2E spike was an ambiguous
+same-step tie, so a LATER step's genuine multi-firer event (which Phase 7
+made possible on any step, not just the first) could be mis-attributed to a
+single L2E id instead of being reported `'ambiguous'`. `_credit_source` now
+reads `self._last_eligible` (this step's actual firer set) directly at the
+moment of attribution — fixing L1I attribution (this phase's explicit scope)
+and, as a direct consequence of sharing one function, L2I attribution too
+(the identical root cause; leaving one fixed and the other stale would have
+been an inconsistent half-fix of the same mechanism). Added the requested
+causal chain: `l1i_first_source_set` (the raw contributor id list, recorded
+even when ambiguous), `l1i_first_arrival_t` (the step a real L2E delivery
+reaches L1I — tracked separately from `l1i_first_t`, the step L1I itself
+crosses threshold, since the default trainable-integrator mode can take
+extra steps to accumulate), `l1i_first_targets` (which L1I units fired), and
+`l1i_first_delivery` (the resulting one-step-delayed L1I→L1E pulse's
+recorded `_inh_events` effect). None of this is inferred — every field reads
+an already-decided physical event, never an index priority, hidden charge,
+weight inspection, or oracle. L1I→L1E's spatially-paired (index-matched)
+meaning was preserved exactly as-is (not touched); the audit reconfirmed
+(and this phase's tests directly assert) that all 9 L1I units currently
+share one literal feedback weight vector and receive an identical delivery
+by default (`infl_l2e_l1i` off), so their synchrony is an honestly-reported
+structural fact, not a fabricated per-unit distinction and not a software
+broadcast shortcut (verified: `l1i_immediate_relay` defaults to False, and
+the default trainable-integrator mode genuinely requires threshold crossing
+— sabotaging L1I's weights/threshold confirms it does not fire).
+
 ## Completed (this session)
 
 Phase 0 (branch/docs setup):
@@ -291,13 +323,73 @@ leakage), code-level locality (AST-verified: the helper's executable body
 references no name beyond its own five arguments), same-step-tie
 non-discrimination, and probe non-mutation.
 
+Phase 9 (causal L1I predictive feedback; see "Files changed" below): fixed
+`_credit_source` to check `self._last_eligible` (this step's actual firer
+set) directly instead of only the presentation-level first-spike tie flag —
+closing a real gap where a genuine same-step multi-firer event on a LATER
+step could be mis-attributed to a single L2E id for BOTH L1I and L2I source
+reporting. Added the full causal chain requested: `l1i_first_source_set`,
+`l1i_first_arrival_t` (separate from the existing `l1i_first_t` threshold-
+crossing step), `l1i_first_targets`, `l1i_first_delivery` (the resulting
+L1I→L1E pulse's `_inh_events` effect, captured one step later via a
+one-shot pending-capture flag). L1I→L1E's spatially-paired meaning and the
+L2E→L1I delivery mechanism itself are UNCHANGED — this phase is
+observability plus a targeted attribution-logic fix, not a rewiring of
+connectivity. Added `test_l1i_causal_feedback.py` (12 new tests).
+
 ## In progress
 
-**Phase 8 (exact local free-energy learning) is COMPLETE** — single-milestone
+**Phase 9 (causal L1I predictive feedback) is COMPLETE** — single-milestone
 phase, phase-end regressions run, this is the phase-end checkpoint per
 `CLAUDE.md`. No further phase is currently queued.
 
-## Files changed (Phase 8 — exact local free-energy learning, this checkpoint)
+## Files changed (Phase 9 — causal L1I predictive feedback, this checkpoint)
+
+- `backend/simulation.py`:
+  - `_credit_source(idx)`: now returns `'ambiguous'` whenever
+    `len(self._last_eligible) > 1` at the moment of attribution (this step's
+    actual firer set), replacing the old check against
+    `self._presentation_tie`/`self._presentation_first_spiker` (which only
+    covered a presentation's very first spike). Applies to BOTH L1I and L2I
+    source attribution, since both share this one function.
+  - New presentation-scoped state (init in `_build()`, reset in
+    `_start_presentation()`, archived into `presentation_log` entries):
+    `_presentation_l1i_first_source_set`, `_presentation_l1i_first_arrival_t`,
+    `_presentation_l1i_first_targets`, `_presentation_l1i_first_delivery`,
+    and a one-shot `_l1i_delivery_capture_pending` flag.
+  - `_track_presentation()`: records ARRIVAL (`step_winner_idx is not None`,
+    i.e. a real nonzero `l2e` was just delivered to L1I this step) with its
+    source SET (`self._last_eligible`), independently of whether L1I has
+    fired yet; on L1I's actual fire, records `l1i_first_targets` (which L1I
+    ids fired) and sets the one-shot delivery-capture flag.
+  - `step()`: right after the top-of-step L1E/`apply_inhibition` loop
+    populates `self._inh_events` for this step (the delivery/effect of
+    WHATEVER L1I fired last step, per the one-step `l1i_feedback_delay`
+    register), checks the pending-capture flag and — if set — snapshots
+    `_inh_events` into `_presentation_l1i_first_delivery` (with the step
+    number) and clears the flag. This correctly captures the FIRST L1I fire's
+    resulting delivery on the very next step, no re-derivation needed since
+    the delay is a fixed, known one-step register.
+  - `dynamic_state()['causal_story']`: added `l1i_first_source_set`,
+    `l1i_first_arrival_t`, `l1i_first_targets`, `l1i_first_delivery`.
+- `test_l1i_causal_feedback.py` (new) — 12 tests: arrival never happens after
+  threshold crossing; source set is recorded at arrival and lists only L2E
+  ids; targets are the actual firing L1I ids; delivery lands exactly one step
+  after threshold crossing and its events reference L1E with `v_pre`/`v_post`;
+  a forced same-step multi-firer set is reported in `l1i_first_source_set`;
+  a same-step tie on a LATER (non-first) step is now correctly reported
+  `'ambiguous'` for both L1I and L2I attribution (the Phase 9 fix, exercised
+  end-to-end through the real engine, not just the unit-level helper); a
+  direct unit test of the fixed `_credit_source`; the default (non-relay)
+  mode genuinely requires threshold crossing (sabotage test, mirroring
+  `test_l1i_immediate_relay.py`'s technique) so units never fire merely by
+  duplication; an audit-confirming test that all 9 L1I still share one
+  literal weight vector by default (honestly reported, not hidden); probe
+  non-mutation for the new bookkeeping; presentation-boundary reset of the
+  new fields; and a proof that reading the new diagnostics heavily between
+  steps has zero effect on physical dynamics.
+
+### Phase 8 (prior checkpoint `c0ac363`)
 
 - `snn/rules/excitatory.py`: added `exact_local_free_energy_update(w, w_min,
   w_max, lr, fe, learn_signal)` — the literal Phase 8 equation, clamped only
@@ -751,7 +843,40 @@ No neural equation and no preset VALUE was changed. `CLAUDE_HANDOFF.md`
 
 ## Tests
 
-### Phase 8 (this checkpoint)
+### Phase 9 (this checkpoint)
+
+- `test_l1i_causal_feedback.py` (new, focused): **12/12 passed**.
+- `pytest -q` (full suite): **232 passed, 5 failed** (220 prior + 12 new =
+  232; same 5 pre-existing `test_flow_rate.py`/`test_assembly_flow_credit.py`
+  failures as every prior checkpoint, untouched).
+- **The correctness fix, verified directly:**
+  `test_l1i_source_is_ambiguous_on_any_step_not_just_the_first_spike` drives
+  a real forced same-step multi-firer event on a LATER step (well after the
+  presentation's first spike) through the full engine and confirms both
+  `l1i_first_source`/`l2i_first_source` report `'ambiguous'` when that step
+  is the one being attributed; `test_credit_source_directly_checks_this_steps_firer_set`
+  is a direct unit-level proof of the fixed helper's exact contract.
+- **Causal chain ordering:** `test_arrival_precedes_or_equals_threshold_crossing`
+  and `test_delivery_effect_lands_one_step_after_threshold_crossing` confirm
+  the three-hop timing (arrival <= threshold crossing < delivery, with
+  delivery exactly `+1`) under `DASHBOARD_PRESET`'s live config.
+- **No fabricated per-unit distinction:**
+  `test_l2e_l1i_delivery_is_currently_identical_across_units_by_default`
+  re-confirms the Phase 1 audit finding (one shared literal weight vector)
+  is still true and reported honestly, not hidden.
+- **No software-broadcast duplication:**
+  `test_default_mode_l1i_does_not_fire_without_real_threshold_crossing`
+  reuses `test_l1i_immediate_relay.py`'s sabotage technique (zeroed weights,
+  impossibly high threshold) under the DEFAULT (non-relay) config and
+  confirms L1I does not fire despite a real L2E winner appearing.
+- **Probe non-mutation and presentation-boundary reset** re-verified under
+  the new bookkeeping specifically (not just inherited from Phase 2/6's
+  existing tests).
+- **No collateral:** all pre-existing L1I/L2I-attribution-adjacent tests
+  (`test_representation_candidate.py`'s tie tests,
+  `test_l1i_immediate_relay.py` in full) pass unchanged.
+
+### Phase 8 (prior checkpoint `c0ac363`)
 
 - `test_structural_free_energy.py`: **13/13 passed** (5 pre-existing + 8 new).
 - `pytest -q` (full suite): **220 passed, 5 failed** (212 prior + 8 new = 220;
@@ -1083,6 +1208,20 @@ No neural equation and no preset VALUE was changed. `CLAUDE_HANDOFF.md`
 
 ## Known problems
 
+- **L1I still has no real per-unit geometric/causal differentiation by
+  default.** All 9 units share one literal feedback weight vector and
+  receive an identical `l2e` delivery, so their synchrony (confirmed again
+  by this phase's own tests, and by Phase 5's `L1I all-nine-sync rate: 1.0`)
+  is structural, not fixed. Phase 4's `infl_l2e_l1i` pathway is a real,
+  already-audited, geometrically-grounded per-unit distance differentiator
+  and IS a "demonstrated physical path" -- but it is default OFF (an isolated
+  Phase 4 ablation, deliberately not enabled together with other pathways),
+  so it was NOT turned on here. Phase 9's scope was the causal
+  attribution/recording layer (source/set/arrival/threshold/target/delivery/
+  effect) and a targeted `_credit_source` correctness fix, not a rewiring of
+  L2E->L1I connectivity or enabling a Phase 4 pathway by default -- flagged
+  as a candidate for a future phase if genuine per-unit L1I differentiation
+  is wanted as a default behavior.
 - **`structural_free_energy` is still default OFF** (`DASHBOARD_PRESET` does
   not set it) -- Phase 8 corrected the equation used WHEN it is enabled, but
   did not turn it on by default or measure its effect on distinct-owner/
@@ -1250,15 +1389,17 @@ No neural equation and no preset VALUE was changed. `CLAUDE_HANDOFF.md`
 
 ## Next action
 
-Phase 8 is closed. Per the corrected Phases 6-12 prompt file (see Branch/HEAD)
+Phase 9 is closed. Per the corrected Phases 6-12 prompt file (see Branch/HEAD)
 and the user's explicit "continue autonomously through Phases 7-12"
-instruction, **Phase 9 (causal L1I predictive feedback) is next** and is
-being started immediately in this same session -- see the Phase 9 sections
-above (or below, once written) for its own Goal/Completed/Files
-changed/Tests entries.
+instruction, **Phase 10 (adaptive-threshold ablation) is next** and is being
+started immediately in this same session.
 
 Other candidates for a future phase, none started, all needing their own
 explicit go-ahead:
+- Enable Phase 4's `infl_l2e_l1i` pathway (a real, demonstrated, geometric
+  per-unit differentiator for L1I) as a default/canonical behavior, if
+  genuine per-unit L1I differentiation is wanted rather than the current
+  honestly-reported structural sameness -- explicitly out of Phase 9's scope.
 - Sweep `structural_free_energy`/`structural_fe_eta_floor` (now Phase
   8-corrected) against the Phase 7 competition baseline, per the original
   ported prompt's multi-seed consolidation/retention measurements -- not run

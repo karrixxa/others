@@ -1267,6 +1267,12 @@ class SimulationEngine:
         self._presentation_latency_to_second: int | None = None
         self._presentation_l1i_first_source: str | None = None
         self._presentation_l1i_first_t: int | None = None
+        # Phase 9: causal L1I predictive-feedback chain (see _start_presentation).
+        self._presentation_l1i_first_source_set: list[str] = []
+        self._presentation_l1i_first_arrival_t: int | None = None
+        self._presentation_l1i_first_targets: list[str] = []
+        self._presentation_l1i_first_delivery: dict | None = None
+        self._l1i_delivery_capture_pending = False
         self._presentation_l2i_first_source: str | None = None
         self._presentation_l2i_first_t: int | None = None
         self._presentation_last_l2_winner: int | None = None
@@ -1908,6 +1914,17 @@ class SimulationEngine:
                 for ev in e.apply_inhibition(np.array([1.0, 0.0])):
                     self._inh_events.append((f'L1E{i}', ev))
 
+        # Phase 9: capture the delivery/effect record for the FIRST L1I
+        # predictive-feedback fire this presentation. _inh_events above is
+        # freshly built for THIS step from the l1i_feedback_delay register set
+        # at the end of the PREVIOUS step -- exactly the delivery the flagged
+        # fire scheduled one step ago (see _track_presentation).
+        if self._l1i_delivery_capture_pending:
+            self._presentation_l1i_first_delivery = (
+                dict(t=t, events=[dict(neuron=nid, **ev) for nid, ev in self._inh_events])
+                if self._inh_events else dict(t=t, events=[]))
+            self._l1i_delivery_capture_pending = False
+
         self._apply_stim()
 
         # 2a. L1E fires (no competition).
@@ -2173,6 +2190,10 @@ class SimulationEngine:
                 latency_to_second_response=self._presentation_latency_to_second,
                 l1i_first_source=self._presentation_l1i_first_source,
                 l1i_first_t=self._presentation_l1i_first_t,
+                l1i_first_source_set=list(self._presentation_l1i_first_source_set),
+                l1i_first_arrival_t=self._presentation_l1i_first_arrival_t,
+                l1i_first_targets=list(self._presentation_l1i_first_targets),
+                l1i_first_delivery=self._presentation_l1i_first_delivery,
                 l2i_first_source=self._presentation_l2i_first_source,
                 l2i_first_t=self._presentation_l2i_first_t))
             # No winner-specific credit for an ambiguous same-step tie: only a
@@ -2197,6 +2218,15 @@ class SimulationEngine:
         self._presentation_latency_to_second = None
         self._presentation_l1i_first_source = None
         self._presentation_l1i_first_t = None
+        # Phase 9: causal L1I predictive-feedback chain -- arrival (a real
+        # L2E delivery reaches L1I) is tracked separately from threshold
+        # crossing (L1I itself fires), since a slow trainable integrator can
+        # take more than one step to cross after the causal event arrives.
+        self._presentation_l1i_first_source_set = []
+        self._presentation_l1i_first_arrival_t = None
+        self._presentation_l1i_first_targets = []
+        self._presentation_l1i_first_delivery = None
+        self._l1i_delivery_capture_pending = False
         self._presentation_l2i_first_source = None
         self._presentation_l2i_first_t = None
         self._presentation_last_l2_winner = None
@@ -2206,17 +2236,23 @@ class SimulationEngine:
         self.winner = None
 
     def _credit_source(self, idx: int | None) -> str | None:
-        """L2E id for `idx`, UNLESS it is the presentation's own ambiguous
-        (same-step-tied) first responder -- an ambiguous same-step set gets no
-        winner-specific credit or feedback, so any L1I/L2I source attribution
-        that would otherwise point at it is reported as 'ambiguous' instead of
-        naming a specific neuron."""
+        """L2E id for `idx`, UNLESS more than one L2E genuinely fired on the
+        step this attribution is being read for. Phase 9 (corrected):
+        `self._last_eligible` is the FULL set of L2E that fired on the
+        CURRENT step (Phase 7 lets every threshold-crosser fire, so this can
+        exceed one member on ANY step, not just a presentation's first
+        spike) -- checking it directly here, at the moment of attribution,
+        replaces the earlier Phase 6 check (which only compared against the
+        presentation's first-spike tie flag and so missed a genuine same-step
+        multi-firer event on a LATER step). An ambiguous same-step set gets no
+        source-specific credit for L1I OR L2I attribution -- never resolved
+        by index priority, hidden charge, or weight inspection, only by the
+        recorded fact of how many neurons actually fired together."""
         if idx is None:
             return None
-        nid = f'L2E{idx}'
-        if self._presentation_tie and nid == self._presentation_first_spiker:
+        if len(self._last_eligible) > 1:
             return 'ambiguous'
-        return nid
+        return f'L2E{idx}'
 
     def _track_presentation(self, step_winner_idx: int | None, l2i_fired: bool, l1i_arr, t: int):
         """Presentation-scoped causal tracking, called once per step() from
@@ -2261,9 +2297,25 @@ class SimulationEngine:
             self._presentation_l2i_first_source = (
                 self._credit_source(step_winner_idx) if step_winner_idx is not None
                 else (self._credit_source(self._presentation_last_l2_winner) or 'residual'))
+        # Phase 9: ARRIVAL -- the first step a real L2E delivery reaches L1I
+        # (step_winner_idx is not None iff l2e was nonzero this step, i.e. a
+        # genuine causal event was just delivered via receive_input), recorded
+        # independently of whether L1I has crossed its own threshold yet.
+        # self._last_eligible (this step's actual firer set) is the source
+        # SET -- recorded even when ambiguous (brief SS9-style raw fact).
+        if step_winner_idx is not None and self._presentation_l1i_first_arrival_t is None:
+            self._presentation_l1i_first_arrival_t = t
+            self._presentation_l1i_first_source_set = [f'L2E{j}' for j in sorted(self._last_eligible)]
         if np.any(l1i_arr > 0.5) and self._presentation_l1i_first_t is None:
             self._presentation_l1i_first_t = t
             self._presentation_l1i_first_source = self._credit_source(self._presentation_last_l2_winner)
+            self._presentation_l1i_first_targets = [f'L1I{i}' for i in range(len(l1i_arr)) if l1i_arr[i] > 0.5]
+            # DELIVERY/EFFECT: the resulting L1I->L1E inhibitory pulse lands
+            # ONE STEP LATER (l1i_feedback_delay's fixed one-step register --
+            # see step()); flag it so the NEXT step's freshly-built
+            # _inh_events (populated at the top of step(), before this flag is
+            # checked) can be captured as the first delivery+effect record.
+            self._l1i_delivery_capture_pending = True
 
     def _set_plasticity_frozen(self, frozen: bool):
         self.plasticity_frozen = frozen
@@ -2543,6 +2595,18 @@ class SimulationEngine:
                         latency_to_second_response=self._presentation_latency_to_second,
                         l1i_first_source=self._presentation_l1i_first_source,
                         l1i_first_t=self._presentation_l1i_first_t,
+                        # Phase 9: full causal L1I predictive-feedback chain --
+                        # arrival (real L2E delivery reaches L1I) is separate
+                        # from threshold_t (L1I itself fires); source_set is
+                        # the raw contributor list (recorded even when
+                        # ambiguous); targets are which L1I fired; delivery is
+                        # the resulting L1I->L1E pulse's recorded effect one
+                        # step later. Nothing here is inferred -- every field
+                        # is read off an already-decided physical event.
+                        l1i_first_source_set=list(self._presentation_l1i_first_source_set),
+                        l1i_first_arrival_t=self._presentation_l1i_first_arrival_t,
+                        l1i_first_targets=list(self._presentation_l1i_first_targets),
+                        l1i_first_delivery=self._presentation_l1i_first_delivery,
                         l2i_first_source=self._presentation_l2i_first_source,
                         l2i_first_t=self._presentation_l2i_first_t,
                         history=list(self.presentation_log)[-10:]),
