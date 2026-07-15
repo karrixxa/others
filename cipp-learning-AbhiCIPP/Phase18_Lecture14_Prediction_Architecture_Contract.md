@@ -1,5 +1,17 @@
 # Phase 18 — LPS Lecture 14 Prediction Architecture Contract
 
+> **SUPERSEDED.** A closer read of the full Lecture 14 transcript (not just
+> the summary documents) indicates the prediction neuron belongs per input
+> column (paired with each `L1Ei`/`L1Ii`), fed by a learned decoder matrix
+> from all eight `L2Ej`, rather than one predictor per `L2Ej` fanning out
+> to all nine `L1Ei` as specified below. See
+> `Phase18b_Lecture14_Prediction_Architecture_Contract_Corrected.md` for the
+> corrected contract. This document is kept unmodified below (git history
+> at `3fef508` is not rewritten) purely for the record; its topology is not
+> to be implemented. The uncommitted implementation attempt against this
+> superseded topology is preserved, unmerged, on local backup branches
+> `backup/phase19-candidate-a-wip` and `backup/phase19-eight-predictor-wip`.
+
 **No neural-dynamics change. No topology change. No runtime behavior added.**
 This document specifies the smallest explicit architecture for testing
 Lecture 14's prediction/reconstruction hypothesis, to be implemented
