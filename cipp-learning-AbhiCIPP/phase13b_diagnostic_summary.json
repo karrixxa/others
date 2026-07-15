@@ -1,0 +1,7232 @@
+{
+  "mean_influence_A": 1.962111111111111,
+  "d_uniform_C": 5.334270865366696,
+  "weight_seeds": [
+    1,
+    2,
+    3,
+    4,
+    5
+  ],
+  "topology_seeds": [
+    1,
+    2,
+    3
+  ],
+  "grid_results": [
+    {
+      "config": "A",
+      "weight_seed": 1,
+      "topology_seed": 1,
+      "scenario": "short_hold_switch",
+      "total_records": 151,
+      "unique_delivery_events": 3,
+      "individual_synapse_deltas": 61,
+      "engine_l2_inhibition_log_len": 3,
+      "non_spiking_prev_step_records": 61,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 0,
+      "tyrant": "L2E3",
+      "tyrant_weights": {
+        "0": 21.54,
+        "1": 214.01,
+        "2": 1.0,
+        "3": 141.42,
+        "4": 190.43,
+        "5": 115.17,
+        "6": 59.09,
+        "7": 195.78,
+        "8": 3.62
+      },
+      "tyrant_union_mean_weight": 171.36,
+      "tyrant_other_mean_weight": 21.31,
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E1",
+        "L2E7"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E0": 9,
+        "L2E1": 9,
+        "L2E7": 9
+      },
+      "l2e_status": {
+        "L2E0": "unrecruited",
+        "L2E1": "unrecruited",
+        "L2E2": "active",
+        "L2E3": "active",
+        "L2E4": "active",
+        "L2E5": "active",
+        "L2E6": "active",
+        "L2E7": "unrecruited"
+      },
+      "active_count": 5,
+      "self_spike_events": 90
+    },
+    {
+      "config": "A",
+      "weight_seed": 1,
+      "topology_seed": 1,
+      "scenario": "long_hold_switch",
+      "total_records": 5840,
+      "unique_delivery_events": 225,
+      "individual_synapse_deltas": 4060,
+      "engine_l2_inhibition_log_len": 225,
+      "non_spiking_prev_step_records": 4060,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 0,
+      "tyrant": "L2E5",
+      "tyrant_weights": {
+        "0": 1.0,
+        "1": 705.07,
+        "2": 1.0,
+        "3": 1554.91,
+        "4": 1810.22,
+        "5": 1542.13,
+        "6": 1.0,
+        "7": 705.07,
+        "8": 1.0
+      },
+      "tyrant_union_mean_weight": 1263.48,
+      "tyrant_other_mean_weight": 1.0,
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E1",
+        "L2E2",
+        "L2E6",
+        "L2E7"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E0": 675,
+        "L2E1": 675,
+        "L2E2": 675,
+        "L2E6": 675,
+        "L2E7": 675
+      },
+      "l2e_status": {
+        "L2E0": "unrecruited",
+        "L2E1": "unrecruited",
+        "L2E2": "unrecruited",
+        "L2E3": "quiet",
+        "L2E4": "quiet",
+        "L2E5": "active",
+        "L2E6": "unrecruited",
+        "L2E7": "unrecruited"
+      },
+      "active_count": 1,
+      "self_spike_events": 1780
+    },
+    {
+      "config": "A",
+      "weight_seed": 1,
+      "topology_seed": 1,
+      "scenario": "interleaved_40",
+      "total_records": 15577,
+      "unique_delivery_events": 674,
+      "individual_synapse_deltas": 9436,
+      "engine_l2_inhibition_log_len": 400,
+      "non_spiking_prev_step_records": 9436,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 0,
+      "tyrant": "L2E5",
+      "tyrant_weights": {
+        "0": 1.0,
+        "1": 1.0,
+        "2": 230.8,
+        "3": 1.0,
+        "4": 2362.85,
+        "5": 1.0,
+        "6": 230.8,
+        "7": 1.0,
+        "8": 1.0
+      },
+      "tyrant_union_mean_weight": 473.37,
+      "tyrant_other_mean_weight": 115.9,
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E1"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E0": 2022,
+        "L2E1": 2022
+      },
+      "l2e_status": {
+        "L2E0": "unrecruited",
+        "L2E1": "unrecruited",
+        "L2E2": "quiet",
+        "L2E3": "quiet",
+        "L2E4": "active",
+        "L2E5": "active",
+        "L2E6": "active",
+        "L2E7": "active"
+      },
+      "active_count": 4,
+      "self_spike_events": 6141
+    },
+    {
+      "config": "A",
+      "weight_seed": 1,
+      "topology_seed": 2,
+      "scenario": "short_hold_switch",
+      "total_records": 151,
+      "unique_delivery_events": 3,
+      "individual_synapse_deltas": 61,
+      "engine_l2_inhibition_log_len": 3,
+      "non_spiking_prev_step_records": 61,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 0,
+      "tyrant": "L2E3",
+      "tyrant_weights": {
+        "0": 21.54,
+        "1": 214.01,
+        "2": 1.0,
+        "3": 141.42,
+        "4": 190.43,
+        "5": 115.17,
+        "6": 59.09,
+        "7": 195.78,
+        "8": 3.62
+      },
+      "tyrant_union_mean_weight": 171.36,
+      "tyrant_other_mean_weight": 21.31,
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E1",
+        "L2E7"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E0": 9,
+        "L2E1": 9,
+        "L2E7": 9
+      },
+      "l2e_status": {
+        "L2E0": "unrecruited",
+        "L2E1": "unrecruited",
+        "L2E2": "active",
+        "L2E3": "active",
+        "L2E4": "active",
+        "L2E5": "active",
+        "L2E6": "active",
+        "L2E7": "unrecruited"
+      },
+      "active_count": 5,
+      "self_spike_events": 90
+    },
+    {
+      "config": "A",
+      "weight_seed": 1,
+      "topology_seed": 2,
+      "scenario": "long_hold_switch",
+      "total_records": 5840,
+      "unique_delivery_events": 225,
+      "individual_synapse_deltas": 4060,
+      "engine_l2_inhibition_log_len": 225,
+      "non_spiking_prev_step_records": 4060,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 0,
+      "tyrant": "L2E5",
+      "tyrant_weights": {
+        "0": 1.0,
+        "1": 705.07,
+        "2": 1.0,
+        "3": 1554.91,
+        "4": 1810.22,
+        "5": 1542.13,
+        "6": 1.0,
+        "7": 705.07,
+        "8": 1.0
+      },
+      "tyrant_union_mean_weight": 1263.48,
+      "tyrant_other_mean_weight": 1.0,
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E1",
+        "L2E2",
+        "L2E6",
+        "L2E7"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E0": 675,
+        "L2E1": 675,
+        "L2E2": 675,
+        "L2E6": 675,
+        "L2E7": 675
+      },
+      "l2e_status": {
+        "L2E0": "unrecruited",
+        "L2E1": "unrecruited",
+        "L2E2": "unrecruited",
+        "L2E3": "quiet",
+        "L2E4": "quiet",
+        "L2E5": "active",
+        "L2E6": "unrecruited",
+        "L2E7": "unrecruited"
+      },
+      "active_count": 1,
+      "self_spike_events": 1780
+    },
+    {
+      "config": "A",
+      "weight_seed": 1,
+      "topology_seed": 2,
+      "scenario": "interleaved_40",
+      "total_records": 15577,
+      "unique_delivery_events": 674,
+      "individual_synapse_deltas": 9436,
+      "engine_l2_inhibition_log_len": 400,
+      "non_spiking_prev_step_records": 9436,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 0,
+      "tyrant": "L2E5",
+      "tyrant_weights": {
+        "0": 1.0,
+        "1": 1.0,
+        "2": 230.8,
+        "3": 1.0,
+        "4": 2362.85,
+        "5": 1.0,
+        "6": 230.8,
+        "7": 1.0,
+        "8": 1.0
+      },
+      "tyrant_union_mean_weight": 473.37,
+      "tyrant_other_mean_weight": 115.9,
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E1"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E0": 2022,
+        "L2E1": 2022
+      },
+      "l2e_status": {
+        "L2E0": "unrecruited",
+        "L2E1": "unrecruited",
+        "L2E2": "quiet",
+        "L2E3": "quiet",
+        "L2E4": "active",
+        "L2E5": "active",
+        "L2E6": "active",
+        "L2E7": "active"
+      },
+      "active_count": 4,
+      "self_spike_events": 6141
+    },
+    {
+      "config": "A",
+      "weight_seed": 1,
+      "topology_seed": 3,
+      "scenario": "short_hold_switch",
+      "total_records": 151,
+      "unique_delivery_events": 3,
+      "individual_synapse_deltas": 61,
+      "engine_l2_inhibition_log_len": 3,
+      "non_spiking_prev_step_records": 61,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 0,
+      "tyrant": "L2E3",
+      "tyrant_weights": {
+        "0": 21.54,
+        "1": 214.01,
+        "2": 1.0,
+        "3": 141.42,
+        "4": 190.43,
+        "5": 115.17,
+        "6": 59.09,
+        "7": 195.78,
+        "8": 3.62
+      },
+      "tyrant_union_mean_weight": 171.36,
+      "tyrant_other_mean_weight": 21.31,
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E1",
+        "L2E7"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E0": 9,
+        "L2E1": 9,
+        "L2E7": 9
+      },
+      "l2e_status": {
+        "L2E0": "unrecruited",
+        "L2E1": "unrecruited",
+        "L2E2": "active",
+        "L2E3": "active",
+        "L2E4": "active",
+        "L2E5": "active",
+        "L2E6": "active",
+        "L2E7": "unrecruited"
+      },
+      "active_count": 5,
+      "self_spike_events": 90
+    },
+    {
+      "config": "A",
+      "weight_seed": 1,
+      "topology_seed": 3,
+      "scenario": "long_hold_switch",
+      "total_records": 5840,
+      "unique_delivery_events": 225,
+      "individual_synapse_deltas": 4060,
+      "engine_l2_inhibition_log_len": 225,
+      "non_spiking_prev_step_records": 4060,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 0,
+      "tyrant": "L2E5",
+      "tyrant_weights": {
+        "0": 1.0,
+        "1": 705.07,
+        "2": 1.0,
+        "3": 1554.91,
+        "4": 1810.22,
+        "5": 1542.13,
+        "6": 1.0,
+        "7": 705.07,
+        "8": 1.0
+      },
+      "tyrant_union_mean_weight": 1263.48,
+      "tyrant_other_mean_weight": 1.0,
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E1",
+        "L2E2",
+        "L2E6",
+        "L2E7"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E0": 675,
+        "L2E1": 675,
+        "L2E2": 675,
+        "L2E6": 675,
+        "L2E7": 675
+      },
+      "l2e_status": {
+        "L2E0": "unrecruited",
+        "L2E1": "unrecruited",
+        "L2E2": "unrecruited",
+        "L2E3": "quiet",
+        "L2E4": "quiet",
+        "L2E5": "active",
+        "L2E6": "unrecruited",
+        "L2E7": "unrecruited"
+      },
+      "active_count": 1,
+      "self_spike_events": 1780
+    },
+    {
+      "config": "A",
+      "weight_seed": 1,
+      "topology_seed": 3,
+      "scenario": "interleaved_40",
+      "total_records": 15577,
+      "unique_delivery_events": 674,
+      "individual_synapse_deltas": 9436,
+      "engine_l2_inhibition_log_len": 400,
+      "non_spiking_prev_step_records": 9436,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 0,
+      "tyrant": "L2E5",
+      "tyrant_weights": {
+        "0": 1.0,
+        "1": 1.0,
+        "2": 230.8,
+        "3": 1.0,
+        "4": 2362.85,
+        "5": 1.0,
+        "6": 230.8,
+        "7": 1.0,
+        "8": 1.0
+      },
+      "tyrant_union_mean_weight": 473.37,
+      "tyrant_other_mean_weight": 115.9,
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E1"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E0": 2022,
+        "L2E1": 2022
+      },
+      "l2e_status": {
+        "L2E0": "unrecruited",
+        "L2E1": "unrecruited",
+        "L2E2": "quiet",
+        "L2E3": "quiet",
+        "L2E4": "active",
+        "L2E5": "active",
+        "L2E6": "active",
+        "L2E7": "active"
+      },
+      "active_count": 4,
+      "self_spike_events": 6141
+    },
+    {
+      "config": "A",
+      "weight_seed": 2,
+      "topology_seed": 1,
+      "scenario": "short_hold_switch",
+      "total_records": 142,
+      "unique_delivery_events": 3,
+      "individual_synapse_deltas": 61,
+      "engine_l2_inhibition_log_len": 3,
+      "non_spiking_prev_step_records": 61,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 0,
+      "tyrant": "L2E0",
+      "tyrant_weights": {
+        "0": 110.19,
+        "1": 1.0,
+        "2": 30.24,
+        "3": 220.07,
+        "4": 204.19,
+        "5": 247.02,
+        "6": 1.0,
+        "7": 91.85,
+        "8": 68.55
+      },
+      "tyrant_union_mean_weight": 152.83,
+      "tyrant_other_mean_weight": 52.5,
+      "never_fired_neurons": [
+        "L2E2",
+        "L2E4"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E2": 9,
+        "L2E4": 9
+      },
+      "l2e_status": {
+        "L2E0": "active",
+        "L2E1": "active",
+        "L2E2": "unrecruited",
+        "L2E3": "active",
+        "L2E4": "unrecruited",
+        "L2E5": "active",
+        "L2E6": "active",
+        "L2E7": "active"
+      },
+      "active_count": 6,
+      "self_spike_events": 81
+    },
+    {
+      "config": "A",
+      "weight_seed": 2,
+      "topology_seed": 1,
+      "scenario": "long_hold_switch",
+      "total_records": 5901,
+      "unique_delivery_events": 229,
+      "individual_synapse_deltas": 4324,
+      "engine_l2_inhibition_log_len": 229,
+      "non_spiking_prev_step_records": 4324,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 9,
+      "tyrant": "L2E7",
+      "tyrant_weights": {
+        "0": 1.0,
+        "1": 698.14,
+        "2": 1.0,
+        "3": 1557.23,
+        "4": 1815.62,
+        "5": 1576.32,
+        "6": 1.0,
+        "7": 698.14,
+        "8": 1.0
+      },
+      "tyrant_union_mean_weight": 1269.09,
+      "tyrant_other_mean_weight": 1.0,
+      "never_fired_neurons": [
+        "L2E1",
+        "L2E2",
+        "L2E4",
+        "L2E5",
+        "L2E6"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E1": 687,
+        "L2E2": 687,
+        "L2E4": 687,
+        "L2E5": 687,
+        "L2E6": 687
+      },
+      "l2e_status": {
+        "L2E0": "quiet",
+        "L2E1": "unrecruited",
+        "L2E2": "unrecruited",
+        "L2E3": "quiet",
+        "L2E4": "unrecruited",
+        "L2E5": "unrecruited",
+        "L2E6": "unrecruited",
+        "L2E7": "active"
+      },
+      "active_count": 1,
+      "self_spike_events": 1577
+    },
+    {
+      "config": "A",
+      "weight_seed": 2,
+      "topology_seed": 1,
+      "scenario": "interleaved_40",
+      "total_records": 16560,
+      "unique_delivery_events": 731,
+      "individual_synapse_deltas": 10613,
+      "engine_l2_inhibition_log_len": 400,
+      "non_spiking_prev_step_records": 10613,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 0,
+      "tyrant": "L2E3",
+      "tyrant_weights": {
+        "0": 2.43,
+        "1": 1.0,
+        "2": 133.96,
+        "3": 1.0,
+        "4": 2415.23,
+        "5": 1.0,
+        "6": 133.96,
+        "7": 1.0,
+        "8": 2.43
+      },
+      "tyrant_union_mean_weight": 483.85,
+      "tyrant_other_mean_weight": 68.2,
+      "never_fired_neurons": [
+        "L2E2",
+        "L2E4"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E2": 2193,
+        "L2E4": 2193
+      },
+      "l2e_status": {
+        "L2E0": "active",
+        "L2E1": "quiet",
+        "L2E2": "unrecruited",
+        "L2E3": "active",
+        "L2E4": "unrecruited",
+        "L2E5": "active",
+        "L2E6": "active",
+        "L2E7": "quiet"
+      },
+      "active_count": 4,
+      "self_spike_events": 5947
+    },
+    {
+      "config": "A",
+      "weight_seed": 2,
+      "topology_seed": 2,
+      "scenario": "short_hold_switch",
+      "total_records": 142,
+      "unique_delivery_events": 3,
+      "individual_synapse_deltas": 61,
+      "engine_l2_inhibition_log_len": 3,
+      "non_spiking_prev_step_records": 61,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 0,
+      "tyrant": "L2E0",
+      "tyrant_weights": {
+        "0": 110.19,
+        "1": 1.0,
+        "2": 30.24,
+        "3": 220.07,
+        "4": 204.19,
+        "5": 247.02,
+        "6": 1.0,
+        "7": 91.85,
+        "8": 68.55
+      },
+      "tyrant_union_mean_weight": 152.83,
+      "tyrant_other_mean_weight": 52.5,
+      "never_fired_neurons": [
+        "L2E2",
+        "L2E4"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E2": 9,
+        "L2E4": 9
+      },
+      "l2e_status": {
+        "L2E0": "active",
+        "L2E1": "active",
+        "L2E2": "unrecruited",
+        "L2E3": "active",
+        "L2E4": "unrecruited",
+        "L2E5": "active",
+        "L2E6": "active",
+        "L2E7": "active"
+      },
+      "active_count": 6,
+      "self_spike_events": 81
+    },
+    {
+      "config": "A",
+      "weight_seed": 2,
+      "topology_seed": 2,
+      "scenario": "long_hold_switch",
+      "total_records": 5901,
+      "unique_delivery_events": 229,
+      "individual_synapse_deltas": 4324,
+      "engine_l2_inhibition_log_len": 229,
+      "non_spiking_prev_step_records": 4324,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 9,
+      "tyrant": "L2E7",
+      "tyrant_weights": {
+        "0": 1.0,
+        "1": 698.14,
+        "2": 1.0,
+        "3": 1557.23,
+        "4": 1815.62,
+        "5": 1576.32,
+        "6": 1.0,
+        "7": 698.14,
+        "8": 1.0
+      },
+      "tyrant_union_mean_weight": 1269.09,
+      "tyrant_other_mean_weight": 1.0,
+      "never_fired_neurons": [
+        "L2E1",
+        "L2E2",
+        "L2E4",
+        "L2E5",
+        "L2E6"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E1": 687,
+        "L2E2": 687,
+        "L2E4": 687,
+        "L2E5": 687,
+        "L2E6": 687
+      },
+      "l2e_status": {
+        "L2E0": "quiet",
+        "L2E1": "unrecruited",
+        "L2E2": "unrecruited",
+        "L2E3": "quiet",
+        "L2E4": "unrecruited",
+        "L2E5": "unrecruited",
+        "L2E6": "unrecruited",
+        "L2E7": "active"
+      },
+      "active_count": 1,
+      "self_spike_events": 1577
+    },
+    {
+      "config": "A",
+      "weight_seed": 2,
+      "topology_seed": 2,
+      "scenario": "interleaved_40",
+      "total_records": 16560,
+      "unique_delivery_events": 731,
+      "individual_synapse_deltas": 10613,
+      "engine_l2_inhibition_log_len": 400,
+      "non_spiking_prev_step_records": 10613,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 0,
+      "tyrant": "L2E3",
+      "tyrant_weights": {
+        "0": 2.43,
+        "1": 1.0,
+        "2": 133.96,
+        "3": 1.0,
+        "4": 2415.23,
+        "5": 1.0,
+        "6": 133.96,
+        "7": 1.0,
+        "8": 2.43
+      },
+      "tyrant_union_mean_weight": 483.85,
+      "tyrant_other_mean_weight": 68.2,
+      "never_fired_neurons": [
+        "L2E2",
+        "L2E4"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E2": 2193,
+        "L2E4": 2193
+      },
+      "l2e_status": {
+        "L2E0": "active",
+        "L2E1": "quiet",
+        "L2E2": "unrecruited",
+        "L2E3": "active",
+        "L2E4": "unrecruited",
+        "L2E5": "active",
+        "L2E6": "active",
+        "L2E7": "quiet"
+      },
+      "active_count": 4,
+      "self_spike_events": 5947
+    },
+    {
+      "config": "A",
+      "weight_seed": 2,
+      "topology_seed": 3,
+      "scenario": "short_hold_switch",
+      "total_records": 142,
+      "unique_delivery_events": 3,
+      "individual_synapse_deltas": 61,
+      "engine_l2_inhibition_log_len": 3,
+      "non_spiking_prev_step_records": 61,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 0,
+      "tyrant": "L2E0",
+      "tyrant_weights": {
+        "0": 110.19,
+        "1": 1.0,
+        "2": 30.24,
+        "3": 220.07,
+        "4": 204.19,
+        "5": 247.02,
+        "6": 1.0,
+        "7": 91.85,
+        "8": 68.55
+      },
+      "tyrant_union_mean_weight": 152.83,
+      "tyrant_other_mean_weight": 52.5,
+      "never_fired_neurons": [
+        "L2E2",
+        "L2E4"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E2": 9,
+        "L2E4": 9
+      },
+      "l2e_status": {
+        "L2E0": "active",
+        "L2E1": "active",
+        "L2E2": "unrecruited",
+        "L2E3": "active",
+        "L2E4": "unrecruited",
+        "L2E5": "active",
+        "L2E6": "active",
+        "L2E7": "active"
+      },
+      "active_count": 6,
+      "self_spike_events": 81
+    },
+    {
+      "config": "A",
+      "weight_seed": 2,
+      "topology_seed": 3,
+      "scenario": "long_hold_switch",
+      "total_records": 5901,
+      "unique_delivery_events": 229,
+      "individual_synapse_deltas": 4324,
+      "engine_l2_inhibition_log_len": 229,
+      "non_spiking_prev_step_records": 4324,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 9,
+      "tyrant": "L2E7",
+      "tyrant_weights": {
+        "0": 1.0,
+        "1": 698.14,
+        "2": 1.0,
+        "3": 1557.23,
+        "4": 1815.62,
+        "5": 1576.32,
+        "6": 1.0,
+        "7": 698.14,
+        "8": 1.0
+      },
+      "tyrant_union_mean_weight": 1269.09,
+      "tyrant_other_mean_weight": 1.0,
+      "never_fired_neurons": [
+        "L2E1",
+        "L2E2",
+        "L2E4",
+        "L2E5",
+        "L2E6"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E1": 687,
+        "L2E2": 687,
+        "L2E4": 687,
+        "L2E5": 687,
+        "L2E6": 687
+      },
+      "l2e_status": {
+        "L2E0": "quiet",
+        "L2E1": "unrecruited",
+        "L2E2": "unrecruited",
+        "L2E3": "quiet",
+        "L2E4": "unrecruited",
+        "L2E5": "unrecruited",
+        "L2E6": "unrecruited",
+        "L2E7": "active"
+      },
+      "active_count": 1,
+      "self_spike_events": 1577
+    },
+    {
+      "config": "A",
+      "weight_seed": 2,
+      "topology_seed": 3,
+      "scenario": "interleaved_40",
+      "total_records": 16560,
+      "unique_delivery_events": 731,
+      "individual_synapse_deltas": 10613,
+      "engine_l2_inhibition_log_len": 400,
+      "non_spiking_prev_step_records": 10613,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 0,
+      "tyrant": "L2E3",
+      "tyrant_weights": {
+        "0": 2.43,
+        "1": 1.0,
+        "2": 133.96,
+        "3": 1.0,
+        "4": 2415.23,
+        "5": 1.0,
+        "6": 133.96,
+        "7": 1.0,
+        "8": 2.43
+      },
+      "tyrant_union_mean_weight": 483.85,
+      "tyrant_other_mean_weight": 68.2,
+      "never_fired_neurons": [
+        "L2E2",
+        "L2E4"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E2": 2193,
+        "L2E4": 2193
+      },
+      "l2e_status": {
+        "L2E0": "active",
+        "L2E1": "quiet",
+        "L2E2": "unrecruited",
+        "L2E3": "active",
+        "L2E4": "unrecruited",
+        "L2E5": "active",
+        "L2E6": "active",
+        "L2E7": "quiet"
+      },
+      "active_count": 4,
+      "self_spike_events": 5947
+    },
+    {
+      "config": "A",
+      "weight_seed": 3,
+      "topology_seed": 1,
+      "scenario": "short_hold_switch",
+      "total_records": 143,
+      "unique_delivery_events": 3,
+      "individual_synapse_deltas": 63,
+      "engine_l2_inhibition_log_len": 3,
+      "non_spiking_prev_step_records": 63,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 0,
+      "tyrant": "L2E3",
+      "tyrant_weights": {
+        "0": 53.66,
+        "1": 231.3,
+        "2": 38.81,
+        "3": 82.64,
+        "4": 206.19,
+        "5": 157.67,
+        "6": 1.0,
+        "7": 206.36,
+        "8": 1.0
+      },
+      "tyrant_union_mean_weight": 176.83,
+      "tyrant_other_mean_weight": 23.62,
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E1",
+        "L2E2",
+        "L2E4"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E0": 9,
+        "L2E1": 9,
+        "L2E2": 9,
+        "L2E4": 9
+      },
+      "l2e_status": {
+        "L2E0": "unrecruited",
+        "L2E1": "unrecruited",
+        "L2E2": "unrecruited",
+        "L2E3": "active",
+        "L2E4": "unrecruited",
+        "L2E5": "active",
+        "L2E6": "active",
+        "L2E7": "active"
+      },
+      "active_count": 4,
+      "self_spike_events": 80
+    },
+    {
+      "config": "A",
+      "weight_seed": 3,
+      "topology_seed": 1,
+      "scenario": "long_hold_switch",
+      "total_records": 7264,
+      "unique_delivery_events": 294,
+      "individual_synapse_deltas": 5258,
+      "engine_l2_inhibition_log_len": 294,
+      "non_spiking_prev_step_records": 5258,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 0,
+      "tyrant": "L2E5",
+      "tyrant_weights": {
+        "0": 1.0,
+        "1": 617.24,
+        "2": 1.0,
+        "3": 1752.8,
+        "4": 1906.63,
+        "5": 1747.03,
+        "6": 1.0,
+        "7": 617.24,
+        "8": 1.0
+      },
+      "tyrant_union_mean_weight": 1328.19,
+      "tyrant_other_mean_weight": 1.0,
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E1",
+        "L2E2",
+        "L2E4",
+        "L2E6"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E0": 882,
+        "L2E1": 882,
+        "L2E2": 882,
+        "L2E4": 882,
+        "L2E6": 882
+      },
+      "l2e_status": {
+        "L2E0": "unrecruited",
+        "L2E1": "unrecruited",
+        "L2E2": "unrecruited",
+        "L2E3": "quiet",
+        "L2E4": "unrecruited",
+        "L2E5": "active",
+        "L2E6": "unrecruited",
+        "L2E7": "active"
+      },
+      "active_count": 2,
+      "self_spike_events": 2006
+    },
+    {
+      "config": "A",
+      "weight_seed": 3,
+      "topology_seed": 1,
+      "scenario": "interleaved_40",
+      "total_records": 18165,
+      "unique_delivery_events": 758,
+      "individual_synapse_deltas": 12134,
+      "engine_l2_inhibition_log_len": 400,
+      "non_spiking_prev_step_records": 12134,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 0,
+      "tyrant": "L2E3",
+      "tyrant_weights": {
+        "0": 48.03,
+        "1": 1.0,
+        "2": 193.05,
+        "3": 1.0,
+        "4": 2404.81,
+        "5": 1.0,
+        "6": 193.05,
+        "7": 1.0,
+        "8": 48.03
+      },
+      "tyrant_union_mean_weight": 481.76,
+      "tyrant_other_mean_weight": 120.54,
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E1",
+        "L2E2"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E0": 2274,
+        "L2E1": 2274,
+        "L2E2": 2274
+      },
+      "l2e_status": {
+        "L2E0": "unrecruited",
+        "L2E1": "unrecruited",
+        "L2E2": "unrecruited",
+        "L2E3": "active",
+        "L2E4": "active",
+        "L2E5": "active",
+        "L2E6": "quiet",
+        "L2E7": "quiet"
+      },
+      "active_count": 3,
+      "self_spike_events": 6031
+    },
+    {
+      "config": "A",
+      "weight_seed": 3,
+      "topology_seed": 2,
+      "scenario": "short_hold_switch",
+      "total_records": 143,
+      "unique_delivery_events": 3,
+      "individual_synapse_deltas": 63,
+      "engine_l2_inhibition_log_len": 3,
+      "non_spiking_prev_step_records": 63,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 0,
+      "tyrant": "L2E3",
+      "tyrant_weights": {
+        "0": 53.66,
+        "1": 231.3,
+        "2": 38.81,
+        "3": 82.64,
+        "4": 206.19,
+        "5": 157.67,
+        "6": 1.0,
+        "7": 206.36,
+        "8": 1.0
+      },
+      "tyrant_union_mean_weight": 176.83,
+      "tyrant_other_mean_weight": 23.62,
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E1",
+        "L2E2",
+        "L2E4"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E0": 9,
+        "L2E1": 9,
+        "L2E2": 9,
+        "L2E4": 9
+      },
+      "l2e_status": {
+        "L2E0": "unrecruited",
+        "L2E1": "unrecruited",
+        "L2E2": "unrecruited",
+        "L2E3": "active",
+        "L2E4": "unrecruited",
+        "L2E5": "active",
+        "L2E6": "active",
+        "L2E7": "active"
+      },
+      "active_count": 4,
+      "self_spike_events": 80
+    },
+    {
+      "config": "A",
+      "weight_seed": 3,
+      "topology_seed": 2,
+      "scenario": "long_hold_switch",
+      "total_records": 7264,
+      "unique_delivery_events": 294,
+      "individual_synapse_deltas": 5258,
+      "engine_l2_inhibition_log_len": 294,
+      "non_spiking_prev_step_records": 5258,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 0,
+      "tyrant": "L2E5",
+      "tyrant_weights": {
+        "0": 1.0,
+        "1": 617.24,
+        "2": 1.0,
+        "3": 1752.8,
+        "4": 1906.63,
+        "5": 1747.03,
+        "6": 1.0,
+        "7": 617.24,
+        "8": 1.0
+      },
+      "tyrant_union_mean_weight": 1328.19,
+      "tyrant_other_mean_weight": 1.0,
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E1",
+        "L2E2",
+        "L2E4",
+        "L2E6"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E0": 882,
+        "L2E1": 882,
+        "L2E2": 882,
+        "L2E4": 882,
+        "L2E6": 882
+      },
+      "l2e_status": {
+        "L2E0": "unrecruited",
+        "L2E1": "unrecruited",
+        "L2E2": "unrecruited",
+        "L2E3": "quiet",
+        "L2E4": "unrecruited",
+        "L2E5": "active",
+        "L2E6": "unrecruited",
+        "L2E7": "active"
+      },
+      "active_count": 2,
+      "self_spike_events": 2006
+    },
+    {
+      "config": "A",
+      "weight_seed": 3,
+      "topology_seed": 2,
+      "scenario": "interleaved_40",
+      "total_records": 18165,
+      "unique_delivery_events": 758,
+      "individual_synapse_deltas": 12134,
+      "engine_l2_inhibition_log_len": 400,
+      "non_spiking_prev_step_records": 12134,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 0,
+      "tyrant": "L2E3",
+      "tyrant_weights": {
+        "0": 48.03,
+        "1": 1.0,
+        "2": 193.05,
+        "3": 1.0,
+        "4": 2404.81,
+        "5": 1.0,
+        "6": 193.05,
+        "7": 1.0,
+        "8": 48.03
+      },
+      "tyrant_union_mean_weight": 481.76,
+      "tyrant_other_mean_weight": 120.54,
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E1",
+        "L2E2"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E0": 2274,
+        "L2E1": 2274,
+        "L2E2": 2274
+      },
+      "l2e_status": {
+        "L2E0": "unrecruited",
+        "L2E1": "unrecruited",
+        "L2E2": "unrecruited",
+        "L2E3": "active",
+        "L2E4": "active",
+        "L2E5": "active",
+        "L2E6": "quiet",
+        "L2E7": "quiet"
+      },
+      "active_count": 3,
+      "self_spike_events": 6031
+    },
+    {
+      "config": "A",
+      "weight_seed": 3,
+      "topology_seed": 3,
+      "scenario": "short_hold_switch",
+      "total_records": 143,
+      "unique_delivery_events": 3,
+      "individual_synapse_deltas": 63,
+      "engine_l2_inhibition_log_len": 3,
+      "non_spiking_prev_step_records": 63,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 0,
+      "tyrant": "L2E3",
+      "tyrant_weights": {
+        "0": 53.66,
+        "1": 231.3,
+        "2": 38.81,
+        "3": 82.64,
+        "4": 206.19,
+        "5": 157.67,
+        "6": 1.0,
+        "7": 206.36,
+        "8": 1.0
+      },
+      "tyrant_union_mean_weight": 176.83,
+      "tyrant_other_mean_weight": 23.62,
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E1",
+        "L2E2",
+        "L2E4"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E0": 9,
+        "L2E1": 9,
+        "L2E2": 9,
+        "L2E4": 9
+      },
+      "l2e_status": {
+        "L2E0": "unrecruited",
+        "L2E1": "unrecruited",
+        "L2E2": "unrecruited",
+        "L2E3": "active",
+        "L2E4": "unrecruited",
+        "L2E5": "active",
+        "L2E6": "active",
+        "L2E7": "active"
+      },
+      "active_count": 4,
+      "self_spike_events": 80
+    },
+    {
+      "config": "A",
+      "weight_seed": 3,
+      "topology_seed": 3,
+      "scenario": "long_hold_switch",
+      "total_records": 7264,
+      "unique_delivery_events": 294,
+      "individual_synapse_deltas": 5258,
+      "engine_l2_inhibition_log_len": 294,
+      "non_spiking_prev_step_records": 5258,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 0,
+      "tyrant": "L2E5",
+      "tyrant_weights": {
+        "0": 1.0,
+        "1": 617.24,
+        "2": 1.0,
+        "3": 1752.8,
+        "4": 1906.63,
+        "5": 1747.03,
+        "6": 1.0,
+        "7": 617.24,
+        "8": 1.0
+      },
+      "tyrant_union_mean_weight": 1328.19,
+      "tyrant_other_mean_weight": 1.0,
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E1",
+        "L2E2",
+        "L2E4",
+        "L2E6"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E0": 882,
+        "L2E1": 882,
+        "L2E2": 882,
+        "L2E4": 882,
+        "L2E6": 882
+      },
+      "l2e_status": {
+        "L2E0": "unrecruited",
+        "L2E1": "unrecruited",
+        "L2E2": "unrecruited",
+        "L2E3": "quiet",
+        "L2E4": "unrecruited",
+        "L2E5": "active",
+        "L2E6": "unrecruited",
+        "L2E7": "active"
+      },
+      "active_count": 2,
+      "self_spike_events": 2006
+    },
+    {
+      "config": "A",
+      "weight_seed": 3,
+      "topology_seed": 3,
+      "scenario": "interleaved_40",
+      "total_records": 18165,
+      "unique_delivery_events": 758,
+      "individual_synapse_deltas": 12134,
+      "engine_l2_inhibition_log_len": 400,
+      "non_spiking_prev_step_records": 12134,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 0,
+      "tyrant": "L2E3",
+      "tyrant_weights": {
+        "0": 48.03,
+        "1": 1.0,
+        "2": 193.05,
+        "3": 1.0,
+        "4": 2404.81,
+        "5": 1.0,
+        "6": 193.05,
+        "7": 1.0,
+        "8": 48.03
+      },
+      "tyrant_union_mean_weight": 481.76,
+      "tyrant_other_mean_weight": 120.54,
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E1",
+        "L2E2"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E0": 2274,
+        "L2E1": 2274,
+        "L2E2": 2274
+      },
+      "l2e_status": {
+        "L2E0": "unrecruited",
+        "L2E1": "unrecruited",
+        "L2E2": "unrecruited",
+        "L2E3": "active",
+        "L2E4": "active",
+        "L2E5": "active",
+        "L2E6": "quiet",
+        "L2E7": "quiet"
+      },
+      "active_count": 3,
+      "self_spike_events": 6031
+    },
+    {
+      "config": "A",
+      "weight_seed": 4,
+      "topology_seed": 1,
+      "scenario": "short_hold_switch",
+      "total_records": 149,
+      "unique_delivery_events": 3,
+      "individual_synapse_deltas": 63,
+      "engine_l2_inhibition_log_len": 3,
+      "non_spiking_prev_step_records": 63,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 0,
+      "tyrant": "L2E3",
+      "tyrant_weights": {
+        "0": 23.73,
+        "1": 248.27,
+        "2": 23.81,
+        "3": 43.55,
+        "4": 288.79,
+        "5": 82.42,
+        "6": 1.0,
+        "7": 258.84,
+        "8": 1.0
+      },
+      "tyrant_union_mean_weight": 184.37,
+      "tyrant_other_mean_weight": 12.38,
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E2",
+        "L2E5",
+        "L2E6"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E0": 9,
+        "L2E2": 9,
+        "L2E5": 9,
+        "L2E6": 9
+      },
+      "l2e_status": {
+        "L2E0": "unrecruited",
+        "L2E1": "active",
+        "L2E2": "unrecruited",
+        "L2E3": "active",
+        "L2E4": "active",
+        "L2E5": "unrecruited",
+        "L2E6": "unrecruited",
+        "L2E7": "active"
+      },
+      "active_count": 4,
+      "self_spike_events": 86
+    },
+    {
+      "config": "A",
+      "weight_seed": 4,
+      "topology_seed": 1,
+      "scenario": "long_hold_switch",
+      "total_records": 5713,
+      "unique_delivery_events": 221,
+      "individual_synapse_deltas": 4273,
+      "engine_l2_inhibition_log_len": 221,
+      "non_spiking_prev_step_records": 4273,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 18,
+      "tyrant": "L2E1",
+      "tyrant_weights": {
+        "0": 1.0,
+        "1": 704.52,
+        "2": 1.0,
+        "3": 1537.05,
+        "4": 1800.67,
+        "5": 1539.14,
+        "6": 1.0,
+        "7": 704.52,
+        "8": 1.0
+      },
+      "tyrant_union_mean_weight": 1257.18,
+      "tyrant_other_mean_weight": 1.0,
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E2",
+        "L2E5",
+        "L2E6",
+        "L2E7"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E0": 663,
+        "L2E2": 663,
+        "L2E5": 663,
+        "L2E6": 663,
+        "L2E7": 663
+      },
+      "l2e_status": {
+        "L2E0": "unrecruited",
+        "L2E1": "active",
+        "L2E2": "unrecruited",
+        "L2E3": "quiet",
+        "L2E4": "quiet",
+        "L2E5": "unrecruited",
+        "L2E6": "unrecruited",
+        "L2E7": "unrecruited"
+      },
+      "active_count": 1,
+      "self_spike_events": 1440
+    },
+    {
+      "config": "A",
+      "weight_seed": 4,
+      "topology_seed": 1,
+      "scenario": "interleaved_40",
+      "total_records": 16225,
+      "unique_delivery_events": 705,
+      "individual_synapse_deltas": 10673,
+      "engine_l2_inhibition_log_len": 400,
+      "non_spiking_prev_step_records": 10673,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 39,
+      "tyrant": "L2E1",
+      "tyrant_weights": {
+        "0": 1.0,
+        "1": 1.0,
+        "2": 224.38,
+        "3": 1.0,
+        "4": 1660.79,
+        "5": 1.0,
+        "6": 224.38,
+        "7": 1.0,
+        "8": 1.0
+      },
+      "tyrant_union_mean_weight": 332.96,
+      "tyrant_other_mean_weight": 112.69,
+      "never_fired_neurons": [
+        "L2E2",
+        "L2E5",
+        "L2E6"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E2": 2115,
+        "L2E5": 2115,
+        "L2E6": 2115
+      },
+      "l2e_status": {
+        "L2E0": "active",
+        "L2E1": "active",
+        "L2E2": "unrecruited",
+        "L2E3": "quiet",
+        "L2E4": "active",
+        "L2E5": "unrecruited",
+        "L2E6": "unrecruited",
+        "L2E7": "active"
+      },
+      "active_count": 4,
+      "self_spike_events": 5552
+    },
+    {
+      "config": "A",
+      "weight_seed": 4,
+      "topology_seed": 2,
+      "scenario": "short_hold_switch",
+      "total_records": 149,
+      "unique_delivery_events": 3,
+      "individual_synapse_deltas": 63,
+      "engine_l2_inhibition_log_len": 3,
+      "non_spiking_prev_step_records": 63,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 0,
+      "tyrant": "L2E3",
+      "tyrant_weights": {
+        "0": 23.73,
+        "1": 248.27,
+        "2": 23.81,
+        "3": 43.55,
+        "4": 288.79,
+        "5": 82.42,
+        "6": 1.0,
+        "7": 258.84,
+        "8": 1.0
+      },
+      "tyrant_union_mean_weight": 184.37,
+      "tyrant_other_mean_weight": 12.38,
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E2",
+        "L2E5",
+        "L2E6"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E0": 9,
+        "L2E2": 9,
+        "L2E5": 9,
+        "L2E6": 9
+      },
+      "l2e_status": {
+        "L2E0": "unrecruited",
+        "L2E1": "active",
+        "L2E2": "unrecruited",
+        "L2E3": "active",
+        "L2E4": "active",
+        "L2E5": "unrecruited",
+        "L2E6": "unrecruited",
+        "L2E7": "active"
+      },
+      "active_count": 4,
+      "self_spike_events": 86
+    },
+    {
+      "config": "A",
+      "weight_seed": 4,
+      "topology_seed": 2,
+      "scenario": "long_hold_switch",
+      "total_records": 5713,
+      "unique_delivery_events": 221,
+      "individual_synapse_deltas": 4273,
+      "engine_l2_inhibition_log_len": 221,
+      "non_spiking_prev_step_records": 4273,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 18,
+      "tyrant": "L2E1",
+      "tyrant_weights": {
+        "0": 1.0,
+        "1": 704.52,
+        "2": 1.0,
+        "3": 1537.05,
+        "4": 1800.67,
+        "5": 1539.14,
+        "6": 1.0,
+        "7": 704.52,
+        "8": 1.0
+      },
+      "tyrant_union_mean_weight": 1257.18,
+      "tyrant_other_mean_weight": 1.0,
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E2",
+        "L2E5",
+        "L2E6",
+        "L2E7"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E0": 663,
+        "L2E2": 663,
+        "L2E5": 663,
+        "L2E6": 663,
+        "L2E7": 663
+      },
+      "l2e_status": {
+        "L2E0": "unrecruited",
+        "L2E1": "active",
+        "L2E2": "unrecruited",
+        "L2E3": "quiet",
+        "L2E4": "quiet",
+        "L2E5": "unrecruited",
+        "L2E6": "unrecruited",
+        "L2E7": "unrecruited"
+      },
+      "active_count": 1,
+      "self_spike_events": 1440
+    },
+    {
+      "config": "A",
+      "weight_seed": 4,
+      "topology_seed": 2,
+      "scenario": "interleaved_40",
+      "total_records": 16225,
+      "unique_delivery_events": 705,
+      "individual_synapse_deltas": 10673,
+      "engine_l2_inhibition_log_len": 400,
+      "non_spiking_prev_step_records": 10673,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 39,
+      "tyrant": "L2E1",
+      "tyrant_weights": {
+        "0": 1.0,
+        "1": 1.0,
+        "2": 224.38,
+        "3": 1.0,
+        "4": 1660.79,
+        "5": 1.0,
+        "6": 224.38,
+        "7": 1.0,
+        "8": 1.0
+      },
+      "tyrant_union_mean_weight": 332.96,
+      "tyrant_other_mean_weight": 112.69,
+      "never_fired_neurons": [
+        "L2E2",
+        "L2E5",
+        "L2E6"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E2": 2115,
+        "L2E5": 2115,
+        "L2E6": 2115
+      },
+      "l2e_status": {
+        "L2E0": "active",
+        "L2E1": "active",
+        "L2E2": "unrecruited",
+        "L2E3": "quiet",
+        "L2E4": "active",
+        "L2E5": "unrecruited",
+        "L2E6": "unrecruited",
+        "L2E7": "active"
+      },
+      "active_count": 4,
+      "self_spike_events": 5552
+    },
+    {
+      "config": "A",
+      "weight_seed": 4,
+      "topology_seed": 3,
+      "scenario": "short_hold_switch",
+      "total_records": 149,
+      "unique_delivery_events": 3,
+      "individual_synapse_deltas": 63,
+      "engine_l2_inhibition_log_len": 3,
+      "non_spiking_prev_step_records": 63,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 0,
+      "tyrant": "L2E3",
+      "tyrant_weights": {
+        "0": 23.73,
+        "1": 248.27,
+        "2": 23.81,
+        "3": 43.55,
+        "4": 288.79,
+        "5": 82.42,
+        "6": 1.0,
+        "7": 258.84,
+        "8": 1.0
+      },
+      "tyrant_union_mean_weight": 184.37,
+      "tyrant_other_mean_weight": 12.38,
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E2",
+        "L2E5",
+        "L2E6"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E0": 9,
+        "L2E2": 9,
+        "L2E5": 9,
+        "L2E6": 9
+      },
+      "l2e_status": {
+        "L2E0": "unrecruited",
+        "L2E1": "active",
+        "L2E2": "unrecruited",
+        "L2E3": "active",
+        "L2E4": "active",
+        "L2E5": "unrecruited",
+        "L2E6": "unrecruited",
+        "L2E7": "active"
+      },
+      "active_count": 4,
+      "self_spike_events": 86
+    },
+    {
+      "config": "A",
+      "weight_seed": 4,
+      "topology_seed": 3,
+      "scenario": "long_hold_switch",
+      "total_records": 5713,
+      "unique_delivery_events": 221,
+      "individual_synapse_deltas": 4273,
+      "engine_l2_inhibition_log_len": 221,
+      "non_spiking_prev_step_records": 4273,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 18,
+      "tyrant": "L2E1",
+      "tyrant_weights": {
+        "0": 1.0,
+        "1": 704.52,
+        "2": 1.0,
+        "3": 1537.05,
+        "4": 1800.67,
+        "5": 1539.14,
+        "6": 1.0,
+        "7": 704.52,
+        "8": 1.0
+      },
+      "tyrant_union_mean_weight": 1257.18,
+      "tyrant_other_mean_weight": 1.0,
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E2",
+        "L2E5",
+        "L2E6",
+        "L2E7"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E0": 663,
+        "L2E2": 663,
+        "L2E5": 663,
+        "L2E6": 663,
+        "L2E7": 663
+      },
+      "l2e_status": {
+        "L2E0": "unrecruited",
+        "L2E1": "active",
+        "L2E2": "unrecruited",
+        "L2E3": "quiet",
+        "L2E4": "quiet",
+        "L2E5": "unrecruited",
+        "L2E6": "unrecruited",
+        "L2E7": "unrecruited"
+      },
+      "active_count": 1,
+      "self_spike_events": 1440
+    },
+    {
+      "config": "A",
+      "weight_seed": 4,
+      "topology_seed": 3,
+      "scenario": "interleaved_40",
+      "total_records": 16225,
+      "unique_delivery_events": 705,
+      "individual_synapse_deltas": 10673,
+      "engine_l2_inhibition_log_len": 400,
+      "non_spiking_prev_step_records": 10673,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 39,
+      "tyrant": "L2E1",
+      "tyrant_weights": {
+        "0": 1.0,
+        "1": 1.0,
+        "2": 224.38,
+        "3": 1.0,
+        "4": 1660.79,
+        "5": 1.0,
+        "6": 224.38,
+        "7": 1.0,
+        "8": 1.0
+      },
+      "tyrant_union_mean_weight": 332.96,
+      "tyrant_other_mean_weight": 112.69,
+      "never_fired_neurons": [
+        "L2E2",
+        "L2E5",
+        "L2E6"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E2": 2115,
+        "L2E5": 2115,
+        "L2E6": 2115
+      },
+      "l2e_status": {
+        "L2E0": "active",
+        "L2E1": "active",
+        "L2E2": "unrecruited",
+        "L2E3": "quiet",
+        "L2E4": "active",
+        "L2E5": "unrecruited",
+        "L2E6": "unrecruited",
+        "L2E7": "active"
+      },
+      "active_count": 4,
+      "self_spike_events": 5552
+    },
+    {
+      "config": "A",
+      "weight_seed": 5,
+      "topology_seed": 1,
+      "scenario": "short_hold_switch",
+      "total_records": 147,
+      "unique_delivery_events": 3,
+      "individual_synapse_deltas": 62,
+      "engine_l2_inhibition_log_len": 3,
+      "non_spiking_prev_step_records": 62,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 0,
+      "tyrant": "L2E5",
+      "tyrant_weights": {
+        "0": 1.0,
+        "1": 142.96,
+        "2": 1.0,
+        "3": 147.57,
+        "4": 325.37,
+        "5": 98.26,
+        "6": 16.58,
+        "7": 196.4,
+        "8": 1.0
+      },
+      "tyrant_union_mean_weight": 182.11,
+      "tyrant_other_mean_weight": 4.89,
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E1",
+        "L2E2"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E0": 9,
+        "L2E1": 9,
+        "L2E2": 9
+      },
+      "l2e_status": {
+        "L2E0": "unrecruited",
+        "L2E1": "unrecruited",
+        "L2E2": "unrecruited",
+        "L2E3": "active",
+        "L2E4": "active",
+        "L2E5": "active",
+        "L2E6": "active",
+        "L2E7": "active"
+      },
+      "active_count": 5,
+      "self_spike_events": 85
+    },
+    {
+      "config": "A",
+      "weight_seed": 5,
+      "topology_seed": 1,
+      "scenario": "long_hold_switch",
+      "total_records": 6376,
+      "unique_delivery_events": 237,
+      "individual_synapse_deltas": 4118,
+      "engine_l2_inhibition_log_len": 237,
+      "non_spiking_prev_step_records": 4118,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 0,
+      "tyrant": "L2E3",
+      "tyrant_weights": {
+        "0": 1.0,
+        "1": 680.03,
+        "2": 1.0,
+        "3": 1599.15,
+        "4": 1827.41,
+        "5": 1596.68,
+        "6": 1.0,
+        "7": 680.03,
+        "8": 1.0
+      },
+      "tyrant_union_mean_weight": 1276.66,
+      "tyrant_other_mean_weight": 1.0,
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E1",
+        "L2E2",
+        "L2E6",
+        "L2E7"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E0": 711,
+        "L2E1": 711,
+        "L2E2": 711,
+        "L2E6": 711,
+        "L2E7": 711
+      },
+      "l2e_status": {
+        "L2E0": "unrecruited",
+        "L2E1": "unrecruited",
+        "L2E2": "unrecruited",
+        "L2E3": "active",
+        "L2E4": "quiet",
+        "L2E5": "active",
+        "L2E6": "unrecruited",
+        "L2E7": "unrecruited"
+      },
+      "active_count": 2,
+      "self_spike_events": 2258
+    },
+    {
+      "config": "A",
+      "weight_seed": 5,
+      "topology_seed": 1,
+      "scenario": "interleaved_40",
+      "total_records": 19189,
+      "unique_delivery_events": 810,
+      "individual_synapse_deltas": 12681,
+      "engine_l2_inhibition_log_len": 400,
+      "non_spiking_prev_step_records": 12681,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 0,
+      "tyrant": "L2E3",
+      "tyrant_weights": {
+        "0": 102.7,
+        "1": 1.0,
+        "2": 131.59,
+        "3": 1.0,
+        "4": 2443.91,
+        "5": 1.0,
+        "6": 131.59,
+        "7": 1.0,
+        "8": 102.7
+      },
+      "tyrant_union_mean_weight": 489.58,
+      "tyrant_other_mean_weight": 117.14,
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E1",
+        "L2E2"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E0": 2430,
+        "L2E1": 2430,
+        "L2E2": 2430
+      },
+      "l2e_status": {
+        "L2E0": "unrecruited",
+        "L2E1": "unrecruited",
+        "L2E2": "unrecruited",
+        "L2E3": "active",
+        "L2E4": "active",
+        "L2E5": "quiet",
+        "L2E6": "active",
+        "L2E7": "quiet"
+      },
+      "active_count": 3,
+      "self_spike_events": 6508
+    },
+    {
+      "config": "A",
+      "weight_seed": 5,
+      "topology_seed": 2,
+      "scenario": "short_hold_switch",
+      "total_records": 147,
+      "unique_delivery_events": 3,
+      "individual_synapse_deltas": 62,
+      "engine_l2_inhibition_log_len": 3,
+      "non_spiking_prev_step_records": 62,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 0,
+      "tyrant": "L2E5",
+      "tyrant_weights": {
+        "0": 1.0,
+        "1": 142.96,
+        "2": 1.0,
+        "3": 147.57,
+        "4": 325.37,
+        "5": 98.26,
+        "6": 16.58,
+        "7": 196.4,
+        "8": 1.0
+      },
+      "tyrant_union_mean_weight": 182.11,
+      "tyrant_other_mean_weight": 4.89,
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E1",
+        "L2E2"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E0": 9,
+        "L2E1": 9,
+        "L2E2": 9
+      },
+      "l2e_status": {
+        "L2E0": "unrecruited",
+        "L2E1": "unrecruited",
+        "L2E2": "unrecruited",
+        "L2E3": "active",
+        "L2E4": "active",
+        "L2E5": "active",
+        "L2E6": "active",
+        "L2E7": "active"
+      },
+      "active_count": 5,
+      "self_spike_events": 85
+    },
+    {
+      "config": "A",
+      "weight_seed": 5,
+      "topology_seed": 2,
+      "scenario": "long_hold_switch",
+      "total_records": 6376,
+      "unique_delivery_events": 237,
+      "individual_synapse_deltas": 4118,
+      "engine_l2_inhibition_log_len": 237,
+      "non_spiking_prev_step_records": 4118,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 0,
+      "tyrant": "L2E3",
+      "tyrant_weights": {
+        "0": 1.0,
+        "1": 680.03,
+        "2": 1.0,
+        "3": 1599.15,
+        "4": 1827.41,
+        "5": 1596.68,
+        "6": 1.0,
+        "7": 680.03,
+        "8": 1.0
+      },
+      "tyrant_union_mean_weight": 1276.66,
+      "tyrant_other_mean_weight": 1.0,
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E1",
+        "L2E2",
+        "L2E6",
+        "L2E7"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E0": 711,
+        "L2E1": 711,
+        "L2E2": 711,
+        "L2E6": 711,
+        "L2E7": 711
+      },
+      "l2e_status": {
+        "L2E0": "unrecruited",
+        "L2E1": "unrecruited",
+        "L2E2": "unrecruited",
+        "L2E3": "active",
+        "L2E4": "quiet",
+        "L2E5": "active",
+        "L2E6": "unrecruited",
+        "L2E7": "unrecruited"
+      },
+      "active_count": 2,
+      "self_spike_events": 2258
+    },
+    {
+      "config": "A",
+      "weight_seed": 5,
+      "topology_seed": 2,
+      "scenario": "interleaved_40",
+      "total_records": 19189,
+      "unique_delivery_events": 810,
+      "individual_synapse_deltas": 12681,
+      "engine_l2_inhibition_log_len": 400,
+      "non_spiking_prev_step_records": 12681,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 0,
+      "tyrant": "L2E3",
+      "tyrant_weights": {
+        "0": 102.7,
+        "1": 1.0,
+        "2": 131.59,
+        "3": 1.0,
+        "4": 2443.91,
+        "5": 1.0,
+        "6": 131.59,
+        "7": 1.0,
+        "8": 102.7
+      },
+      "tyrant_union_mean_weight": 489.58,
+      "tyrant_other_mean_weight": 117.14,
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E1",
+        "L2E2"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E0": 2430,
+        "L2E1": 2430,
+        "L2E2": 2430
+      },
+      "l2e_status": {
+        "L2E0": "unrecruited",
+        "L2E1": "unrecruited",
+        "L2E2": "unrecruited",
+        "L2E3": "active",
+        "L2E4": "active",
+        "L2E5": "quiet",
+        "L2E6": "active",
+        "L2E7": "quiet"
+      },
+      "active_count": 3,
+      "self_spike_events": 6508
+    },
+    {
+      "config": "A",
+      "weight_seed": 5,
+      "topology_seed": 3,
+      "scenario": "short_hold_switch",
+      "total_records": 147,
+      "unique_delivery_events": 3,
+      "individual_synapse_deltas": 62,
+      "engine_l2_inhibition_log_len": 3,
+      "non_spiking_prev_step_records": 62,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 0,
+      "tyrant": "L2E5",
+      "tyrant_weights": {
+        "0": 1.0,
+        "1": 142.96,
+        "2": 1.0,
+        "3": 147.57,
+        "4": 325.37,
+        "5": 98.26,
+        "6": 16.58,
+        "7": 196.4,
+        "8": 1.0
+      },
+      "tyrant_union_mean_weight": 182.11,
+      "tyrant_other_mean_weight": 4.89,
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E1",
+        "L2E2"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E0": 9,
+        "L2E1": 9,
+        "L2E2": 9
+      },
+      "l2e_status": {
+        "L2E0": "unrecruited",
+        "L2E1": "unrecruited",
+        "L2E2": "unrecruited",
+        "L2E3": "active",
+        "L2E4": "active",
+        "L2E5": "active",
+        "L2E6": "active",
+        "L2E7": "active"
+      },
+      "active_count": 5,
+      "self_spike_events": 85
+    },
+    {
+      "config": "A",
+      "weight_seed": 5,
+      "topology_seed": 3,
+      "scenario": "long_hold_switch",
+      "total_records": 6376,
+      "unique_delivery_events": 237,
+      "individual_synapse_deltas": 4118,
+      "engine_l2_inhibition_log_len": 237,
+      "non_spiking_prev_step_records": 4118,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 0,
+      "tyrant": "L2E3",
+      "tyrant_weights": {
+        "0": 1.0,
+        "1": 680.03,
+        "2": 1.0,
+        "3": 1599.15,
+        "4": 1827.41,
+        "5": 1596.68,
+        "6": 1.0,
+        "7": 680.03,
+        "8": 1.0
+      },
+      "tyrant_union_mean_weight": 1276.66,
+      "tyrant_other_mean_weight": 1.0,
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E1",
+        "L2E2",
+        "L2E6",
+        "L2E7"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E0": 711,
+        "L2E1": 711,
+        "L2E2": 711,
+        "L2E6": 711,
+        "L2E7": 711
+      },
+      "l2e_status": {
+        "L2E0": "unrecruited",
+        "L2E1": "unrecruited",
+        "L2E2": "unrecruited",
+        "L2E3": "active",
+        "L2E4": "quiet",
+        "L2E5": "active",
+        "L2E6": "unrecruited",
+        "L2E7": "unrecruited"
+      },
+      "active_count": 2,
+      "self_spike_events": 2258
+    },
+    {
+      "config": "A",
+      "weight_seed": 5,
+      "topology_seed": 3,
+      "scenario": "interleaved_40",
+      "total_records": 19189,
+      "unique_delivery_events": 810,
+      "individual_synapse_deltas": 12681,
+      "engine_l2_inhibition_log_len": 400,
+      "non_spiking_prev_step_records": 12681,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 0,
+      "tyrant": "L2E3",
+      "tyrant_weights": {
+        "0": 102.7,
+        "1": 1.0,
+        "2": 131.59,
+        "3": 1.0,
+        "4": 2443.91,
+        "5": 1.0,
+        "6": 131.59,
+        "7": 1.0,
+        "8": 102.7
+      },
+      "tyrant_union_mean_weight": 489.58,
+      "tyrant_other_mean_weight": 117.14,
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E1",
+        "L2E2"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E0": 2430,
+        "L2E1": 2430,
+        "L2E2": 2430
+      },
+      "l2e_status": {
+        "L2E0": "unrecruited",
+        "L2E1": "unrecruited",
+        "L2E2": "unrecruited",
+        "L2E3": "active",
+        "L2E4": "active",
+        "L2E5": "quiet",
+        "L2E6": "active",
+        "L2E7": "quiet"
+      },
+      "active_count": 3,
+      "self_spike_events": 6508
+    },
+    {
+      "config": "B",
+      "weight_seed": 1,
+      "topology_seed": 1,
+      "scenario": "short_hold_switch",
+      "total_records": 66,
+      "unique_delivery_events": 1,
+      "individual_synapse_deltas": 21,
+      "engine_l2_inhibition_log_len": 1,
+      "non_spiking_prev_step_records": 21,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 0,
+      "tyrant": "L2E3",
+      "tyrant_weights": {
+        "0": 65.52,
+        "1": 252.49,
+        "2": 25.97,
+        "3": 101.55,
+        "4": 152.32,
+        "5": 74.45,
+        "6": 101.85,
+        "7": 234.51,
+        "8": 48.19
+      },
+      "tyrant_union_mean_weight": 163.06,
+      "tyrant_other_mean_weight": 60.38,
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E1",
+        "L2E2",
+        "L2E6",
+        "L2E7"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E0": 3,
+        "L2E1": 3,
+        "L2E2": 3,
+        "L2E6": 3,
+        "L2E7": 3
+      },
+      "l2e_status": {
+        "L2E0": "unrecruited",
+        "L2E1": "unrecruited",
+        "L2E2": "unrecruited",
+        "L2E3": "active",
+        "L2E4": "active",
+        "L2E5": "active",
+        "L2E6": "unrecruited",
+        "L2E7": "unrecruited"
+      },
+      "active_count": 3,
+      "self_spike_events": 45
+    },
+    {
+      "config": "B",
+      "weight_seed": 1,
+      "topology_seed": 1,
+      "scenario": "long_hold_switch",
+      "total_records": 4338,
+      "unique_delivery_events": 170,
+      "individual_synapse_deltas": 2695,
+      "engine_l2_inhibition_log_len": 170,
+      "non_spiking_prev_step_records": 2695,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 0,
+      "tyrant": "L2E4",
+      "tyrant_weights": {
+        "0": 1.0,
+        "1": 524.12,
+        "2": 1.0,
+        "3": 1503.06,
+        "4": 1709.32,
+        "5": 1511.92,
+        "6": 1.0,
+        "7": 524.12,
+        "8": 1.0
+      },
+      "tyrant_union_mean_weight": 1154.51,
+      "tyrant_other_mean_weight": 1.0,
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E1",
+        "L2E2",
+        "L2E6",
+        "L2E7"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E0": 510,
+        "L2E1": 510,
+        "L2E2": 510,
+        "L2E6": 510,
+        "L2E7": 510
+      },
+      "l2e_status": {
+        "L2E0": "unrecruited",
+        "L2E1": "unrecruited",
+        "L2E2": "unrecruited",
+        "L2E3": "quiet",
+        "L2E4": "active",
+        "L2E5": "active",
+        "L2E6": "unrecruited",
+        "L2E7": "unrecruited"
+      },
+      "active_count": 2,
+      "self_spike_events": 1643
+    },
+    {
+      "config": "B",
+      "weight_seed": 1,
+      "topology_seed": 1,
+      "scenario": "interleaved_40",
+      "total_records": 12982,
+      "unique_delivery_events": 495,
+      "individual_synapse_deltas": 8326,
+      "engine_l2_inhibition_log_len": 400,
+      "non_spiking_prev_step_records": 8326,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 0,
+      "tyrant": "L2E4",
+      "tyrant_weights": {
+        "0": 4.8,
+        "1": 1.0,
+        "2": 138.58,
+        "3": 1.0,
+        "4": 2336.63,
+        "5": 1.0,
+        "6": 138.58,
+        "7": 1.0,
+        "8": 4.8
+      },
+      "tyrant_union_mean_weight": 468.13,
+      "tyrant_other_mean_weight": 71.69,
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E1",
+        "L2E6"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E0": 1485,
+        "L2E1": 1485,
+        "L2E6": 1485
+      },
+      "l2e_status": {
+        "L2E0": "unrecruited",
+        "L2E1": "unrecruited",
+        "L2E2": "quiet",
+        "L2E3": "quiet",
+        "L2E4": "active",
+        "L2E5": "quiet",
+        "L2E6": "unrecruited",
+        "L2E7": "quiet"
+      },
+      "active_count": 1,
+      "self_spike_events": 4656
+    },
+    {
+      "config": "B",
+      "weight_seed": 1,
+      "topology_seed": 2,
+      "scenario": "short_hold_switch",
+      "total_records": 66,
+      "unique_delivery_events": 1,
+      "individual_synapse_deltas": 21,
+      "engine_l2_inhibition_log_len": 1,
+      "non_spiking_prev_step_records": 21,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 0,
+      "tyrant": "L2E3",
+      "tyrant_weights": {
+        "0": 65.52,
+        "1": 252.49,
+        "2": 25.97,
+        "3": 101.55,
+        "4": 152.32,
+        "5": 74.45,
+        "6": 101.85,
+        "7": 234.51,
+        "8": 48.19
+      },
+      "tyrant_union_mean_weight": 163.06,
+      "tyrant_other_mean_weight": 60.38,
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E1",
+        "L2E2",
+        "L2E6",
+        "L2E7"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E0": 3,
+        "L2E1": 3,
+        "L2E2": 3,
+        "L2E6": 3,
+        "L2E7": 3
+      },
+      "l2e_status": {
+        "L2E0": "unrecruited",
+        "L2E1": "unrecruited",
+        "L2E2": "unrecruited",
+        "L2E3": "active",
+        "L2E4": "active",
+        "L2E5": "active",
+        "L2E6": "unrecruited",
+        "L2E7": "unrecruited"
+      },
+      "active_count": 3,
+      "self_spike_events": 45
+    },
+    {
+      "config": "B",
+      "weight_seed": 1,
+      "topology_seed": 2,
+      "scenario": "long_hold_switch",
+      "total_records": 4338,
+      "unique_delivery_events": 170,
+      "individual_synapse_deltas": 2695,
+      "engine_l2_inhibition_log_len": 170,
+      "non_spiking_prev_step_records": 2695,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 0,
+      "tyrant": "L2E4",
+      "tyrant_weights": {
+        "0": 1.0,
+        "1": 524.12,
+        "2": 1.0,
+        "3": 1503.06,
+        "4": 1709.32,
+        "5": 1511.92,
+        "6": 1.0,
+        "7": 524.12,
+        "8": 1.0
+      },
+      "tyrant_union_mean_weight": 1154.51,
+      "tyrant_other_mean_weight": 1.0,
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E1",
+        "L2E2",
+        "L2E6",
+        "L2E7"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E0": 510,
+        "L2E1": 510,
+        "L2E2": 510,
+        "L2E6": 510,
+        "L2E7": 510
+      },
+      "l2e_status": {
+        "L2E0": "unrecruited",
+        "L2E1": "unrecruited",
+        "L2E2": "unrecruited",
+        "L2E3": "quiet",
+        "L2E4": "active",
+        "L2E5": "active",
+        "L2E6": "unrecruited",
+        "L2E7": "unrecruited"
+      },
+      "active_count": 2,
+      "self_spike_events": 1643
+    },
+    {
+      "config": "B",
+      "weight_seed": 1,
+      "topology_seed": 2,
+      "scenario": "interleaved_40",
+      "total_records": 12982,
+      "unique_delivery_events": 495,
+      "individual_synapse_deltas": 8326,
+      "engine_l2_inhibition_log_len": 400,
+      "non_spiking_prev_step_records": 8326,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 0,
+      "tyrant": "L2E4",
+      "tyrant_weights": {
+        "0": 4.8,
+        "1": 1.0,
+        "2": 138.58,
+        "3": 1.0,
+        "4": 2336.63,
+        "5": 1.0,
+        "6": 138.58,
+        "7": 1.0,
+        "8": 4.8
+      },
+      "tyrant_union_mean_weight": 468.13,
+      "tyrant_other_mean_weight": 71.69,
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E1",
+        "L2E6"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E0": 1485,
+        "L2E1": 1485,
+        "L2E6": 1485
+      },
+      "l2e_status": {
+        "L2E0": "unrecruited",
+        "L2E1": "unrecruited",
+        "L2E2": "quiet",
+        "L2E3": "quiet",
+        "L2E4": "active",
+        "L2E5": "quiet",
+        "L2E6": "unrecruited",
+        "L2E7": "quiet"
+      },
+      "active_count": 1,
+      "self_spike_events": 4656
+    },
+    {
+      "config": "B",
+      "weight_seed": 1,
+      "topology_seed": 3,
+      "scenario": "short_hold_switch",
+      "total_records": 66,
+      "unique_delivery_events": 1,
+      "individual_synapse_deltas": 21,
+      "engine_l2_inhibition_log_len": 1,
+      "non_spiking_prev_step_records": 21,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 0,
+      "tyrant": "L2E3",
+      "tyrant_weights": {
+        "0": 65.52,
+        "1": 252.49,
+        "2": 25.97,
+        "3": 101.55,
+        "4": 152.32,
+        "5": 74.45,
+        "6": 101.85,
+        "7": 234.51,
+        "8": 48.19
+      },
+      "tyrant_union_mean_weight": 163.06,
+      "tyrant_other_mean_weight": 60.38,
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E1",
+        "L2E2",
+        "L2E6",
+        "L2E7"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E0": 3,
+        "L2E1": 3,
+        "L2E2": 3,
+        "L2E6": 3,
+        "L2E7": 3
+      },
+      "l2e_status": {
+        "L2E0": "unrecruited",
+        "L2E1": "unrecruited",
+        "L2E2": "unrecruited",
+        "L2E3": "active",
+        "L2E4": "active",
+        "L2E5": "active",
+        "L2E6": "unrecruited",
+        "L2E7": "unrecruited"
+      },
+      "active_count": 3,
+      "self_spike_events": 45
+    },
+    {
+      "config": "B",
+      "weight_seed": 1,
+      "topology_seed": 3,
+      "scenario": "long_hold_switch",
+      "total_records": 4338,
+      "unique_delivery_events": 170,
+      "individual_synapse_deltas": 2695,
+      "engine_l2_inhibition_log_len": 170,
+      "non_spiking_prev_step_records": 2695,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 0,
+      "tyrant": "L2E4",
+      "tyrant_weights": {
+        "0": 1.0,
+        "1": 524.12,
+        "2": 1.0,
+        "3": 1503.06,
+        "4": 1709.32,
+        "5": 1511.92,
+        "6": 1.0,
+        "7": 524.12,
+        "8": 1.0
+      },
+      "tyrant_union_mean_weight": 1154.51,
+      "tyrant_other_mean_weight": 1.0,
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E1",
+        "L2E2",
+        "L2E6",
+        "L2E7"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E0": 510,
+        "L2E1": 510,
+        "L2E2": 510,
+        "L2E6": 510,
+        "L2E7": 510
+      },
+      "l2e_status": {
+        "L2E0": "unrecruited",
+        "L2E1": "unrecruited",
+        "L2E2": "unrecruited",
+        "L2E3": "quiet",
+        "L2E4": "active",
+        "L2E5": "active",
+        "L2E6": "unrecruited",
+        "L2E7": "unrecruited"
+      },
+      "active_count": 2,
+      "self_spike_events": 1643
+    },
+    {
+      "config": "B",
+      "weight_seed": 1,
+      "topology_seed": 3,
+      "scenario": "interleaved_40",
+      "total_records": 12982,
+      "unique_delivery_events": 495,
+      "individual_synapse_deltas": 8326,
+      "engine_l2_inhibition_log_len": 400,
+      "non_spiking_prev_step_records": 8326,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 0,
+      "tyrant": "L2E4",
+      "tyrant_weights": {
+        "0": 4.8,
+        "1": 1.0,
+        "2": 138.58,
+        "3": 1.0,
+        "4": 2336.63,
+        "5": 1.0,
+        "6": 138.58,
+        "7": 1.0,
+        "8": 4.8
+      },
+      "tyrant_union_mean_weight": 468.13,
+      "tyrant_other_mean_weight": 71.69,
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E1",
+        "L2E6"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E0": 1485,
+        "L2E1": 1485,
+        "L2E6": 1485
+      },
+      "l2e_status": {
+        "L2E0": "unrecruited",
+        "L2E1": "unrecruited",
+        "L2E2": "quiet",
+        "L2E3": "quiet",
+        "L2E4": "active",
+        "L2E5": "quiet",
+        "L2E6": "unrecruited",
+        "L2E7": "quiet"
+      },
+      "active_count": 1,
+      "self_spike_events": 4656
+    },
+    {
+      "config": "B",
+      "weight_seed": 2,
+      "topology_seed": 1,
+      "scenario": "short_hold_switch",
+      "total_records": 57,
+      "unique_delivery_events": 1,
+      "individual_synapse_deltas": 21,
+      "engine_l2_inhibition_log_len": 1,
+      "non_spiking_prev_step_records": 21,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 0,
+      "tyrant": "L2E0",
+      "tyrant_weights": {
+        "0": 151.28,
+        "1": 29.08,
+        "2": 73.9,
+        "3": 180.91,
+        "4": 170.56,
+        "5": 208.88,
+        "6": 12.99,
+        "7": 136.14,
+        "8": 110.97
+      },
+      "tyrant_union_mean_weight": 145.11,
+      "tyrant_other_mean_weight": 87.28,
+      "never_fired_neurons": [
+        "L2E2",
+        "L2E4",
+        "L2E5",
+        "L2E6"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E2": 3,
+        "L2E4": 3,
+        "L2E5": 3,
+        "L2E6": 3
+      },
+      "l2e_status": {
+        "L2E0": "active",
+        "L2E1": "active",
+        "L2E2": "unrecruited",
+        "L2E3": "active",
+        "L2E4": "unrecruited",
+        "L2E5": "unrecruited",
+        "L2E6": "unrecruited",
+        "L2E7": "active"
+      },
+      "active_count": 4,
+      "self_spike_events": 36
+    },
+    {
+      "config": "B",
+      "weight_seed": 2,
+      "topology_seed": 1,
+      "scenario": "long_hold_switch",
+      "total_records": 4491,
+      "unique_delivery_events": 173,
+      "individual_synapse_deltas": 2841,
+      "engine_l2_inhibition_log_len": 173,
+      "non_spiking_prev_step_records": 2841,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 0,
+      "tyrant": "L2E3",
+      "tyrant_weights": {
+        "0": 1.0,
+        "1": 541.34,
+        "2": 1.0,
+        "3": 1501.91,
+        "4": 1718.56,
+        "5": 1509.07,
+        "6": 1.0,
+        "7": 541.34,
+        "8": 1.0
+      },
+      "tyrant_union_mean_weight": 1162.44,
+      "tyrant_other_mean_weight": 1.0,
+      "never_fired_neurons": [
+        "L2E1",
+        "L2E2",
+        "L2E4",
+        "L2E5",
+        "L2E6"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E1": 519,
+        "L2E2": 519,
+        "L2E4": 519,
+        "L2E5": 519,
+        "L2E6": 519
+      },
+      "l2e_status": {
+        "L2E0": "active",
+        "L2E1": "unrecruited",
+        "L2E2": "unrecruited",
+        "L2E3": "active",
+        "L2E4": "unrecruited",
+        "L2E5": "unrecruited",
+        "L2E6": "unrecruited",
+        "L2E7": "active"
+      },
+      "active_count": 3,
+      "self_spike_events": 1650
+    },
+    {
+      "config": "B",
+      "weight_seed": 2,
+      "topology_seed": 1,
+      "scenario": "interleaved_40",
+      "total_records": 9815,
+      "unique_delivery_events": 446,
+      "individual_synapse_deltas": 5447,
+      "engine_l2_inhibition_log_len": 400,
+      "non_spiking_prev_step_records": 5447,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 0,
+      "tyrant": "L2E0",
+      "tyrant_weights": {
+        "0": 1.0,
+        "1": 1.0,
+        "2": 140.8,
+        "3": 1.0,
+        "4": 2293.02,
+        "5": 1.0,
+        "6": 140.8,
+        "7": 1.0,
+        "8": 1.0
+      },
+      "tyrant_union_mean_weight": 459.4,
+      "tyrant_other_mean_weight": 70.9,
+      "never_fired_neurons": [
+        "L2E4"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E4": 1338
+      },
+      "l2e_status": {
+        "L2E0": "active",
+        "L2E1": "active",
+        "L2E2": "active",
+        "L2E3": "active",
+        "L2E4": "unrecruited",
+        "L2E5": "active",
+        "L2E6": "active",
+        "L2E7": "quiet"
+      },
+      "active_count": 6,
+      "self_spike_events": 4368
+    },
+    {
+      "config": "B",
+      "weight_seed": 2,
+      "topology_seed": 2,
+      "scenario": "short_hold_switch",
+      "total_records": 57,
+      "unique_delivery_events": 1,
+      "individual_synapse_deltas": 21,
+      "engine_l2_inhibition_log_len": 1,
+      "non_spiking_prev_step_records": 21,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 0,
+      "tyrant": "L2E0",
+      "tyrant_weights": {
+        "0": 151.28,
+        "1": 29.08,
+        "2": 73.9,
+        "3": 180.91,
+        "4": 170.56,
+        "5": 208.88,
+        "6": 12.99,
+        "7": 136.14,
+        "8": 110.97
+      },
+      "tyrant_union_mean_weight": 145.11,
+      "tyrant_other_mean_weight": 87.28,
+      "never_fired_neurons": [
+        "L2E2",
+        "L2E4",
+        "L2E5",
+        "L2E6"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E2": 3,
+        "L2E4": 3,
+        "L2E5": 3,
+        "L2E6": 3
+      },
+      "l2e_status": {
+        "L2E0": "active",
+        "L2E1": "active",
+        "L2E2": "unrecruited",
+        "L2E3": "active",
+        "L2E4": "unrecruited",
+        "L2E5": "unrecruited",
+        "L2E6": "unrecruited",
+        "L2E7": "active"
+      },
+      "active_count": 4,
+      "self_spike_events": 36
+    },
+    {
+      "config": "B",
+      "weight_seed": 2,
+      "topology_seed": 2,
+      "scenario": "long_hold_switch",
+      "total_records": 4491,
+      "unique_delivery_events": 173,
+      "individual_synapse_deltas": 2841,
+      "engine_l2_inhibition_log_len": 173,
+      "non_spiking_prev_step_records": 2841,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 0,
+      "tyrant": "L2E3",
+      "tyrant_weights": {
+        "0": 1.0,
+        "1": 541.34,
+        "2": 1.0,
+        "3": 1501.91,
+        "4": 1718.56,
+        "5": 1509.07,
+        "6": 1.0,
+        "7": 541.34,
+        "8": 1.0
+      },
+      "tyrant_union_mean_weight": 1162.44,
+      "tyrant_other_mean_weight": 1.0,
+      "never_fired_neurons": [
+        "L2E1",
+        "L2E2",
+        "L2E4",
+        "L2E5",
+        "L2E6"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E1": 519,
+        "L2E2": 519,
+        "L2E4": 519,
+        "L2E5": 519,
+        "L2E6": 519
+      },
+      "l2e_status": {
+        "L2E0": "active",
+        "L2E1": "unrecruited",
+        "L2E2": "unrecruited",
+        "L2E3": "active",
+        "L2E4": "unrecruited",
+        "L2E5": "unrecruited",
+        "L2E6": "unrecruited",
+        "L2E7": "active"
+      },
+      "active_count": 3,
+      "self_spike_events": 1650
+    },
+    {
+      "config": "B",
+      "weight_seed": 2,
+      "topology_seed": 2,
+      "scenario": "interleaved_40",
+      "total_records": 9815,
+      "unique_delivery_events": 446,
+      "individual_synapse_deltas": 5447,
+      "engine_l2_inhibition_log_len": 400,
+      "non_spiking_prev_step_records": 5447,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 0,
+      "tyrant": "L2E0",
+      "tyrant_weights": {
+        "0": 1.0,
+        "1": 1.0,
+        "2": 140.8,
+        "3": 1.0,
+        "4": 2293.02,
+        "5": 1.0,
+        "6": 140.8,
+        "7": 1.0,
+        "8": 1.0
+      },
+      "tyrant_union_mean_weight": 459.4,
+      "tyrant_other_mean_weight": 70.9,
+      "never_fired_neurons": [
+        "L2E4"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E4": 1338
+      },
+      "l2e_status": {
+        "L2E0": "active",
+        "L2E1": "active",
+        "L2E2": "active",
+        "L2E3": "active",
+        "L2E4": "unrecruited",
+        "L2E5": "active",
+        "L2E6": "active",
+        "L2E7": "quiet"
+      },
+      "active_count": 6,
+      "self_spike_events": 4368
+    },
+    {
+      "config": "B",
+      "weight_seed": 2,
+      "topology_seed": 3,
+      "scenario": "short_hold_switch",
+      "total_records": 57,
+      "unique_delivery_events": 1,
+      "individual_synapse_deltas": 21,
+      "engine_l2_inhibition_log_len": 1,
+      "non_spiking_prev_step_records": 21,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 0,
+      "tyrant": "L2E0",
+      "tyrant_weights": {
+        "0": 151.28,
+        "1": 29.08,
+        "2": 73.9,
+        "3": 180.91,
+        "4": 170.56,
+        "5": 208.88,
+        "6": 12.99,
+        "7": 136.14,
+        "8": 110.97
+      },
+      "tyrant_union_mean_weight": 145.11,
+      "tyrant_other_mean_weight": 87.28,
+      "never_fired_neurons": [
+        "L2E2",
+        "L2E4",
+        "L2E5",
+        "L2E6"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E2": 3,
+        "L2E4": 3,
+        "L2E5": 3,
+        "L2E6": 3
+      },
+      "l2e_status": {
+        "L2E0": "active",
+        "L2E1": "active",
+        "L2E2": "unrecruited",
+        "L2E3": "active",
+        "L2E4": "unrecruited",
+        "L2E5": "unrecruited",
+        "L2E6": "unrecruited",
+        "L2E7": "active"
+      },
+      "active_count": 4,
+      "self_spike_events": 36
+    },
+    {
+      "config": "B",
+      "weight_seed": 2,
+      "topology_seed": 3,
+      "scenario": "long_hold_switch",
+      "total_records": 4491,
+      "unique_delivery_events": 173,
+      "individual_synapse_deltas": 2841,
+      "engine_l2_inhibition_log_len": 173,
+      "non_spiking_prev_step_records": 2841,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 0,
+      "tyrant": "L2E3",
+      "tyrant_weights": {
+        "0": 1.0,
+        "1": 541.34,
+        "2": 1.0,
+        "3": 1501.91,
+        "4": 1718.56,
+        "5": 1509.07,
+        "6": 1.0,
+        "7": 541.34,
+        "8": 1.0
+      },
+      "tyrant_union_mean_weight": 1162.44,
+      "tyrant_other_mean_weight": 1.0,
+      "never_fired_neurons": [
+        "L2E1",
+        "L2E2",
+        "L2E4",
+        "L2E5",
+        "L2E6"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E1": 519,
+        "L2E2": 519,
+        "L2E4": 519,
+        "L2E5": 519,
+        "L2E6": 519
+      },
+      "l2e_status": {
+        "L2E0": "active",
+        "L2E1": "unrecruited",
+        "L2E2": "unrecruited",
+        "L2E3": "active",
+        "L2E4": "unrecruited",
+        "L2E5": "unrecruited",
+        "L2E6": "unrecruited",
+        "L2E7": "active"
+      },
+      "active_count": 3,
+      "self_spike_events": 1650
+    },
+    {
+      "config": "B",
+      "weight_seed": 2,
+      "topology_seed": 3,
+      "scenario": "interleaved_40",
+      "total_records": 9815,
+      "unique_delivery_events": 446,
+      "individual_synapse_deltas": 5447,
+      "engine_l2_inhibition_log_len": 400,
+      "non_spiking_prev_step_records": 5447,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 0,
+      "tyrant": "L2E0",
+      "tyrant_weights": {
+        "0": 1.0,
+        "1": 1.0,
+        "2": 140.8,
+        "3": 1.0,
+        "4": 2293.02,
+        "5": 1.0,
+        "6": 140.8,
+        "7": 1.0,
+        "8": 1.0
+      },
+      "tyrant_union_mean_weight": 459.4,
+      "tyrant_other_mean_weight": 70.9,
+      "never_fired_neurons": [
+        "L2E4"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E4": 1338
+      },
+      "l2e_status": {
+        "L2E0": "active",
+        "L2E1": "active",
+        "L2E2": "active",
+        "L2E3": "active",
+        "L2E4": "unrecruited",
+        "L2E5": "active",
+        "L2E6": "active",
+        "L2E7": "quiet"
+      },
+      "active_count": 6,
+      "self_spike_events": 4368
+    },
+    {
+      "config": "B",
+      "weight_seed": 3,
+      "topology_seed": 1,
+      "scenario": "short_hold_switch",
+      "total_records": 57,
+      "unique_delivery_events": 1,
+      "individual_synapse_deltas": 21,
+      "engine_l2_inhibition_log_len": 1,
+      "non_spiking_prev_step_records": 21,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 0,
+      "tyrant": "L2E3",
+      "tyrant_weights": {
+        "0": 96.53,
+        "1": 268.52,
+        "2": 82.16,
+        "3": 40.58,
+        "4": 167.71,
+        "5": 118.06,
+        "6": 42.82,
+        "7": 244.06,
+        "8": 1.0
+      },
+      "tyrant_union_mean_weight": 167.79,
+      "tyrant_other_mean_weight": 55.63,
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E1",
+        "L2E2",
+        "L2E4",
+        "L2E6"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E0": 3,
+        "L2E1": 3,
+        "L2E2": 3,
+        "L2E4": 3,
+        "L2E6": 3
+      },
+      "l2e_status": {
+        "L2E0": "unrecruited",
+        "L2E1": "unrecruited",
+        "L2E2": "unrecruited",
+        "L2E3": "active",
+        "L2E4": "unrecruited",
+        "L2E5": "active",
+        "L2E6": "unrecruited",
+        "L2E7": "active"
+      },
+      "active_count": 3,
+      "self_spike_events": 36
+    },
+    {
+      "config": "B",
+      "weight_seed": 3,
+      "topology_seed": 1,
+      "scenario": "long_hold_switch",
+      "total_records": 4302,
+      "unique_delivery_events": 168,
+      "individual_synapse_deltas": 2854,
+      "engine_l2_inhibition_log_len": 168,
+      "non_spiking_prev_step_records": 2854,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 0,
+      "tyrant": "L2E5",
+      "tyrant_weights": {
+        "0": 1.0,
+        "1": 526.91,
+        "2": 1.0,
+        "3": 1503.1,
+        "4": 1703.75,
+        "5": 1493.49,
+        "6": 1.0,
+        "7": 526.91,
+        "8": 1.0
+      },
+      "tyrant_union_mean_weight": 1150.83,
+      "tyrant_other_mean_weight": 1.0,
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E1",
+        "L2E2",
+        "L2E4",
+        "L2E6"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E0": 504,
+        "L2E1": 504,
+        "L2E2": 504,
+        "L2E4": 504,
+        "L2E6": 504
+      },
+      "l2e_status": {
+        "L2E0": "unrecruited",
+        "L2E1": "unrecruited",
+        "L2E2": "unrecruited",
+        "L2E3": "quiet",
+        "L2E4": "unrecruited",
+        "L2E5": "active",
+        "L2E6": "unrecruited",
+        "L2E7": "active"
+      },
+      "active_count": 2,
+      "self_spike_events": 1448
+    },
+    {
+      "config": "B",
+      "weight_seed": 3,
+      "topology_seed": 1,
+      "scenario": "interleaved_40",
+      "total_records": 11218,
+      "unique_delivery_events": 485,
+      "individual_synapse_deltas": 7086,
+      "engine_l2_inhibition_log_len": 400,
+      "non_spiking_prev_step_records": 7086,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 0,
+      "tyrant": "L2E3",
+      "tyrant_weights": {
+        "0": 4.81,
+        "1": 1.0,
+        "2": 138.78,
+        "3": 1.0,
+        "4": 2327.93,
+        "5": 1.0,
+        "6": 138.78,
+        "7": 1.0,
+        "8": 4.81
+      },
+      "tyrant_union_mean_weight": 466.39,
+      "tyrant_other_mean_weight": 71.8,
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E1"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E0": 1455,
+        "L2E1": 1455
+      },
+      "l2e_status": {
+        "L2E0": "unrecruited",
+        "L2E1": "unrecruited",
+        "L2E2": "quiet",
+        "L2E3": "active",
+        "L2E4": "active",
+        "L2E5": "active",
+        "L2E6": "active",
+        "L2E7": "quiet"
+      },
+      "active_count": 4,
+      "self_spike_events": 4132
+    },
+    {
+      "config": "B",
+      "weight_seed": 3,
+      "topology_seed": 2,
+      "scenario": "short_hold_switch",
+      "total_records": 57,
+      "unique_delivery_events": 1,
+      "individual_synapse_deltas": 21,
+      "engine_l2_inhibition_log_len": 1,
+      "non_spiking_prev_step_records": 21,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 0,
+      "tyrant": "L2E3",
+      "tyrant_weights": {
+        "0": 96.53,
+        "1": 268.52,
+        "2": 82.16,
+        "3": 40.58,
+        "4": 167.71,
+        "5": 118.06,
+        "6": 42.82,
+        "7": 244.06,
+        "8": 1.0
+      },
+      "tyrant_union_mean_weight": 167.79,
+      "tyrant_other_mean_weight": 55.63,
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E1",
+        "L2E2",
+        "L2E4",
+        "L2E6"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E0": 3,
+        "L2E1": 3,
+        "L2E2": 3,
+        "L2E4": 3,
+        "L2E6": 3
+      },
+      "l2e_status": {
+        "L2E0": "unrecruited",
+        "L2E1": "unrecruited",
+        "L2E2": "unrecruited",
+        "L2E3": "active",
+        "L2E4": "unrecruited",
+        "L2E5": "active",
+        "L2E6": "unrecruited",
+        "L2E7": "active"
+      },
+      "active_count": 3,
+      "self_spike_events": 36
+    },
+    {
+      "config": "B",
+      "weight_seed": 3,
+      "topology_seed": 2,
+      "scenario": "long_hold_switch",
+      "total_records": 4302,
+      "unique_delivery_events": 168,
+      "individual_synapse_deltas": 2854,
+      "engine_l2_inhibition_log_len": 168,
+      "non_spiking_prev_step_records": 2854,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 0,
+      "tyrant": "L2E5",
+      "tyrant_weights": {
+        "0": 1.0,
+        "1": 526.91,
+        "2": 1.0,
+        "3": 1503.1,
+        "4": 1703.75,
+        "5": 1493.49,
+        "6": 1.0,
+        "7": 526.91,
+        "8": 1.0
+      },
+      "tyrant_union_mean_weight": 1150.83,
+      "tyrant_other_mean_weight": 1.0,
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E1",
+        "L2E2",
+        "L2E4",
+        "L2E6"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E0": 504,
+        "L2E1": 504,
+        "L2E2": 504,
+        "L2E4": 504,
+        "L2E6": 504
+      },
+      "l2e_status": {
+        "L2E0": "unrecruited",
+        "L2E1": "unrecruited",
+        "L2E2": "unrecruited",
+        "L2E3": "quiet",
+        "L2E4": "unrecruited",
+        "L2E5": "active",
+        "L2E6": "unrecruited",
+        "L2E7": "active"
+      },
+      "active_count": 2,
+      "self_spike_events": 1448
+    },
+    {
+      "config": "B",
+      "weight_seed": 3,
+      "topology_seed": 2,
+      "scenario": "interleaved_40",
+      "total_records": 11218,
+      "unique_delivery_events": 485,
+      "individual_synapse_deltas": 7086,
+      "engine_l2_inhibition_log_len": 400,
+      "non_spiking_prev_step_records": 7086,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 0,
+      "tyrant": "L2E3",
+      "tyrant_weights": {
+        "0": 4.81,
+        "1": 1.0,
+        "2": 138.78,
+        "3": 1.0,
+        "4": 2327.93,
+        "5": 1.0,
+        "6": 138.78,
+        "7": 1.0,
+        "8": 4.81
+      },
+      "tyrant_union_mean_weight": 466.39,
+      "tyrant_other_mean_weight": 71.8,
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E1"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E0": 1455,
+        "L2E1": 1455
+      },
+      "l2e_status": {
+        "L2E0": "unrecruited",
+        "L2E1": "unrecruited",
+        "L2E2": "quiet",
+        "L2E3": "active",
+        "L2E4": "active",
+        "L2E5": "active",
+        "L2E6": "active",
+        "L2E7": "quiet"
+      },
+      "active_count": 4,
+      "self_spike_events": 4132
+    },
+    {
+      "config": "B",
+      "weight_seed": 3,
+      "topology_seed": 3,
+      "scenario": "short_hold_switch",
+      "total_records": 57,
+      "unique_delivery_events": 1,
+      "individual_synapse_deltas": 21,
+      "engine_l2_inhibition_log_len": 1,
+      "non_spiking_prev_step_records": 21,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 0,
+      "tyrant": "L2E3",
+      "tyrant_weights": {
+        "0": 96.53,
+        "1": 268.52,
+        "2": 82.16,
+        "3": 40.58,
+        "4": 167.71,
+        "5": 118.06,
+        "6": 42.82,
+        "7": 244.06,
+        "8": 1.0
+      },
+      "tyrant_union_mean_weight": 167.79,
+      "tyrant_other_mean_weight": 55.63,
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E1",
+        "L2E2",
+        "L2E4",
+        "L2E6"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E0": 3,
+        "L2E1": 3,
+        "L2E2": 3,
+        "L2E4": 3,
+        "L2E6": 3
+      },
+      "l2e_status": {
+        "L2E0": "unrecruited",
+        "L2E1": "unrecruited",
+        "L2E2": "unrecruited",
+        "L2E3": "active",
+        "L2E4": "unrecruited",
+        "L2E5": "active",
+        "L2E6": "unrecruited",
+        "L2E7": "active"
+      },
+      "active_count": 3,
+      "self_spike_events": 36
+    },
+    {
+      "config": "B",
+      "weight_seed": 3,
+      "topology_seed": 3,
+      "scenario": "long_hold_switch",
+      "total_records": 4302,
+      "unique_delivery_events": 168,
+      "individual_synapse_deltas": 2854,
+      "engine_l2_inhibition_log_len": 168,
+      "non_spiking_prev_step_records": 2854,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 0,
+      "tyrant": "L2E5",
+      "tyrant_weights": {
+        "0": 1.0,
+        "1": 526.91,
+        "2": 1.0,
+        "3": 1503.1,
+        "4": 1703.75,
+        "5": 1493.49,
+        "6": 1.0,
+        "7": 526.91,
+        "8": 1.0
+      },
+      "tyrant_union_mean_weight": 1150.83,
+      "tyrant_other_mean_weight": 1.0,
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E1",
+        "L2E2",
+        "L2E4",
+        "L2E6"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E0": 504,
+        "L2E1": 504,
+        "L2E2": 504,
+        "L2E4": 504,
+        "L2E6": 504
+      },
+      "l2e_status": {
+        "L2E0": "unrecruited",
+        "L2E1": "unrecruited",
+        "L2E2": "unrecruited",
+        "L2E3": "quiet",
+        "L2E4": "unrecruited",
+        "L2E5": "active",
+        "L2E6": "unrecruited",
+        "L2E7": "active"
+      },
+      "active_count": 2,
+      "self_spike_events": 1448
+    },
+    {
+      "config": "B",
+      "weight_seed": 3,
+      "topology_seed": 3,
+      "scenario": "interleaved_40",
+      "total_records": 11218,
+      "unique_delivery_events": 485,
+      "individual_synapse_deltas": 7086,
+      "engine_l2_inhibition_log_len": 400,
+      "non_spiking_prev_step_records": 7086,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 0,
+      "tyrant": "L2E3",
+      "tyrant_weights": {
+        "0": 4.81,
+        "1": 1.0,
+        "2": 138.78,
+        "3": 1.0,
+        "4": 2327.93,
+        "5": 1.0,
+        "6": 138.78,
+        "7": 1.0,
+        "8": 4.81
+      },
+      "tyrant_union_mean_weight": 466.39,
+      "tyrant_other_mean_weight": 71.8,
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E1"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E0": 1455,
+        "L2E1": 1455
+      },
+      "l2e_status": {
+        "L2E0": "unrecruited",
+        "L2E1": "unrecruited",
+        "L2E2": "quiet",
+        "L2E3": "active",
+        "L2E4": "active",
+        "L2E5": "active",
+        "L2E6": "active",
+        "L2E7": "quiet"
+      },
+      "active_count": 4,
+      "self_spike_events": 4132
+    },
+    {
+      "config": "B",
+      "weight_seed": 4,
+      "topology_seed": 1,
+      "scenario": "short_hold_switch",
+      "total_records": 96,
+      "unique_delivery_events": 2,
+      "individual_synapse_deltas": 42,
+      "engine_l2_inhibition_log_len": 2,
+      "non_spiking_prev_step_records": 42,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 0,
+      "tyrant": "L2E1",
+      "tyrant_weights": {
+        "0": 44.42,
+        "1": 157.61,
+        "2": 48.52,
+        "3": 170.93,
+        "4": 257.71,
+        "5": 181.79,
+        "6": 64.22,
+        "7": 188.76,
+        "8": 74.17
+      },
+      "tyrant_union_mean_weight": 191.36,
+      "tyrant_other_mean_weight": 57.83,
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E2",
+        "L2E6"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E0": 6,
+        "L2E2": 6,
+        "L2E6": 6
+      },
+      "l2e_status": {
+        "L2E0": "unrecruited",
+        "L2E1": "active",
+        "L2E2": "unrecruited",
+        "L2E3": "active",
+        "L2E4": "active",
+        "L2E5": "active",
+        "L2E6": "unrecruited",
+        "L2E7": "active"
+      },
+      "active_count": 5,
+      "self_spike_events": 54
+    },
+    {
+      "config": "B",
+      "weight_seed": 4,
+      "topology_seed": 1,
+      "scenario": "long_hold_switch",
+      "total_records": 4250,
+      "unique_delivery_events": 173,
+      "individual_synapse_deltas": 3110,
+      "engine_l2_inhibition_log_len": 173,
+      "non_spiking_prev_step_records": 3110,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 0,
+      "tyrant": "L2E1",
+      "tyrant_weights": {
+        "0": 1.0,
+        "1": 551.6,
+        "2": 1.0,
+        "3": 1499.83,
+        "4": 1717.03,
+        "5": 1502.12,
+        "6": 1.0,
+        "7": 551.6,
+        "8": 1.0
+      },
+      "tyrant_union_mean_weight": 1164.44,
+      "tyrant_other_mean_weight": 1.0,
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E2",
+        "L2E3",
+        "L2E6",
+        "L2E7"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E0": 519,
+        "L2E2": 519,
+        "L2E3": 519,
+        "L2E6": 519,
+        "L2E7": 519
+      },
+      "l2e_status": {
+        "L2E0": "unrecruited",
+        "L2E1": "active",
+        "L2E2": "unrecruited",
+        "L2E3": "unrecruited",
+        "L2E4": "quiet",
+        "L2E5": "quiet",
+        "L2E6": "unrecruited",
+        "L2E7": "unrecruited"
+      },
+      "active_count": 1,
+      "self_spike_events": 1140
+    },
+    {
+      "config": "B",
+      "weight_seed": 4,
+      "topology_seed": 1,
+      "scenario": "interleaved_40",
+      "total_records": 9637,
+      "unique_delivery_events": 451,
+      "individual_synapse_deltas": 5566,
+      "engine_l2_inhibition_log_len": 400,
+      "non_spiking_prev_step_records": 5566,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 0,
+      "tyrant": "L2E0",
+      "tyrant_weights": {
+        "0": 6.24,
+        "1": 1.0,
+        "2": 139.5,
+        "3": 1.0,
+        "4": 2296.79,
+        "5": 1.0,
+        "6": 139.5,
+        "7": 1.0,
+        "8": 6.24
+      },
+      "tyrant_union_mean_weight": 460.16,
+      "tyrant_other_mean_weight": 72.87,
+      "never_fired_neurons": [
+        "L2E6"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E6": 1353
+      },
+      "l2e_status": {
+        "L2E0": "active",
+        "L2E1": "quiet",
+        "L2E2": "active",
+        "L2E3": "active",
+        "L2E4": "active",
+        "L2E5": "quiet",
+        "L2E6": "unrecruited",
+        "L2E7": "active"
+      },
+      "active_count": 5,
+      "self_spike_events": 4071
+    },
+    {
+      "config": "B",
+      "weight_seed": 4,
+      "topology_seed": 2,
+      "scenario": "short_hold_switch",
+      "total_records": 96,
+      "unique_delivery_events": 2,
+      "individual_synapse_deltas": 42,
+      "engine_l2_inhibition_log_len": 2,
+      "non_spiking_prev_step_records": 42,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 0,
+      "tyrant": "L2E1",
+      "tyrant_weights": {
+        "0": 44.42,
+        "1": 157.61,
+        "2": 48.52,
+        "3": 170.93,
+        "4": 257.71,
+        "5": 181.79,
+        "6": 64.22,
+        "7": 188.76,
+        "8": 74.17
+      },
+      "tyrant_union_mean_weight": 191.36,
+      "tyrant_other_mean_weight": 57.83,
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E2",
+        "L2E6"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E0": 6,
+        "L2E2": 6,
+        "L2E6": 6
+      },
+      "l2e_status": {
+        "L2E0": "unrecruited",
+        "L2E1": "active",
+        "L2E2": "unrecruited",
+        "L2E3": "active",
+        "L2E4": "active",
+        "L2E5": "active",
+        "L2E6": "unrecruited",
+        "L2E7": "active"
+      },
+      "active_count": 5,
+      "self_spike_events": 54
+    },
+    {
+      "config": "B",
+      "weight_seed": 4,
+      "topology_seed": 2,
+      "scenario": "long_hold_switch",
+      "total_records": 4250,
+      "unique_delivery_events": 173,
+      "individual_synapse_deltas": 3110,
+      "engine_l2_inhibition_log_len": 173,
+      "non_spiking_prev_step_records": 3110,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 0,
+      "tyrant": "L2E1",
+      "tyrant_weights": {
+        "0": 1.0,
+        "1": 551.6,
+        "2": 1.0,
+        "3": 1499.83,
+        "4": 1717.03,
+        "5": 1502.12,
+        "6": 1.0,
+        "7": 551.6,
+        "8": 1.0
+      },
+      "tyrant_union_mean_weight": 1164.44,
+      "tyrant_other_mean_weight": 1.0,
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E2",
+        "L2E3",
+        "L2E6",
+        "L2E7"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E0": 519,
+        "L2E2": 519,
+        "L2E3": 519,
+        "L2E6": 519,
+        "L2E7": 519
+      },
+      "l2e_status": {
+        "L2E0": "unrecruited",
+        "L2E1": "active",
+        "L2E2": "unrecruited",
+        "L2E3": "unrecruited",
+        "L2E4": "quiet",
+        "L2E5": "quiet",
+        "L2E6": "unrecruited",
+        "L2E7": "unrecruited"
+      },
+      "active_count": 1,
+      "self_spike_events": 1140
+    },
+    {
+      "config": "B",
+      "weight_seed": 4,
+      "topology_seed": 2,
+      "scenario": "interleaved_40",
+      "total_records": 9637,
+      "unique_delivery_events": 451,
+      "individual_synapse_deltas": 5566,
+      "engine_l2_inhibition_log_len": 400,
+      "non_spiking_prev_step_records": 5566,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 0,
+      "tyrant": "L2E0",
+      "tyrant_weights": {
+        "0": 6.24,
+        "1": 1.0,
+        "2": 139.5,
+        "3": 1.0,
+        "4": 2296.79,
+        "5": 1.0,
+        "6": 139.5,
+        "7": 1.0,
+        "8": 6.24
+      },
+      "tyrant_union_mean_weight": 460.16,
+      "tyrant_other_mean_weight": 72.87,
+      "never_fired_neurons": [
+        "L2E6"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E6": 1353
+      },
+      "l2e_status": {
+        "L2E0": "active",
+        "L2E1": "quiet",
+        "L2E2": "active",
+        "L2E3": "active",
+        "L2E4": "active",
+        "L2E5": "quiet",
+        "L2E6": "unrecruited",
+        "L2E7": "active"
+      },
+      "active_count": 5,
+      "self_spike_events": 4071
+    },
+    {
+      "config": "B",
+      "weight_seed": 4,
+      "topology_seed": 3,
+      "scenario": "short_hold_switch",
+      "total_records": 96,
+      "unique_delivery_events": 2,
+      "individual_synapse_deltas": 42,
+      "engine_l2_inhibition_log_len": 2,
+      "non_spiking_prev_step_records": 42,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 0,
+      "tyrant": "L2E1",
+      "tyrant_weights": {
+        "0": 44.42,
+        "1": 157.61,
+        "2": 48.52,
+        "3": 170.93,
+        "4": 257.71,
+        "5": 181.79,
+        "6": 64.22,
+        "7": 188.76,
+        "8": 74.17
+      },
+      "tyrant_union_mean_weight": 191.36,
+      "tyrant_other_mean_weight": 57.83,
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E2",
+        "L2E6"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E0": 6,
+        "L2E2": 6,
+        "L2E6": 6
+      },
+      "l2e_status": {
+        "L2E0": "unrecruited",
+        "L2E1": "active",
+        "L2E2": "unrecruited",
+        "L2E3": "active",
+        "L2E4": "active",
+        "L2E5": "active",
+        "L2E6": "unrecruited",
+        "L2E7": "active"
+      },
+      "active_count": 5,
+      "self_spike_events": 54
+    },
+    {
+      "config": "B",
+      "weight_seed": 4,
+      "topology_seed": 3,
+      "scenario": "long_hold_switch",
+      "total_records": 4250,
+      "unique_delivery_events": 173,
+      "individual_synapse_deltas": 3110,
+      "engine_l2_inhibition_log_len": 173,
+      "non_spiking_prev_step_records": 3110,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 0,
+      "tyrant": "L2E1",
+      "tyrant_weights": {
+        "0": 1.0,
+        "1": 551.6,
+        "2": 1.0,
+        "3": 1499.83,
+        "4": 1717.03,
+        "5": 1502.12,
+        "6": 1.0,
+        "7": 551.6,
+        "8": 1.0
+      },
+      "tyrant_union_mean_weight": 1164.44,
+      "tyrant_other_mean_weight": 1.0,
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E2",
+        "L2E3",
+        "L2E6",
+        "L2E7"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E0": 519,
+        "L2E2": 519,
+        "L2E3": 519,
+        "L2E6": 519,
+        "L2E7": 519
+      },
+      "l2e_status": {
+        "L2E0": "unrecruited",
+        "L2E1": "active",
+        "L2E2": "unrecruited",
+        "L2E3": "unrecruited",
+        "L2E4": "quiet",
+        "L2E5": "quiet",
+        "L2E6": "unrecruited",
+        "L2E7": "unrecruited"
+      },
+      "active_count": 1,
+      "self_spike_events": 1140
+    },
+    {
+      "config": "B",
+      "weight_seed": 4,
+      "topology_seed": 3,
+      "scenario": "interleaved_40",
+      "total_records": 9637,
+      "unique_delivery_events": 451,
+      "individual_synapse_deltas": 5566,
+      "engine_l2_inhibition_log_len": 400,
+      "non_spiking_prev_step_records": 5566,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 0,
+      "tyrant": "L2E0",
+      "tyrant_weights": {
+        "0": 6.24,
+        "1": 1.0,
+        "2": 139.5,
+        "3": 1.0,
+        "4": 2296.79,
+        "5": 1.0,
+        "6": 139.5,
+        "7": 1.0,
+        "8": 6.24
+      },
+      "tyrant_union_mean_weight": 460.16,
+      "tyrant_other_mean_weight": 72.87,
+      "never_fired_neurons": [
+        "L2E6"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E6": 1353
+      },
+      "l2e_status": {
+        "L2E0": "active",
+        "L2E1": "quiet",
+        "L2E2": "active",
+        "L2E3": "active",
+        "L2E4": "active",
+        "L2E5": "quiet",
+        "L2E6": "unrecruited",
+        "L2E7": "active"
+      },
+      "active_count": 5,
+      "self_spike_events": 4071
+    },
+    {
+      "config": "B",
+      "weight_seed": 5,
+      "topology_seed": 1,
+      "scenario": "short_hold_switch",
+      "total_records": 66,
+      "unique_delivery_events": 1,
+      "individual_synapse_deltas": 21,
+      "engine_l2_inhibition_log_len": 1,
+      "non_spiking_prev_step_records": 21,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 0,
+      "tyrant": "L2E3",
+      "tyrant_weights": {
+        "0": 127.93,
+        "1": 106.63,
+        "2": 135.95,
+        "3": 202.93,
+        "4": 200.23,
+        "5": 189.36,
+        "6": 128.25,
+        "7": 46.47,
+        "8": 73.39
+      },
+      "tyrant_union_mean_weight": 149.12,
+      "tyrant_other_mean_weight": 116.38,
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E1",
+        "L2E2"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E0": 3,
+        "L2E1": 3,
+        "L2E2": 3
+      },
+      "l2e_status": {
+        "L2E0": "unrecruited",
+        "L2E1": "unrecruited",
+        "L2E2": "unrecruited",
+        "L2E3": "active",
+        "L2E4": "active",
+        "L2E5": "active",
+        "L2E6": "active",
+        "L2E7": "active"
+      },
+      "active_count": 5,
+      "self_spike_events": 45
+    },
+    {
+      "config": "B",
+      "weight_seed": 5,
+      "topology_seed": 1,
+      "scenario": "long_hold_switch",
+      "total_records": 4359,
+      "unique_delivery_events": 175,
+      "individual_synapse_deltas": 3169,
+      "engine_l2_inhibition_log_len": 175,
+      "non_spiking_prev_step_records": 3169,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 0,
+      "tyrant": "L2E3",
+      "tyrant_weights": {
+        "0": 1.0,
+        "1": 548.79,
+        "2": 1.0,
+        "3": 1511.02,
+        "4": 1721.3,
+        "5": 1508.08,
+        "6": 1.0,
+        "7": 548.79,
+        "8": 1.0
+      },
+      "tyrant_union_mean_weight": 1167.6,
+      "tyrant_other_mean_weight": 1.0,
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E1",
+        "L2E2",
+        "L2E5",
+        "L2E7"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E0": 525,
+        "L2E1": 525,
+        "L2E2": 525,
+        "L2E5": 525,
+        "L2E7": 525
+      },
+      "l2e_status": {
+        "L2E0": "unrecruited",
+        "L2E1": "unrecruited",
+        "L2E2": "unrecruited",
+        "L2E3": "active",
+        "L2E4": "active",
+        "L2E5": "unrecruited",
+        "L2E6": "quiet",
+        "L2E7": "unrecruited"
+      },
+      "active_count": 2,
+      "self_spike_events": 1190
+    },
+    {
+      "config": "B",
+      "weight_seed": 5,
+      "topology_seed": 1,
+      "scenario": "interleaved_40",
+      "total_records": 10123,
+      "unique_delivery_events": 406,
+      "individual_synapse_deltas": 5783,
+      "engine_l2_inhibition_log_len": 400,
+      "non_spiking_prev_step_records": 5783,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 0,
+      "tyrant": "L2E3",
+      "tyrant_weights": {
+        "0": 5.08,
+        "1": 1.0,
+        "2": 142.31,
+        "3": 1.0,
+        "4": 2178.26,
+        "5": 1.0,
+        "6": 142.31,
+        "7": 1.0,
+        "8": 5.08
+      },
+      "tyrant_union_mean_weight": 436.45,
+      "tyrant_other_mean_weight": 73.7,
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E2"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E0": 1218,
+        "L2E2": 1218
+      },
+      "l2e_status": {
+        "L2E0": "unrecruited",
+        "L2E1": "active",
+        "L2E2": "unrecruited",
+        "L2E3": "active",
+        "L2E4": "active",
+        "L2E5": "active",
+        "L2E6": "quiet",
+        "L2E7": "quiet"
+      },
+      "active_count": 4,
+      "self_spike_events": 4340
+    },
+    {
+      "config": "B",
+      "weight_seed": 5,
+      "topology_seed": 2,
+      "scenario": "short_hold_switch",
+      "total_records": 66,
+      "unique_delivery_events": 1,
+      "individual_synapse_deltas": 21,
+      "engine_l2_inhibition_log_len": 1,
+      "non_spiking_prev_step_records": 21,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 0,
+      "tyrant": "L2E3",
+      "tyrant_weights": {
+        "0": 127.93,
+        "1": 106.63,
+        "2": 135.95,
+        "3": 202.93,
+        "4": 200.23,
+        "5": 189.36,
+        "6": 128.25,
+        "7": 46.47,
+        "8": 73.39
+      },
+      "tyrant_union_mean_weight": 149.12,
+      "tyrant_other_mean_weight": 116.38,
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E1",
+        "L2E2"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E0": 3,
+        "L2E1": 3,
+        "L2E2": 3
+      },
+      "l2e_status": {
+        "L2E0": "unrecruited",
+        "L2E1": "unrecruited",
+        "L2E2": "unrecruited",
+        "L2E3": "active",
+        "L2E4": "active",
+        "L2E5": "active",
+        "L2E6": "active",
+        "L2E7": "active"
+      },
+      "active_count": 5,
+      "self_spike_events": 45
+    },
+    {
+      "config": "B",
+      "weight_seed": 5,
+      "topology_seed": 2,
+      "scenario": "long_hold_switch",
+      "total_records": 4359,
+      "unique_delivery_events": 175,
+      "individual_synapse_deltas": 3169,
+      "engine_l2_inhibition_log_len": 175,
+      "non_spiking_prev_step_records": 3169,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 0,
+      "tyrant": "L2E3",
+      "tyrant_weights": {
+        "0": 1.0,
+        "1": 548.79,
+        "2": 1.0,
+        "3": 1511.02,
+        "4": 1721.3,
+        "5": 1508.08,
+        "6": 1.0,
+        "7": 548.79,
+        "8": 1.0
+      },
+      "tyrant_union_mean_weight": 1167.6,
+      "tyrant_other_mean_weight": 1.0,
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E1",
+        "L2E2",
+        "L2E5",
+        "L2E7"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E0": 525,
+        "L2E1": 525,
+        "L2E2": 525,
+        "L2E5": 525,
+        "L2E7": 525
+      },
+      "l2e_status": {
+        "L2E0": "unrecruited",
+        "L2E1": "unrecruited",
+        "L2E2": "unrecruited",
+        "L2E3": "active",
+        "L2E4": "active",
+        "L2E5": "unrecruited",
+        "L2E6": "quiet",
+        "L2E7": "unrecruited"
+      },
+      "active_count": 2,
+      "self_spike_events": 1190
+    },
+    {
+      "config": "B",
+      "weight_seed": 5,
+      "topology_seed": 2,
+      "scenario": "interleaved_40",
+      "total_records": 10123,
+      "unique_delivery_events": 406,
+      "individual_synapse_deltas": 5783,
+      "engine_l2_inhibition_log_len": 400,
+      "non_spiking_prev_step_records": 5783,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 0,
+      "tyrant": "L2E3",
+      "tyrant_weights": {
+        "0": 5.08,
+        "1": 1.0,
+        "2": 142.31,
+        "3": 1.0,
+        "4": 2178.26,
+        "5": 1.0,
+        "6": 142.31,
+        "7": 1.0,
+        "8": 5.08
+      },
+      "tyrant_union_mean_weight": 436.45,
+      "tyrant_other_mean_weight": 73.7,
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E2"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E0": 1218,
+        "L2E2": 1218
+      },
+      "l2e_status": {
+        "L2E0": "unrecruited",
+        "L2E1": "active",
+        "L2E2": "unrecruited",
+        "L2E3": "active",
+        "L2E4": "active",
+        "L2E5": "active",
+        "L2E6": "quiet",
+        "L2E7": "quiet"
+      },
+      "active_count": 4,
+      "self_spike_events": 4340
+    },
+    {
+      "config": "B",
+      "weight_seed": 5,
+      "topology_seed": 3,
+      "scenario": "short_hold_switch",
+      "total_records": 66,
+      "unique_delivery_events": 1,
+      "individual_synapse_deltas": 21,
+      "engine_l2_inhibition_log_len": 1,
+      "non_spiking_prev_step_records": 21,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 0,
+      "tyrant": "L2E3",
+      "tyrant_weights": {
+        "0": 127.93,
+        "1": 106.63,
+        "2": 135.95,
+        "3": 202.93,
+        "4": 200.23,
+        "5": 189.36,
+        "6": 128.25,
+        "7": 46.47,
+        "8": 73.39
+      },
+      "tyrant_union_mean_weight": 149.12,
+      "tyrant_other_mean_weight": 116.38,
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E1",
+        "L2E2"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E0": 3,
+        "L2E1": 3,
+        "L2E2": 3
+      },
+      "l2e_status": {
+        "L2E0": "unrecruited",
+        "L2E1": "unrecruited",
+        "L2E2": "unrecruited",
+        "L2E3": "active",
+        "L2E4": "active",
+        "L2E5": "active",
+        "L2E6": "active",
+        "L2E7": "active"
+      },
+      "active_count": 5,
+      "self_spike_events": 45
+    },
+    {
+      "config": "B",
+      "weight_seed": 5,
+      "topology_seed": 3,
+      "scenario": "long_hold_switch",
+      "total_records": 4359,
+      "unique_delivery_events": 175,
+      "individual_synapse_deltas": 3169,
+      "engine_l2_inhibition_log_len": 175,
+      "non_spiking_prev_step_records": 3169,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 0,
+      "tyrant": "L2E3",
+      "tyrant_weights": {
+        "0": 1.0,
+        "1": 548.79,
+        "2": 1.0,
+        "3": 1511.02,
+        "4": 1721.3,
+        "5": 1508.08,
+        "6": 1.0,
+        "7": 548.79,
+        "8": 1.0
+      },
+      "tyrant_union_mean_weight": 1167.6,
+      "tyrant_other_mean_weight": 1.0,
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E1",
+        "L2E2",
+        "L2E5",
+        "L2E7"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E0": 525,
+        "L2E1": 525,
+        "L2E2": 525,
+        "L2E5": 525,
+        "L2E7": 525
+      },
+      "l2e_status": {
+        "L2E0": "unrecruited",
+        "L2E1": "unrecruited",
+        "L2E2": "unrecruited",
+        "L2E3": "active",
+        "L2E4": "active",
+        "L2E5": "unrecruited",
+        "L2E6": "quiet",
+        "L2E7": "unrecruited"
+      },
+      "active_count": 2,
+      "self_spike_events": 1190
+    },
+    {
+      "config": "B",
+      "weight_seed": 5,
+      "topology_seed": 3,
+      "scenario": "interleaved_40",
+      "total_records": 10123,
+      "unique_delivery_events": 406,
+      "individual_synapse_deltas": 5783,
+      "engine_l2_inhibition_log_len": 400,
+      "non_spiking_prev_step_records": 5783,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 0,
+      "tyrant": "L2E3",
+      "tyrant_weights": {
+        "0": 5.08,
+        "1": 1.0,
+        "2": 142.31,
+        "3": 1.0,
+        "4": 2178.26,
+        "5": 1.0,
+        "6": 142.31,
+        "7": 1.0,
+        "8": 5.08
+      },
+      "tyrant_union_mean_weight": 436.45,
+      "tyrant_other_mean_weight": 73.7,
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E2"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E0": 1218,
+        "L2E2": 1218
+      },
+      "l2e_status": {
+        "L2E0": "unrecruited",
+        "L2E1": "active",
+        "L2E2": "unrecruited",
+        "L2E3": "active",
+        "L2E4": "active",
+        "L2E5": "active",
+        "L2E6": "quiet",
+        "L2E7": "quiet"
+      },
+      "active_count": 4,
+      "self_spike_events": 4340
+    },
+    {
+      "config": "C",
+      "weight_seed": 1,
+      "topology_seed": 1,
+      "scenario": "short_hold_switch",
+      "total_records": 144,
+      "unique_delivery_events": 3,
+      "individual_synapse_deltas": 63,
+      "engine_l2_inhibition_log_len": 3,
+      "non_spiking_prev_step_records": 63,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 0,
+      "tyrant": "L2E3",
+      "tyrant_weights": {
+        "0": 21.54,
+        "1": 216.22,
+        "2": 1.0,
+        "3": 141.42,
+        "4": 192.42,
+        "5": 115.17,
+        "6": 59.09,
+        "7": 197.82,
+        "8": 3.61
+      },
+      "tyrant_union_mean_weight": 172.61,
+      "tyrant_other_mean_weight": 21.31,
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E1",
+        "L2E2",
+        "L2E6",
+        "L2E7"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E0": 9,
+        "L2E1": 9,
+        "L2E2": 9,
+        "L2E6": 9,
+        "L2E7": 9
+      },
+      "l2e_status": {
+        "L2E0": "unrecruited",
+        "L2E1": "unrecruited",
+        "L2E2": "unrecruited",
+        "L2E3": "active",
+        "L2E4": "active",
+        "L2E5": "active",
+        "L2E6": "unrecruited",
+        "L2E7": "unrecruited"
+      },
+      "active_count": 3,
+      "self_spike_events": 81
+    },
+    {
+      "config": "C",
+      "weight_seed": 1,
+      "topology_seed": 1,
+      "scenario": "long_hold_switch",
+      "total_records": 7347,
+      "unique_delivery_events": 294,
+      "individual_synapse_deltas": 4851,
+      "engine_l2_inhibition_log_len": 294,
+      "non_spiking_prev_step_records": 4851,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 0,
+      "tyrant": "L2E5",
+      "tyrant_weights": {
+        "0": 1.0,
+        "1": 605.03,
+        "2": 1.0,
+        "3": 1758.0,
+        "4": 1908.85,
+        "5": 1749.38,
+        "6": 1.0,
+        "7": 605.03,
+        "8": 1.0
+      },
+      "tyrant_union_mean_weight": 1325.26,
+      "tyrant_other_mean_weight": 1.0,
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E1",
+        "L2E2",
+        "L2E6",
+        "L2E7"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E0": 882,
+        "L2E1": 882,
+        "L2E2": 882,
+        "L2E6": 882,
+        "L2E7": 882
+      },
+      "l2e_status": {
+        "L2E0": "unrecruited",
+        "L2E1": "unrecruited",
+        "L2E2": "unrecruited",
+        "L2E3": "active",
+        "L2E4": "active",
+        "L2E5": "active",
+        "L2E6": "unrecruited",
+        "L2E7": "unrecruited"
+      },
+      "active_count": 3,
+      "self_spike_events": 2496
+    },
+    {
+      "config": "C",
+      "weight_seed": 1,
+      "topology_seed": 1,
+      "scenario": "interleaved_40",
+      "total_records": 23624,
+      "unique_delivery_events": 852,
+      "individual_synapse_deltas": 13414,
+      "engine_l2_inhibition_log_len": 400,
+      "non_spiking_prev_step_records": 13414,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 0,
+      "tyrant": "L2E4",
+      "tyrant_weights": {
+        "0": 13.54,
+        "1": 1.0,
+        "2": 220.79,
+        "3": 1.0,
+        "4": 2449.76,
+        "5": 1.0,
+        "6": 220.79,
+        "7": 1.0,
+        "8": 13.54
+      },
+      "tyrant_union_mean_weight": 490.75,
+      "tyrant_other_mean_weight": 117.17,
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E1",
+        "L2E6",
+        "L2E7"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E0": 2556,
+        "L2E1": 2556,
+        "L2E6": 2556,
+        "L2E7": 2556
+      },
+      "l2e_status": {
+        "L2E0": "unrecruited",
+        "L2E1": "unrecruited",
+        "L2E2": "quiet",
+        "L2E3": "active",
+        "L2E4": "active",
+        "L2E5": "active",
+        "L2E6": "unrecruited",
+        "L2E7": "unrecruited"
+      },
+      "active_count": 3,
+      "self_spike_events": 10210
+    },
+    {
+      "config": "C",
+      "weight_seed": 1,
+      "topology_seed": 2,
+      "scenario": "short_hold_switch",
+      "total_records": 144,
+      "unique_delivery_events": 3,
+      "individual_synapse_deltas": 63,
+      "engine_l2_inhibition_log_len": 3,
+      "non_spiking_prev_step_records": 63,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 0,
+      "tyrant": "L2E3",
+      "tyrant_weights": {
+        "0": 21.54,
+        "1": 216.22,
+        "2": 1.0,
+        "3": 141.42,
+        "4": 192.42,
+        "5": 115.17,
+        "6": 59.09,
+        "7": 197.82,
+        "8": 3.61
+      },
+      "tyrant_union_mean_weight": 172.61,
+      "tyrant_other_mean_weight": 21.31,
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E1",
+        "L2E2",
+        "L2E6",
+        "L2E7"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E0": 9,
+        "L2E1": 9,
+        "L2E2": 9,
+        "L2E6": 9,
+        "L2E7": 9
+      },
+      "l2e_status": {
+        "L2E0": "unrecruited",
+        "L2E1": "unrecruited",
+        "L2E2": "unrecruited",
+        "L2E3": "active",
+        "L2E4": "active",
+        "L2E5": "active",
+        "L2E6": "unrecruited",
+        "L2E7": "unrecruited"
+      },
+      "active_count": 3,
+      "self_spike_events": 81
+    },
+    {
+      "config": "C",
+      "weight_seed": 1,
+      "topology_seed": 2,
+      "scenario": "long_hold_switch",
+      "total_records": 7347,
+      "unique_delivery_events": 294,
+      "individual_synapse_deltas": 4851,
+      "engine_l2_inhibition_log_len": 294,
+      "non_spiking_prev_step_records": 4851,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 0,
+      "tyrant": "L2E5",
+      "tyrant_weights": {
+        "0": 1.0,
+        "1": 605.03,
+        "2": 1.0,
+        "3": 1758.0,
+        "4": 1908.85,
+        "5": 1749.38,
+        "6": 1.0,
+        "7": 605.03,
+        "8": 1.0
+      },
+      "tyrant_union_mean_weight": 1325.26,
+      "tyrant_other_mean_weight": 1.0,
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E1",
+        "L2E2",
+        "L2E6",
+        "L2E7"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E0": 882,
+        "L2E1": 882,
+        "L2E2": 882,
+        "L2E6": 882,
+        "L2E7": 882
+      },
+      "l2e_status": {
+        "L2E0": "unrecruited",
+        "L2E1": "unrecruited",
+        "L2E2": "unrecruited",
+        "L2E3": "active",
+        "L2E4": "active",
+        "L2E5": "active",
+        "L2E6": "unrecruited",
+        "L2E7": "unrecruited"
+      },
+      "active_count": 3,
+      "self_spike_events": 2496
+    },
+    {
+      "config": "C",
+      "weight_seed": 1,
+      "topology_seed": 2,
+      "scenario": "interleaved_40",
+      "total_records": 23624,
+      "unique_delivery_events": 852,
+      "individual_synapse_deltas": 13414,
+      "engine_l2_inhibition_log_len": 400,
+      "non_spiking_prev_step_records": 13414,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 0,
+      "tyrant": "L2E4",
+      "tyrant_weights": {
+        "0": 13.54,
+        "1": 1.0,
+        "2": 220.79,
+        "3": 1.0,
+        "4": 2449.76,
+        "5": 1.0,
+        "6": 220.79,
+        "7": 1.0,
+        "8": 13.54
+      },
+      "tyrant_union_mean_weight": 490.75,
+      "tyrant_other_mean_weight": 117.17,
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E1",
+        "L2E6",
+        "L2E7"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E0": 2556,
+        "L2E1": 2556,
+        "L2E6": 2556,
+        "L2E7": 2556
+      },
+      "l2e_status": {
+        "L2E0": "unrecruited",
+        "L2E1": "unrecruited",
+        "L2E2": "quiet",
+        "L2E3": "active",
+        "L2E4": "active",
+        "L2E5": "active",
+        "L2E6": "unrecruited",
+        "L2E7": "unrecruited"
+      },
+      "active_count": 3,
+      "self_spike_events": 10210
+    },
+    {
+      "config": "C",
+      "weight_seed": 1,
+      "topology_seed": 3,
+      "scenario": "short_hold_switch",
+      "total_records": 144,
+      "unique_delivery_events": 3,
+      "individual_synapse_deltas": 63,
+      "engine_l2_inhibition_log_len": 3,
+      "non_spiking_prev_step_records": 63,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 0,
+      "tyrant": "L2E3",
+      "tyrant_weights": {
+        "0": 21.54,
+        "1": 216.22,
+        "2": 1.0,
+        "3": 141.42,
+        "4": 192.42,
+        "5": 115.17,
+        "6": 59.09,
+        "7": 197.82,
+        "8": 3.61
+      },
+      "tyrant_union_mean_weight": 172.61,
+      "tyrant_other_mean_weight": 21.31,
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E1",
+        "L2E2",
+        "L2E6",
+        "L2E7"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E0": 9,
+        "L2E1": 9,
+        "L2E2": 9,
+        "L2E6": 9,
+        "L2E7": 9
+      },
+      "l2e_status": {
+        "L2E0": "unrecruited",
+        "L2E1": "unrecruited",
+        "L2E2": "unrecruited",
+        "L2E3": "active",
+        "L2E4": "active",
+        "L2E5": "active",
+        "L2E6": "unrecruited",
+        "L2E7": "unrecruited"
+      },
+      "active_count": 3,
+      "self_spike_events": 81
+    },
+    {
+      "config": "C",
+      "weight_seed": 1,
+      "topology_seed": 3,
+      "scenario": "long_hold_switch",
+      "total_records": 7347,
+      "unique_delivery_events": 294,
+      "individual_synapse_deltas": 4851,
+      "engine_l2_inhibition_log_len": 294,
+      "non_spiking_prev_step_records": 4851,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 0,
+      "tyrant": "L2E5",
+      "tyrant_weights": {
+        "0": 1.0,
+        "1": 605.03,
+        "2": 1.0,
+        "3": 1758.0,
+        "4": 1908.85,
+        "5": 1749.38,
+        "6": 1.0,
+        "7": 605.03,
+        "8": 1.0
+      },
+      "tyrant_union_mean_weight": 1325.26,
+      "tyrant_other_mean_weight": 1.0,
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E1",
+        "L2E2",
+        "L2E6",
+        "L2E7"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E0": 882,
+        "L2E1": 882,
+        "L2E2": 882,
+        "L2E6": 882,
+        "L2E7": 882
+      },
+      "l2e_status": {
+        "L2E0": "unrecruited",
+        "L2E1": "unrecruited",
+        "L2E2": "unrecruited",
+        "L2E3": "active",
+        "L2E4": "active",
+        "L2E5": "active",
+        "L2E6": "unrecruited",
+        "L2E7": "unrecruited"
+      },
+      "active_count": 3,
+      "self_spike_events": 2496
+    },
+    {
+      "config": "C",
+      "weight_seed": 1,
+      "topology_seed": 3,
+      "scenario": "interleaved_40",
+      "total_records": 23624,
+      "unique_delivery_events": 852,
+      "individual_synapse_deltas": 13414,
+      "engine_l2_inhibition_log_len": 400,
+      "non_spiking_prev_step_records": 13414,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 0,
+      "tyrant": "L2E4",
+      "tyrant_weights": {
+        "0": 13.54,
+        "1": 1.0,
+        "2": 220.79,
+        "3": 1.0,
+        "4": 2449.76,
+        "5": 1.0,
+        "6": 220.79,
+        "7": 1.0,
+        "8": 13.54
+      },
+      "tyrant_union_mean_weight": 490.75,
+      "tyrant_other_mean_weight": 117.17,
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E1",
+        "L2E6",
+        "L2E7"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E0": 2556,
+        "L2E1": 2556,
+        "L2E6": 2556,
+        "L2E7": 2556
+      },
+      "l2e_status": {
+        "L2E0": "unrecruited",
+        "L2E1": "unrecruited",
+        "L2E2": "quiet",
+        "L2E3": "active",
+        "L2E4": "active",
+        "L2E5": "active",
+        "L2E6": "unrecruited",
+        "L2E7": "unrecruited"
+      },
+      "active_count": 3,
+      "self_spike_events": 10210
+    },
+    {
+      "config": "C",
+      "weight_seed": 2,
+      "topology_seed": 1,
+      "scenario": "short_hold_switch",
+      "total_records": 141,
+      "unique_delivery_events": 3,
+      "individual_synapse_deltas": 61,
+      "engine_l2_inhibition_log_len": 3,
+      "non_spiking_prev_step_records": 61,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 0,
+      "tyrant": "L2E0",
+      "tyrant_weights": {
+        "0": 67.21,
+        "1": 117.52,
+        "2": 1.0,
+        "3": 98.82,
+        "4": 248.73,
+        "5": 128.64,
+        "6": 1.0,
+        "7": 216.76,
+        "8": 24.16
+      },
+      "tyrant_union_mean_weight": 162.09,
+      "tyrant_other_mean_weight": 23.34,
+      "never_fired_neurons": [
+        "L2E2",
+        "L2E4",
+        "L2E5"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E2": 9,
+        "L2E4": 9,
+        "L2E5": 9
+      },
+      "l2e_status": {
+        "L2E0": "active",
+        "L2E1": "active",
+        "L2E2": "unrecruited",
+        "L2E3": "active",
+        "L2E4": "unrecruited",
+        "L2E5": "unrecruited",
+        "L2E6": "active",
+        "L2E7": "active"
+      },
+      "active_count": 5,
+      "self_spike_events": 80
+    },
+    {
+      "config": "C",
+      "weight_seed": 2,
+      "topology_seed": 1,
+      "scenario": "long_hold_switch",
+      "total_records": 7253,
+      "unique_delivery_events": 296,
+      "individual_synapse_deltas": 4969,
+      "engine_l2_inhibition_log_len": 296,
+      "non_spiking_prev_step_records": 4969,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 0,
+      "tyrant": "L2E3",
+      "tyrant_weights": {
+        "0": 1.0,
+        "1": 602.71,
+        "2": 1.0,
+        "3": 1756.6,
+        "4": 1911.34,
+        "5": 1760.97,
+        "6": 1.0,
+        "7": 602.71,
+        "8": 1.0
+      },
+      "tyrant_union_mean_weight": 1326.87,
+      "tyrant_other_mean_weight": 1.0,
+      "never_fired_neurons": [
+        "L2E1",
+        "L2E2",
+        "L2E4",
+        "L2E5",
+        "L2E6"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E1": 888,
+        "L2E2": 888,
+        "L2E4": 888,
+        "L2E5": 888,
+        "L2E6": 888
+      },
+      "l2e_status": {
+        "L2E0": "active",
+        "L2E1": "unrecruited",
+        "L2E2": "unrecruited",
+        "L2E3": "active",
+        "L2E4": "unrecruited",
+        "L2E5": "unrecruited",
+        "L2E6": "unrecruited",
+        "L2E7": "quiet"
+      },
+      "active_count": 2,
+      "self_spike_events": 2284
+    },
+    {
+      "config": "C",
+      "weight_seed": 2,
+      "topology_seed": 1,
+      "scenario": "interleaved_40",
+      "total_records": 16596,
+      "unique_delivery_events": 741,
+      "individual_synapse_deltas": 10723,
+      "engine_l2_inhibition_log_len": 400,
+      "non_spiking_prev_step_records": 10723,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 0,
+      "tyrant": "L2E0",
+      "tyrant_weights": {
+        "0": 1.0,
+        "1": 1.0,
+        "2": 198.71,
+        "3": 1.0,
+        "4": 2430.85,
+        "5": 1.0,
+        "6": 198.71,
+        "7": 1.0,
+        "8": 1.0
+      },
+      "tyrant_union_mean_weight": 486.97,
+      "tyrant_other_mean_weight": 99.86,
+      "never_fired_neurons": [
+        "L2E2",
+        "L2E4"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E2": 2223,
+        "L2E4": 2223
+      },
+      "l2e_status": {
+        "L2E0": "active",
+        "L2E1": "quiet",
+        "L2E2": "unrecruited",
+        "L2E3": "active",
+        "L2E4": "unrecruited",
+        "L2E5": "active",
+        "L2E6": "active",
+        "L2E7": "quiet"
+      },
+      "active_count": 4,
+      "self_spike_events": 5873
+    },
+    {
+      "config": "C",
+      "weight_seed": 2,
+      "topology_seed": 2,
+      "scenario": "short_hold_switch",
+      "total_records": 141,
+      "unique_delivery_events": 3,
+      "individual_synapse_deltas": 61,
+      "engine_l2_inhibition_log_len": 3,
+      "non_spiking_prev_step_records": 61,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 0,
+      "tyrant": "L2E0",
+      "tyrant_weights": {
+        "0": 67.21,
+        "1": 117.52,
+        "2": 1.0,
+        "3": 98.82,
+        "4": 248.73,
+        "5": 128.64,
+        "6": 1.0,
+        "7": 216.76,
+        "8": 24.16
+      },
+      "tyrant_union_mean_weight": 162.09,
+      "tyrant_other_mean_weight": 23.34,
+      "never_fired_neurons": [
+        "L2E2",
+        "L2E4",
+        "L2E5"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E2": 9,
+        "L2E4": 9,
+        "L2E5": 9
+      },
+      "l2e_status": {
+        "L2E0": "active",
+        "L2E1": "active",
+        "L2E2": "unrecruited",
+        "L2E3": "active",
+        "L2E4": "unrecruited",
+        "L2E5": "unrecruited",
+        "L2E6": "active",
+        "L2E7": "active"
+      },
+      "active_count": 5,
+      "self_spike_events": 80
+    },
+    {
+      "config": "C",
+      "weight_seed": 2,
+      "topology_seed": 2,
+      "scenario": "long_hold_switch",
+      "total_records": 7253,
+      "unique_delivery_events": 296,
+      "individual_synapse_deltas": 4969,
+      "engine_l2_inhibition_log_len": 296,
+      "non_spiking_prev_step_records": 4969,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 0,
+      "tyrant": "L2E3",
+      "tyrant_weights": {
+        "0": 1.0,
+        "1": 602.71,
+        "2": 1.0,
+        "3": 1756.6,
+        "4": 1911.34,
+        "5": 1760.97,
+        "6": 1.0,
+        "7": 602.71,
+        "8": 1.0
+      },
+      "tyrant_union_mean_weight": 1326.87,
+      "tyrant_other_mean_weight": 1.0,
+      "never_fired_neurons": [
+        "L2E1",
+        "L2E2",
+        "L2E4",
+        "L2E5",
+        "L2E6"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E1": 888,
+        "L2E2": 888,
+        "L2E4": 888,
+        "L2E5": 888,
+        "L2E6": 888
+      },
+      "l2e_status": {
+        "L2E0": "active",
+        "L2E1": "unrecruited",
+        "L2E2": "unrecruited",
+        "L2E3": "active",
+        "L2E4": "unrecruited",
+        "L2E5": "unrecruited",
+        "L2E6": "unrecruited",
+        "L2E7": "quiet"
+      },
+      "active_count": 2,
+      "self_spike_events": 2284
+    },
+    {
+      "config": "C",
+      "weight_seed": 2,
+      "topology_seed": 2,
+      "scenario": "interleaved_40",
+      "total_records": 16596,
+      "unique_delivery_events": 741,
+      "individual_synapse_deltas": 10723,
+      "engine_l2_inhibition_log_len": 400,
+      "non_spiking_prev_step_records": 10723,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 0,
+      "tyrant": "L2E0",
+      "tyrant_weights": {
+        "0": 1.0,
+        "1": 1.0,
+        "2": 198.71,
+        "3": 1.0,
+        "4": 2430.85,
+        "5": 1.0,
+        "6": 198.71,
+        "7": 1.0,
+        "8": 1.0
+      },
+      "tyrant_union_mean_weight": 486.97,
+      "tyrant_other_mean_weight": 99.86,
+      "never_fired_neurons": [
+        "L2E2",
+        "L2E4"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E2": 2223,
+        "L2E4": 2223
+      },
+      "l2e_status": {
+        "L2E0": "active",
+        "L2E1": "quiet",
+        "L2E2": "unrecruited",
+        "L2E3": "active",
+        "L2E4": "unrecruited",
+        "L2E5": "active",
+        "L2E6": "active",
+        "L2E7": "quiet"
+      },
+      "active_count": 4,
+      "self_spike_events": 5873
+    },
+    {
+      "config": "C",
+      "weight_seed": 2,
+      "topology_seed": 3,
+      "scenario": "short_hold_switch",
+      "total_records": 141,
+      "unique_delivery_events": 3,
+      "individual_synapse_deltas": 61,
+      "engine_l2_inhibition_log_len": 3,
+      "non_spiking_prev_step_records": 61,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 0,
+      "tyrant": "L2E0",
+      "tyrant_weights": {
+        "0": 67.21,
+        "1": 117.52,
+        "2": 1.0,
+        "3": 98.82,
+        "4": 248.73,
+        "5": 128.64,
+        "6": 1.0,
+        "7": 216.76,
+        "8": 24.16
+      },
+      "tyrant_union_mean_weight": 162.09,
+      "tyrant_other_mean_weight": 23.34,
+      "never_fired_neurons": [
+        "L2E2",
+        "L2E4",
+        "L2E5"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E2": 9,
+        "L2E4": 9,
+        "L2E5": 9
+      },
+      "l2e_status": {
+        "L2E0": "active",
+        "L2E1": "active",
+        "L2E2": "unrecruited",
+        "L2E3": "active",
+        "L2E4": "unrecruited",
+        "L2E5": "unrecruited",
+        "L2E6": "active",
+        "L2E7": "active"
+      },
+      "active_count": 5,
+      "self_spike_events": 80
+    },
+    {
+      "config": "C",
+      "weight_seed": 2,
+      "topology_seed": 3,
+      "scenario": "long_hold_switch",
+      "total_records": 7253,
+      "unique_delivery_events": 296,
+      "individual_synapse_deltas": 4969,
+      "engine_l2_inhibition_log_len": 296,
+      "non_spiking_prev_step_records": 4969,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 0,
+      "tyrant": "L2E3",
+      "tyrant_weights": {
+        "0": 1.0,
+        "1": 602.71,
+        "2": 1.0,
+        "3": 1756.6,
+        "4": 1911.34,
+        "5": 1760.97,
+        "6": 1.0,
+        "7": 602.71,
+        "8": 1.0
+      },
+      "tyrant_union_mean_weight": 1326.87,
+      "tyrant_other_mean_weight": 1.0,
+      "never_fired_neurons": [
+        "L2E1",
+        "L2E2",
+        "L2E4",
+        "L2E5",
+        "L2E6"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E1": 888,
+        "L2E2": 888,
+        "L2E4": 888,
+        "L2E5": 888,
+        "L2E6": 888
+      },
+      "l2e_status": {
+        "L2E0": "active",
+        "L2E1": "unrecruited",
+        "L2E2": "unrecruited",
+        "L2E3": "active",
+        "L2E4": "unrecruited",
+        "L2E5": "unrecruited",
+        "L2E6": "unrecruited",
+        "L2E7": "quiet"
+      },
+      "active_count": 2,
+      "self_spike_events": 2284
+    },
+    {
+      "config": "C",
+      "weight_seed": 2,
+      "topology_seed": 3,
+      "scenario": "interleaved_40",
+      "total_records": 16596,
+      "unique_delivery_events": 741,
+      "individual_synapse_deltas": 10723,
+      "engine_l2_inhibition_log_len": 400,
+      "non_spiking_prev_step_records": 10723,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 0,
+      "tyrant": "L2E0",
+      "tyrant_weights": {
+        "0": 1.0,
+        "1": 1.0,
+        "2": 198.71,
+        "3": 1.0,
+        "4": 2430.85,
+        "5": 1.0,
+        "6": 198.71,
+        "7": 1.0,
+        "8": 1.0
+      },
+      "tyrant_union_mean_weight": 486.97,
+      "tyrant_other_mean_weight": 99.86,
+      "never_fired_neurons": [
+        "L2E2",
+        "L2E4"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E2": 2223,
+        "L2E4": 2223
+      },
+      "l2e_status": {
+        "L2E0": "active",
+        "L2E1": "quiet",
+        "L2E2": "unrecruited",
+        "L2E3": "active",
+        "L2E4": "unrecruited",
+        "L2E5": "active",
+        "L2E6": "active",
+        "L2E7": "quiet"
+      },
+      "active_count": 4,
+      "self_spike_events": 5873
+    },
+    {
+      "config": "C",
+      "weight_seed": 3,
+      "topology_seed": 1,
+      "scenario": "short_hold_switch",
+      "total_records": 143,
+      "unique_delivery_events": 3,
+      "individual_synapse_deltas": 63,
+      "engine_l2_inhibition_log_len": 3,
+      "non_spiking_prev_step_records": 63,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 0,
+      "tyrant": "L2E3",
+      "tyrant_weights": {
+        "0": 53.65,
+        "1": 231.14,
+        "2": 38.8,
+        "3": 82.63,
+        "4": 206.06,
+        "5": 157.66,
+        "6": 1.0,
+        "7": 206.23,
+        "8": 1.0
+      },
+      "tyrant_union_mean_weight": 176.74,
+      "tyrant_other_mean_weight": 23.61,
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E1",
+        "L2E2",
+        "L2E4"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E0": 9,
+        "L2E1": 9,
+        "L2E2": 9,
+        "L2E4": 9
+      },
+      "l2e_status": {
+        "L2E0": "unrecruited",
+        "L2E1": "unrecruited",
+        "L2E2": "unrecruited",
+        "L2E3": "active",
+        "L2E4": "unrecruited",
+        "L2E5": "active",
+        "L2E6": "active",
+        "L2E7": "active"
+      },
+      "active_count": 4,
+      "self_spike_events": 80
+    },
+    {
+      "config": "C",
+      "weight_seed": 3,
+      "topology_seed": 1,
+      "scenario": "long_hold_switch",
+      "total_records": 7324,
+      "unique_delivery_events": 292,
+      "individual_synapse_deltas": 4809,
+      "engine_l2_inhibition_log_len": 292,
+      "non_spiking_prev_step_records": 4809,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 0,
+      "tyrant": "L2E5",
+      "tyrant_weights": {
+        "0": 1.0,
+        "1": 606.81,
+        "2": 1.0,
+        "3": 1754.08,
+        "4": 1904.61,
+        "5": 1748.15,
+        "6": 1.0,
+        "7": 606.81,
+        "8": 1.0
+      },
+      "tyrant_union_mean_weight": 1324.09,
+      "tyrant_other_mean_weight": 1.0,
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E1",
+        "L2E2",
+        "L2E4",
+        "L2E6"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E0": 876,
+        "L2E1": 876,
+        "L2E2": 876,
+        "L2E4": 876,
+        "L2E6": 876
+      },
+      "l2e_status": {
+        "L2E0": "unrecruited",
+        "L2E1": "unrecruited",
+        "L2E2": "unrecruited",
+        "L2E3": "active",
+        "L2E4": "unrecruited",
+        "L2E5": "active",
+        "L2E6": "unrecruited",
+        "L2E7": "active"
+      },
+      "active_count": 3,
+      "self_spike_events": 2515
+    },
+    {
+      "config": "C",
+      "weight_seed": 3,
+      "topology_seed": 1,
+      "scenario": "interleaved_40",
+      "total_records": 16226,
+      "unique_delivery_events": 697,
+      "individual_synapse_deltas": 10115,
+      "engine_l2_inhibition_log_len": 400,
+      "non_spiking_prev_step_records": 10115,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 0,
+      "tyrant": "L2E5",
+      "tyrant_weights": {
+        "0": 3.05,
+        "1": 1.0,
+        "2": 137.07,
+        "3": 1.0,
+        "4": 2404.52,
+        "5": 1.0,
+        "6": 137.07,
+        "7": 1.0,
+        "8": 3.05
+      },
+      "tyrant_union_mean_weight": 481.7,
+      "tyrant_other_mean_weight": 70.06,
+      "never_fired_neurons": [
+        "L2E1"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E1": 2091
+      },
+      "l2e_status": {
+        "L2E0": "quiet",
+        "L2E1": "unrecruited",
+        "L2E2": "active",
+        "L2E3": "active",
+        "L2E4": "quiet",
+        "L2E5": "active",
+        "L2E6": "quiet",
+        "L2E7": "active"
+      },
+      "active_count": 4,
+      "self_spike_events": 6111
+    },
+    {
+      "config": "C",
+      "weight_seed": 3,
+      "topology_seed": 2,
+      "scenario": "short_hold_switch",
+      "total_records": 143,
+      "unique_delivery_events": 3,
+      "individual_synapse_deltas": 63,
+      "engine_l2_inhibition_log_len": 3,
+      "non_spiking_prev_step_records": 63,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 0,
+      "tyrant": "L2E3",
+      "tyrant_weights": {
+        "0": 53.65,
+        "1": 231.14,
+        "2": 38.8,
+        "3": 82.63,
+        "4": 206.06,
+        "5": 157.66,
+        "6": 1.0,
+        "7": 206.23,
+        "8": 1.0
+      },
+      "tyrant_union_mean_weight": 176.74,
+      "tyrant_other_mean_weight": 23.61,
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E1",
+        "L2E2",
+        "L2E4"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E0": 9,
+        "L2E1": 9,
+        "L2E2": 9,
+        "L2E4": 9
+      },
+      "l2e_status": {
+        "L2E0": "unrecruited",
+        "L2E1": "unrecruited",
+        "L2E2": "unrecruited",
+        "L2E3": "active",
+        "L2E4": "unrecruited",
+        "L2E5": "active",
+        "L2E6": "active",
+        "L2E7": "active"
+      },
+      "active_count": 4,
+      "self_spike_events": 80
+    },
+    {
+      "config": "C",
+      "weight_seed": 3,
+      "topology_seed": 2,
+      "scenario": "long_hold_switch",
+      "total_records": 7324,
+      "unique_delivery_events": 292,
+      "individual_synapse_deltas": 4809,
+      "engine_l2_inhibition_log_len": 292,
+      "non_spiking_prev_step_records": 4809,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 0,
+      "tyrant": "L2E5",
+      "tyrant_weights": {
+        "0": 1.0,
+        "1": 606.81,
+        "2": 1.0,
+        "3": 1754.08,
+        "4": 1904.61,
+        "5": 1748.15,
+        "6": 1.0,
+        "7": 606.81,
+        "8": 1.0
+      },
+      "tyrant_union_mean_weight": 1324.09,
+      "tyrant_other_mean_weight": 1.0,
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E1",
+        "L2E2",
+        "L2E4",
+        "L2E6"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E0": 876,
+        "L2E1": 876,
+        "L2E2": 876,
+        "L2E4": 876,
+        "L2E6": 876
+      },
+      "l2e_status": {
+        "L2E0": "unrecruited",
+        "L2E1": "unrecruited",
+        "L2E2": "unrecruited",
+        "L2E3": "active",
+        "L2E4": "unrecruited",
+        "L2E5": "active",
+        "L2E6": "unrecruited",
+        "L2E7": "active"
+      },
+      "active_count": 3,
+      "self_spike_events": 2515
+    },
+    {
+      "config": "C",
+      "weight_seed": 3,
+      "topology_seed": 2,
+      "scenario": "interleaved_40",
+      "total_records": 16226,
+      "unique_delivery_events": 697,
+      "individual_synapse_deltas": 10115,
+      "engine_l2_inhibition_log_len": 400,
+      "non_spiking_prev_step_records": 10115,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 0,
+      "tyrant": "L2E5",
+      "tyrant_weights": {
+        "0": 3.05,
+        "1": 1.0,
+        "2": 137.07,
+        "3": 1.0,
+        "4": 2404.52,
+        "5": 1.0,
+        "6": 137.07,
+        "7": 1.0,
+        "8": 3.05
+      },
+      "tyrant_union_mean_weight": 481.7,
+      "tyrant_other_mean_weight": 70.06,
+      "never_fired_neurons": [
+        "L2E1"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E1": 2091
+      },
+      "l2e_status": {
+        "L2E0": "quiet",
+        "L2E1": "unrecruited",
+        "L2E2": "active",
+        "L2E3": "active",
+        "L2E4": "quiet",
+        "L2E5": "active",
+        "L2E6": "quiet",
+        "L2E7": "active"
+      },
+      "active_count": 4,
+      "self_spike_events": 6111
+    },
+    {
+      "config": "C",
+      "weight_seed": 3,
+      "topology_seed": 3,
+      "scenario": "short_hold_switch",
+      "total_records": 143,
+      "unique_delivery_events": 3,
+      "individual_synapse_deltas": 63,
+      "engine_l2_inhibition_log_len": 3,
+      "non_spiking_prev_step_records": 63,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 0,
+      "tyrant": "L2E3",
+      "tyrant_weights": {
+        "0": 53.65,
+        "1": 231.14,
+        "2": 38.8,
+        "3": 82.63,
+        "4": 206.06,
+        "5": 157.66,
+        "6": 1.0,
+        "7": 206.23,
+        "8": 1.0
+      },
+      "tyrant_union_mean_weight": 176.74,
+      "tyrant_other_mean_weight": 23.61,
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E1",
+        "L2E2",
+        "L2E4"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E0": 9,
+        "L2E1": 9,
+        "L2E2": 9,
+        "L2E4": 9
+      },
+      "l2e_status": {
+        "L2E0": "unrecruited",
+        "L2E1": "unrecruited",
+        "L2E2": "unrecruited",
+        "L2E3": "active",
+        "L2E4": "unrecruited",
+        "L2E5": "active",
+        "L2E6": "active",
+        "L2E7": "active"
+      },
+      "active_count": 4,
+      "self_spike_events": 80
+    },
+    {
+      "config": "C",
+      "weight_seed": 3,
+      "topology_seed": 3,
+      "scenario": "long_hold_switch",
+      "total_records": 7324,
+      "unique_delivery_events": 292,
+      "individual_synapse_deltas": 4809,
+      "engine_l2_inhibition_log_len": 292,
+      "non_spiking_prev_step_records": 4809,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 0,
+      "tyrant": "L2E5",
+      "tyrant_weights": {
+        "0": 1.0,
+        "1": 606.81,
+        "2": 1.0,
+        "3": 1754.08,
+        "4": 1904.61,
+        "5": 1748.15,
+        "6": 1.0,
+        "7": 606.81,
+        "8": 1.0
+      },
+      "tyrant_union_mean_weight": 1324.09,
+      "tyrant_other_mean_weight": 1.0,
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E1",
+        "L2E2",
+        "L2E4",
+        "L2E6"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E0": 876,
+        "L2E1": 876,
+        "L2E2": 876,
+        "L2E4": 876,
+        "L2E6": 876
+      },
+      "l2e_status": {
+        "L2E0": "unrecruited",
+        "L2E1": "unrecruited",
+        "L2E2": "unrecruited",
+        "L2E3": "active",
+        "L2E4": "unrecruited",
+        "L2E5": "active",
+        "L2E6": "unrecruited",
+        "L2E7": "active"
+      },
+      "active_count": 3,
+      "self_spike_events": 2515
+    },
+    {
+      "config": "C",
+      "weight_seed": 3,
+      "topology_seed": 3,
+      "scenario": "interleaved_40",
+      "total_records": 16226,
+      "unique_delivery_events": 697,
+      "individual_synapse_deltas": 10115,
+      "engine_l2_inhibition_log_len": 400,
+      "non_spiking_prev_step_records": 10115,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 0,
+      "tyrant": "L2E5",
+      "tyrant_weights": {
+        "0": 3.05,
+        "1": 1.0,
+        "2": 137.07,
+        "3": 1.0,
+        "4": 2404.52,
+        "5": 1.0,
+        "6": 137.07,
+        "7": 1.0,
+        "8": 3.05
+      },
+      "tyrant_union_mean_weight": 481.7,
+      "tyrant_other_mean_weight": 70.06,
+      "never_fired_neurons": [
+        "L2E1"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E1": 2091
+      },
+      "l2e_status": {
+        "L2E0": "quiet",
+        "L2E1": "unrecruited",
+        "L2E2": "active",
+        "L2E3": "active",
+        "L2E4": "quiet",
+        "L2E5": "active",
+        "L2E6": "quiet",
+        "L2E7": "active"
+      },
+      "active_count": 4,
+      "self_spike_events": 6111
+    },
+    {
+      "config": "C",
+      "weight_seed": 4,
+      "topology_seed": 1,
+      "scenario": "short_hold_switch",
+      "total_records": 153,
+      "unique_delivery_events": 3,
+      "individual_synapse_deltas": 63,
+      "engine_l2_inhibition_log_len": 3,
+      "non_spiking_prev_step_records": 63,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 0,
+      "tyrant": "L2E1",
+      "tyrant_weights": {
+        "0": 1.0,
+        "1": 119.22,
+        "2": 4.66,
+        "3": 207.66,
+        "4": 293.62,
+        "5": 218.12,
+        "6": 20.88,
+        "7": 151.36,
+        "8": 31.16
+      },
+      "tyrant_union_mean_weight": 198.0,
+      "tyrant_other_mean_weight": 14.43,
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E2",
+        "L2E6"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E0": 9,
+        "L2E2": 9,
+        "L2E6": 9
+      },
+      "l2e_status": {
+        "L2E0": "unrecruited",
+        "L2E1": "active",
+        "L2E2": "unrecruited",
+        "L2E3": "active",
+        "L2E4": "active",
+        "L2E5": "active",
+        "L2E6": "unrecruited",
+        "L2E7": "active"
+      },
+      "active_count": 5,
+      "self_spike_events": 90
+    },
+    {
+      "config": "C",
+      "weight_seed": 4,
+      "topology_seed": 1,
+      "scenario": "long_hold_switch",
+      "total_records": 7314,
+      "unique_delivery_events": 293,
+      "individual_synapse_deltas": 5164,
+      "engine_l2_inhibition_log_len": 293,
+      "non_spiking_prev_step_records": 5164,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 0,
+      "tyrant": "L2E1",
+      "tyrant_weights": {
+        "0": 1.0,
+        "1": 605.42,
+        "2": 1.0,
+        "3": 1753.19,
+        "4": 1906.59,
+        "5": 1754.59,
+        "6": 1.0,
+        "7": 605.42,
+        "8": 1.0
+      },
+      "tyrant_union_mean_weight": 1325.04,
+      "tyrant_other_mean_weight": 1.0,
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E2",
+        "L2E3",
+        "L2E6",
+        "L2E7"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E0": 879,
+        "L2E2": 879,
+        "L2E3": 879,
+        "L2E6": 879,
+        "L2E7": 879
+      },
+      "l2e_status": {
+        "L2E0": "unrecruited",
+        "L2E1": "active",
+        "L2E2": "unrecruited",
+        "L2E3": "unrecruited",
+        "L2E4": "active",
+        "L2E5": "quiet",
+        "L2E6": "unrecruited",
+        "L2E7": "unrecruited"
+      },
+      "active_count": 2,
+      "self_spike_events": 2150
+    },
+    {
+      "config": "C",
+      "weight_seed": 4,
+      "topology_seed": 1,
+      "scenario": "interleaved_40",
+      "total_records": 15477,
+      "unique_delivery_events": 688,
+      "individual_synapse_deltas": 9392,
+      "engine_l2_inhibition_log_len": 400,
+      "non_spiking_prev_step_records": 9392,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 0,
+      "tyrant": "L2E1",
+      "tyrant_weights": {
+        "0": 4.67,
+        "1": 1.0,
+        "2": 136.78,
+        "3": 1.0,
+        "4": 2412.81,
+        "5": 1.0,
+        "6": 136.78,
+        "7": 1.0,
+        "8": 4.67
+      },
+      "tyrant_union_mean_weight": 483.36,
+      "tyrant_other_mean_weight": 70.73,
+      "never_fired_neurons": [
+        "L2E2",
+        "L2E6"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E2": 2064,
+        "L2E6": 2064
+      },
+      "l2e_status": {
+        "L2E0": "active",
+        "L2E1": "active",
+        "L2E2": "unrecruited",
+        "L2E3": "active",
+        "L2E4": "active",
+        "L2E5": "quiet",
+        "L2E6": "unrecruited",
+        "L2E7": "active"
+      },
+      "active_count": 5,
+      "self_spike_events": 6085
+    },
+    {
+      "config": "C",
+      "weight_seed": 4,
+      "topology_seed": 2,
+      "scenario": "short_hold_switch",
+      "total_records": 153,
+      "unique_delivery_events": 3,
+      "individual_synapse_deltas": 63,
+      "engine_l2_inhibition_log_len": 3,
+      "non_spiking_prev_step_records": 63,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 0,
+      "tyrant": "L2E1",
+      "tyrant_weights": {
+        "0": 1.0,
+        "1": 119.22,
+        "2": 4.66,
+        "3": 207.66,
+        "4": 293.62,
+        "5": 218.12,
+        "6": 20.88,
+        "7": 151.36,
+        "8": 31.16
+      },
+      "tyrant_union_mean_weight": 198.0,
+      "tyrant_other_mean_weight": 14.43,
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E2",
+        "L2E6"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E0": 9,
+        "L2E2": 9,
+        "L2E6": 9
+      },
+      "l2e_status": {
+        "L2E0": "unrecruited",
+        "L2E1": "active",
+        "L2E2": "unrecruited",
+        "L2E3": "active",
+        "L2E4": "active",
+        "L2E5": "active",
+        "L2E6": "unrecruited",
+        "L2E7": "active"
+      },
+      "active_count": 5,
+      "self_spike_events": 90
+    },
+    {
+      "config": "C",
+      "weight_seed": 4,
+      "topology_seed": 2,
+      "scenario": "long_hold_switch",
+      "total_records": 7314,
+      "unique_delivery_events": 293,
+      "individual_synapse_deltas": 5164,
+      "engine_l2_inhibition_log_len": 293,
+      "non_spiking_prev_step_records": 5164,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 0,
+      "tyrant": "L2E1",
+      "tyrant_weights": {
+        "0": 1.0,
+        "1": 605.42,
+        "2": 1.0,
+        "3": 1753.19,
+        "4": 1906.59,
+        "5": 1754.59,
+        "6": 1.0,
+        "7": 605.42,
+        "8": 1.0
+      },
+      "tyrant_union_mean_weight": 1325.04,
+      "tyrant_other_mean_weight": 1.0,
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E2",
+        "L2E3",
+        "L2E6",
+        "L2E7"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E0": 879,
+        "L2E2": 879,
+        "L2E3": 879,
+        "L2E6": 879,
+        "L2E7": 879
+      },
+      "l2e_status": {
+        "L2E0": "unrecruited",
+        "L2E1": "active",
+        "L2E2": "unrecruited",
+        "L2E3": "unrecruited",
+        "L2E4": "active",
+        "L2E5": "quiet",
+        "L2E6": "unrecruited",
+        "L2E7": "unrecruited"
+      },
+      "active_count": 2,
+      "self_spike_events": 2150
+    },
+    {
+      "config": "C",
+      "weight_seed": 4,
+      "topology_seed": 2,
+      "scenario": "interleaved_40",
+      "total_records": 15477,
+      "unique_delivery_events": 688,
+      "individual_synapse_deltas": 9392,
+      "engine_l2_inhibition_log_len": 400,
+      "non_spiking_prev_step_records": 9392,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 0,
+      "tyrant": "L2E1",
+      "tyrant_weights": {
+        "0": 4.67,
+        "1": 1.0,
+        "2": 136.78,
+        "3": 1.0,
+        "4": 2412.81,
+        "5": 1.0,
+        "6": 136.78,
+        "7": 1.0,
+        "8": 4.67
+      },
+      "tyrant_union_mean_weight": 483.36,
+      "tyrant_other_mean_weight": 70.73,
+      "never_fired_neurons": [
+        "L2E2",
+        "L2E6"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E2": 2064,
+        "L2E6": 2064
+      },
+      "l2e_status": {
+        "L2E0": "active",
+        "L2E1": "active",
+        "L2E2": "unrecruited",
+        "L2E3": "active",
+        "L2E4": "active",
+        "L2E5": "quiet",
+        "L2E6": "unrecruited",
+        "L2E7": "active"
+      },
+      "active_count": 5,
+      "self_spike_events": 6085
+    },
+    {
+      "config": "C",
+      "weight_seed": 4,
+      "topology_seed": 3,
+      "scenario": "short_hold_switch",
+      "total_records": 153,
+      "unique_delivery_events": 3,
+      "individual_synapse_deltas": 63,
+      "engine_l2_inhibition_log_len": 3,
+      "non_spiking_prev_step_records": 63,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 0,
+      "tyrant": "L2E1",
+      "tyrant_weights": {
+        "0": 1.0,
+        "1": 119.22,
+        "2": 4.66,
+        "3": 207.66,
+        "4": 293.62,
+        "5": 218.12,
+        "6": 20.88,
+        "7": 151.36,
+        "8": 31.16
+      },
+      "tyrant_union_mean_weight": 198.0,
+      "tyrant_other_mean_weight": 14.43,
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E2",
+        "L2E6"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E0": 9,
+        "L2E2": 9,
+        "L2E6": 9
+      },
+      "l2e_status": {
+        "L2E0": "unrecruited",
+        "L2E1": "active",
+        "L2E2": "unrecruited",
+        "L2E3": "active",
+        "L2E4": "active",
+        "L2E5": "active",
+        "L2E6": "unrecruited",
+        "L2E7": "active"
+      },
+      "active_count": 5,
+      "self_spike_events": 90
+    },
+    {
+      "config": "C",
+      "weight_seed": 4,
+      "topology_seed": 3,
+      "scenario": "long_hold_switch",
+      "total_records": 7314,
+      "unique_delivery_events": 293,
+      "individual_synapse_deltas": 5164,
+      "engine_l2_inhibition_log_len": 293,
+      "non_spiking_prev_step_records": 5164,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 0,
+      "tyrant": "L2E1",
+      "tyrant_weights": {
+        "0": 1.0,
+        "1": 605.42,
+        "2": 1.0,
+        "3": 1753.19,
+        "4": 1906.59,
+        "5": 1754.59,
+        "6": 1.0,
+        "7": 605.42,
+        "8": 1.0
+      },
+      "tyrant_union_mean_weight": 1325.04,
+      "tyrant_other_mean_weight": 1.0,
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E2",
+        "L2E3",
+        "L2E6",
+        "L2E7"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E0": 879,
+        "L2E2": 879,
+        "L2E3": 879,
+        "L2E6": 879,
+        "L2E7": 879
+      },
+      "l2e_status": {
+        "L2E0": "unrecruited",
+        "L2E1": "active",
+        "L2E2": "unrecruited",
+        "L2E3": "unrecruited",
+        "L2E4": "active",
+        "L2E5": "quiet",
+        "L2E6": "unrecruited",
+        "L2E7": "unrecruited"
+      },
+      "active_count": 2,
+      "self_spike_events": 2150
+    },
+    {
+      "config": "C",
+      "weight_seed": 4,
+      "topology_seed": 3,
+      "scenario": "interleaved_40",
+      "total_records": 15477,
+      "unique_delivery_events": 688,
+      "individual_synapse_deltas": 9392,
+      "engine_l2_inhibition_log_len": 400,
+      "non_spiking_prev_step_records": 9392,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 0,
+      "tyrant": "L2E1",
+      "tyrant_weights": {
+        "0": 4.67,
+        "1": 1.0,
+        "2": 136.78,
+        "3": 1.0,
+        "4": 2412.81,
+        "5": 1.0,
+        "6": 136.78,
+        "7": 1.0,
+        "8": 4.67
+      },
+      "tyrant_union_mean_weight": 483.36,
+      "tyrant_other_mean_weight": 70.73,
+      "never_fired_neurons": [
+        "L2E2",
+        "L2E6"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E2": 2064,
+        "L2E6": 2064
+      },
+      "l2e_status": {
+        "L2E0": "active",
+        "L2E1": "active",
+        "L2E2": "unrecruited",
+        "L2E3": "active",
+        "L2E4": "active",
+        "L2E5": "quiet",
+        "L2E6": "unrecruited",
+        "L2E7": "active"
+      },
+      "active_count": 5,
+      "self_spike_events": 6085
+    },
+    {
+      "config": "C",
+      "weight_seed": 5,
+      "topology_seed": 1,
+      "scenario": "short_hold_switch",
+      "total_records": 138,
+      "unique_delivery_events": 3,
+      "individual_synapse_deltas": 58,
+      "engine_l2_inhibition_log_len": 3,
+      "non_spiking_prev_step_records": 58,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 0,
+      "tyrant": "L2E6",
+      "tyrant_weights": {
+        "0": 1.0,
+        "1": 99.55,
+        "2": 1.0,
+        "3": 61.24,
+        "4": 297.05,
+        "5": 121.03,
+        "6": 31.59,
+        "7": 156.35,
+        "8": 12.71
+      },
+      "tyrant_union_mean_weight": 147.04,
+      "tyrant_other_mean_weight": 11.58,
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E1",
+        "L2E2"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E0": 9,
+        "L2E1": 9,
+        "L2E2": 9
+      },
+      "l2e_status": {
+        "L2E0": "unrecruited",
+        "L2E1": "unrecruited",
+        "L2E2": "unrecruited",
+        "L2E3": "active",
+        "L2E4": "active",
+        "L2E5": "active",
+        "L2E6": "active",
+        "L2E7": "active"
+      },
+      "active_count": 5,
+      "self_spike_events": 80
+    },
+    {
+      "config": "C",
+      "weight_seed": 5,
+      "topology_seed": 1,
+      "scenario": "long_hold_switch",
+      "total_records": 7208,
+      "unique_delivery_events": 294,
+      "individual_synapse_deltas": 5119,
+      "engine_l2_inhibition_log_len": 294,
+      "non_spiking_prev_step_records": 5119,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 0,
+      "tyrant": "L2E6",
+      "tyrant_weights": {
+        "0": 1.0,
+        "1": 610.1,
+        "2": 1.0,
+        "3": 1749.31,
+        "4": 1910.73,
+        "5": 1756.77,
+        "6": 1.0,
+        "7": 610.1,
+        "8": 1.0
+      },
+      "tyrant_union_mean_weight": 1327.4,
+      "tyrant_other_mean_weight": 1.0,
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E1",
+        "L2E2",
+        "L2E5",
+        "L2E7"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E0": 882,
+        "L2E1": 882,
+        "L2E2": 882,
+        "L2E5": 882,
+        "L2E7": 882
+      },
+      "l2e_status": {
+        "L2E0": "unrecruited",
+        "L2E1": "unrecruited",
+        "L2E2": "unrecruited",
+        "L2E3": "quiet",
+        "L2E4": "active",
+        "L2E5": "unrecruited",
+        "L2E6": "active",
+        "L2E7": "unrecruited"
+      },
+      "active_count": 2,
+      "self_spike_events": 2089
+    },
+    {
+      "config": "C",
+      "weight_seed": 5,
+      "topology_seed": 1,
+      "scenario": "interleaved_40",
+      "total_records": 15642,
+      "unique_delivery_events": 560,
+      "individual_synapse_deltas": 9300,
+      "engine_l2_inhibition_log_len": 400,
+      "non_spiking_prev_step_records": 9300,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 0,
+      "tyrant": "L2E7",
+      "tyrant_weights": {
+        "0": 4.91,
+        "1": 1.0,
+        "2": 207.05,
+        "3": 1.0,
+        "4": 2041.07,
+        "5": 1.0,
+        "6": 207.05,
+        "7": 1.0,
+        "8": 4.91
+      },
+      "tyrant_union_mean_weight": 409.01,
+      "tyrant_other_mean_weight": 105.98,
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E1",
+        "L2E2"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E0": 1680,
+        "L2E1": 1680,
+        "L2E2": 1680
+      },
+      "l2e_status": {
+        "L2E0": "unrecruited",
+        "L2E1": "unrecruited",
+        "L2E2": "unrecruited",
+        "L2E3": "active",
+        "L2E4": "active",
+        "L2E5": "quiet",
+        "L2E6": "quiet",
+        "L2E7": "active"
+      },
+      "active_count": 3,
+      "self_spike_events": 6342
+    },
+    {
+      "config": "C",
+      "weight_seed": 5,
+      "topology_seed": 2,
+      "scenario": "short_hold_switch",
+      "total_records": 138,
+      "unique_delivery_events": 3,
+      "individual_synapse_deltas": 58,
+      "engine_l2_inhibition_log_len": 3,
+      "non_spiking_prev_step_records": 58,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 0,
+      "tyrant": "L2E6",
+      "tyrant_weights": {
+        "0": 1.0,
+        "1": 99.55,
+        "2": 1.0,
+        "3": 61.24,
+        "4": 297.05,
+        "5": 121.03,
+        "6": 31.59,
+        "7": 156.35,
+        "8": 12.71
+      },
+      "tyrant_union_mean_weight": 147.04,
+      "tyrant_other_mean_weight": 11.58,
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E1",
+        "L2E2"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E0": 9,
+        "L2E1": 9,
+        "L2E2": 9
+      },
+      "l2e_status": {
+        "L2E0": "unrecruited",
+        "L2E1": "unrecruited",
+        "L2E2": "unrecruited",
+        "L2E3": "active",
+        "L2E4": "active",
+        "L2E5": "active",
+        "L2E6": "active",
+        "L2E7": "active"
+      },
+      "active_count": 5,
+      "self_spike_events": 80
+    },
+    {
+      "config": "C",
+      "weight_seed": 5,
+      "topology_seed": 2,
+      "scenario": "long_hold_switch",
+      "total_records": 7208,
+      "unique_delivery_events": 294,
+      "individual_synapse_deltas": 5119,
+      "engine_l2_inhibition_log_len": 294,
+      "non_spiking_prev_step_records": 5119,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 0,
+      "tyrant": "L2E6",
+      "tyrant_weights": {
+        "0": 1.0,
+        "1": 610.1,
+        "2": 1.0,
+        "3": 1749.31,
+        "4": 1910.73,
+        "5": 1756.77,
+        "6": 1.0,
+        "7": 610.1,
+        "8": 1.0
+      },
+      "tyrant_union_mean_weight": 1327.4,
+      "tyrant_other_mean_weight": 1.0,
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E1",
+        "L2E2",
+        "L2E5",
+        "L2E7"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E0": 882,
+        "L2E1": 882,
+        "L2E2": 882,
+        "L2E5": 882,
+        "L2E7": 882
+      },
+      "l2e_status": {
+        "L2E0": "unrecruited",
+        "L2E1": "unrecruited",
+        "L2E2": "unrecruited",
+        "L2E3": "quiet",
+        "L2E4": "active",
+        "L2E5": "unrecruited",
+        "L2E6": "active",
+        "L2E7": "unrecruited"
+      },
+      "active_count": 2,
+      "self_spike_events": 2089
+    },
+    {
+      "config": "C",
+      "weight_seed": 5,
+      "topology_seed": 2,
+      "scenario": "interleaved_40",
+      "total_records": 15642,
+      "unique_delivery_events": 560,
+      "individual_synapse_deltas": 9300,
+      "engine_l2_inhibition_log_len": 400,
+      "non_spiking_prev_step_records": 9300,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 0,
+      "tyrant": "L2E7",
+      "tyrant_weights": {
+        "0": 4.91,
+        "1": 1.0,
+        "2": 207.05,
+        "3": 1.0,
+        "4": 2041.07,
+        "5": 1.0,
+        "6": 207.05,
+        "7": 1.0,
+        "8": 4.91
+      },
+      "tyrant_union_mean_weight": 409.01,
+      "tyrant_other_mean_weight": 105.98,
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E1",
+        "L2E2"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E0": 1680,
+        "L2E1": 1680,
+        "L2E2": 1680
+      },
+      "l2e_status": {
+        "L2E0": "unrecruited",
+        "L2E1": "unrecruited",
+        "L2E2": "unrecruited",
+        "L2E3": "active",
+        "L2E4": "active",
+        "L2E5": "quiet",
+        "L2E6": "quiet",
+        "L2E7": "active"
+      },
+      "active_count": 3,
+      "self_spike_events": 6342
+    },
+    {
+      "config": "C",
+      "weight_seed": 5,
+      "topology_seed": 3,
+      "scenario": "short_hold_switch",
+      "total_records": 138,
+      "unique_delivery_events": 3,
+      "individual_synapse_deltas": 58,
+      "engine_l2_inhibition_log_len": 3,
+      "non_spiking_prev_step_records": 58,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 0,
+      "tyrant": "L2E6",
+      "tyrant_weights": {
+        "0": 1.0,
+        "1": 99.55,
+        "2": 1.0,
+        "3": 61.24,
+        "4": 297.05,
+        "5": 121.03,
+        "6": 31.59,
+        "7": 156.35,
+        "8": 12.71
+      },
+      "tyrant_union_mean_weight": 147.04,
+      "tyrant_other_mean_weight": 11.58,
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E1",
+        "L2E2"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E0": 9,
+        "L2E1": 9,
+        "L2E2": 9
+      },
+      "l2e_status": {
+        "L2E0": "unrecruited",
+        "L2E1": "unrecruited",
+        "L2E2": "unrecruited",
+        "L2E3": "active",
+        "L2E4": "active",
+        "L2E5": "active",
+        "L2E6": "active",
+        "L2E7": "active"
+      },
+      "active_count": 5,
+      "self_spike_events": 80
+    },
+    {
+      "config": "C",
+      "weight_seed": 5,
+      "topology_seed": 3,
+      "scenario": "long_hold_switch",
+      "total_records": 7208,
+      "unique_delivery_events": 294,
+      "individual_synapse_deltas": 5119,
+      "engine_l2_inhibition_log_len": 294,
+      "non_spiking_prev_step_records": 5119,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 0,
+      "tyrant": "L2E6",
+      "tyrant_weights": {
+        "0": 1.0,
+        "1": 610.1,
+        "2": 1.0,
+        "3": 1749.31,
+        "4": 1910.73,
+        "5": 1756.77,
+        "6": 1.0,
+        "7": 610.1,
+        "8": 1.0
+      },
+      "tyrant_union_mean_weight": 1327.4,
+      "tyrant_other_mean_weight": 1.0,
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E1",
+        "L2E2",
+        "L2E5",
+        "L2E7"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E0": 882,
+        "L2E1": 882,
+        "L2E2": 882,
+        "L2E5": 882,
+        "L2E7": 882
+      },
+      "l2e_status": {
+        "L2E0": "unrecruited",
+        "L2E1": "unrecruited",
+        "L2E2": "unrecruited",
+        "L2E3": "quiet",
+        "L2E4": "active",
+        "L2E5": "unrecruited",
+        "L2E6": "active",
+        "L2E7": "unrecruited"
+      },
+      "active_count": 2,
+      "self_spike_events": 2089
+    },
+    {
+      "config": "C",
+      "weight_seed": 5,
+      "topology_seed": 3,
+      "scenario": "interleaved_40",
+      "total_records": 15642,
+      "unique_delivery_events": 560,
+      "individual_synapse_deltas": 9300,
+      "engine_l2_inhibition_log_len": 400,
+      "non_spiking_prev_step_records": 9300,
+      "non_spiking_prev_step_increases": 0,
+      "loser_depression_events_where_target_fires_later_same_step": 0,
+      "tyrant": "L2E7",
+      "tyrant_weights": {
+        "0": 4.91,
+        "1": 1.0,
+        "2": 207.05,
+        "3": 1.0,
+        "4": 2041.07,
+        "5": 1.0,
+        "6": 207.05,
+        "7": 1.0,
+        "8": 4.91
+      },
+      "tyrant_union_mean_weight": 409.01,
+      "tyrant_other_mean_weight": 105.98,
+      "never_fired_neurons": [
+        "L2E0",
+        "L2E1",
+        "L2E2"
+      ],
+      "never_fired_loser_depression_counts": {
+        "L2E0": 1680,
+        "L2E1": 1680,
+        "L2E2": 1680
+      },
+      "l2e_status": {
+        "L2E0": "unrecruited",
+        "L2E1": "unrecruited",
+        "L2E2": "unrecruited",
+        "L2E3": "active",
+        "L2E4": "active",
+        "L2E5": "quiet",
+        "L2E6": "quiet",
+        "L2E7": "active"
+      },
+      "active_count": 3,
+      "self_spike_events": 6342
+    }
+  ],
+  "phase11_style_interleaved_metrics": [
+    {
+      "config": "A",
+      "weight_seed": 1,
+      "topology_seed": 1,
+      "distinct_owners": 4,
+      "per_pattern_consistency": {
+        "row 1": 0.675,
+        "col 1": 0.5,
+        "diag \\": 0.55,
+        "diag /": 0.8
+      },
+      "collisions": {},
+      "silent_cells": [
+        "L2E0",
+        "L2E1"
+      ],
+      "recruitable_cells": [
+        "L2E2",
+        "L2E3"
+      ]
+    },
+    {
+      "config": "A",
+      "weight_seed": 2,
+      "topology_seed": 1,
+      "distinct_owners": 4,
+      "per_pattern_consistency": {
+        "row 1": 0.675,
+        "col 1": 0.975,
+        "diag \\": 0.6,
+        "diag /": 0.6
+      },
+      "collisions": {},
+      "silent_cells": [
+        "L2E2",
+        "L2E4"
+      ],
+      "recruitable_cells": [
+        "L2E1",
+        "L2E7"
+      ]
+    },
+    {
+      "config": "A",
+      "weight_seed": 3,
+      "topology_seed": 1,
+      "distinct_owners": 3,
+      "per_pattern_consistency": {
+        "row 1": 0.475,
+        "col 1": 0.45,
+        "diag \\": 0.8,
+        "diag /": 0.775
+      },
+      "collisions": {
+        "L2E3": [
+          "diag \\",
+          "diag /"
+        ]
+      },
+      "silent_cells": [
+        "L2E0",
+        "L2E1",
+        "L2E2"
+      ],
+      "recruitable_cells": [
+        "L2E6",
+        "L2E7"
+      ]
+    },
+    {
+      "config": "A",
+      "weight_seed": 4,
+      "topology_seed": 1,
+      "distinct_owners": 4,
+      "per_pattern_consistency": {
+        "row 1": 0.525,
+        "col 1": 0.425,
+        "diag \\": 0.45,
+        "diag /": 0.925
+      },
+      "collisions": {},
+      "silent_cells": [
+        "L2E2",
+        "L2E5",
+        "L2E6"
+      ],
+      "recruitable_cells": [
+        "L2E3"
+      ]
+    },
+    {
+      "config": "A",
+      "weight_seed": 5,
+      "topology_seed": 1,
+      "distinct_owners": 3,
+      "per_pattern_consistency": {
+        "row 1": 0.6,
+        "col 1": 0.85,
+        "diag \\": 0.825,
+        "diag /": 0.575
+      },
+      "collisions": {
+        "L2E3": [
+          "col 1",
+          "diag \\"
+        ]
+      },
+      "silent_cells": [
+        "L2E0",
+        "L2E1",
+        "L2E2"
+      ],
+      "recruitable_cells": [
+        "L2E5",
+        "L2E7"
+      ]
+    },
+    {
+      "config": "B",
+      "weight_seed": 1,
+      "topology_seed": 1,
+      "distinct_owners": 1,
+      "per_pattern_consistency": {
+        "row 1": 0.5,
+        "col 1": 0.525,
+        "diag \\": 0.525,
+        "diag /": 0.525
+      },
+      "collisions": {
+        "L2E4": [
+          "row 1",
+          "col 1",
+          "diag \\",
+          "diag /"
+        ]
+      },
+      "silent_cells": [
+        "L2E0",
+        "L2E1",
+        "L2E6"
+      ],
+      "recruitable_cells": [
+        "L2E2",
+        "L2E3",
+        "L2E5",
+        "L2E7"
+      ]
+    },
+    {
+      "config": "B",
+      "weight_seed": 2,
+      "topology_seed": 1,
+      "distinct_owners": 1,
+      "per_pattern_consistency": {
+        "row 1": 0.525,
+        "col 1": 0.65,
+        "diag \\": 0.475,
+        "diag /": 0.475
+      },
+      "collisions": {
+        "L2E0": [
+          "row 1",
+          "col 1",
+          "diag \\",
+          "diag /"
+        ]
+      },
+      "silent_cells": [
+        "L2E4"
+      ],
+      "recruitable_cells": [
+        "L2E1",
+        "L2E2",
+        "L2E3",
+        "L2E5",
+        "L2E6",
+        "L2E7"
+      ]
+    },
+    {
+      "config": "B",
+      "weight_seed": 3,
+      "topology_seed": 1,
+      "distinct_owners": 4,
+      "per_pattern_consistency": {
+        "row 1": 0.725,
+        "col 1": 0.95,
+        "diag \\": 0.7,
+        "diag /": 0.575
+      },
+      "collisions": {},
+      "silent_cells": [
+        "L2E0",
+        "L2E1"
+      ],
+      "recruitable_cells": [
+        "L2E2",
+        "L2E7"
+      ]
+    },
+    {
+      "config": "B",
+      "weight_seed": 4,
+      "topology_seed": 1,
+      "distinct_owners": 1,
+      "per_pattern_consistency": {
+        "row 1": 0.65,
+        "col 1": 0.55,
+        "diag \\": 0.5,
+        "diag /": 0.825
+      },
+      "collisions": {
+        "L2E0": [
+          "row 1",
+          "col 1",
+          "diag \\",
+          "diag /"
+        ]
+      },
+      "silent_cells": [
+        "L2E6"
+      ],
+      "recruitable_cells": [
+        "L2E1",
+        "L2E2",
+        "L2E3",
+        "L2E4",
+        "L2E5",
+        "L2E7"
+      ]
+    },
+    {
+      "config": "B",
+      "weight_seed": 5,
+      "topology_seed": 1,
+      "distinct_owners": 1,
+      "per_pattern_consistency": {
+        "row 1": 0.525,
+        "col 1": 0.55,
+        "diag \\": 0.775,
+        "diag /": 0.6
+      },
+      "collisions": {
+        "L2E3": [
+          "row 1",
+          "col 1",
+          "diag \\",
+          "diag /"
+        ]
+      },
+      "silent_cells": [
+        "L2E0",
+        "L2E2"
+      ],
+      "recruitable_cells": [
+        "L2E1",
+        "L2E4",
+        "L2E5",
+        "L2E6",
+        "L2E7"
+      ]
+    },
+    {
+      "config": "C",
+      "weight_seed": 1,
+      "topology_seed": 1,
+      "distinct_owners": 1,
+      "per_pattern_consistency": {
+        "row 1": 0.825,
+        "col 1": 0.75,
+        "diag \\": 0.9,
+        "diag /": 0.9
+      },
+      "collisions": {
+        "L2E4": [
+          "row 1",
+          "col 1",
+          "diag \\",
+          "diag /"
+        ]
+      },
+      "silent_cells": [
+        "L2E0",
+        "L2E1",
+        "L2E6",
+        "L2E7"
+      ],
+      "recruitable_cells": [
+        "L2E2",
+        "L2E3",
+        "L2E5"
+      ]
+    },
+    {
+      "config": "C",
+      "weight_seed": 2,
+      "topology_seed": 1,
+      "distinct_owners": 4,
+      "per_pattern_consistency": {
+        "row 1": 0.675,
+        "col 1": 0.6,
+        "diag \\": 0.6,
+        "diag /": 0.975
+      },
+      "collisions": {},
+      "silent_cells": [
+        "L2E2",
+        "L2E4",
+        "L2E7"
+      ],
+      "recruitable_cells": [
+        "L2E1"
+      ]
+    },
+    {
+      "config": "C",
+      "weight_seed": 3,
+      "topology_seed": 1,
+      "distinct_owners": 4,
+      "per_pattern_consistency": {
+        "row 1": 0.925,
+        "col 1": 0.6,
+        "diag \\": 0.475,
+        "diag /": 0.5
+      },
+      "collisions": {},
+      "silent_cells": [
+        "L2E0",
+        "L2E1",
+        "L2E4"
+      ],
+      "recruitable_cells": [
+        "L2E6"
+      ]
+    },
+    {
+      "config": "C",
+      "weight_seed": 4,
+      "topology_seed": 1,
+      "distinct_owners": 1,
+      "per_pattern_consistency": {
+        "row 1": 0.825,
+        "col 1": 0.775,
+        "diag \\": 0.75,
+        "diag /": 0.7
+      },
+      "collisions": {
+        "L2E1": [
+          "row 1",
+          "col 1",
+          "diag \\",
+          "diag /"
+        ]
+      },
+      "silent_cells": [
+        "L2E2",
+        "L2E5",
+        "L2E6"
+      ],
+      "recruitable_cells": [
+        "L2E0",
+        "L2E3",
+        "L2E4",
+        "L2E7"
+      ]
+    },
+    {
+      "config": "C",
+      "weight_seed": 5,
+      "topology_seed": 1,
+      "distinct_owners": 1,
+      "per_pattern_consistency": {
+        "row 1": 0.425,
+        "col 1": 0.8,
+        "diag \\": 0.725,
+        "diag /": 0.775
+      },
+      "collisions": {
+        "L2E7": [
+          "row 1",
+          "col 1",
+          "diag \\",
+          "diag /"
+        ]
+      },
+      "silent_cells": [
+        "L2E0",
+        "L2E1",
+        "L2E2"
+      ],
+      "recruitable_cells": [
+        "L2E3",
+        "L2E4",
+        "L2E5",
+        "L2E6"
+      ]
+    }
+  ],
+  "topology_seed_inertness": [
+    {
+      "config": "A",
+      "weight_seed": 1,
+      "topology_seeds_tested": [
+        1,
+        2,
+        3
+      ],
+      "identical_across_topology_seed": true
+    },
+    {
+      "config": "B",
+      "weight_seed": 1,
+      "topology_seeds_tested": [
+        1,
+        2,
+        3
+      ],
+      "identical_across_topology_seed": true
+    },
+    {
+      "config": "C",
+      "weight_seed": 1,
+      "topology_seeds_tested": [
+        1,
+        2,
+        3
+      ],
+      "identical_across_topology_seed": true
+    }
+  ]
+}

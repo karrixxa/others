@@ -25,10 +25,11 @@
 - Phase 11 END checkpoint commit: `1a59ae8` (controlled multi-seed validation)
 - Phase 12 END checkpoint commit: `e4ee1f9` (final local review, DO NOT
   PUBLISH — the last phase of the corrected Phases 6-12 sequence)
-- This update corresponds to the **Phase 13 END** checkpoint (dashboard
-  behavior diagnostic, measurement only, requested directly by the user
-  outside the Phases 6-12 sequence — commit hash filled in after this commit
-  lands, see repo log).
+- Phase 13 END checkpoint commit: `6655cfe` (dashboard behavior diagnostic,
+  measurement only)
+- This update corresponds to the **Phase 13b END** checkpoint (corrected and
+  strengthened dashboard behavior diagnostic, measurement only — commit hash
+  filled in after this commit lands, see repo log).
 - Base branch `july14` is untouched and remains the protected base.
 - `four-pattern` branch exists (checked out in a separate worktree at
   `/home/charisxiong/Documents/others`) and is explicitly NOT merged here —
@@ -331,6 +332,68 @@ findings, the exact reproduction method, and every example record are in
 backing every number is in `dashboard_behavior_diagnostic_summary.json`
 (committed); the full per-event log (tens of MB) is a disposable `/tmp`
 artifact, not committed, per this repo's own commit-hygiene rule.
+
+**Current phase (Phase 13b, complete) — Corrected and strengthened
+dashboard behavior diagnostic, MEASUREMENT ONLY:** found and fixed a real
+methodology bug in Phase 13's own instrumentation -- it tagged loser-
+depression weight-delta records with `engine.spiked[nid]` read at the
+moment `apply_delayed_inhibition()` is called (the top of `step()`, before
+that step's own competition runs), which is last step's result, not this
+step's. Replaced with three explicitly-timed fields
+(`spiked_previous_step`/`inhibited_at_start_of_step`/
+`spiked_later_current_step`), verified by 11 new tracer-timing tests
+against independently-reconstructed ground truth. Ran the FULL grid this
+time -- weight seeds 1-5 x topology seeds 1-3 x 3 scenarios (20+20 hold/
+switch, 600+200 hold/switch, 40-rotation interleaved) x 3 configs (A:
+dashboard default distance-on/legacy-pinned; B: raw distance off; C: new,
+diagnostic-only spatially-uniform delivery charge-matched to A's mean
+influence, built by overriding `.distance` post-construction, no default
+touched) = 135 runs, plus a 5-seed Phase-11-style distinct-owners pass for
+direct reconciliation. **Corrected several Phase 13 overgeneralizations
+drawn from seed=1 alone:** "distance off measurably worsens recruitment" is
+WRONG as a general claim (B's mean active-neuron count roughly matches or
+beats A across 5 seeds; seed=1 was an unlucky draw for B, not
+representative) -- what IS seed-robust is that A trades variance for a
+schedule-dependent mean effect that reverses direction (A better in short-
+hold, worse in long-hold, roughly even in interleaved); the L2E5-specific
+"union receptive field" framing was this session's own prompt's arbitrary
+example, not an identified tyrant (L2E5 is tyrant in only 3/45 grid runs) --
+but the underlying MECHANISM generalizes perfectly (the tyrant's single
+highest weight is the always-active center pixel in 45/45 runs, every
+config). New, quantified findings: never-fired neurons receive ~1,400-2,200
+loser-depression hits each over a 3,200-step run with zero self-generated
+event that could reverse it; `spiked_later_current_step` (a neuron hit by
+delayed inhibition still firing later the SAME step) occurs in only 9/135
+runs and EXCLUSIVELY under config A, never B or C -- it takes a spatially
+concentrated amplification, not just an equal-average one, to rebuild
+charge that fast. A genuine methodological finding surfaced by the tracer-
+timing tests: `engine._l2_inhibition_log` is a `deque(maxlen=400)`, a
+display-oriented rolling window that silently truncates on long runs --
+this diagnostic's own exhaustive count, not that log's length, is the
+correct "unique delivery events" figure once a run exceeds 400 deliveries.
+**Reconciled with Phase 11's schedule-dependent distance/influence
+finding:** Phase 11's "influence on" is REAL topology-jittered distance
+(`legacy_distance_compat=False`); this phase's config A is the fixed,
+legacy-PINNED distance the dashboard actually ships with
+(`legacy_distance_compat=True`) -- a third condition Phase 11's own 2x2
+geometry grid never tested (and Phase 11's own docstring claim that the
+dashboard default sits inside its "influence-off" cell appears imprecise by
+its own `_engine_kwargs` code -- flagged for human review, not edited, out
+of this phase's scope). The two phases' specific manipulations and even
+their schedule lengths differ (Phase 11's short-interleaved is 10 cycles/
+800 steps; this phase's `interleaved_40` is 40 cycles/3,200 steps, per this
+session's explicit instruction), so they should not be read as agreeing or
+disagreeing at face value -- but Phase 13b's OWN axis independently
+reproduces the SAME qualitative shape Phase 11 found (a schedule-dependent
+reversal, not a uniform verdict), which is a stronger result than either
+phase alone. Topology_seed confirmed a complete no-op for all three configs
+(byte-identical final weights across topology_seed in {1,2,3} at a fixed
+weight seed) since none of Phase 4's real-geometry-consuming pathways are
+enabled here. Full findings, the explicit list of corrected Phase 13
+claims, and every table are in `Phase13b_Diagnostic_Correction.md`; the
+135-run grid plus the reconciliation pass are in
+`phase13b_diagnostic_summary.json` (committed); full per-event logs are a
+disposable `/tmp` artifact per the standing commit-hygiene rule.
 
 ## Completed (this session)
 
