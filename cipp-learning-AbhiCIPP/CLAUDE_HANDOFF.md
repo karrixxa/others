@@ -183,6 +183,31 @@
   competitor at all) rather than competitive. 30/30 weight x topology seed
   grid run for both schedules (~396s); topology_seed confirmed inert
   (matches Phase 13b). See `Phase27_L2_Ownership_Causal_Audit.md`.
+- Phase 28A (measurement/offline only, no engine flag added): tested a
+  purely local presynaptic trace (`c_i <- c_i + (s_i - c_i)/tau_c`, driven
+  ONLY by physical L1E spikes) gating ONLY positive self-spike potentiation
+  (`g_i = max(g_min, 1 - c_i)`) -- never physical transmission, never
+  inactive-input depression, never L2I loser depression. Implemented
+  offline via monkeypatches (`phase28a_local_common_input_feasibility.py`),
+  never touching `backend/simulation.py`/`presets.py`. Full grid: 30 weight
+  seeds x 1 topology seed x 3 pattern sets (`standard` = real PATTERNS,
+  universal pixel 4; `shifted` = pixel 0<->4 swap, universal pixel moves to
+  0 -- the generalization check; `no_universal` = the four PROBES used as
+  trainable patterns, no common pixel) x 2 schedules (interleaved,
+  long-hold) x 14 conditions (baseline/oracle/12 gate combos) = 2,460 runs,
+  all reported. **GATE FAILS**: 0/12 `(tau_c, g_min)` pairs pass all six
+  pre-registered stop/go criteria (written BEFORE seeing results). The gate
+  shows a real, generalizing improvement on the INTERLEAVED schedule
+  (helps both `standard` and `shifted` with the same params, e.g.
+  tau_c=80/g_min<=0.25) but fails on the LONG-HOLD schedule (either costs
+  too much genuine peripheral learning, or for `shifted` actively makes
+  ownership WORSE than baseline) -- a same-time-constant leaky trace cannot
+  distinguish "common across pattern switches" from "held a long time
+  within one pattern." **Phase 28B (the engine flag) is explicitly NOT
+  implemented per this negative result.** Recommendation for a future
+  phase: a per-presentation-boundary discrete commonness counter (schedule-
+  length-invariant by construction) instead of a continuous per-step EMA.
+  See `Phase28A_Local_Common_Input_Feasibility.md`.
 - Base branch `july14` is untouched and remains the protected base.
 - `four-pattern` branch exists (checked out in a separate worktree at
   `/home/charisxiong/Documents/others`) and is explicitly NOT merged here —
