@@ -143,6 +143,17 @@
   GROWTH DYNAMICS (Phase 20's weights plateau by step 10,000 because PCi
   stops firing, an upstream bottleneck free-energy has no mechanism to
   address). See `Phase25_Synapse_Free_Energy_Gate_Report.md`.
+- Phase 26 (final validation, no code change): full backend suite
+  re-confirmed clean -- 379 passed, 5 pre-existing failures (same flow-rate/
+  assembly-flow-credit failures present since before this investigation), no
+  new failures. Consolidated `Lecture14_Architecture_Validation.md` covering
+  Phases 18-26: architecture actually implemented, per-phase outcome table,
+  what stays default OFF, what remains conceptual/unresolved, full commit
+  list, both regression bugs found/fixed, overall verdict ("partially
+  validated" -- coincidence detection and selective inhibition work as
+  designed; decoder maturation under realistic training and continuous-
+  switching carryover remain open, honestly documented limitations). This
+  is the closing checkpoint of the Lecture 14 investigation.
 - Base branch `july14` is untouched and remains the protected base.
 - `four-pattern` branch exists (checked out in a separate worktree at
   `/home/charisxiong/Documents/others`) and is explicitly NOT merged here —
