@@ -138,6 +138,11 @@
   positive baseline, not genuine prediction; frequency cannot distinguish
   correct from incorrect prediction at all). See
   `Phase24_Frequency_Learning_Stop_Gate_Report.md`.
+- Phase 25: GATED OFF, no implementation. Prediction signal is meaningful
+  in DIRECTION (precision=1.0 decoder selectivity, Phases 19-22) but not in
+  GROWTH DYNAMICS (Phase 20's weights plateau by step 10,000 because PCi
+  stops firing, an upstream bottleneck free-energy has no mechanism to
+  address). See `Phase25_Synapse_Free_Energy_Gate_Report.md`.
 - Base branch `july14` is untouched and remains the protected base.
 - `four-pattern` branch exists (checked out in a separate worktree at
   `/home/charisxiong/Documents/others`) and is explicitly NOT merged here —
