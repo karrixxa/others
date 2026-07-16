@@ -154,6 +154,35 @@
   designed; decoder maturation under realistic training and continuous-
   switching carryover remain open, honestly documented limitations). This
   is the closing checkpoint of the Lecture 14 investigation.
+- **New branch `l2-ownership-recovery`** (created from the Phase 26
+  checkpoint `7dc6f4f`; NOT `f9d71e7`, a remote-only commit that touches
+  only tracked `.pyc` cache files). Phase 27 (measurement only, no default/
+  parameter/equation changed, DASHBOARD_PRESET unchanged, all prediction
+  flags stay off): built `CausalTracer` (non-mutating patches around
+  `fire`/`apply_delayed_inhibition`/`_homeostatic_scaling`/
+  `set_feedforward_weight`/`_deliver_scheduled_l2_inhibition`, same hooks as
+  Phase 13b's `WeightDeltaRecorder`) classifying every weight delta into
+  `self_spike_potentiation` / `self_spike_depression_inactive` /
+  `l2i_loser_depression` / `homeostasis` / `manual_edit`, plus an explicit
+  `residual_unattributed` safety-net bucket (empty across all 30 interleaved
+  runs -- every real delta in this config is fully explained). Two
+  ownership-collision detectors: `find_earliest_modal_collision` (the
+  literal earliest candidate -- usually a fragile n=1 flicker that
+  self-corrects, true in 17/18 collisions found) and
+  `find_persistent_ownership_collision` (the collision that actually
+  sticks, walked back to its onset). KEY FINDING: in 18/18 traced
+  interleaved collisions and both traced long-hold collisions, the
+  eventual tyrant's center-pixel (index 4, active in every trained pattern)
+  weight establishes a PERMANENT lead over the displaced competitor's own
+  center weight BEFORE the second-pattern-capture presentation, every
+  single time -- but which learning-rule category produces that
+  crossing delta is split ~evenly (9/18 `self_spike_potentiation`, 9/18
+  `l2i_loser_depression`), not one dominant mechanism. Long-hold secondary
+  finding: on an abrupt pattern switch, capture is immediate (col 1's very
+  first presentation goes straight to the row-1 incumbent, no displaced
+  competitor at all) rather than competitive. 30/30 weight x topology seed
+  grid run for both schedules (~396s); topology_seed confirmed inert
+  (matches Phase 13b). See `Phase27_L2_Ownership_Causal_Audit.md`.
 - Base branch `july14` is untouched and remains the protected base.
 - `four-pattern` branch exists (checked out in a separate worktree at
   `/home/charisxiong/Documents/others`) and is explicitly NOT merged here —
