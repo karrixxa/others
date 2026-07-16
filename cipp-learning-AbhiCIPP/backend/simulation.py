@@ -889,6 +889,38 @@ class SimulationEngine:
                  # the unbounded-accumulation failure mode that motivates the
                  # real leak. Never used outside that one diagnostic test/run.
                  prediction_leak_diagnostic_disable: bool = False,
+                 # Phase 21 (LPS Lecture 14 selective local predictive
+                 # inhibition; see Phase18b_Lecture14_Local_Coincidence_
+                 # Architecture_Contract.md's deferred "PCi->Ii->Si" path,
+                 # wired for the first time in this phase). Requires
+                 # prediction_column_enabled (raises otherwise -- selective
+                 # input needs an actual PC population to draw from). Default
+                 # OFF reproduces the exact baseline L1I input topology
+                 # (all-nine-identical global L2E broadcast, n_feedback_inputs
+                 # = N_OUT). When True: L1Ii's incoming array is replaced
+                 # (not appended to) with a SINGLE input from its own paired
+                 # PCi only (n_feedback_inputs = 1) -- "route each PCi's
+                 # pixel-specific prediction to L1Ii INSTEAD OF all-nine-
+                 # identical global L2E evidence", delivered same-step
+                 # (immediate), matching the existing L2E->L1I feedback's own
+                 # same-step delivery convention (see step()'s "2d. Deliver
+                 # L2E winner spike immediately to all L1I neurons").
+                 prediction_column_to_i_enabled: bool = False,
+                 # Phase 21: fixed/pretrained L1I regulation, KEPT AS A
+                 # SEPARATE factorial variable from the input-topology flag
+                 # above (per the independent review's correction #6 --
+                 # do not change input topology and inhibitory plasticity
+                 # simultaneously without isolated controls). Default OFF
+                 # reproduces the existing learned L1I regulation exactly
+                 # (random init, ChargeBasedRule learning). When True: every
+                 # L1Ii incoming weight (whether global N_OUT-dim or the
+                 # single selective PCi input, depending on the flag above)
+                 # is fixed at L1I's own resolved threshold (one physical
+                 # source event alone sufficient), and L1I's own
+                 # learning_rate is pinned to 0 -- same "pretrained
+                 # recruitment" pattern as Phase 17's
+                 # pretrained_l2i_recruitment, applied to L1I instead of L2I.
+                 pretrained_l1i_regulation: bool = False,
                  # Capacity rule for the minimal experiment (see the prompt's
                  # "Threshold, Cap, Floor" section). l2e_weight_cap_frac sets each
                  # L2E positive feedforward weight cap to frac*thr_l2, so three
@@ -1045,6 +1077,8 @@ class SimulationEngine:
                            prediction_leak=prediction_leak,
                            prediction_feedback_delay=prediction_feedback_delay,
                            prediction_leak_diagnostic_disable=prediction_leak_diagnostic_disable,
+                           prediction_column_to_i_enabled=prediction_column_to_i_enabled,
+                           pretrained_l1i_regulation=pretrained_l1i_regulation,
                            l2e_weight_cap_frac=l2e_weight_cap_frac,
                            pos_weight_floor=pos_weight_floor,
                            l2e_init_mode=l2e_init_mode,
@@ -1088,10 +1122,20 @@ class SimulationEngine:
         thr_l1i = thr_l2i * p['l1i_threshold_frac']  # 1.0 => L1I exactly matches L2I
 
         self.prediction_excitatory_enabled = bool(p['prediction_excitatory_enabled'])
+        # Phase 21: selective PCi->Ii input topology REPLACES (not appends
+        # to) L1I's incoming array -- n_feedback_inputs becomes 1 (this
+        # column's own paired PCi only) instead of N_OUT (all-nine-identical
+        # global L2E broadcast). Requires an actual PC population to exist.
+        self.prediction_column_to_i_enabled = bool(p['prediction_column_to_i_enabled'])
+        if self.prediction_column_to_i_enabled and not p['prediction_column_enabled']:
+            raise ValueError(
+                "prediction_column_to_i_enabled requires prediction_column_enabled "
+                "(selective L1I input needs an actual PC population to draw from).")
+        l1i_n_feedback = 1 if self.prediction_column_to_i_enabled else N_OUT
         self.l1 = InputLayer(n_neurons=N_PIX, threshold=thr_l1,
                              refractory_period=p['refractory'], learning_rate=p['learning_rate'],
                              weight_cap=thr_l1, leak_rate=p['leak_l1'],
-                             n_feedback_inputs=N_OUT,
+                             n_feedback_inputs=l1i_n_feedback,
                              n_prediction_inputs=(1 if self.prediction_excitatory_enabled else 0))
         # L1E: pre-trained pixel encoders — fixed weights, no learning.
         # Fixed-point scale: gate -1*UNIT, excitatory drive +1*UNIT, so one pixel
@@ -1122,8 +1166,21 @@ class SimulationEngine:
         # its paired pixel in phase with the rest of the active input. Give the bank
         # one task-independent feedback vector; independent random vectors create
         # arbitrary phase groups with no pixel-local signal that could correct them.
+        # Phase 21: sized to l1i_n_feedback (1 under the selective PCi-input
+        # topology, N_OUT under the existing global topology) rather than a
+        # hardcoded N_OUT.
         l1i_feedback_init = rng_fb.uniform(lo_frac * thr_l1i, hi_frac * thr_l1i,
-                                           size=N_OUT)
+                                           size=l1i_n_feedback)
+        # Phase 21: fixed/pretrained L1I regulation -- a SEPARATE factorial
+        # variable from the input-topology flag above. Default OFF preserves
+        # the learned random init exactly. When True: every incoming L1I
+        # weight (whichever topology) is fixed at L1I's own resolved
+        # threshold (one physical source event alone is sufficient), and
+        # L1I's own learning_rate is pinned to 0 -- same pattern as Phase
+        # 17's pretrained_l2i_recruitment, applied to L1I instead of L2I.
+        self.pretrained_l1i_regulation = bool(p['pretrained_l1i_regulation'])
+        if self.pretrained_l1i_regulation:
+            l1i_feedback_init = np.full(l1i_n_feedback, thr_l1i)
         for inh in self.l1.inhibitory_neurons:
             inh.threshold = thr_l1i    # Phase 2: L1I's own (possibly lowered) threshold
             # InputLayer constructed L1I with L1E's cap. Raise the cap before
@@ -1133,6 +1190,8 @@ class SimulationEngine:
             inh.weights = l1i_feedback_init.copy()
             inh.leak_rate = L1I_LEAK_RATE if p['l1i_leak_enabled'] else 0.0
             inh.refractory_period = L1I_FEEDBACK_REFRACTORY
+            if self.pretrained_l1i_regulation:
+                inh.learning_rate = 0.0
 
         # Phase 19A: nine per-input-column prediction neurons P0..P8 plus a
         # stored 8x9 L2E->P decoder matrix. The decoder weights live on each
@@ -1386,8 +1445,16 @@ class SimulationEngine:
                     # Charge-based excitatory rule for these incoming (E->I)
                     # weights too -- same eta-scaled-to-cap principle as L2E
                     # above. Phase 1: L2I and L1I get separate lr fractions.
-                    lr_frac = p['l2i_lr_frac'] if nid.startswith('L2') else p['l1i_lr_frac']
-                    n.learning_rate = lr_frac * n.weight_cap
+                    # Phase 21: this generic per-neuron sweep would otherwise
+                    # silently overwrite pretrained_l1i_regulation's own
+                    # learning_rate=0.0 pinning (set earlier in _build(), see
+                    # the L1I init loop) -- skip it for L1I in that mode,
+                    # same discipline as the PC distance-weighting fix above.
+                    if nid.startswith('L1') and self.pretrained_l1i_regulation:
+                        pass
+                    else:
+                        lr_frac = p['l2i_lr_frac'] if nid.startswith('L2') else p['l1i_lr_frac']
+                        n.learning_rate = lr_frac * n.weight_cap
                     # Decouple the saturation ceiling from the hard clip (see
                     # excitatory_saturation_cap in Neuron). The quadratic
                     # rule dw = eta*p*(1 - w^2/w_max) has its natural equilibrium
@@ -1786,9 +1853,20 @@ class SimulationEngine:
             self.synapses.append(dict(id=f'{j}->inh', source=f'L2E{j}', target='L2I', kind='excitation'))
         for i in range(N_PIX):
             self.synapses.append(dict(id=f'li{i}', source=f'L1I{i}', target=f'L1E{i}', kind='inhibition'))
-        for j in range(N_OUT):
+        # Phase 21: the selective PCi->Ii topology REPLACES the global
+        # N_OUT-wide L2E->L1I feedback fanout with a single one-to-one
+        # PCi->L1Ii synapse per column (kind='col_inhibition_feedback') --
+        # L1Ii's own incoming array is genuinely 1-wide in that mode (see
+        # _build()), so the old N_OUT `fb{j}->{i}` ids would not correspond
+        # to anything real.
+        if self.prediction_column_to_i_enabled:
             for i in range(N_PIX):
-                self.synapses.append(dict(id=f'fb{j}->{i}', source=f'L2E{j}', target=f'L1I{i}', kind='feedback'))
+                self.synapses.append(dict(id=f'pcinh{i}', source=f'PC{i}',
+                                          target=f'L1I{i}', kind='col_inhibition_feedback'))
+        else:
+            for j in range(N_OUT):
+                for i in range(N_PIX):
+                    self.synapses.append(dict(id=f'fb{j}->{i}', source=f'L2E{j}', target=f'L1I{i}', kind='feedback'))
         if self.prediction_excitatory_enabled:
             for j in range(N_OUT):
                 for i in range(N_PIX):
@@ -1876,11 +1954,19 @@ class SimulationEngine:
                 float(infl_l2e_l2i_vals[j]) if p['infl_l2i_l2e'] else 1.0)
 
         # ---- L2E -> L1I: per-L1I distance row to all N_OUT L2E ----
-        for i, inh in enumerate(self.l1.inhibitory_neurons):
-            d_row = np.linalg.norm(l2e_xyz - l1i_xyz[i], axis=1)      # (N_OUT,)
-            inh.distance_weighting = bool(p['infl_l2e_l1i'])
-            inh.distance_power, inh.distance_ref, inh.distance_min = power, ref, d_min
-            inh.distance = d_row
+        # Phase 21: under the selective PCi->Ii topology, L1Ii's incoming
+        # array is genuinely 1-wide (its own paired PCi only, not any L2E) --
+        # the N_OUT-shaped geometric L2E->L1I distance concept does not
+        # apply to that single, same-column connection, so this pathway's
+        # distance-weighting stays off and untouched for L1I in that mode
+        # (matches distance_weighting's own class default -- never swept in
+        # here, same discipline as the PC distance-weighting fix above).
+        if not self.prediction_column_to_i_enabled:
+            for i, inh in enumerate(self.l1.inhibitory_neurons):
+                d_row = np.linalg.norm(l2e_xyz - l1i_xyz[i], axis=1)      # (N_OUT,)
+                inh.distance_weighting = bool(p['infl_l2e_l1i'])
+                inh.distance_power, inh.distance_ref, inh.distance_min = power, ref, d_min
+                inh.distance = d_row
 
         # ---- L1I -> L1E: paired distance (index 0 real, every excitatory input
         # slot neutralized so sensory and optional replay channels never inherit
@@ -2073,7 +2159,10 @@ class SimulationEngine:
                'prediction_feedback_init', 'prediction_feedback_max',
                'prediction_learning_rate', 'prediction_threshold',
                'prediction_leak', 'prediction_feedback_delay',
-               'prediction_leak_diagnostic_disable')
+               'prediction_leak_diagnostic_disable',
+               # Phase 21: selective local predictive inhibition (PCi->Ii),
+               # kept as two SEPARATE factorial variables.
+               'prediction_column_to_i_enabled', 'pretrained_l1i_regulation')
 
     def apply_config(self, overrides: dict):
         """Merge tunable overrides into self.params and rebuild the network in
@@ -2099,7 +2188,8 @@ class SimulationEngine:
                      'infl_l2e_l2i', 'infl_l2i_l2e', 'infl_l2e_l1i', 'infl_l1i_l1e',
                      'adaptive_threshold', 'loser_depression_protection',
                      'pretrained_l2i_recruitment', 'prediction_excitatory_enabled',
-                     'prediction_column_enabled', 'prediction_leak_diagnostic_disable'):
+                     'prediction_column_enabled', 'prediction_leak_diagnostic_disable',
+                     'prediction_column_to_i_enabled', 'pretrained_l1i_regulation'):
                 v = bool(v)
             elif k in ('seed', 'refractory', 'l2_charge_chunks', 'l2_inhibition_delay',
                        'prediction_feedback_delay'):
@@ -2700,8 +2790,21 @@ class SimulationEngine:
         #     L1I neuron's N_OUT-dimensional afferent weight vector. (t carries the
         #     flow-rate current trace when L1I is a trainable integrator; ignored in
         #     immediate-relay mode, where L1I's flow flag is off.)
-        for inh in l1.inhibitory_neurons:
-            inh.receive_input(l2e, t=t)
+        # Phase 21: selective PCi->Ii delivery REPLACES the global L2E
+        # broadcast when prediction_column_to_i_enabled is on -- each L1Ii
+        # receives only its OWN paired PCi's just-computed spike this step
+        # (pcol_spiked, already resolved earlier in this same step() call,
+        # before L2 competition -- see the PC delivery block above), never
+        # the other eight columns' PCi. Delivered same-step (immediate),
+        # matching the existing L2E->L1I feedback's own same-step
+        # convention -- this is the first time PCi's own output affects any
+        # other neuron (Phase 19/20 were shadow-only, zero output).
+        if self.prediction_column_to_i_enabled:
+            for i, inh in enumerate(l1.inhibitory_neurons):
+                inh.receive_input(np.array([pcol_spiked[i]]), t=t)
+        else:
+            for inh in l1.inhibitory_neurons:
+                inh.receive_input(l2e, t=t)
 
         # 2e. L1I fires after receiving L2E feedback.
         if self.l1i_immediate_relay:
@@ -3080,8 +3183,14 @@ class SimulationEngine:
         for i in range(N_PIX):
             w[f'li{i}'] = float(self.l1.excitatory_neurons[i].weights[0])
             fbw = self.l1.inhibitory_neurons[i].weights
-            for j in range(N_OUT):
-                w[f'fb{j}->{i}'] = float(fbw[j])
+            # Phase 21: fbw is genuinely 1-wide under the selective PCi->Ii
+            # topology (see _build()) -- report the single pcinh{i} weight
+            # instead of indexing into N_OUT entries that no longer exist.
+            if self.prediction_column_to_i_enabled:
+                w[f'pcinh{i}'] = float(fbw[0])
+            else:
+                for j in range(N_OUT):
+                    w[f'fb{j}->{i}'] = float(fbw[j])
         # Phase 19A: stored decoder matrix plus fixed local replay edges.
         if self.prediction_excitatory_enabled:
             stored = self._stored_prediction_decoder_matrix()

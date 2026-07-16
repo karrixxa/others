@@ -91,6 +91,23 @@
   no runaway, no false L2E activation -- confirming the architecture/
   cueing mechanism itself is sound; the gap is specifically that Phase 19's
   calibrated learning rate never reaches maturity under realistic training.
+- Phase 21 (new flags, default OFF): `prediction_column_to_i_enabled`
+  (selective PCi->Ii input topology, replacing L1I's global N_OUT-wide
+  feedback with a single paired-PCi input) and `pretrained_l1i_regulation`
+  (fixed vs learned L1I regulation, kept as a SEPARATE factorial variable).
+  First phase where PCi's own output affects any other neuron (Phases
+  19-20 were shadow-only). POSITIVE RESULT: the selective topology breaks
+  all-nine L1I synchronization completely (0.42-0.48 -> 0.00) and gives
+  EXACT per-pixel selectivity (inactive columns receive precisely zero
+  PCi-driven drive over a 3000-step hold) -- works cleanly as intended.
+  Honest trade-off: weaker overall suppression than global feedback (PCi
+  fires far less often than L2E, so L1E's duty cycle is higher under the
+  selective topology) -- a direct, expected consequence of Phase 19/20's
+  sparse PCi firing rate. Two regression bugs found and fixed during
+  implementation (same class as Phase 19's PC distance-weighting fix): a
+  generic per-neuron distance-weighting sweep and a generic learning_rate
+  sweep both silently corrupted the new flags' state; both are now guarded
+  by dedicated tests. See `Phase21_Selective_Inhibition_Report.md`.
 - Base branch `july14` is untouched and remains the protected base.
 - `four-pattern` branch exists (checked out in a separate worktree at
   `/home/charisxiong/Documents/others`) and is explicitly NOT merged here —

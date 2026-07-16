@@ -1,0 +1,78 @@
+{
+  "A": {
+    "l1i_rate_active": 0.4613,
+    "l1i_rate_inactive": 0.4613,
+    "l1i_rate_center": 0.4613,
+    "l1e_duty_cycle": 0.1796,
+    "l1e_min_rate": 0.0,
+    "all_nine_sync_rate": 0.4613,
+    "l1i_rate_per_pixel": [
+      0.4613,
+      0.4613,
+      0.4613,
+      0.4613,
+      0.4613,
+      0.4613,
+      0.4613,
+      0.4613,
+      0.4613
+    ]
+  },
+  "B": {
+    "l1i_rate_active": 0.181,
+    "l1i_rate_inactive": 0.0,
+    "l1i_rate_center": 0.181,
+    "l1e_duty_cycle": 0.2731,
+    "l1e_min_rate": 0.0,
+    "all_nine_sync_rate": 0.0,
+    "l1i_rate_per_pixel": [
+      0.0,
+      0.0,
+      0.0,
+      0.181,
+      0.181,
+      0.181,
+      0.0,
+      0.0,
+      0.0
+    ]
+  },
+  "C": {
+    "l1i_rate_active": 0.4843,
+    "l1i_rate_inactive": 0.4843,
+    "l1i_rate_center": 0.4843,
+    "l1e_duty_cycle": 0.172,
+    "l1e_min_rate": 0.0,
+    "all_nine_sync_rate": 0.4843,
+    "l1i_rate_per_pixel": [
+      0.4843,
+      0.4843,
+      0.4843,
+      0.4843,
+      0.4843,
+      0.4843,
+      0.4843,
+      0.4843,
+      0.4843
+    ]
+  },
+  "D": {
+    "l1i_rate_active": 0.2117,
+    "l1i_rate_inactive": 0.0,
+    "l1i_rate_center": 0.2117,
+    "l1e_duty_cycle": 0.2628,
+    "l1e_min_rate": 0.0,
+    "all_nine_sync_rate": 0.0,
+    "l1i_rate_per_pixel": [
+      0.0,
+      0.0,
+      0.0,
+      0.2117,
+      0.2117,
+      0.2117,
+      0.0,
+      0.0,
+      0.0
+    ]
+  }
+}

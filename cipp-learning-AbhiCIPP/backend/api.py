@@ -608,6 +608,22 @@ CONFIG_SPEC = [
      "desc": "DIAGNOSTIC CONTROL ONLY -- forces PC leak to 0.0 regardless of "
              "the leak value above, to reproduce the unbounded-accumulation "
              "failure mode that motivates having a real leak at all."},
+    # Phase 21 (LPS Lecture 14 selective local predictive inhibition) --
+    # wires the deferred PCi->Ii path; requires prediction_column_enabled.
+    {"key": "prediction_column_to_i_enabled", "label": "Selective PCi->Ii inhibition", "kind": "toggle",
+     "desc": "Replaces L1Ii's incoming array (all-nine-identical global L2E "
+             "broadcast) with a single input from its own paired PCi only. "
+             "Requires prediction_column_enabled. The first phase where PCi's "
+             "own output affects any other neuron (Phases 19-20 were shadow-"
+             "only). OFF (default) is byte-identical to the existing global "
+             "L2E->L1I feedback topology."},
+    {"key": "pretrained_l1i_regulation", "label": "Pre-trained L1I regulation", "kind": "toggle",
+     "desc": "SEPARATE factorial variable from the toggle above: fixes every "
+             "incoming L1I weight (whichever topology) at L1I's own resolved "
+             "threshold, and pins L1I's learning rate to 0 -- the Phase 17 "
+             "pretrained_l2i_recruitment pattern applied to L1I instead of "
+             "L2I. OFF (default) is byte-identical to the existing learned-"
+             "regulation baseline."},
 ]
 
 # Dashboard clutter control: the panel exposes every tunable, but most are inert
