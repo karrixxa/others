@@ -122,6 +122,17 @@
   was the single most extreme collapse (one L2E as literally the only
   neuron with any learned structure at all). See
   `Phase22_Full_Interaction_Report.md`.
+- Phase 23 (measurement only, no new flag, no production code touched):
+  L1E frequency across 6 conditions. KEY FINDING: the baseline (no
+  prediction at all) sits closest to 0.5 (0.528) -- Phase 17's established
+  false positive, reconfirmed; genuine selective PC-driven inhibition sits
+  FURTHER from 0.5 (0.834), not closer, because it delivers weaker overall
+  suppression (Phase 21's finding). Forcing an INCORRECT (wrong-pixel)
+  prediction produces frequency (0.854) statistically indistinguishable
+  from CORRECT prediction (0.834) -- frequency alone cannot tell them
+  apart. This FAILS Phase 24's explicit gate ("proceed only if Phase 23
+  establishes a nontrivial frequency<->correct-prediction relationship").
+  See `Phase23_Frequency_Measurement_Report.md`.
 - Base branch `july14` is untouched and remains the protected base.
 - `four-pattern` branch exists (checked out in a separate worktree at
   `/home/charisxiong/Documents/others`) and is explicitly NOT merged here —

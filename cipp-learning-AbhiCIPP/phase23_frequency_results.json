@@ -1,0 +1,104 @@
+{
+  "1_external_input_only": {
+    "mean": 0.176,
+    "active_mean": 0.528,
+    "per_pixel": [
+      0.0,
+      0.0,
+      0.0,
+      0.528,
+      0.528,
+      0.528,
+      0.0,
+      0.0,
+      0.0
+    ]
+  },
+  "2_global_synchronized_suppression": {
+    "mean": 0.176,
+    "active_mean": 0.528,
+    "per_pixel": [
+      0.0,
+      0.0,
+      0.0,
+      0.528,
+      0.528,
+      0.528,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "note": "identical run to condition 1 -- the baseline topology IS the false-positive regime"
+  },
+  "3_selective_predictive_inhibition": {
+    "mean": 0.278,
+    "active_mean": 0.834,
+    "per_pixel": [
+      0.0,
+      0.0,
+      0.0,
+      0.834,
+      0.834,
+      0.834,
+      0.0,
+      0.0,
+      0.0
+    ]
+  },
+  "4_correct_learned_prediction": {
+    "l1e_active_mean": 0.834,
+    "pc_active_mean": 0.2265,
+    "l1e_per_pixel": [
+      0.0,
+      0.0,
+      0.0,
+      0.834,
+      0.834,
+      0.834,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "pc_per_pixel": [
+      0.0,
+      0.0,
+      0.0,
+      0.2265,
+      0.2265,
+      0.2265,
+      0.0,
+      0.0,
+      0.0
+    ]
+  },
+  "5_incorrect_prediction": {
+    "mean": 0.2847,
+    "active_mean": 0.854,
+    "pixel0_rate": 0.0,
+    "per_pixel": [
+      0.0,
+      0.0,
+      0.0,
+      0.854,
+      0.854,
+      0.854,
+      0.0,
+      0.0,
+      0.0
+    ]
+  },
+  "6_reconstruction_with_input_removed": {
+    "pc_active_mean": 0.025,
+    "pc_per_pixel": [
+      0.0,
+      0.0,
+      0.0,
+      0.025,
+      0.025,
+      0.025,
+      0.0,
+      0.0,
+      0.0
+    ]
+  }
+}
