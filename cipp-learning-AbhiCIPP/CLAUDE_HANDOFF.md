@@ -208,6 +208,31 @@
   phase: a per-presentation-boundary discrete commonness counter (schedule-
   length-invariant by construction) instead of a continuous per-step EMA.
   See `Phase28A_Local_Common_Input_Feasibility.md`.
+- Phase 29 (FSCI/ISM investigation, measurement/offline only, no engine
+  flag added): the other session's centered/covariance-encoder runs
+  (`/tmp/l2-commonness-budget-review/audit.py`) turned out to be
+  permanently inaccessible (isolated sandbox, gone even after those
+  processes finished) -- per user direction, implemented and ran the exact
+  specified rule from scratch instead: `x_bar_i <- (1-a)x_bar_i + a*x_i`
+  (physical L1E spikes only), `s_i = x_i - x_bar_i`, `delta_w_ji = eta *
+  FE_j * (1-w_ji/w_max)^2 * s_i`, gated on the postsynaptic neuron's own
+  spike, loser depression OFF for `centered` (ON for `legacy` control).
+  Preregistered `alpha=1/80` (from Phase 28A's own best-generalizing
+  tau_c, not fit to this experiment) and `eta`=each neuron's existing
+  `learning_rate` (no new free parameter). 30 seeds x 2 conditions x 2
+  schedules = 120 runs, all reported. MIXED result: center/peripheral
+  ratio drops 78% on interleaved (7.68->1.66, the exact targeted
+  pathology, confirmed fixed) and ambiguity drops substantially on both
+  schedules, but persistent-collision rate is slightly WORSE on
+  interleaved (66.7%->73.3%, mass shifts from severe collapse toward a
+  3-owner middle rather than eliminating collisions) and never-fired count
+  roughly doubles there. Long-hold's collision rate DOES improve
+  (43.3%->26.7%). Verdict: PARTIAL PASS -- the specific universal-feature
+  mechanism is decisively fixed, general ownership improves modestly with
+  no catastrophic regression, so the investigation proceeds to the active
+  prediction-loop phase per the plan's own structure (encoder was never
+  meant to solve ownership alone), reported honestly rather than
+  oversold. See `Phase29_Centered_Encoder_Ownership_Gate.md`.
 - Base branch `july14` is untouched and remains the protected base.
 - `four-pattern` branch exists (checked out in a separate worktree at
   `/home/charisxiong/Documents/others`) and is explicitly NOT merged here —
