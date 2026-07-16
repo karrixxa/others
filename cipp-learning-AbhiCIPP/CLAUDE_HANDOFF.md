@@ -133,6 +133,11 @@
   apart. This FAILS Phase 24's explicit gate ("proceed only if Phase 23
   establishes a nontrivial frequency<->correct-prediction relationship").
   See `Phase23_Frequency_Measurement_Report.md`.
+- Phase 24: GATED OFF, no implementation. Phase 23 established the
+  opposite of what the gate required (frequency near 0.5 is the false-
+  positive baseline, not genuine prediction; frequency cannot distinguish
+  correct from incorrect prediction at all). See
+  `Phase24_Frequency_Learning_Stop_Gate_Report.md`.
 - Base branch `july14` is untouched and remains the protected base.
 - `four-pattern` branch exists (checked out in a separate worktree at
   `/home/charisxiong/Documents/others`) and is explicitly NOT merged here —
