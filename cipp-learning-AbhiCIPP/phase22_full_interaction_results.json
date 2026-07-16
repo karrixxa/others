@@ -1,0 +1,2270 @@
+{
+  "A": {
+    "wta": {
+      "short": [
+        {
+          "seed": 1,
+          "per_pattern": {
+            "row 1": {
+              "consistency": 0.667,
+              "ambiguity_rate": 0.0,
+              "no_response_rate": 0.333,
+              "modal_owner": "L2E5",
+              "n_presentations": 3
+            },
+            "col 1": {
+              "consistency": 0.333,
+              "ambiguity_rate": 0.0,
+              "no_response_rate": 0.333,
+              "modal_owner": "L2E2",
+              "n_presentations": 3
+            },
+            "diag \\": {
+              "consistency": 0.333,
+              "ambiguity_rate": 0.0,
+              "no_response_rate": 0.333,
+              "modal_owner": "L2E3",
+              "n_presentations": 3
+            },
+            "diag /": {
+              "consistency": 0.333,
+              "ambiguity_rate": 0.0,
+              "no_response_rate": 0.333,
+              "modal_owner": "L2E3",
+              "n_presentations": 3
+            }
+          },
+          "forgetting": {
+            "row 1": {
+              "first_half_owner": null,
+              "second_half_owner": "L2E5",
+              "changed": false
+            },
+            "col 1": {
+              "first_half_owner": "L2E5",
+              "second_half_owner": "L2E2",
+              "changed": true
+            },
+            "diag \\": {
+              "first_half_owner": "L2E3",
+              "second_half_owner": "L2E5",
+              "changed": true
+            },
+            "diag /": {
+              "first_half_owner": null,
+              "second_half_owner": "L2E3",
+              "changed": false
+            }
+          },
+          "distinct_owners": 3,
+          "collisions": {
+            "L2E3": [
+              "diag \\",
+              "diag /"
+            ]
+          },
+          "silent_cells": [
+            "L2E0",
+            "L2E1",
+            "L2E6",
+            "L2E7"
+          ],
+          "recruitable_cells": [
+            "L2E4"
+          ],
+          "l2i_activity": {
+            "mean_per_presentation": 0.417,
+            "total": 5
+          },
+          "l1i_all_nine_sync_rate": 1.0,
+          "frozen_replay_zero_weight_drift": true,
+          "frozen_first_responder_consistency": {
+            "row 1": 0.6,
+            "col 1": 0.4,
+            "diag \\": 0.4,
+            "diag /": 0.4
+          }
+        },
+        {
+          "seed": 2,
+          "per_pattern": {
+            "row 1": {
+              "consistency": 0.333,
+              "ambiguity_rate": 0.0,
+              "no_response_rate": 0.667,
+              "modal_owner": "L2E5",
+              "n_presentations": 3
+            },
+            "col 1": {
+              "consistency": 0.333,
+              "ambiguity_rate": 0.0,
+              "no_response_rate": 0.333,
+              "modal_owner": "L2E3",
+              "n_presentations": 3
+            },
+            "diag \\": {
+              "consistency": 0.333,
+              "ambiguity_rate": 0.0,
+              "no_response_rate": 0.333,
+              "modal_owner": "L2E0",
+              "n_presentations": 3
+            },
+            "diag /": {
+              "consistency": 0.333,
+              "ambiguity_rate": 0.0,
+              "no_response_rate": 0.333,
+              "modal_owner": "L2E0",
+              "n_presentations": 3
+            }
+          },
+          "forgetting": {
+            "row 1": {
+              "first_half_owner": null,
+              "second_half_owner": "L2E5",
+              "changed": false
+            },
+            "col 1": {
+              "first_half_owner": "L2E7",
+              "second_half_owner": "L2E3",
+              "changed": true
+            },
+            "diag \\": {
+              "first_half_owner": "L2E0",
+              "second_half_owner": "L2E7",
+              "changed": true
+            },
+            "diag /": {
+              "first_half_owner": null,
+              "second_half_owner": "L2E0",
+              "changed": false
+            }
+          },
+          "distinct_owners": 3,
+          "collisions": {
+            "L2E0": [
+              "diag \\",
+              "diag /"
+            ]
+          },
+          "silent_cells": [
+            "L2E1",
+            "L2E2",
+            "L2E4",
+            "L2E6"
+          ],
+          "recruitable_cells": [
+            "L2E7"
+          ],
+          "l2i_activity": {
+            "mean_per_presentation": 0.417,
+            "total": 5
+          },
+          "l1i_all_nine_sync_rate": 1.0,
+          "frozen_replay_zero_weight_drift": true,
+          "frozen_first_responder_consistency": {
+            "row 1": 0.4,
+            "col 1": 0.6,
+            "diag \\": 0.8,
+            "diag /": 0.4
+          }
+        }
+      ],
+      "equal": [
+        {
+          "seed": 1,
+          "per_pattern": {
+            "row 1": {
+              "consistency": 0.667,
+              "ambiguity_rate": 0.0,
+              "no_response_rate": 0.0,
+              "modal_owner": "L2E4",
+              "n_presentations": 3
+            },
+            "col 1": {
+              "consistency": 0.667,
+              "ambiguity_rate": 0.0,
+              "no_response_rate": 0.0,
+              "modal_owner": "L2E4",
+              "n_presentations": 3
+            },
+            "diag \\": {
+              "consistency": 0.333,
+              "ambiguity_rate": 0.0,
+              "no_response_rate": 0.0,
+              "modal_owner": "L2E2",
+              "n_presentations": 3
+            },
+            "diag /": {
+              "consistency": 0.333,
+              "ambiguity_rate": 0.0,
+              "no_response_rate": 0.0,
+              "modal_owner": "L2E3",
+              "n_presentations": 3
+            }
+          },
+          "forgetting": {
+            "row 1": {
+              "first_half_owner": "L2E5",
+              "second_half_owner": "L2E4",
+              "changed": true
+            },
+            "col 1": {
+              "first_half_owner": "L2E3",
+              "second_half_owner": "L2E4",
+              "changed": true
+            },
+            "diag \\": {
+              "first_half_owner": "L2E2",
+              "second_half_owner": "L2E5",
+              "changed": true
+            },
+            "diag /": {
+              "first_half_owner": "L2E3",
+              "second_half_owner": "L2E4",
+              "changed": true
+            }
+          },
+          "distinct_owners": 3,
+          "collisions": {
+            "L2E4": [
+              "row 1",
+              "col 1"
+            ]
+          },
+          "silent_cells": [
+            "L2E0",
+            "L2E1",
+            "L2E6"
+          ],
+          "recruitable_cells": [
+            "L2E5",
+            "L2E7"
+          ],
+          "l2i_activity": {
+            "mean_per_presentation": 1.833,
+            "total": 22
+          },
+          "l1i_all_nine_sync_rate": 1.0,
+          "frozen_replay_zero_weight_drift": true,
+          "frozen_first_responder_consistency": {
+            "row 1": 0.6,
+            "col 1": 0.6,
+            "diag \\": 0.8,
+            "diag /": 0.8
+          }
+        },
+        {
+          "seed": 2,
+          "per_pattern": {
+            "row 1": {
+              "consistency": 0.667,
+              "ambiguity_rate": 0.0,
+              "no_response_rate": 0.0,
+              "modal_owner": "L2E3",
+              "n_presentations": 3
+            },
+            "col 1": {
+              "consistency": 0.667,
+              "ambiguity_rate": 0.333,
+              "no_response_rate": 0.0,
+              "modal_owner": "L2E3",
+              "n_presentations": 3
+            },
+            "diag \\": {
+              "consistency": 0.333,
+              "ambiguity_rate": 0.0,
+              "no_response_rate": 0.0,
+              "modal_owner": "L2E1",
+              "n_presentations": 3
+            },
+            "diag /": {
+              "consistency": 0.667,
+              "ambiguity_rate": 0.0,
+              "no_response_rate": 0.0,
+              "modal_owner": "L2E3",
+              "n_presentations": 3
+            }
+          },
+          "forgetting": {
+            "row 1": {
+              "first_half_owner": "L2E0",
+              "second_half_owner": "L2E3",
+              "changed": true
+            },
+            "col 1": {
+              "first_half_owner": "L2E1",
+              "second_half_owner": "L2E3",
+              "changed": true
+            },
+            "diag \\": {
+              "first_half_owner": "L2E1",
+              "second_half_owner": "L2E6",
+              "changed": true
+            },
+            "diag /": {
+              "first_half_owner": "L2E3",
+              "second_half_owner": "L2E3",
+              "changed": false
+            }
+          },
+          "distinct_owners": 2,
+          "collisions": {
+            "L2E3": [
+              "row 1",
+              "col 1",
+              "diag /"
+            ]
+          },
+          "silent_cells": [
+            "L2E2",
+            "L2E4"
+          ],
+          "recruitable_cells": [
+            "L2E0",
+            "L2E5",
+            "L2E6",
+            "L2E7"
+          ],
+          "l2i_activity": {
+            "mean_per_presentation": 1.917,
+            "total": 23
+          },
+          "l1i_all_nine_sync_rate": 1.0,
+          "frozen_replay_zero_weight_drift": true,
+          "frozen_first_responder_consistency": {
+            "row 1": 0.4,
+            "col 1": 0.8,
+            "diag \\": 0.4,
+            "diag /": 1.0
+          }
+        }
+      ],
+      "long": [
+        {
+          "seed": 1,
+          "per_pattern": {
+            "row 1": {
+              "consistency": 0.333,
+              "ambiguity_rate": 0.333,
+              "no_response_rate": 0.0,
+              "modal_owner": "L2E3",
+              "n_presentations": 3
+            },
+            "col 1": {
+              "consistency": 0.667,
+              "ambiguity_rate": 0.0,
+              "no_response_rate": 0.0,
+              "modal_owner": "L2E3",
+              "n_presentations": 3
+            },
+            "diag \\": {
+              "consistency": 0.667,
+              "ambiguity_rate": 0.333,
+              "no_response_rate": 0.0,
+              "modal_owner": "L2E4",
+              "n_presentations": 3
+            },
+            "diag /": {
+              "consistency": 1.0,
+              "ambiguity_rate": 0.0,
+              "no_response_rate": 0.0,
+              "modal_owner": "L2E4",
+              "n_presentations": 3
+            }
+          },
+          "forgetting": {
+            "row 1": {
+              "first_half_owner": "L2E5",
+              "second_half_owner": "L2E3",
+              "changed": true
+            },
+            "col 1": {
+              "first_half_owner": "L2E3",
+              "second_half_owner": "L2E3",
+              "changed": false
+            },
+            "diag \\": {
+              "first_half_owner": "L2E4",
+              "second_half_owner": "L2E3",
+              "changed": true
+            },
+            "diag /": {
+              "first_half_owner": "L2E4",
+              "second_half_owner": "L2E4",
+              "changed": false
+            }
+          },
+          "distinct_owners": 2,
+          "collisions": {
+            "L2E3": [
+              "row 1",
+              "col 1"
+            ],
+            "L2E4": [
+              "diag \\",
+              "diag /"
+            ]
+          },
+          "silent_cells": [
+            "L2E0",
+            "L2E1",
+            "L2E2",
+            "L2E6",
+            "L2E7"
+          ],
+          "recruitable_cells": [
+            "L2E5"
+          ],
+          "l2i_activity": {
+            "mean_per_presentation": 19.917,
+            "total": 239
+          },
+          "l1i_all_nine_sync_rate": 1.0,
+          "frozen_replay_zero_weight_drift": true,
+          "frozen_first_responder_consistency": {
+            "row 1": 1.0,
+            "col 1": 1.0,
+            "diag \\": 1.0,
+            "diag /": 0.8
+          }
+        },
+        {
+          "seed": 2,
+          "per_pattern": {
+            "row 1": {
+              "consistency": 0.667,
+              "ambiguity_rate": 0.0,
+              "no_response_rate": 0.0,
+              "modal_owner": "L2E7",
+              "n_presentations": 3
+            },
+            "col 1": {
+              "consistency": 0.667,
+              "ambiguity_rate": 0.0,
+              "no_response_rate": 0.0,
+              "modal_owner": "L2E3",
+              "n_presentations": 3
+            },
+            "diag \\": {
+              "consistency": 1.0,
+              "ambiguity_rate": 0.0,
+              "no_response_rate": 0.0,
+              "modal_owner": "L2E0",
+              "n_presentations": 3
+            },
+            "diag /": {
+              "consistency": 1.0,
+              "ambiguity_rate": 0.0,
+              "no_response_rate": 0.0,
+              "modal_owner": "L2E0",
+              "n_presentations": 3
+            }
+          },
+          "forgetting": {
+            "row 1": {
+              "first_half_owner": "L2E0",
+              "second_half_owner": "L2E7",
+              "changed": true
+            },
+            "col 1": {
+              "first_half_owner": "L2E3",
+              "second_half_owner": "L2E0",
+              "changed": true
+            },
+            "diag \\": {
+              "first_half_owner": "L2E0",
+              "second_half_owner": "L2E0",
+              "changed": false
+            },
+            "diag /": {
+              "first_half_owner": "L2E0",
+              "second_half_owner": "L2E0",
+              "changed": false
+            }
+          },
+          "distinct_owners": 3,
+          "collisions": {
+            "L2E0": [
+              "diag \\",
+              "diag /"
+            ]
+          },
+          "silent_cells": [
+            "L2E1",
+            "L2E2",
+            "L2E4",
+            "L2E5",
+            "L2E6"
+          ],
+          "recruitable_cells": [],
+          "l2i_activity": {
+            "mean_per_presentation": 24.917,
+            "total": 299
+          },
+          "l1i_all_nine_sync_rate": 1.0,
+          "frozen_replay_zero_weight_drift": true,
+          "frozen_first_responder_consistency": {
+            "row 1": 1.0,
+            "col 1": 1.0,
+            "diag \\": 1.0,
+            "diag /": 1.0
+          }
+        }
+      ]
+    },
+    "prediction": {
+      "1": null,
+      "2": null
+    },
+    "capacity": {
+      "1": {
+        "pre_novel_owners": {
+          "row 1": 4,
+          "col 1": 4,
+          "diag \\": 4,
+          "diag /": 3
+        },
+        "spare_before": [
+          0,
+          1,
+          2,
+          5,
+          6,
+          7
+        ],
+        "novel_owner": 0,
+        "novel_owner_was_spare": true,
+        "novel_owner_was_tyrant": false
+      },
+      "2": {
+        "pre_novel_owners": {
+          "row 1": 0,
+          "col 1": 3,
+          "diag \\": 6,
+          "diag /": 3
+        },
+        "spare_before": [
+          1,
+          2,
+          4,
+          5,
+          7
+        ],
+        "novel_owner": 1,
+        "novel_owner_was_spare": true,
+        "novel_owner_was_tyrant": false
+      }
+    }
+  },
+  "B": {
+    "wta": {
+      "short": [
+        {
+          "seed": 1,
+          "per_pattern": {
+            "row 1": {
+              "consistency": 0.667,
+              "ambiguity_rate": 0.0,
+              "no_response_rate": 0.333,
+              "modal_owner": "L2E5",
+              "n_presentations": 3
+            },
+            "col 1": {
+              "consistency": 0.333,
+              "ambiguity_rate": 0.0,
+              "no_response_rate": 0.667,
+              "modal_owner": "L2E5",
+              "n_presentations": 3
+            },
+            "diag \\": {
+              "consistency": 0.667,
+              "ambiguity_rate": 0.0,
+              "no_response_rate": 0.333,
+              "modal_owner": "L2E5",
+              "n_presentations": 3
+            },
+            "diag /": {
+              "consistency": 0.333,
+              "ambiguity_rate": 0.0,
+              "no_response_rate": 0.667,
+              "modal_owner": "L2E5",
+              "n_presentations": 3
+            }
+          },
+          "forgetting": {
+            "row 1": {
+              "first_half_owner": null,
+              "second_half_owner": "L2E5",
+              "changed": false
+            },
+            "col 1": {
+              "first_half_owner": "L2E5",
+              "second_half_owner": null,
+              "changed": false
+            },
+            "diag \\": {
+              "first_half_owner": null,
+              "second_half_owner": "L2E5",
+              "changed": false
+            },
+            "diag /": {
+              "first_half_owner": "L2E5",
+              "second_half_owner": null,
+              "changed": false
+            }
+          },
+          "distinct_owners": 1,
+          "collisions": {
+            "L2E5": [
+              "row 1",
+              "col 1",
+              "diag \\",
+              "diag /"
+            ]
+          },
+          "silent_cells": [
+            "L2E0",
+            "L2E1",
+            "L2E2",
+            "L2E3",
+            "L2E4",
+            "L2E6",
+            "L2E7"
+          ],
+          "recruitable_cells": [],
+          "l2i_activity": {
+            "mean_per_presentation": 0.5,
+            "total": 6
+          },
+          "l1i_all_nine_sync_rate": 1.0,
+          "frozen_replay_zero_weight_drift": true,
+          "frozen_first_responder_consistency": {
+            "row 1": 0.6,
+            "col 1": 0.8,
+            "diag \\": 0.4,
+            "diag /": 0.6
+          }
+        },
+        {
+          "seed": 2,
+          "per_pattern": {
+            "row 1": {
+              "consistency": 0.0,
+              "ambiguity_rate": 0.0,
+              "no_response_rate": 1.0,
+              "modal_owner": null,
+              "n_presentations": 3
+            },
+            "col 1": {
+              "consistency": 1.0,
+              "ambiguity_rate": 0.0,
+              "no_response_rate": 0.0,
+              "modal_owner": "L2E7",
+              "n_presentations": 3
+            },
+            "diag \\": {
+              "consistency": 0.0,
+              "ambiguity_rate": 0.0,
+              "no_response_rate": 1.0,
+              "modal_owner": null,
+              "n_presentations": 3
+            },
+            "diag /": {
+              "consistency": 1.0,
+              "ambiguity_rate": 0.0,
+              "no_response_rate": 0.0,
+              "modal_owner": "L2E5",
+              "n_presentations": 3
+            }
+          },
+          "forgetting": {
+            "row 1": {
+              "first_half_owner": null,
+              "second_half_owner": null,
+              "changed": false
+            },
+            "col 1": {
+              "first_half_owner": "L2E7",
+              "second_half_owner": "L2E7",
+              "changed": false
+            },
+            "diag \\": {
+              "first_half_owner": null,
+              "second_half_owner": null,
+              "changed": false
+            },
+            "diag /": {
+              "first_half_owner": "L2E5",
+              "second_half_owner": "L2E5",
+              "changed": false
+            }
+          },
+          "distinct_owners": 2,
+          "collisions": {},
+          "silent_cells": [
+            "L2E0",
+            "L2E1",
+            "L2E2",
+            "L2E3",
+            "L2E4",
+            "L2E6"
+          ],
+          "recruitable_cells": [],
+          "l2i_activity": {
+            "mean_per_presentation": 0.5,
+            "total": 6
+          },
+          "l1i_all_nine_sync_rate": 1.0,
+          "frozen_replay_zero_weight_drift": true,
+          "frozen_first_responder_consistency": {
+            "row 1": 0.0,
+            "col 1": 1.0,
+            "diag \\": 0.0,
+            "diag /": 1.0
+          }
+        }
+      ],
+      "equal": [
+        {
+          "seed": 1,
+          "per_pattern": {
+            "row 1": {
+              "consistency": 1.0,
+              "ambiguity_rate": 0.0,
+              "no_response_rate": 0.0,
+              "modal_owner": "L2E5",
+              "n_presentations": 3
+            },
+            "col 1": {
+              "consistency": 1.0,
+              "ambiguity_rate": 0.0,
+              "no_response_rate": 0.0,
+              "modal_owner": "L2E5",
+              "n_presentations": 3
+            },
+            "diag \\": {
+              "consistency": 0.667,
+              "ambiguity_rate": 0.333,
+              "no_response_rate": 0.0,
+              "modal_owner": "L2E5",
+              "n_presentations": 3
+            },
+            "diag /": {
+              "consistency": 1.0,
+              "ambiguity_rate": 0.0,
+              "no_response_rate": 0.0,
+              "modal_owner": "L2E5",
+              "n_presentations": 3
+            }
+          },
+          "forgetting": {
+            "row 1": {
+              "first_half_owner": "L2E5",
+              "second_half_owner": "L2E5",
+              "changed": false
+            },
+            "col 1": {
+              "first_half_owner": "L2E5",
+              "second_half_owner": "L2E5",
+              "changed": false
+            },
+            "diag \\": {
+              "first_half_owner": "L2E2",
+              "second_half_owner": "L2E5",
+              "changed": true
+            },
+            "diag /": {
+              "first_half_owner": "L2E5",
+              "second_half_owner": "L2E5",
+              "changed": false
+            }
+          },
+          "distinct_owners": 1,
+          "collisions": {
+            "L2E5": [
+              "row 1",
+              "col 1",
+              "diag \\",
+              "diag /"
+            ]
+          },
+          "silent_cells": [
+            "L2E0",
+            "L2E1",
+            "L2E3",
+            "L2E4",
+            "L2E6",
+            "L2E7"
+          ],
+          "recruitable_cells": [
+            "L2E2"
+          ],
+          "l2i_activity": {
+            "mean_per_presentation": 3.75,
+            "total": 45
+          },
+          "l1i_all_nine_sync_rate": 1.0,
+          "frozen_replay_zero_weight_drift": true,
+          "frozen_first_responder_consistency": {
+            "row 1": 1.0,
+            "col 1": 1.0,
+            "diag \\": 1.0,
+            "diag /": 1.0
+          }
+        },
+        {
+          "seed": 2,
+          "per_pattern": {
+            "row 1": {
+              "consistency": 1.0,
+              "ambiguity_rate": 0.0,
+              "no_response_rate": 0.0,
+              "modal_owner": "L2E0",
+              "n_presentations": 3
+            },
+            "col 1": {
+              "consistency": 1.0,
+              "ambiguity_rate": 0.0,
+              "no_response_rate": 0.0,
+              "modal_owner": "L2E0",
+              "n_presentations": 3
+            },
+            "diag \\": {
+              "consistency": 1.0,
+              "ambiguity_rate": 0.0,
+              "no_response_rate": 0.0,
+              "modal_owner": "L2E5",
+              "n_presentations": 3
+            },
+            "diag /": {
+              "consistency": 1.0,
+              "ambiguity_rate": 0.0,
+              "no_response_rate": 0.0,
+              "modal_owner": "L2E3",
+              "n_presentations": 3
+            }
+          },
+          "forgetting": {
+            "row 1": {
+              "first_half_owner": "L2E0",
+              "second_half_owner": "L2E0",
+              "changed": false
+            },
+            "col 1": {
+              "first_half_owner": "L2E0",
+              "second_half_owner": "L2E0",
+              "changed": false
+            },
+            "diag \\": {
+              "first_half_owner": "L2E5",
+              "second_half_owner": "L2E5",
+              "changed": false
+            },
+            "diag /": {
+              "first_half_owner": "L2E3",
+              "second_half_owner": "L2E3",
+              "changed": false
+            }
+          },
+          "distinct_owners": 3,
+          "collisions": {
+            "L2E0": [
+              "row 1",
+              "col 1"
+            ]
+          },
+          "silent_cells": [
+            "L2E1",
+            "L2E2",
+            "L2E4",
+            "L2E6",
+            "L2E7"
+          ],
+          "recruitable_cells": [],
+          "l2i_activity": {
+            "mean_per_presentation": 3,
+            "total": 36
+          },
+          "l1i_all_nine_sync_rate": 1.0,
+          "frozen_replay_zero_weight_drift": true,
+          "frozen_first_responder_consistency": {
+            "row 1": 1.0,
+            "col 1": 1.0,
+            "diag \\": 1.0,
+            "diag /": 1.0
+          }
+        }
+      ],
+      "long": [
+        {
+          "seed": 1,
+          "per_pattern": {
+            "row 1": {
+              "consistency": 1.0,
+              "ambiguity_rate": 0.0,
+              "no_response_rate": 0.0,
+              "modal_owner": "L2E5",
+              "n_presentations": 3
+            },
+            "col 1": {
+              "consistency": 1.0,
+              "ambiguity_rate": 0.0,
+              "no_response_rate": 0.0,
+              "modal_owner": "L2E5",
+              "n_presentations": 3
+            },
+            "diag \\": {
+              "consistency": 1.0,
+              "ambiguity_rate": 0.0,
+              "no_response_rate": 0.0,
+              "modal_owner": "L2E5",
+              "n_presentations": 3
+            },
+            "diag /": {
+              "consistency": 1.0,
+              "ambiguity_rate": 0.0,
+              "no_response_rate": 0.0,
+              "modal_owner": "L2E5",
+              "n_presentations": 3
+            }
+          },
+          "forgetting": {
+            "row 1": {
+              "first_half_owner": "L2E5",
+              "second_half_owner": "L2E5",
+              "changed": false
+            },
+            "col 1": {
+              "first_half_owner": "L2E5",
+              "second_half_owner": "L2E5",
+              "changed": false
+            },
+            "diag \\": {
+              "first_half_owner": "L2E5",
+              "second_half_owner": "L2E5",
+              "changed": false
+            },
+            "diag /": {
+              "first_half_owner": "L2E5",
+              "second_half_owner": "L2E5",
+              "changed": false
+            }
+          },
+          "distinct_owners": 1,
+          "collisions": {
+            "L2E5": [
+              "row 1",
+              "col 1",
+              "diag \\",
+              "diag /"
+            ]
+          },
+          "silent_cells": [
+            "L2E0",
+            "L2E1",
+            "L2E2",
+            "L2E3",
+            "L2E4",
+            "L2E6",
+            "L2E7"
+          ],
+          "recruitable_cells": [],
+          "l2i_activity": {
+            "mean_per_presentation": 34.75,
+            "total": 417
+          },
+          "l1i_all_nine_sync_rate": 1.0,
+          "frozen_replay_zero_weight_drift": true,
+          "frozen_first_responder_consistency": {
+            "row 1": 1.0,
+            "col 1": 1.0,
+            "diag \\": 1.0,
+            "diag /": 1.0
+          }
+        },
+        {
+          "seed": 2,
+          "per_pattern": {
+            "row 1": {
+              "consistency": 1.0,
+              "ambiguity_rate": 0.0,
+              "no_response_rate": 0.0,
+              "modal_owner": "L2E0",
+              "n_presentations": 3
+            },
+            "col 1": {
+              "consistency": 1.0,
+              "ambiguity_rate": 0.0,
+              "no_response_rate": 0.0,
+              "modal_owner": "L2E0",
+              "n_presentations": 3
+            },
+            "diag \\": {
+              "consistency": 1.0,
+              "ambiguity_rate": 0.0,
+              "no_response_rate": 0.0,
+              "modal_owner": "L2E0",
+              "n_presentations": 3
+            },
+            "diag /": {
+              "consistency": 1.0,
+              "ambiguity_rate": 0.0,
+              "no_response_rate": 0.0,
+              "modal_owner": "L2E0",
+              "n_presentations": 3
+            }
+          },
+          "forgetting": {
+            "row 1": {
+              "first_half_owner": "L2E0",
+              "second_half_owner": "L2E0",
+              "changed": false
+            },
+            "col 1": {
+              "first_half_owner": "L2E0",
+              "second_half_owner": "L2E0",
+              "changed": false
+            },
+            "diag \\": {
+              "first_half_owner": "L2E0",
+              "second_half_owner": "L2E0",
+              "changed": false
+            },
+            "diag /": {
+              "first_half_owner": "L2E0",
+              "second_half_owner": "L2E0",
+              "changed": false
+            }
+          },
+          "distinct_owners": 1,
+          "collisions": {
+            "L2E0": [
+              "row 1",
+              "col 1",
+              "diag \\",
+              "diag /"
+            ]
+          },
+          "silent_cells": [
+            "L2E1",
+            "L2E2",
+            "L2E3",
+            "L2E4",
+            "L2E5",
+            "L2E6",
+            "L2E7"
+          ],
+          "recruitable_cells": [],
+          "l2i_activity": {
+            "mean_per_presentation": 34.917,
+            "total": 419
+          },
+          "l1i_all_nine_sync_rate": 1.0,
+          "frozen_replay_zero_weight_drift": true,
+          "frozen_first_responder_consistency": {
+            "row 1": 1.0,
+            "col 1": 1.0,
+            "diag \\": 1.0,
+            "diag /": 1.0
+          }
+        }
+      ]
+    },
+    "prediction": {
+      "1": null,
+      "2": null
+    },
+    "capacity": {
+      "1": {
+        "pre_novel_owners": {
+          "row 1": 5,
+          "col 1": 5,
+          "diag \\": 5,
+          "diag /": 5
+        },
+        "spare_before": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          6,
+          7
+        ],
+        "novel_owner": 3,
+        "novel_owner_was_spare": true,
+        "novel_owner_was_tyrant": false
+      },
+      "2": {
+        "pre_novel_owners": {
+          "row 1": 0,
+          "col 1": 0,
+          "diag \\": 5,
+          "diag /": 3
+        },
+        "spare_before": [
+          1,
+          2,
+          4,
+          6,
+          7
+        ],
+        "novel_owner": 1,
+        "novel_owner_was_spare": true,
+        "novel_owner_was_tyrant": false
+      }
+    }
+  },
+  "C": {
+    "wta": {
+      "short": [
+        {
+          "seed": 1,
+          "per_pattern": {
+            "row 1": {
+              "consistency": 0.667,
+              "ambiguity_rate": 0.0,
+              "no_response_rate": 0.333,
+              "modal_owner": "L2E5",
+              "n_presentations": 3
+            },
+            "col 1": {
+              "consistency": 0.333,
+              "ambiguity_rate": 0.0,
+              "no_response_rate": 0.333,
+              "modal_owner": "L2E4",
+              "n_presentations": 3
+            },
+            "diag \\": {
+              "consistency": 0.333,
+              "ambiguity_rate": 0.0,
+              "no_response_rate": 0.333,
+              "modal_owner": "L2E3",
+              "n_presentations": 3
+            },
+            "diag /": {
+              "consistency": 0.333,
+              "ambiguity_rate": 0.0,
+              "no_response_rate": 0.667,
+              "modal_owner": "L2E4",
+              "n_presentations": 3
+            }
+          },
+          "forgetting": {
+            "row 1": {
+              "first_half_owner": null,
+              "second_half_owner": "L2E5",
+              "changed": false
+            },
+            "col 1": {
+              "first_half_owner": "L2E5",
+              "second_half_owner": "L2E4",
+              "changed": true
+            },
+            "diag \\": {
+              "first_half_owner": "L2E3",
+              "second_half_owner": "L2E5",
+              "changed": true
+            },
+            "diag /": {
+              "first_half_owner": null,
+              "second_half_owner": "L2E4",
+              "changed": false
+            }
+          },
+          "distinct_owners": 3,
+          "collisions": {
+            "L2E4": [
+              "col 1",
+              "diag /"
+            ]
+          },
+          "silent_cells": [
+            "L2E0",
+            "L2E1",
+            "L2E2",
+            "L2E6",
+            "L2E7"
+          ],
+          "recruitable_cells": [],
+          "l2i_activity": {
+            "mean_per_presentation": 0.417,
+            "total": 5
+          },
+          "l1i_all_nine_sync_rate": 0.0,
+          "frozen_replay_zero_weight_drift": true,
+          "frozen_first_responder_consistency": {
+            "row 1": 0.8,
+            "col 1": 0.4,
+            "diag \\": 0.6,
+            "diag /": 0.4
+          }
+        },
+        {
+          "seed": 2,
+          "per_pattern": {
+            "row 1": {
+              "consistency": 0.667,
+              "ambiguity_rate": 0.0,
+              "no_response_rate": 0.333,
+              "modal_owner": "L2E5",
+              "n_presentations": 3
+            },
+            "col 1": {
+              "consistency": 0.333,
+              "ambiguity_rate": 0.0,
+              "no_response_rate": 0.333,
+              "modal_owner": "L2E3",
+              "n_presentations": 3
+            },
+            "diag \\": {
+              "consistency": 0.667,
+              "ambiguity_rate": 0.0,
+              "no_response_rate": 0.0,
+              "modal_owner": "L2E0",
+              "n_presentations": 3
+            },
+            "diag /": {
+              "consistency": 0.333,
+              "ambiguity_rate": 0.0,
+              "no_response_rate": 0.667,
+              "modal_owner": "L2E7",
+              "n_presentations": 3
+            }
+          },
+          "forgetting": {
+            "row 1": {
+              "first_half_owner": null,
+              "second_half_owner": "L2E5",
+              "changed": false
+            },
+            "col 1": {
+              "first_half_owner": "L2E7",
+              "second_half_owner": "L2E3",
+              "changed": true
+            },
+            "diag \\": {
+              "first_half_owner": "L2E0",
+              "second_half_owner": "L2E0",
+              "changed": false
+            },
+            "diag /": {
+              "first_half_owner": null,
+              "second_half_owner": "L2E7",
+              "changed": false
+            }
+          },
+          "distinct_owners": 4,
+          "collisions": {},
+          "silent_cells": [
+            "L2E1",
+            "L2E2",
+            "L2E4",
+            "L2E6"
+          ],
+          "recruitable_cells": [],
+          "l2i_activity": {
+            "mean_per_presentation": 0.417,
+            "total": 5
+          },
+          "l1i_all_nine_sync_rate": 0.0,
+          "frozen_replay_zero_weight_drift": true,
+          "frozen_first_responder_consistency": {
+            "row 1": 0.4,
+            "col 1": 0.4,
+            "diag \\": 0.6,
+            "diag /": 0.4
+          }
+        }
+      ],
+      "equal": [
+        {
+          "seed": 1,
+          "per_pattern": {
+            "row 1": {
+              "consistency": 0.667,
+              "ambiguity_rate": 0.0,
+              "no_response_rate": 0.0,
+              "modal_owner": "L2E5",
+              "n_presentations": 3
+            },
+            "col 1": {
+              "consistency": 0.667,
+              "ambiguity_rate": 0.0,
+              "no_response_rate": 0.0,
+              "modal_owner": "L2E5",
+              "n_presentations": 3
+            },
+            "diag \\": {
+              "consistency": 0.333,
+              "ambiguity_rate": 0.0,
+              "no_response_rate": 0.0,
+              "modal_owner": "L2E4",
+              "n_presentations": 3
+            },
+            "diag /": {
+              "consistency": 0.667,
+              "ambiguity_rate": 0.0,
+              "no_response_rate": 0.0,
+              "modal_owner": "L2E4",
+              "n_presentations": 3
+            }
+          },
+          "forgetting": {
+            "row 1": {
+              "first_half_owner": "L2E5",
+              "second_half_owner": "L2E4",
+              "changed": true
+            },
+            "col 1": {
+              "first_half_owner": "L2E5",
+              "second_half_owner": "L2E4",
+              "changed": true
+            },
+            "diag \\": {
+              "first_half_owner": "L2E6",
+              "second_half_owner": "L2E4",
+              "changed": true
+            },
+            "diag /": {
+              "first_half_owner": "L2E2",
+              "second_half_owner": "L2E4",
+              "changed": true
+            }
+          },
+          "distinct_owners": 2,
+          "collisions": {
+            "L2E5": [
+              "row 1",
+              "col 1"
+            ],
+            "L2E4": [
+              "diag \\",
+              "diag /"
+            ]
+          },
+          "silent_cells": [
+            "L2E0",
+            "L2E1",
+            "L2E3",
+            "L2E7"
+          ],
+          "recruitable_cells": [
+            "L2E2",
+            "L2E6"
+          ],
+          "l2i_activity": {
+            "mean_per_presentation": 2.167,
+            "total": 26
+          },
+          "l1i_all_nine_sync_rate": 0.0,
+          "frozen_replay_zero_weight_drift": true,
+          "frozen_first_responder_consistency": {
+            "row 1": 0.6,
+            "col 1": 0.6,
+            "diag \\": 0.6,
+            "diag /": 0.6
+          }
+        },
+        {
+          "seed": 2,
+          "per_pattern": {
+            "row 1": {
+              "consistency": 0.333,
+              "ambiguity_rate": 0.0,
+              "no_response_rate": 0.0,
+              "modal_owner": "L2E0",
+              "n_presentations": 3
+            },
+            "col 1": {
+              "consistency": 0.333,
+              "ambiguity_rate": 0.0,
+              "no_response_rate": 0.0,
+              "modal_owner": "L2E3",
+              "n_presentations": 3
+            },
+            "diag \\": {
+              "consistency": 0.667,
+              "ambiguity_rate": 0.0,
+              "no_response_rate": 0.0,
+              "modal_owner": "L2E0",
+              "n_presentations": 3
+            },
+            "diag /": {
+              "consistency": 0.667,
+              "ambiguity_rate": 0.0,
+              "no_response_rate": 0.0,
+              "modal_owner": "L2E0",
+              "n_presentations": 3
+            }
+          },
+          "forgetting": {
+            "row 1": {
+              "first_half_owner": "L2E0",
+              "second_half_owner": "L2E3",
+              "changed": true
+            },
+            "col 1": {
+              "first_half_owner": "L2E6",
+              "second_half_owner": "L2E3",
+              "changed": true
+            },
+            "diag \\": {
+              "first_half_owner": "L2E1",
+              "second_half_owner": "L2E0",
+              "changed": true
+            },
+            "diag /": {
+              "first_half_owner": "L2E5",
+              "second_half_owner": "L2E0",
+              "changed": true
+            }
+          },
+          "distinct_owners": 2,
+          "collisions": {
+            "L2E0": [
+              "row 1",
+              "diag \\",
+              "diag /"
+            ]
+          },
+          "silent_cells": [
+            "L2E2",
+            "L2E4"
+          ],
+          "recruitable_cells": [
+            "L2E1",
+            "L2E5",
+            "L2E6",
+            "L2E7"
+          ],
+          "l2i_activity": {
+            "mean_per_presentation": 2.333,
+            "total": 28
+          },
+          "l1i_all_nine_sync_rate": 0.0,
+          "frozen_replay_zero_weight_drift": true,
+          "frozen_first_responder_consistency": {
+            "row 1": 0.6,
+            "col 1": 0.4,
+            "diag \\": 1.0,
+            "diag /": 1.0
+          }
+        }
+      ],
+      "long": [
+        {
+          "seed": 1,
+          "per_pattern": {
+            "row 1": {
+              "consistency": 0.333,
+              "ambiguity_rate": 0.0,
+              "no_response_rate": 0.0,
+              "modal_owner": "L2E3",
+              "n_presentations": 3
+            },
+            "col 1": {
+              "consistency": 0.333,
+              "ambiguity_rate": 0.0,
+              "no_response_rate": 0.0,
+              "modal_owner": "L2E3",
+              "n_presentations": 3
+            },
+            "diag \\": {
+              "consistency": 0.667,
+              "ambiguity_rate": 0.333,
+              "no_response_rate": 0.0,
+              "modal_owner": "L2E4",
+              "n_presentations": 3
+            },
+            "diag /": {
+              "consistency": 1.0,
+              "ambiguity_rate": 0.0,
+              "no_response_rate": 0.0,
+              "modal_owner": "L2E4",
+              "n_presentations": 3
+            }
+          },
+          "forgetting": {
+            "row 1": {
+              "first_half_owner": "L2E5",
+              "second_half_owner": "L2E3",
+              "changed": true
+            },
+            "col 1": {
+              "first_half_owner": "L2E5",
+              "second_half_owner": "L2E3",
+              "changed": true
+            },
+            "diag \\": {
+              "first_half_owner": "L2E4",
+              "second_half_owner": "L2E3",
+              "changed": true
+            },
+            "diag /": {
+              "first_half_owner": "L2E4",
+              "second_half_owner": "L2E4",
+              "changed": false
+            }
+          },
+          "distinct_owners": 2,
+          "collisions": {
+            "L2E3": [
+              "row 1",
+              "col 1"
+            ],
+            "L2E4": [
+              "diag \\",
+              "diag /"
+            ]
+          },
+          "silent_cells": [
+            "L2E0",
+            "L2E1",
+            "L2E2",
+            "L2E6",
+            "L2E7"
+          ],
+          "recruitable_cells": [
+            "L2E5"
+          ],
+          "l2i_activity": {
+            "mean_per_presentation": 34.667,
+            "total": 416
+          },
+          "l1i_all_nine_sync_rate": 0.0,
+          "frozen_replay_zero_weight_drift": true,
+          "frozen_first_responder_consistency": {
+            "row 1": 1.0,
+            "col 1": 1.0,
+            "diag \\": 0.6,
+            "diag /": 1.0
+          }
+        },
+        {
+          "seed": 2,
+          "per_pattern": {
+            "row 1": {
+              "consistency": 1.0,
+              "ambiguity_rate": 0.0,
+              "no_response_rate": 0.0,
+              "modal_owner": "L2E0",
+              "n_presentations": 3
+            },
+            "col 1": {
+              "consistency": 0.667,
+              "ambiguity_rate": 0.333,
+              "no_response_rate": 0.0,
+              "modal_owner": "L2E0",
+              "n_presentations": 3
+            },
+            "diag \\": {
+              "consistency": 1.0,
+              "ambiguity_rate": 0.333,
+              "no_response_rate": 0.0,
+              "modal_owner": "L2E0",
+              "n_presentations": 3
+            },
+            "diag /": {
+              "consistency": 1.0,
+              "ambiguity_rate": 0.0,
+              "no_response_rate": 0.0,
+              "modal_owner": "L2E0",
+              "n_presentations": 3
+            }
+          },
+          "forgetting": {
+            "row 1": {
+              "first_half_owner": "L2E0",
+              "second_half_owner": "L2E0",
+              "changed": false
+            },
+            "col 1": {
+              "first_half_owner": "L2E0",
+              "second_half_owner": "L2E0",
+              "changed": false
+            },
+            "diag \\": {
+              "first_half_owner": "L2E0",
+              "second_half_owner": "L2E0",
+              "changed": false
+            },
+            "diag /": {
+              "first_half_owner": "L2E0",
+              "second_half_owner": "L2E0",
+              "changed": false
+            }
+          },
+          "distinct_owners": 1,
+          "collisions": {
+            "L2E0": [
+              "row 1",
+              "col 1",
+              "diag \\",
+              "diag /"
+            ]
+          },
+          "silent_cells": [
+            "L2E1",
+            "L2E2",
+            "L2E4",
+            "L2E5",
+            "L2E6",
+            "L2E7"
+          ],
+          "recruitable_cells": [
+            "L2E3"
+          ],
+          "l2i_activity": {
+            "mean_per_presentation": 37.083,
+            "total": 445
+          },
+          "l1i_all_nine_sync_rate": 0.0,
+          "frozen_replay_zero_weight_drift": true,
+          "frozen_first_responder_consistency": {
+            "row 1": 1.0,
+            "col 1": 1.0,
+            "diag \\": 1.0,
+            "diag /": 1.0
+          }
+        }
+      ]
+    },
+    "prediction": {
+      "1": {
+        "precision": 1.0,
+        "fired": [
+          3,
+          4,
+          5
+        ]
+      },
+      "2": {
+        "precision": 1.0,
+        "fired": [
+          3,
+          4,
+          5
+        ]
+      }
+    },
+    "capacity": {
+      "1": {
+        "pre_novel_owners": {
+          "row 1": 3,
+          "col 1": 2,
+          "diag \\": 2,
+          "diag /": 2
+        },
+        "spare_before": [
+          0,
+          1,
+          4,
+          5,
+          6,
+          7
+        ],
+        "novel_owner": 0,
+        "novel_owner_was_spare": true,
+        "novel_owner_was_tyrant": false
+      },
+      "2": {
+        "pre_novel_owners": {
+          "row 1": 0,
+          "col 1": 0,
+          "diag \\": 0,
+          "diag /": 0
+        },
+        "spare_before": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "novel_owner": 0,
+        "novel_owner_was_spare": false,
+        "novel_owner_was_tyrant": true
+      }
+    }
+  },
+  "D": {
+    "wta": {
+      "short": [
+        {
+          "seed": 1,
+          "per_pattern": {
+            "row 1": {
+              "consistency": 0.667,
+              "ambiguity_rate": 0.0,
+              "no_response_rate": 0.333,
+              "modal_owner": "L2E5",
+              "n_presentations": 3
+            },
+            "col 1": {
+              "consistency": 0.667,
+              "ambiguity_rate": 0.0,
+              "no_response_rate": 0.333,
+              "modal_owner": "L2E5",
+              "n_presentations": 3
+            },
+            "diag \\": {
+              "consistency": 0.333,
+              "ambiguity_rate": 0.0,
+              "no_response_rate": 0.667,
+              "modal_owner": "L2E5",
+              "n_presentations": 3
+            },
+            "diag /": {
+              "consistency": 0.333,
+              "ambiguity_rate": 0.0,
+              "no_response_rate": 0.333,
+              "modal_owner": "L2E2",
+              "n_presentations": 3
+            }
+          },
+          "forgetting": {
+            "row 1": {
+              "first_half_owner": null,
+              "second_half_owner": "L2E5",
+              "changed": false
+            },
+            "col 1": {
+              "first_half_owner": "L2E5",
+              "second_half_owner": "L2E5",
+              "changed": false
+            },
+            "diag \\": {
+              "first_half_owner": null,
+              "second_half_owner": "L2E5",
+              "changed": false
+            },
+            "diag /": {
+              "first_half_owner": "L2E5",
+              "second_half_owner": "L2E2",
+              "changed": true
+            }
+          },
+          "distinct_owners": 2,
+          "collisions": {
+            "L2E5": [
+              "row 1",
+              "col 1",
+              "diag \\"
+            ]
+          },
+          "silent_cells": [
+            "L2E0",
+            "L2E1",
+            "L2E3",
+            "L2E4",
+            "L2E6",
+            "L2E7"
+          ],
+          "recruitable_cells": [],
+          "l2i_activity": {
+            "mean_per_presentation": 0.583,
+            "total": 7
+          },
+          "l1i_all_nine_sync_rate": 0.0,
+          "frozen_replay_zero_weight_drift": true,
+          "frozen_first_responder_consistency": {
+            "row 1": 0.4,
+            "col 1": 0.6,
+            "diag \\": 0.6,
+            "diag /": 0.4
+          }
+        },
+        {
+          "seed": 2,
+          "per_pattern": {
+            "row 1": {
+              "consistency": 0.0,
+              "ambiguity_rate": 0.0,
+              "no_response_rate": 1.0,
+              "modal_owner": null,
+              "n_presentations": 3
+            },
+            "col 1": {
+              "consistency": 1.0,
+              "ambiguity_rate": 0.0,
+              "no_response_rate": 0.0,
+              "modal_owner": "L2E7",
+              "n_presentations": 3
+            },
+            "diag \\": {
+              "consistency": 0.0,
+              "ambiguity_rate": 0.0,
+              "no_response_rate": 1.0,
+              "modal_owner": null,
+              "n_presentations": 3
+            },
+            "diag /": {
+              "consistency": 1.0,
+              "ambiguity_rate": 0.0,
+              "no_response_rate": 0.0,
+              "modal_owner": "L2E5",
+              "n_presentations": 3
+            }
+          },
+          "forgetting": {
+            "row 1": {
+              "first_half_owner": null,
+              "second_half_owner": null,
+              "changed": false
+            },
+            "col 1": {
+              "first_half_owner": "L2E7",
+              "second_half_owner": "L2E7",
+              "changed": false
+            },
+            "diag \\": {
+              "first_half_owner": null,
+              "second_half_owner": null,
+              "changed": false
+            },
+            "diag /": {
+              "first_half_owner": "L2E5",
+              "second_half_owner": "L2E5",
+              "changed": false
+            }
+          },
+          "distinct_owners": 2,
+          "collisions": {},
+          "silent_cells": [
+            "L2E0",
+            "L2E1",
+            "L2E2",
+            "L2E3",
+            "L2E4",
+            "L2E6"
+          ],
+          "recruitable_cells": [],
+          "l2i_activity": {
+            "mean_per_presentation": 0.5,
+            "total": 6
+          },
+          "l1i_all_nine_sync_rate": 0.0,
+          "frozen_replay_zero_weight_drift": true,
+          "frozen_first_responder_consistency": {
+            "row 1": 0.0,
+            "col 1": 1.0,
+            "diag \\": 0.0,
+            "diag /": 1.0
+          }
+        }
+      ],
+      "equal": [
+        {
+          "seed": 1,
+          "per_pattern": {
+            "row 1": {
+              "consistency": 1.0,
+              "ambiguity_rate": 0.0,
+              "no_response_rate": 0.0,
+              "modal_owner": "L2E5",
+              "n_presentations": 3
+            },
+            "col 1": {
+              "consistency": 1.0,
+              "ambiguity_rate": 0.0,
+              "no_response_rate": 0.0,
+              "modal_owner": "L2E5",
+              "n_presentations": 3
+            },
+            "diag \\": {
+              "consistency": 1.0,
+              "ambiguity_rate": 0.0,
+              "no_response_rate": 0.0,
+              "modal_owner": "L2E5",
+              "n_presentations": 3
+            },
+            "diag /": {
+              "consistency": 1.0,
+              "ambiguity_rate": 0.0,
+              "no_response_rate": 0.0,
+              "modal_owner": "L2E5",
+              "n_presentations": 3
+            }
+          },
+          "forgetting": {
+            "row 1": {
+              "first_half_owner": "L2E5",
+              "second_half_owner": "L2E5",
+              "changed": false
+            },
+            "col 1": {
+              "first_half_owner": "L2E5",
+              "second_half_owner": "L2E5",
+              "changed": false
+            },
+            "diag \\": {
+              "first_half_owner": "L2E5",
+              "second_half_owner": "L2E5",
+              "changed": false
+            },
+            "diag /": {
+              "first_half_owner": "L2E5",
+              "second_half_owner": "L2E5",
+              "changed": false
+            }
+          },
+          "distinct_owners": 1,
+          "collisions": {
+            "L2E5": [
+              "row 1",
+              "col 1",
+              "diag \\",
+              "diag /"
+            ]
+          },
+          "silent_cells": [
+            "L2E0",
+            "L2E1",
+            "L2E2",
+            "L2E3",
+            "L2E4",
+            "L2E6",
+            "L2E7"
+          ],
+          "recruitable_cells": [],
+          "l2i_activity": {
+            "mean_per_presentation": 4.333,
+            "total": 52
+          },
+          "l1i_all_nine_sync_rate": 0.0,
+          "frozen_replay_zero_weight_drift": true,
+          "frozen_first_responder_consistency": {
+            "row 1": 1.0,
+            "col 1": 1.0,
+            "diag \\": 1.0,
+            "diag /": 1.0
+          }
+        },
+        {
+          "seed": 2,
+          "per_pattern": {
+            "row 1": {
+              "consistency": 1.0,
+              "ambiguity_rate": 0.0,
+              "no_response_rate": 0.0,
+              "modal_owner": "L2E0",
+              "n_presentations": 3
+            },
+            "col 1": {
+              "consistency": 1.0,
+              "ambiguity_rate": 0.0,
+              "no_response_rate": 0.0,
+              "modal_owner": "L2E0",
+              "n_presentations": 3
+            },
+            "diag \\": {
+              "consistency": 0.667,
+              "ambiguity_rate": 0.0,
+              "no_response_rate": 0.0,
+              "modal_owner": "L2E5",
+              "n_presentations": 3
+            },
+            "diag /": {
+              "consistency": 0.667,
+              "ambiguity_rate": 0.0,
+              "no_response_rate": 0.0,
+              "modal_owner": "L2E5",
+              "n_presentations": 3
+            }
+          },
+          "forgetting": {
+            "row 1": {
+              "first_half_owner": "L2E0",
+              "second_half_owner": "L2E0",
+              "changed": false
+            },
+            "col 1": {
+              "first_half_owner": "L2E0",
+              "second_half_owner": "L2E0",
+              "changed": false
+            },
+            "diag \\": {
+              "first_half_owner": "L2E5",
+              "second_half_owner": "L2E0",
+              "changed": true
+            },
+            "diag /": {
+              "first_half_owner": "L2E5",
+              "second_half_owner": "L2E0",
+              "changed": true
+            }
+          },
+          "distinct_owners": 2,
+          "collisions": {
+            "L2E5": [
+              "diag \\",
+              "diag /"
+            ],
+            "L2E0": [
+              "row 1",
+              "col 1"
+            ]
+          },
+          "silent_cells": [
+            "L2E1",
+            "L2E2",
+            "L2E3",
+            "L2E4",
+            "L2E6",
+            "L2E7"
+          ],
+          "recruitable_cells": [],
+          "l2i_activity": {
+            "mean_per_presentation": 3.083,
+            "total": 37
+          },
+          "l1i_all_nine_sync_rate": 0.0,
+          "frozen_replay_zero_weight_drift": true,
+          "frozen_first_responder_consistency": {
+            "row 1": 1.0,
+            "col 1": 1.0,
+            "diag \\": 1.0,
+            "diag /": 1.0
+          }
+        }
+      ],
+      "long": [
+        {
+          "seed": 1,
+          "per_pattern": {
+            "row 1": {
+              "consistency": 1.0,
+              "ambiguity_rate": 0.0,
+              "no_response_rate": 0.0,
+              "modal_owner": "L2E5",
+              "n_presentations": 3
+            },
+            "col 1": {
+              "consistency": 1.0,
+              "ambiguity_rate": 0.0,
+              "no_response_rate": 0.0,
+              "modal_owner": "L2E5",
+              "n_presentations": 3
+            },
+            "diag \\": {
+              "consistency": 1.0,
+              "ambiguity_rate": 0.0,
+              "no_response_rate": 0.0,
+              "modal_owner": "L2E5",
+              "n_presentations": 3
+            },
+            "diag /": {
+              "consistency": 1.0,
+              "ambiguity_rate": 0.0,
+              "no_response_rate": 0.0,
+              "modal_owner": "L2E5",
+              "n_presentations": 3
+            }
+          },
+          "forgetting": {
+            "row 1": {
+              "first_half_owner": "L2E5",
+              "second_half_owner": "L2E5",
+              "changed": false
+            },
+            "col 1": {
+              "first_half_owner": "L2E5",
+              "second_half_owner": "L2E5",
+              "changed": false
+            },
+            "diag \\": {
+              "first_half_owner": "L2E5",
+              "second_half_owner": "L2E5",
+              "changed": false
+            },
+            "diag /": {
+              "first_half_owner": "L2E5",
+              "second_half_owner": "L2E5",
+              "changed": false
+            }
+          },
+          "distinct_owners": 1,
+          "collisions": {
+            "L2E5": [
+              "row 1",
+              "col 1",
+              "diag \\",
+              "diag /"
+            ]
+          },
+          "silent_cells": [
+            "L2E0",
+            "L2E1",
+            "L2E2",
+            "L2E3",
+            "L2E4",
+            "L2E6",
+            "L2E7"
+          ],
+          "recruitable_cells": [],
+          "l2i_activity": {
+            "mean_per_presentation": 45.5,
+            "total": 546
+          },
+          "l1i_all_nine_sync_rate": 0.0,
+          "frozen_replay_zero_weight_drift": true,
+          "frozen_first_responder_consistency": {
+            "row 1": 1.0,
+            "col 1": 1.0,
+            "diag \\": 1.0,
+            "diag /": 1.0
+          }
+        },
+        {
+          "seed": 2,
+          "per_pattern": {
+            "row 1": {
+              "consistency": 1.0,
+              "ambiguity_rate": 0.0,
+              "no_response_rate": 0.0,
+              "modal_owner": "L2E0",
+              "n_presentations": 3
+            },
+            "col 1": {
+              "consistency": 1.0,
+              "ambiguity_rate": 0.0,
+              "no_response_rate": 0.0,
+              "modal_owner": "L2E0",
+              "n_presentations": 3
+            },
+            "diag \\": {
+              "consistency": 1.0,
+              "ambiguity_rate": 0.0,
+              "no_response_rate": 0.0,
+              "modal_owner": "L2E0",
+              "n_presentations": 3
+            },
+            "diag /": {
+              "consistency": 1.0,
+              "ambiguity_rate": 0.0,
+              "no_response_rate": 0.0,
+              "modal_owner": "L2E0",
+              "n_presentations": 3
+            }
+          },
+          "forgetting": {
+            "row 1": {
+              "first_half_owner": "L2E0",
+              "second_half_owner": "L2E0",
+              "changed": false
+            },
+            "col 1": {
+              "first_half_owner": "L2E0",
+              "second_half_owner": "L2E0",
+              "changed": false
+            },
+            "diag \\": {
+              "first_half_owner": "L2E0",
+              "second_half_owner": "L2E0",
+              "changed": false
+            },
+            "diag /": {
+              "first_half_owner": "L2E0",
+              "second_half_owner": "L2E0",
+              "changed": false
+            }
+          },
+          "distinct_owners": 1,
+          "collisions": {
+            "L2E0": [
+              "row 1",
+              "col 1",
+              "diag \\",
+              "diag /"
+            ]
+          },
+          "silent_cells": [
+            "L2E1",
+            "L2E2",
+            "L2E3",
+            "L2E4",
+            "L2E5",
+            "L2E6",
+            "L2E7"
+          ],
+          "recruitable_cells": [],
+          "l2i_activity": {
+            "mean_per_presentation": 44.917,
+            "total": 539
+          },
+          "l1i_all_nine_sync_rate": 0.0,
+          "frozen_replay_zero_weight_drift": true,
+          "frozen_first_responder_consistency": {
+            "row 1": 1.0,
+            "col 1": 1.0,
+            "diag \\": 1.0,
+            "diag /": 1.0
+          }
+        }
+      ]
+    },
+    "prediction": {
+      "1": {
+        "precision": 1.0,
+        "fired": [
+          3,
+          4,
+          5
+        ]
+      },
+      "2": {
+        "precision": 1.0,
+        "fired": [
+          3,
+          4,
+          5
+        ]
+      }
+    },
+    "capacity": {
+      "1": {
+        "pre_novel_owners": {
+          "row 1": 5,
+          "col 1": 5,
+          "diag \\": 5,
+          "diag /": 5
+        },
+        "spare_before": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          6,
+          7
+        ],
+        "novel_owner": 3,
+        "novel_owner_was_spare": true,
+        "novel_owner_was_tyrant": false
+      },
+      "2": {
+        "pre_novel_owners": {
+          "row 1": 0,
+          "col 1": 0,
+          "diag \\": 0,
+          "diag /": 0
+        },
+        "spare_before": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "novel_owner": 1,
+        "novel_owner_was_spare": true,
+        "novel_owner_was_tyrant": false
+      }
+    }
+  }
+}

@@ -108,6 +108,20 @@
   generic per-neuron distance-weighting sweep and a generic learning_rate
   sweep both silently corrupted the new flags' state; both are now guarded
   by dedicated tests. See `Phase21_Selective_Inhibition_Report.md`.
+- Phase 22 (measurement only, no new flag): full 2x2 interaction of
+  `pretrained_l2i_recruitment` (Phase 17) x `prediction_column_to_i_enabled`
+  (Phase 21), across short/equal/long schedules, 2 seeds, plus a novel-
+  pattern spare-capacity challenge per condition. Confirms both mechanisms'
+  individual findings persist unchanged in combination (Phase 17's tyranny,
+  Phase 21's exact selectivity + all-nine-sync=0), and that they are
+  otherwise ORTHOGONAL (PC's own precision/fired-set is byte-identical
+  whether or not L2I is pretrained). Selective inhibition does NOT fix
+  Phase 17's tyranny (no mechanistic reason it should -- disjoint causal
+  pathways). POSITIVE finding: novel-pattern spare-capacity recruitment
+  survives even severe upstream tyranny in 7/8 trials; the one exception
+  was the single most extreme collapse (one L2E as literally the only
+  neuron with any learned structure at all). See
+  `Phase22_Full_Interaction_Report.md`.
 - Base branch `july14` is untouched and remains the protected base.
 - `four-pattern` branch exists (checked out in a separate worktree at
   `/home/charisxiong/Documents/others`) and is explicitly NOT merged here —
