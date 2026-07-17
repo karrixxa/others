@@ -265,6 +265,36 @@
   defensible narrower candidate for a future, separate promotion decision.
   See `Phase31_32_FSCI_ISM_Conditions_AF_And_Leak.md` and the consolidated
   `FSCI_ISM_Final_Report.md`/`FSCI_ISM_Final_Report.json`.
+- Phase 33 (causal microstep L2 race, default OFF): new
+  `causal_microstep_l2_race_enabled` flag, reusing the existing
+  `l2_charge_chunks` (K) concept -- no new chunking parameter. UNLIKE the
+  existing K-chunk path (which stops delivering further chunks the
+  instant any neuron crosses threshold), this NEVER discards remaining
+  feedforward mass: every microstep still delivers its 1/K fraction
+  regardless of earlier spikes, so multiple L2E (and multiple L2I
+  firings) can occur causally across different microsteps within one
+  volley. Every physical threshold crosser fires (exact co-crossers are
+  ties; never argmax/highest-potential/index-order). L2I's own threshold
+  is checked every microstep and can fire multiple times per volley, each
+  scheduling its own causally-timed delayed return-inhibition event in a
+  NEW, separate microstep-granular queue (never touching the existing
+  outer-step queue). Conservation accounting (scheduled/delivered/
+  refractory-rejected mass) exposed via `_causal_microstep_stats`. Flag
+  off is byte-identical to `ffefd1f`, verified directly. A bug was found
+  and fixed during implementation: L2I must integrate every microstep
+  unconditionally (even an all-zero vector), not just microsteps with a
+  new spike -- found via the mandatory "K=1 reproduces the baseline"
+  test. 14 new mandatory tests, all passing. Full suite: 458 passed, 5
+  pre-existing failures, no new failures.
+  **Gate A (row/column two-pattern acquisition) FAILS** at the
+  preregistered K=20 (1/3 seeds show distinct stable owners; the SAME
+  neuron captures both row1 and col1 within its very first presentation
+  of each, in 2/3 seeds) -- K=1 (both this new mechanism and the existing
+  one, proven identical there) passes 3/3, suggesting chunk granularity
+  itself, not specifically discard-vs-continue, drives the difference.
+  Per explicit instruction, stopped at Gate A -- no parameter tuning, no
+  retry, Gates B/C not run. See
+  `Phase33_Causal_Microstep_L2_Race_Report.md`.
 - Base branch `july14` is untouched and remains the protected base.
 - `four-pattern` branch exists (checked out in a separate worktree at
   `/home/charisxiong/Documents/others`) and is explicitly NOT merged here —

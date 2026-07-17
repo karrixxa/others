@@ -1,0 +1,285 @@
+{
+  "seeds": [
+    1,
+    2,
+    3
+  ],
+  "topology_seed": 1,
+  "patterns": [
+    "row 1",
+    "col 1"
+  ],
+  "presentations_per_pattern": 40,
+  "stable_min_count": 8,
+  "stable_window": 10,
+  "k_candidate": 20,
+  "k_control": 1,
+  "gate_a_verdict": "FAIL",
+  "runtime_seconds": 26.3,
+  "results": [
+    {
+      "per_pattern": {
+        "row 1": {
+          "stable_owner": "L2E5",
+          "count_in_window": 10
+        },
+        "col 1": {
+          "stable_owner": "L2E5",
+          "count_in_window": 10
+        }
+      },
+      "both_have_stable_owner": true,
+      "distinct": false,
+      "early_mean_latency": 1.5,
+      "late_mean_latency": 1.05,
+      "exact_tie_rate": 0.0,
+      "n_presentations": 80,
+      "condition": "causal_microstep_K20",
+      "weight_seed": 1,
+      "K": 20,
+      "causal_microstep_l2_race_enabled": true
+    },
+    {
+      "per_pattern": {
+        "row 1": {
+          "stable_owner": "L2E0",
+          "count_in_window": 10
+        },
+        "col 1": {
+          "stable_owner": "L2E3",
+          "count_in_window": 10
+        }
+      },
+      "both_have_stable_owner": true,
+      "distinct": true,
+      "early_mean_latency": 2.15,
+      "late_mean_latency": 0.0,
+      "exact_tie_rate": 0.7625,
+      "n_presentations": 80,
+      "condition": "causal_microstep_K20",
+      "weight_seed": 2,
+      "K": 20,
+      "causal_microstep_l2_race_enabled": true
+    },
+    {
+      "per_pattern": {
+        "row 1": {
+          "stable_owner": "L2E5",
+          "count_in_window": 10
+        },
+        "col 1": {
+          "stable_owner": "L2E5",
+          "count_in_window": 10
+        }
+      },
+      "both_have_stable_owner": true,
+      "distinct": false,
+      "early_mean_latency": 1.2,
+      "late_mean_latency": 0.8,
+      "exact_tie_rate": 0.0,
+      "n_presentations": 80,
+      "condition": "causal_microstep_K20",
+      "weight_seed": 3,
+      "K": 20,
+      "causal_microstep_l2_race_enabled": true
+    },
+    {
+      "per_pattern": {
+        "row 1": {
+          "stable_owner": "L2E3",
+          "count_in_window": 10
+        },
+        "col 1": {
+          "stable_owner": "L2E2",
+          "count_in_window": 10
+        }
+      },
+      "both_have_stable_owner": true,
+      "distinct": true,
+      "early_mean_latency": 2.2,
+      "late_mean_latency": 1.0,
+      "exact_tie_rate": 0.8125,
+      "n_presentations": 80,
+      "condition": "causal_microstep_K1",
+      "weight_seed": 1,
+      "K": 1,
+      "causal_microstep_l2_race_enabled": true
+    },
+    {
+      "per_pattern": {
+        "row 1": {
+          "stable_owner": "L2E0",
+          "count_in_window": 10
+        },
+        "col 1": {
+          "stable_owner": "L2E3",
+          "count_in_window": 10
+        }
+      },
+      "both_have_stable_owner": true,
+      "distinct": true,
+      "early_mean_latency": 2.15,
+      "late_mean_latency": 0.0,
+      "exact_tie_rate": 0.7625,
+      "n_presentations": 80,
+      "condition": "causal_microstep_K1",
+      "weight_seed": 2,
+      "K": 1,
+      "causal_microstep_l2_race_enabled": true
+    },
+    {
+      "per_pattern": {
+        "row 1": {
+          "stable_owner": "L2E5",
+          "count_in_window": 10
+        },
+        "col 1": {
+          "stable_owner": "L2E3",
+          "count_in_window": 10
+        }
+      },
+      "both_have_stable_owner": true,
+      "distinct": true,
+      "early_mean_latency": 2.25,
+      "late_mean_latency": 1.0,
+      "exact_tie_rate": 0.9,
+      "n_presentations": 80,
+      "condition": "causal_microstep_K1",
+      "weight_seed": 3,
+      "K": 1,
+      "causal_microstep_l2_race_enabled": true
+    },
+    {
+      "per_pattern": {
+        "row 1": {
+          "stable_owner": "L2E3",
+          "count_in_window": 10
+        },
+        "col 1": {
+          "stable_owner": "L2E2",
+          "count_in_window": 10
+        }
+      },
+      "both_have_stable_owner": true,
+      "distinct": true,
+      "early_mean_latency": 2.2,
+      "late_mean_latency": 1.0,
+      "exact_tie_rate": 0.8125,
+      "n_presentations": 80,
+      "condition": "existing_K1_baseline",
+      "weight_seed": 1,
+      "K": 1,
+      "causal_microstep_l2_race_enabled": false
+    },
+    {
+      "per_pattern": {
+        "row 1": {
+          "stable_owner": "L2E0",
+          "count_in_window": 10
+        },
+        "col 1": {
+          "stable_owner": "L2E3",
+          "count_in_window": 10
+        }
+      },
+      "both_have_stable_owner": true,
+      "distinct": true,
+      "early_mean_latency": 2.15,
+      "late_mean_latency": 0.0,
+      "exact_tie_rate": 0.7625,
+      "n_presentations": 80,
+      "condition": "existing_K1_baseline",
+      "weight_seed": 2,
+      "K": 1,
+      "causal_microstep_l2_race_enabled": false
+    },
+    {
+      "per_pattern": {
+        "row 1": {
+          "stable_owner": "L2E5",
+          "count_in_window": 10
+        },
+        "col 1": {
+          "stable_owner": "L2E3",
+          "count_in_window": 10
+        }
+      },
+      "both_have_stable_owner": true,
+      "distinct": true,
+      "early_mean_latency": 2.25,
+      "late_mean_latency": 1.0,
+      "exact_tie_rate": 0.9,
+      "n_presentations": 80,
+      "condition": "existing_K1_baseline",
+      "weight_seed": 3,
+      "K": 1,
+      "causal_microstep_l2_race_enabled": false
+    },
+    {
+      "per_pattern": {
+        "row 1": {
+          "stable_owner": "L2E4",
+          "count_in_window": 8
+        },
+        "col 1": {
+          "stable_owner": null,
+          "count_in_window": 5
+        }
+      },
+      "both_have_stable_owner": false,
+      "distinct": false,
+      "early_mean_latency": 1.05,
+      "late_mean_latency": 0.0,
+      "exact_tie_rate": 0.0375,
+      "n_presentations": 80,
+      "condition": "existing_K20_baseline",
+      "weight_seed": 1,
+      "K": 20,
+      "causal_microstep_l2_race_enabled": false
+    },
+    {
+      "per_pattern": {
+        "row 1": {
+          "stable_owner": "L2E0",
+          "count_in_window": 10
+        },
+        "col 1": {
+          "stable_owner": "L2E3",
+          "count_in_window": 10
+        }
+      },
+      "both_have_stable_owner": true,
+      "distinct": true,
+      "early_mean_latency": 2.0,
+      "late_mean_latency": 0.0,
+      "exact_tie_rate": 0.0125,
+      "n_presentations": 80,
+      "condition": "existing_K20_baseline",
+      "weight_seed": 2,
+      "K": 20,
+      "causal_microstep_l2_race_enabled": false
+    },
+    {
+      "per_pattern": {
+        "row 1": {
+          "stable_owner": "L2E7",
+          "count_in_window": 10
+        },
+        "col 1": {
+          "stable_owner": "L2E7",
+          "count_in_window": 10
+        }
+      },
+      "both_have_stable_owner": true,
+      "distinct": false,
+      "early_mean_latency": 0.95,
+      "late_mean_latency": 1.0,
+      "exact_tie_rate": 0.0,
+      "n_presentations": 80,
+      "condition": "existing_K20_baseline",
+      "weight_seed": 3,
+      "K": 20,
+      "causal_microstep_l2_race_enabled": false
+    }
+  ]
+}

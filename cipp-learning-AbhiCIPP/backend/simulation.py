@@ -548,6 +548,26 @@ class SimulationEngine:
                  # leak/update runs between chunks. K=1 (default) delivers the full
                  # drive in one chunk and reproduces the un-chunked behavior exactly.
                  l2_charge_chunks: int = 1,
+                 # Phase 33 -- default-OFF "causal microstep L2 race"
+                 # (see Phase33_Causal_Microstep_L2_Race_Report.md). Reuses
+                 # l2_charge_chunks (K) as its own chunking granularity --
+                 # NO new K parameter. UNLIKE the existing chunked-charge
+                 # path just above (which STOPS delivering further chunks
+                 # the instant any neuron crosses threshold), this path
+                 # NEVER discards remaining feedforward mass: every one of
+                 # the K microsteps delivers its 1/K fraction regardless of
+                 # earlier spikes, so multiple L2E (and multiple L2I
+                 # firings) can occur causally across DIFFERENT microsteps
+                 # within the SAME outer volley. Every physical threshold
+                 # crosser in a given microstep fires -- exact co-crossers
+                 # are ties, never an argmax/highest-potential/index-order
+                 # pick. Default OFF reproduces the existing K-chunk path
+                 # exactly (this branch is never entered when False). Does
+                 # NOT change prediction, decoder, centered-encoder,
+                 # saturation-cap, threshold, initialization, or learning
+                 # equations -- purely a competition-timing/delivery
+                 # mechanism, orthogonal to all of those.
+                 causal_microstep_l2_race_enabled: bool = False,
                  # L1I feedback firing mode. DEFAULT OFF: L1I is a trainable
                  # threshold accumulator. When enabled it acts as an IMMEDIATE
                  # DETERMINISTIC RELAY: any L1I that receives a nonzero L2E
@@ -1078,6 +1098,7 @@ class SimulationEngine:
                            signed_depression=signed_depression, eta_off=eta_off,
                            l2e_budget=l2e_budget, event_driven=event_driven,
                            l2_charge_chunks=l2_charge_chunks,
+                           causal_microstep_l2_race_enabled=causal_microstep_l2_race_enabled,
                            l1i_immediate_relay=l1i_immediate_relay,
                            excitatory_flow_rate=excitatory_flow_rate,
                            l2i_excitatory_flow_rate=l2i_excitatory_flow_rate,
@@ -1641,6 +1662,19 @@ class SimulationEngine:
         self._l2i_contributors: list[tuple] = []  # (t, 'L2Ej') events since L2I's last fire
         self._last_l2_inhibition_delivery: dict | None = None
         self._l2_inhibition_log: deque = deque(maxlen=LOG_MAX)
+        # Phase 33: causal microstep L2 race -- a SEPARATE, microstep-
+        # granular event queue/counter, never touching _l2i_pending above
+        # (which stays inert/empty whenever this path is used, since only
+        # _resolve_l2_competition -- not the microstep variant -- ever
+        # populates it). Cheap to always initialize; only ever advanced
+        # when causal_microstep_l2_race_enabled is True.
+        self.causal_microstep_l2_race_enabled = bool(self.params['causal_microstep_l2_race_enabled'])
+        self._l2_microstep_counter = 0
+        self._l2i_microstep_pending: list[dict] = []
+        self._causal_microstep_stats: dict = dict(
+            ff_events_scheduled=0, ff_events_delivered=0,
+            inhib_events_scheduled=0, inhib_events_delivered=0,
+            inhib_events_refractory_rejected=0)
 
         # Auto-cycle: rotate through the patterns, showing each for a short bounded
         # VISIT, and detect training per pattern. Sitting on one pattern can't
@@ -2290,7 +2324,9 @@ class SimulationEngine:
                'centered_encoder_enabled', 'centered_encoder_alpha',
                'prediction_subthreshold_decoder_enabled',
                'prediction_subthreshold_learning_rate',
-               'prediction_subthreshold_z_tau', 'prediction_subthreshold_u_tau')
+               'prediction_subthreshold_z_tau', 'prediction_subthreshold_u_tau',
+               # Phase 33: causal microstep L2 race.
+               'causal_microstep_l2_race_enabled')
 
     def apply_config(self, overrides: dict):
         """Merge tunable overrides into self.params and rebuild the network in
@@ -2318,7 +2354,8 @@ class SimulationEngine:
                      'pretrained_l2i_recruitment', 'prediction_excitatory_enabled',
                      'prediction_column_enabled', 'prediction_leak_diagnostic_disable',
                      'prediction_column_to_i_enabled', 'pretrained_l1i_regulation',
-                     'centered_encoder_enabled', 'prediction_subthreshold_decoder_enabled'):
+                     'centered_encoder_enabled', 'prediction_subthreshold_decoder_enabled',
+                     'causal_microstep_l2_race_enabled'):
                 v = bool(v)
             elif k in ('seed', 'refractory', 'l2_charge_chunks', 'l2_inhibition_delay',
                        'prediction_feedback_delay'):
@@ -2624,6 +2661,131 @@ class SimulationEngine:
                 magnitude=self.l2_inhibition_magnitude))
         return l2i, [], eligible[0]
 
+    def _resolve_l2_competition_causal_microstep(self, l2, l2e, ff_vec, t):
+        """Phase 33 -- default-OFF "causal microstep L2 race"
+        (causal_microstep_l2_race_enabled). Divides this outer volley's
+        feedforward delivery into K = l2_charge_chunks EQUAL microsteps
+        (reuses the existing l2_charge_chunks concept -- no new chunking
+        parameter). UNLIKE the existing chunked-charge path in step()
+        (which stops delivering further chunks the instant any neuron
+        crosses threshold), this NEVER discards remaining feedforward
+        mass: every one of the K microsteps delivers its 1/K fraction
+        regardless of whether an earlier microstep already produced a
+        physical spike, so multiple L2E -- and multiple L2I firings --
+        can occur causally across DIFFERENT microsteps within the SAME
+        outer volley.
+
+        Every L2E that physically crosses threshold in a GIVEN microstep
+        fires -- exact co-crossers within that SAME microstep are TIES
+        and all fire together (identical principle to
+        _resolve_l2_competition's own eligible-set convention, just
+        evaluated per microstep instead of once per whole chunk-loop
+        iteration). Never an argmax, highest-potential selection, or
+        index-order tiebreak.
+
+        L2I's own threshold is checked EVERY microstep, so it can fire
+        MULTIPLE times within one volley if separate microsteps each
+        independently drive it across threshold -- each firing schedules
+        its OWN causally-timed delayed return-inhibition event in
+        self._l2i_microstep_pending, a SEPARATE, microstep-granular queue
+        that NEVER touches self._l2i_pending (the existing outer-step-
+        granular queue used by _resolve_l2_competition/_deliver_scheduled_
+        l2_inhibition, which stays empty/inert whenever this method runs
+        instead). The delay is expressed in MICROSTEP units as
+        `l2_inhibition_delay * K`, so the real-world latency of the delay
+        parameter is UNCHANGED from the existing mechanism's own meaning
+        (a delay of "1 outer step" still resolves after one full outer
+        step's worth of microsteps) -- this is a new internal scheduling
+        unit for this experimental path only, not a change to the
+        l2_inhibition_delay parameter's value or meaning.
+
+        Leak/refractory-countdown/other outer-step state updates are NOT
+        run here -- exactly like the existing K-chunk loop, the clock
+        does not advance and no leak/update runs between microsteps; this
+        method only ever runs ONCE per real outer step() call.
+
+        Conservation accounting (self._causal_microstep_stats, overwritten
+        fresh at the start of every call -- feedforward delivery always
+        succeeds regardless of refractory state via receive_input, so
+        ff_events_scheduled == ff_events_delivered always, reported
+        explicitly rather than assumed; inhibitory delivery CAN be
+        refractory-rejected, via apply_delayed_inhibition's own existing
+        'applied' flag -- the same delivery-validity convention already
+        established for this engine's causal audits)."""
+        K = max(1, int(self.l2_charge_chunks))
+        delay_microsteps = max(1, int(round(self.l2_inhibition_delay * K)))
+        l2i = 0.0
+        stats = dict(ff_events_scheduled=0, ff_events_delivered=0,
+                    inhib_events_scheduled=0, inhib_events_delivered=0,
+                    inhib_events_refractory_rejected=0)
+
+        for _chunk in range(K):
+            self._l2_microstep_counter += 1
+            current_microstep = self._l2_microstep_counter
+
+            # 1. Deliver all events due at THIS microstep.
+            due = [rec for rec in self._l2i_microstep_pending
+                  if rec['deliver_at_microstep'] <= current_microstep]
+            if due:
+                self._l2i_microstep_pending = [
+                    rec for rec in self._l2i_microstep_pending
+                    if rec['deliver_at_microstep'] > current_microstep]
+                for rec in due:
+                    for j, e in enumerate(l2.excitatory_neurons):
+                        stats['inhib_events_scheduled'] += 1
+                        out = e.apply_delayed_inhibition(rec['magnitude'])
+                        if out['applied']:
+                            stats['inhib_events_delivered'] += 1
+                            self._reset_events.append((f'L2E{j}', out))
+                        else:
+                            stats['inhib_events_refractory_rejected'] += 1
+
+            # 2. Deliver this microstep's own feedforward fraction.
+            for e in l2.excitatory_neurons:
+                e.receive_input(ff_vec, charge_scale=1.0 / K, t=t)
+                stats['ff_events_scheduled'] += 1
+                stats['ff_events_delivered'] += 1
+            self.l2_drive = {f'L2E{j}': float(e.potential) for j, e in enumerate(l2.excitatory_neurons)}
+
+            # 3. Identify every physical threshold crosser THIS microstep;
+            #    fire every exact co-crosser as a tie.
+            eligible = [j for j, e in enumerate(l2.excitatory_neurons) if e.check_threshold()]
+            self._last_eligible = eligible
+            for j in eligible:
+                l2.excitatory_neurons[j].fire()
+                l2e[j] = 1.0
+                self._l2i_contributors.append((current_microstep, f'L2E{j}'))
+
+            # 4. Enqueue each L2E->shared-L2I event causally; if L2I
+            #    physically crosses threshold, fire it and enqueue its
+            #    return inhibition causally. L2I integrates EVERY
+            #    microstep (even an all-zero l2e vector when nobody fired)
+            #    -- exactly matching the existing K-chunk path's own
+            #    "not resolved" fallback, which always gives L2I a chance
+            #    to fire from residual/decayed charge. Skipping this
+            #    integration on empty microsteps would silently diverge
+            #    from that behavior (found and fixed directly: an earlier
+            #    version of this method `continue`d past L2I entirely
+            #    whenever `eligible` was empty, which broke the mandatory
+            #    "K=1 reproduces the baseline trajectory" requirement).
+            l2.inhibitory_neuron.receive_input(l2e, t=t)
+            if l2.inhibitory_neuron.check_threshold():
+                v_pre_l2i = float(l2.inhibitory_neuron.potential)
+                l2.inhibitory_neuron.fire()
+                l2i = 1.0
+                v_post_l2i = float(l2.inhibitory_neuron.potential)
+                contributors = list(self._l2i_contributors)
+                self._l2i_contributors = []
+                self._l2i_microstep_pending.append(dict(
+                    fire_microstep=current_microstep,
+                    deliver_at_microstep=current_microstep + delay_microsteps,
+                    fire_t=t, contributors=contributors,
+                    l2i_v_pre=round(v_pre_l2i, 4), l2i_v_post=round(v_post_l2i, 4),
+                    magnitude=self.l2_inhibition_magnitude))
+
+        self._causal_microstep_stats = stats
+        return l2i, []
+
     def _deliver_scheduled_l2_inhibition(self, t):
         """PHASE 7 -- apply every delayed L2I->L2E delivery scheduled (by
         _resolve_l2_competition) whose deliver_at has arrived. Called at the
@@ -2877,6 +3039,15 @@ class SimulationEngine:
                     l2.inhibitory_neuron.fire()
                     l2i = 1.0
                     self.l2_inh_field += self.inh_boost
+        elif self.causal_microstep_l2_race_enabled and (cycle_boundary or self.event_driven):
+            # Phase 33 -- default-OFF causal microstep L2 race. See
+            # _resolve_l2_competition_causal_microstep for the full
+            # mechanism. Checked BEFORE the existing K-chunk branch below
+            # so enabling this flag genuinely replaces that path instead
+            # of running alongside it; the existing branch is completely
+            # unreachable while this flag is on, and this branch is
+            # completely unreachable while it is off (default).
+            l2i, inhibited = self._resolve_l2_competition_causal_microstep(l2, l2e, ff_vec, t)
         elif cycle_boundary or self.event_driven:
             # Standard per-step argmax competition, delivered in K charge chunks.
             # Competition resolves EVERY step (event_driven, default) OR once per
