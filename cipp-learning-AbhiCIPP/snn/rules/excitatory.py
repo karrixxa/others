@@ -184,16 +184,62 @@ class ChargeBasedRule(ExcitatoryRule):
         n._apply_budget_and_cap()
 
 
+class CenteredEncoderRule(ExcitatoryRule):
+    """FSCI/ISM Phase 29/30 candidate (see Phase29_Centered_Encoder_
+    Ownership_Gate.md): REPLACES the signed +1/-1 potentiation signal with a
+    continuously-graded, LOCALLY-CENTERED presynaptic signal
+
+        s_i = x_i - x_bar_i
+
+    where x_i is this step's REAL presynaptic spike (n._last_input_spikes,
+    the same field every other rule reads) and x_bar_i is a SHARED,
+    engine-level per-pixel leaky trace of physical L1E spikes (injected via
+    n._centered_x_bar -- never owned or mutated by this rule; see
+    SimulationEngine._build/step). The update:
+
+        delta_w_ji = learning_rate * FE_j * (1 - w_ji/w_max)^2 * s_i
+
+    uses this neuron's OWN existing structural-free-energy gate FE_j (no
+    new quantity) and the same saturating envelope every other rule here
+    uses. Gated on this neuron's own physical spike -- the same trigger
+    convention as SignedSpikeRule/ChargeBasedRule, a deliberate design
+    choice (see the module docstring of phase29_centered_encoder_ownership_
+    gate.py, which this class was promoted from byte-for-byte). Reads ONLY
+    this neuron's own state and the shared presynaptic trace -- no
+    cross-neuron/global/pattern information."""
+
+    def on_fire(self, n, v_pre):
+        w = n._weights_array
+        if w is None or len(w) == 0 or n._centered_x_bar is None:
+            return
+        w_max = n.excitatory_saturation_cap if n.excitatory_saturation_cap is not None else n.weight_cap
+        if w_max <= 0:
+            return
+        fe = n._structural_free_energy_gate() if n.structural_free_energy else 1.0
+        x = n._last_input_spikes[:len(n._centered_x_bar)]
+        s = x - n._centered_x_bar
+        w_min = n.min_positive_weight if n.min_positive_weight is not None else 0.0
+        pos = np.nonzero(w > 0)[0]
+        if pos.size == 0:
+            return
+        envelope = (1.0 - w[pos] / w_max) ** 2
+        dw = n.learning_rate * fe * envelope * s[pos]
+        w[pos] = np.clip(w[pos] + dw, w_min, w_max)
+
+
 # Stateless singletons -- shared across all neurons (they operate on the arg).
 _SIGNED_SPIKE = SignedSpikeRule()
 _ASSEMBLY_FLOW = AssemblyFlowCredit()
 _CHARGE_BASED = ChargeBasedRule()
+_CENTERED_ENCODER = CenteredEncoderRule()
 
 
 def select_excitatory_rule(n):
     """Map the neuron's current flags to the one active excitatory rule. Encodes
     the old mutual-exclusivity (signed/assembly took precedence and returned early;
     charge is the default) explicitly instead of as inline early returns."""
+    if getattr(n, 'centered_encoder_enabled', False):
+        return _CENTERED_ENCODER
     if n.signed_spike_learning:
         return _SIGNED_SPIKE
     if n.assembly_flow_credit:

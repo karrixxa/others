@@ -205,6 +205,16 @@ class Neuron(NeuralEntity):
         # dependent). Default OFF -> signed rule uses p exactly as before.
         self.structural_free_energy = False
         self.structural_fe_eta_floor = 0.02    # plasticity floor for a mature neuron
+        # FSCI/ISM Phase 29 centered/covariance encoder (opt-in; L2E only;
+        # see snn/rules/excitatory.py CenteredEncoderRule and
+        # Phase29_Centered_Encoder_Ownership_Gate.md). _centered_x_bar is a
+        # REFERENCE to a shared engine-level per-pixel trace array, injected
+        # by SimulationEngine._build -- never owned or mutated by the
+        # neuron itself. Default off -> select_excitatory_rule never
+        # dispatches to CenteredEncoderRule, so the existing rule is
+        # byte-identical.
+        self.centered_encoder_enabled = False
+        self._centered_x_bar = None
         # Phase 10 (corrected Phases 6-12 prompt file): adaptive-threshold
         # ablation -- a separately named, SEPARATE mechanism from
         # self.homeostasis (synaptic-scaling homeostasis) and from geometry.

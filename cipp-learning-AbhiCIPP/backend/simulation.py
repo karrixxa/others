@@ -921,6 +921,56 @@ class SimulationEngine:
                  # recruitment" pattern as Phase 17's
                  # pretrained_l2i_recruitment, applied to L1I instead of L2I.
                  pretrained_l1i_regulation: bool = False,
+                 # FSCI/ISM Phase 29/30: centered/covariance encoder (see
+                 # Phase29_Centered_Encoder_Ownership_Gate.md). REPLACES the
+                 # signed +1/-1 potentiation signal in the L2E excitatory
+                 # rule with a continuously-graded, LOCALLY-CENTERED
+                 # presynaptic signal s_i = x_i - x_bar_i, x_bar_i a shared
+                 # per-pixel leaky trace of PHYSICAL L1E spikes (never the
+                 # raw input_vec) -- delta_w_ji = learning_rate * FE_j *
+                 # (1 - w_ji/w_max)^2 * s_i, gated on this L2E's own physical
+                 # spike (same trigger convention as every other rule).
+                 # Default OFF reproduces the existing signed-spike rule
+                 # exactly (select_excitatory_rule never dispatches to it).
+                 # Promoted, byte-for-byte, from Phase 29's own offline
+                 # monkeypatch feasibility harness.
+                 centered_encoder_enabled: bool = False,
+                 # PREREGISTERED (Phase 29, chosen from that phase's own
+                 # independent tau_c=80 sweep -- not fit to any later
+                 # result): x_bar update rate alpha = 1/80.
+                 centered_encoder_alpha: float = 1.0 / 80.0,
+                 # FSCI/ISM Phase 30: local subthreshold coincidence decoder
+                 # (see Phase18b_Lecture14_Local_Coincidence_Architecture_
+                 # Contract.md's R_j->PCi decoder). Maintains a SHORT
+                 # presynaptic trace z_j^R of REAL L2Ej spikes (the same
+                 # already-delayed dec_vec_pcol vector the existing spike-
+                 # gated rule also reads) and a per-PCi local sensory
+                 # eligibility trace u_i^S of its own delivered lateral S_i
+                 # component -- delta_d_ji = eta_sub * z_j^R * u_i^S *
+                 # (1 - d_ji/d_max)^2, applied to EVERY PCi EVERY step,
+                 # regardless of PCi's own physical spike (this is the
+                 # explicit fix for the existing rule's cold-start plateau
+                 # -- see Phase19's report). Mutually exclusive with the
+                 # existing spike-gated `_apply_prediction_column_learning`
+                 # (this flag REPLACES it, never both). Actual PCi->Ii
+                 # inhibition still requires PCi's own physical spike --
+                 # this flag changes ONLY the decoder LEARNING trigger, not
+                 # the firing/inhibition path. Default OFF preserves the
+                 # existing spike-gated decoder exactly (the Phase 19/21
+                 # control).
+                 prediction_subthreshold_decoder_enabled: bool = False,
+                 # PREREGISTERED (chosen before running any Phase 30
+                 # experiment): an order of magnitude below the existing
+                 # spike-gated prediction_learning_rate (0.15), since this
+                 # rule can update every step (far more frequently than the
+                 # existing rule's genuine-coincidence events) and would
+                 # otherwise saturate near-instantly.
+                 prediction_subthreshold_learning_rate: float = 0.01,
+                 # PREREGISTERED short trace time constants (steps) for z_j^R
+                 # and u_i^S -- "short" per the spec, kept symmetric absent
+                 # any evidence favoring an asymmetric choice.
+                 prediction_subthreshold_z_tau: float = 3.0,
+                 prediction_subthreshold_u_tau: float = 3.0,
                  # Capacity rule for the minimal experiment (see the prompt's
                  # "Threshold, Cap, Floor" section). l2e_weight_cap_frac sets each
                  # L2E positive feedforward weight cap to frac*thr_l2, so three
@@ -1079,6 +1129,12 @@ class SimulationEngine:
                            prediction_leak_diagnostic_disable=prediction_leak_diagnostic_disable,
                            prediction_column_to_i_enabled=prediction_column_to_i_enabled,
                            pretrained_l1i_regulation=pretrained_l1i_regulation,
+                           centered_encoder_enabled=centered_encoder_enabled,
+                           centered_encoder_alpha=centered_encoder_alpha,
+                           prediction_subthreshold_decoder_enabled=prediction_subthreshold_decoder_enabled,
+                           prediction_subthreshold_learning_rate=prediction_subthreshold_learning_rate,
+                           prediction_subthreshold_z_tau=prediction_subthreshold_z_tau,
+                           prediction_subthreshold_u_tau=prediction_subthreshold_u_tau,
                            l2e_weight_cap_frac=l2e_weight_cap_frac,
                            pos_weight_floor=pos_weight_floor,
                            l2e_init_mode=l2e_init_mode,
@@ -1324,6 +1380,15 @@ class SimulationEngine:
         #   homeostasis stays off below) -- each incoming synapse is capped
         #   independently, with no renormalization forcing them to trade off
         #   against each other.
+        # FSCI/ISM Phase 29/30: centered/covariance encoder -- ONE shared
+        # per-pixel presynaptic trace (x_bar_i), read (never mutated) by
+        # every L2E neuron's CenteredEncoderRule.on_fire via the reference
+        # injected below. Allocated unconditionally (cheap, N_PIX floats);
+        # only ever advanced in step() when centered_encoder_enabled is on.
+        self.centered_encoder_enabled = bool(self.params['centered_encoder_enabled'])
+        self.centered_encoder_alpha = float(self.params['centered_encoder_alpha'])
+        self._centered_x_bar = np.zeros(N_PIX)
+
         for nid, n in self.neurons.items():
             if self.meta[nid]['type'] == 'E' and nid.startswith('L2'):
                 n.weight_budget = L2E_BUDGET_MULT * thr_l2 if p['l2e_budget'] else None
@@ -1434,6 +1499,14 @@ class SimulationEngine:
                 # byte-identical to every prior phase.
                 n.loser_depression_protection = p['loser_depression_protection']
                 n.loser_depression_protection_ca_ref = p['loser_depression_protection_ca_ref']
+                # FSCI/ISM Phase 29 (L2E only; default off -- select_excitatory_
+                # rule never dispatches to CenteredEncoderRule unless this is
+                # set, so the existing signed-spike rule is byte-identical
+                # when off). _centered_x_bar is a REFERENCE to the one shared
+                # engine-level array above -- every L2E reads the SAME
+                # presynaptic trace, never a private per-neuron copy.
+                n.centered_encoder_enabled = self.centered_encoder_enabled
+                n._centered_x_bar = self._centered_x_bar
             else:
                 n.weight_budget = None
                 if self.meta[nid]['type'] == 'I':
@@ -1730,6 +1803,56 @@ class SimulationEngine:
             np.zeros(N_OUT) for _ in range(self.prediction_feedback_delay))
         self.s_to_pcol_queue = deque(
             np.zeros(N_PIX) for _ in range(self.prediction_feedback_delay))
+
+        # FSCI/ISM Phase 30: local subthreshold coincidence decoder (see
+        # Phase18b_Lecture14_Local_Coincidence_Architecture_Contract.md's
+        # R_j->PCi decoder). Allocated unconditionally whenever PC exists
+        # (cheap); only ever advanced/consulted in step() when
+        # prediction_subthreshold_decoder_enabled is on.
+        self.prediction_subthreshold_decoder_enabled = bool(p['prediction_subthreshold_decoder_enabled'])
+        self.prediction_subthreshold_learning_rate = float(p['prediction_subthreshold_learning_rate'])
+        # exp(-1/tau): a short leaky decay per step (tau in steps), same
+        # fixed-point-free convention as every other float leak in this file.
+        self.prediction_subthreshold_z_decay = float(np.exp(-1.0 / max(1e-6, float(p['prediction_subthreshold_z_tau']))))
+        self.prediction_subthreshold_u_decay = float(np.exp(-1.0 / max(1e-6, float(p['prediction_subthreshold_u_tau']))))
+        self._pcol_z_R = np.zeros(N_OUT)     # presynaptic trace of REAL L2Ej spikes
+        self._pcol_u_S = np.zeros(N_PIX)     # per-PCi local sensory eligibility trace
+
+    def _apply_subthreshold_decoder_learning(self, pc, i):
+        """FSCI/ISM Phase 30 EXPERIMENTAL CANDIDATE decoder rule (see the
+        module-level constructor docs and Phase18b_Lecture14_Local_
+        Coincidence_Architecture_Contract.md): runs EVERY step, for PCi at
+        index i, REGARDLESS of whether PCi itself physically spikes this
+        step -- unlike _apply_prediction_column_learning, a somatic spike is
+        NOT required for potentiation (the explicit fix for that rule's
+        cold-start plateau). Reads ONLY the two local traces (this PCi's own
+        u_i^S and the shared z_j^R) and this PCi's own weights -- no
+        pattern name, no owner table, no global error, no cross-neuron
+        comparison.
+
+            delta_d_ji = eta_sub * z_j^R * u_i^S * (1 - d_ji/d_max)^2
+
+        `u_i^S <= 0` (no recent local sensory eligibility at all) skips the
+        WHOLE update for every j -- "no paired sensory eligibility means no
+        update". Among the eight feedback indices, only those with z_j^R > 0
+        (a REAL L2Ej spike within the trace's short window) move at all --
+        "no R_j spike means no update", "absent columns remain unchanged".
+        Monotonic, saturating, POSITIVE-ONLY growth, bounded to
+        [0, prediction_feedback_max] -- same bounds as the existing rule.
+        Actual PCi->Ii inhibition is untouched by this method entirely; it
+        still requires PCi's own physical spike (see step())."""
+        u = self._pcol_u_S[i]
+        if u <= 0.0:
+            return   # no paired sensory eligibility -- no update at all, any j
+        z = self._pcol_z_R
+        active = z > 0.0
+        if not active.any():
+            return   # no R_j trace active -- no update
+        w = pc._weights_array[:N_OUT]
+        w_max = self.prediction_feedback_max
+        envelope = (1.0 - w[active] / w_max) ** 2
+        growth = self.prediction_subthreshold_learning_rate * z[active] * u * envelope
+        w[active] = np.clip(w[active] + growth, 0.0, w_max)
 
     def _apply_prediction_column_learning(self, pc):
         """Phase 19-v2 decoder-learning event -- runs ONLY on PCi's own
@@ -2162,7 +2285,12 @@ class SimulationEngine:
                'prediction_leak_diagnostic_disable',
                # Phase 21: selective local predictive inhibition (PCi->Ii),
                # kept as two SEPARATE factorial variables.
-               'prediction_column_to_i_enabled', 'pretrained_l1i_regulation')
+               'prediction_column_to_i_enabled', 'pretrained_l1i_regulation',
+               # FSCI/ISM Phase 29/30.
+               'centered_encoder_enabled', 'centered_encoder_alpha',
+               'prediction_subthreshold_decoder_enabled',
+               'prediction_subthreshold_learning_rate',
+               'prediction_subthreshold_z_tau', 'prediction_subthreshold_u_tau')
 
     def apply_config(self, overrides: dict):
         """Merge tunable overrides into self.params and rebuild the network in
@@ -2189,7 +2317,8 @@ class SimulationEngine:
                      'adaptive_threshold', 'loser_depression_protection',
                      'pretrained_l2i_recruitment', 'prediction_excitatory_enabled',
                      'prediction_column_enabled', 'prediction_leak_diagnostic_disable',
-                     'prediction_column_to_i_enabled', 'pretrained_l1i_regulation'):
+                     'prediction_column_to_i_enabled', 'pretrained_l1i_regulation',
+                     'centered_encoder_enabled', 'prediction_subthreshold_decoder_enabled'):
                 v = bool(v)
             elif k in ('seed', 'refractory', 'l2_charge_chunks', 'l2_inhibition_delay',
                        'prediction_feedback_delay'):
@@ -2654,14 +2783,32 @@ class SimulationEngine:
         if self.prediction_column_enabled:
             dec_vec_pcol = self.l2e_to_pcol_queue.popleft()
             lat_vec_pcol = self.s_to_pcol_queue.popleft()
+            if self.prediction_subthreshold_decoder_enabled:
+                # FSCI/ISM Phase 30: short presynaptic/eligibility traces,
+                # built from the SAME already-delayed real event vectors the
+                # existing spike-gated rule also reads (dec_vec_pcol = real
+                # L2E spikes from prediction_feedback_delay steps ago;
+                # lat_vec_pcol = each PCi's own delivered lateral S_i
+                # component) -- never a fresh, undelayed signal, so no new
+                # timing violation is introduced.
+                self._pcol_z_R = self._pcol_z_R * self.prediction_subthreshold_z_decay + dec_vec_pcol
+                self._pcol_u_S = self._pcol_u_S * self.prediction_subthreshold_u_decay + lat_vec_pcol
             for i, pc in enumerate(self.pcol):
                 combined = np.concatenate([dec_vec_pcol, [lat_vec_pcol[i]]])
                 pc.receive_input(combined, t=t)
+            if self.prediction_subthreshold_decoder_enabled and not self.plasticity_frozen:
+                # Runs EVERY step, for EVERY PCi, regardless of whether PCi
+                # itself physically spikes this step -- the explicit fix for
+                # the existing rule's cold-start plateau (Phase 19's
+                # report). Firing itself and the PCi->Ii inhibition path
+                # (below, gated on pcol_spiked) are completely untouched.
+                for i, pc in enumerate(self.pcol):
+                    self._apply_subthreshold_decoder_learning(pc, i)
             for i, pc in enumerate(self.pcol):
                 if pc.check_threshold():
                     pc.fire()
                     pcol_spiked[i] = 1.0
-                    if not self.plasticity_frozen:
+                    if not self.plasticity_frozen and not self.prediction_subthreshold_decoder_enabled:
                         self._apply_prediction_column_learning(pc)
 
         # 2b/2c. Deliver L1E->L2E feedforward charge and resolve L2 competition.
@@ -2885,6 +3032,14 @@ class SimulationEngine:
         # Queue this step's L1I spikes as one-step inhibition for t+1. Replacing
         # rather than OR-latching the register is what permits the E/silent/E rhythm.
         self.l1i_feedback_delay = l1i.copy()
+        # FSCI/ISM Phase 29: advance the shared centered-encoder presynaptic
+        # trace using THIS step's own physical L1E spikes, AFTER every L2E's
+        # own fire() (and thus CenteredEncoderRule.on_fire, if enabled) has
+        # already run and read the PRE-update trace value -- a fire() event
+        # this step reflects only spikes strictly BEFORE this step, never
+        # this step's own l1e (causal, non-anticipatory).
+        if self.centered_encoder_enabled:
+            self._centered_x_bar += (l1e - self._centered_x_bar) * self.centered_encoder_alpha
         self.timestep += 1
         self._detect_weight_changes()
         self._detect_confidence_changes()
