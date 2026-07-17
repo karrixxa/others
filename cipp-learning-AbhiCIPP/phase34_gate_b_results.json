@@ -1,0 +1,22 @@
+{
+  "shadow": {
+    "d_final": 389.7487195334369,
+    "pc_i_spiked": true,
+    "l1i_i_spiked": false,
+    "pc_other_spiked": false,
+    "l1i_other_spiked": false
+  },
+  "active": {
+    "d_final": 389.7487195334369,
+    "pc_i_spiked": true,
+    "l1i_i_spiked": true,
+    "pc_other_spiked": false,
+    "l1i_other_spiked": false
+  },
+  "requirements": {
+    "shadow_pc_fires_but_has_no_effect": true,
+    "active_pc_fires_and_l1i_reacts_same_step": true,
+    "untrained_column_stays_silent_both_conditions": true
+  },
+  "verdict": "PASS"
+}

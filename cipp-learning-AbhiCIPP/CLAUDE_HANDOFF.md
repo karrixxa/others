@@ -265,6 +265,48 @@
   defensible narrower candidate for a future, separate promotion decision.
   See `Phase31_32_FSCI_ISM_Conditions_AF_And_Leak.md` and the consolidated
   `FSCI_ISM_Final_Report.md`/`FSCI_ISM_Final_Report.json`.
+- **New branch `phase34-active-dendrite-coincidence`** (created from `l2-
+  ownership-recovery`'s pre-Phase-33 commit `ffefd1f`, NOT Phase 33's
+  `a51b4e4` -- that commit remains preserved as its own separate, unpromoted
+  negative experiment). Phase 34: active-dendrite local coincidence
+  prediction -- a new default-OFF `prediction_active_dendrite_enabled` flag
+  that REPLACES the additive PCi somatic-integration path (`pc.receive_
+  input`) entirely: PCi can never fire from feedback or sensory input alone,
+  only from a genuine same-step coincidence of a real sensory arrival AND a
+  real feedback arrival against an already-matured decoder synapse
+  (`d_ji >= 350`, checked BEFORE that step's own learning update -- the
+  CORRECTED contract, overriding an earlier decayed-trace-product
+  formulation before any code was written). Bounded, decaying traces
+  (retention 0.7) drive decoder learning only, never the fire decision.
+  `eta` corrected from an initial 0.01 to **0.15** per Codex preflight's
+  independently-verified reproduction target (closed-form saturating-growth
+  solution lands exactly on ~2946 coincidence events to mature d=50->350 at
+  eta=0.15). Added passive, non-mutating queue-origin telemetry (origin
+  timestep tracking, reactive pattern-switch detection, and a current-
+  correct/stale-but-same-pixel/stale-wrong-pixel suppression
+  classification). Flag-off byte-identical to `ffefd1f`. 35 new tests, full
+  suite 470 passed / 5 pre-existing failures. **Gate A (isolated logic +
+  natural coincidence-rate measurement) PASS**: forced-coincidence
+  transition matches the corrected semantics exactly (crosses at event
+  2946); a REAL, unforced 'row 1' presentation independently confirmed
+  organic maturation at step 4,239 (measured natural coincidence rate
+  0.505/step). **Gate B (shadow vs. active causal chain) PASS** after
+  fixing a test-isolation bug (the engine always holds SOME real pattern
+  from construction; the first version of this gate never silenced it,
+  confounding the measurement with ambient real L2E->L1I broadcast
+  activity -- fixed by zeroing `input_vec`). **Gate C (exploratory
+  two-pattern integration) NEGATIVE, honestly reported**: all 3 seeds
+  organically matured row 1's decoder, but neither expected effect held --
+  row-only pixel activity during 'row 1' INCREASED under prediction (0.500
+  -> 0.698) rather than being suppressed, and column-only pixel activity
+  during 'col 1' also increased sharply (0.500 -> 1.000) rather than
+  staying near baseline. Plausible explanation (unverified, a question for
+  a future phase): selective `prediction_column_to_i_enabled` routing
+  REPLACES L1I's default frequent broadcast-driven regulation for ALL nine
+  columns uniformly, and the sparser coincidence-gated PCi drive suppresses
+  less than what it replaced wherever (as with column 1, never trained) it
+  provides little to no drive at all. See
+  `Phase34_Active_Dendrite_Coincidence_Report.md`.
 - Base branch `july14` is untouched and remains the protected base.
 - `four-pattern` branch exists (checked out in a separate worktree at
   `/home/charisxiong/Documents/others`) and is explicitly NOT merged here —

@@ -1,0 +1,313 @@
+{
+  "per_seed": [
+    {
+      "seed": 1,
+      "responder_j": 0,
+      "pilot_counts": [
+        5346,
+        0,
+        0,
+        2,
+        1771,
+        24,
+        0,
+        0
+      ],
+      "matured_pixels": [
+        3,
+        4,
+        5
+      ],
+      "decoder_organically_matured": true,
+      "off": {
+        "0": {
+          "row 1": 0.0,
+          "col 1": 0.0
+        },
+        "1": {
+          "row 1": 0.0,
+          "col 1": 0.5
+        },
+        "2": {
+          "row 1": 0.0,
+          "col 1": 0.0
+        },
+        "3": {
+          "row 1": 0.5,
+          "col 1": 0.0
+        },
+        "4": {
+          "row 1": 0.5,
+          "col 1": 0.5
+        },
+        "5": {
+          "row 1": 0.5,
+          "col 1": 0.0
+        },
+        "6": {
+          "row 1": 0.0,
+          "col 1": 0.0
+        },
+        "7": {
+          "row 1": 0.0,
+          "col 1": 0.5
+        },
+        "8": {
+          "row 1": 0.0,
+          "col 1": 0.0
+        }
+      },
+      "on": {
+        "0": {
+          "row 1": 0.0,
+          "col 1": 0.0
+        },
+        "1": {
+          "row 1": 0.0,
+          "col 1": 1.0
+        },
+        "2": {
+          "row 1": 0.0,
+          "col 1": 0.0
+        },
+        "3": {
+          "row 1": 0.6974999999999998,
+          "col 1": 0.0
+        },
+        "4": {
+          "row 1": 0.6974999999999998,
+          "col 1": 0.7024999999999999
+        },
+        "5": {
+          "row 1": 0.6974999999999998,
+          "col 1": 0.0
+        },
+        "6": {
+          "row 1": 0.0,
+          "col 1": 0.0
+        },
+        "7": {
+          "row 1": 0.0,
+          "col 1": 1.0
+        },
+        "8": {
+          "row 1": 0.0,
+          "col 1": 0.0
+        }
+      }
+    },
+    {
+      "seed": 2,
+      "responder_j": 0,
+      "pilot_counts": [
+        5354,
+        0,
+        0,
+        23,
+        0,
+        0,
+        0,
+        1766
+      ],
+      "matured_pixels": [
+        3,
+        4,
+        5
+      ],
+      "decoder_organically_matured": true,
+      "off": {
+        "0": {
+          "row 1": 0.0,
+          "col 1": 0.0
+        },
+        "1": {
+          "row 1": 0.0,
+          "col 1": 0.5
+        },
+        "2": {
+          "row 1": 0.0,
+          "col 1": 0.0
+        },
+        "3": {
+          "row 1": 0.5,
+          "col 1": 0.0
+        },
+        "4": {
+          "row 1": 0.5,
+          "col 1": 0.5
+        },
+        "5": {
+          "row 1": 0.5,
+          "col 1": 0.0
+        },
+        "6": {
+          "row 1": 0.0,
+          "col 1": 0.0
+        },
+        "7": {
+          "row 1": 0.0,
+          "col 1": 0.5
+        },
+        "8": {
+          "row 1": 0.0,
+          "col 1": 0.0
+        }
+      },
+      "on": {
+        "0": {
+          "row 1": 0.0,
+          "col 1": 0.0
+        },
+        "1": {
+          "row 1": 0.0,
+          "col 1": 1.0
+        },
+        "2": {
+          "row 1": 0.0,
+          "col 1": 0.0
+        },
+        "3": {
+          "row 1": 0.6974999999999998,
+          "col 1": 0.0
+        },
+        "4": {
+          "row 1": 0.6974999999999998,
+          "col 1": 0.7024999999999999
+        },
+        "5": {
+          "row 1": 0.6974999999999998,
+          "col 1": 0.0
+        },
+        "6": {
+          "row 1": 0.0,
+          "col 1": 0.0
+        },
+        "7": {
+          "row 1": 0.0,
+          "col 1": 1.0
+        },
+        "8": {
+          "row 1": 0.0,
+          "col 1": 0.0
+        }
+      }
+    },
+    {
+      "seed": 3,
+      "responder_j": 5,
+      "pilot_counts": [
+        0,
+        0,
+        0,
+        31,
+        0,
+        5316,
+        0,
+        1790
+      ],
+      "matured_pixels": [
+        3,
+        4,
+        5
+      ],
+      "decoder_organically_matured": true,
+      "off": {
+        "0": {
+          "row 1": 0.0,
+          "col 1": 0.0
+        },
+        "1": {
+          "row 1": 0.0,
+          "col 1": 0.5
+        },
+        "2": {
+          "row 1": 0.0,
+          "col 1": 0.0
+        },
+        "3": {
+          "row 1": 0.5,
+          "col 1": 0.0
+        },
+        "4": {
+          "row 1": 0.5,
+          "col 1": 0.5
+        },
+        "5": {
+          "row 1": 0.5,
+          "col 1": 0.0
+        },
+        "6": {
+          "row 1": 0.0,
+          "col 1": 0.0
+        },
+        "7": {
+          "row 1": 0.0,
+          "col 1": 0.5
+        },
+        "8": {
+          "row 1": 0.0,
+          "col 1": 0.0
+        }
+      },
+      "on": {
+        "0": {
+          "row 1": 0.0,
+          "col 1": 0.0
+        },
+        "1": {
+          "row 1": 0.0,
+          "col 1": 1.0
+        },
+        "2": {
+          "row 1": 0.0,
+          "col 1": 0.0
+        },
+        "3": {
+          "row 1": 0.6974999999999998,
+          "col 1": 0.0
+        },
+        "4": {
+          "row 1": 0.6974999999999998,
+          "col 1": 0.7024999999999999
+        },
+        "5": {
+          "row 1": 0.6974999999999998,
+          "col 1": 0.0
+        },
+        "6": {
+          "row 1": 0.0,
+          "col 1": 0.0
+        },
+        "7": {
+          "row 1": 0.0,
+          "col 1": 1.0
+        },
+        "8": {
+          "row 1": 0.0,
+          "col 1": 0.0
+        }
+      }
+    }
+  ],
+  "summary": {
+    "row_only_pixels": [
+      3,
+      5
+    ],
+    "col_only_pixels": [
+      1,
+      7
+    ],
+    "center": 4,
+    "all_seeds_organically_matured": true,
+    "row_only_activity_during_row1_off": 0.5,
+    "row_only_activity_during_row1_on": 0.6974999999999998,
+    "col_only_activity_during_col1_off": 0.5,
+    "col_only_activity_during_col1_on": 1.0
+  },
+  "observation": {
+    "row_pixels_show_suppression_trend": false,
+    "col_pixels_remain_largely_unaffected": false
+  },
+  "note": "EXPLORATORY measurement only -- not a claim that prediction solves four-pattern ownership. Decoder maturity for row 1's responder was trained ORGANICALLY (real, unforced coincidences over 9000 real steps), not assigned directly."
+}

@@ -971,6 +971,61 @@ class SimulationEngine:
                  # any evidence favoring an asymmetric choice.
                  prediction_subthreshold_z_tau: float = 3.0,
                  prediction_subthreshold_u_tau: float = 3.0,
+                 # Phase 34: active-dendrite local coincidence prediction.
+                 # REPLACES the additive somatic integration (pc.receive_input)
+                 # entirely when on -- PCi never fires from either afferent
+                 # alone. Two SEPARATE pieces, per the corrected contract
+                 # (see _active_dendrite_event / _apply_active_dendrite_
+                 # decoder_learning for the full rationale):
+                 #
+                 # 1. LEARNING traces (bounded, decaying, used for decoder
+                 #    learning ONLY -- never for the fire decision):
+                 #        z_j^R <- min(1, retention*z_j^R + feedback_arrival_j)
+                 #        u_i^S <- min(1, retention*u_i^S + sensory_arrival_i)
+                 #    feeding delta_d_ji = eta_ad * z_j^R * u_i^S *
+                 #    (1 - d_ji/d_max)^2 -- same saturating, positive-only,
+                 #    two-gate structure as _apply_subthreshold_decoder_learning.
+                 # 2. The PHYSICAL DENDRITIC SPIKE (CORRECTION TO PHASE 34
+                 #    CONTRACT, overriding the original u*z>=0.7 decayed-trace
+                 #    product condition): fires ONLY on a genuine CURRENT-STEP
+                 #    coincidence -- sensory_arrival_i(t)==1 AND
+                 #    feedback_arrival_j(t)==1 for some j (the raw, undecayed
+                 #    delivery vectors, never the traces above) AND d_ji,
+                 #    evaluated BEFORE this step's own learning update,
+                 #    >= prediction_active_dendrite_coincidence_weight. This
+                 #    makes ONE engine timestep the exact preregistered
+                 #    coincidence window and prevents repeated isolated inputs
+                 #    from becoming an OR-over-time. Multiple qualifying
+                 #    sources still produce exactly one bounded injection of
+                 #    magnitude prediction_threshold -- never additive across
+                 #    sources or across the soma. Default OFF preserves the
+                 #    existing (subthreshold-decoder or spike-gated) PC path
+                 #    exactly. Mutually exclusive with
+                 #    prediction_subthreshold_decoder_enabled (raises at
+                 #    build time if both are on).
+                 prediction_active_dendrite_enabled: bool = False,
+                 # CORRECTED (Codex preflight reproduction target, verified
+                 # independently against the saturating-growth closed form
+                 # dw/dt = eta*(1-w/w_max)^2 -- solving for w0=50, w_max=1200,
+                 # target d=350 gives t = 2946 events at eta=0.15 EXACTLY,
+                 # matching the required reproduction target of "approximately
+                 # 2946 coincidence events"). Reuses the SAME value as the
+                 # existing spike-gated prediction_learning_rate rather than
+                 # introducing a new untested constant -- was previously (and
+                 # wrongly) set to 0.01 by analogy to the subthreshold
+                 # decoder rate before this correction.
+                 prediction_active_dendrite_learning_rate: float = 0.15,
+                 # PREREGISTERED trace retention per step (0.7 = 1 - prediction_
+                 # leak's default 0.3), applied as a flat per-step retention
+                 # (trace <- retention*trace + arrival, then clipped to
+                 # [0, 1]) rather than the tau-derived exp(-1/tau) decay the
+                 # other PC traces use -- exactly as specified in the
+                 # correction, not re-derived.
+                 prediction_active_dendrite_trace_retention: float = 0.7,
+                 # PREREGISTERED decoder-maturity threshold (d_ji, evaluated
+                 # before this step's learning update) a feedback synapse must
+                 # clear for its source to count toward a dendritic spike.
+                 prediction_active_dendrite_coincidence_weight: float = 350.0,
                  # Capacity rule for the minimal experiment (see the prompt's
                  # "Threshold, Cap, Floor" section). l2e_weight_cap_frac sets each
                  # L2E positive feedforward weight cap to frac*thr_l2, so three
@@ -1135,6 +1190,10 @@ class SimulationEngine:
                            prediction_subthreshold_learning_rate=prediction_subthreshold_learning_rate,
                            prediction_subthreshold_z_tau=prediction_subthreshold_z_tau,
                            prediction_subthreshold_u_tau=prediction_subthreshold_u_tau,
+                           prediction_active_dendrite_enabled=prediction_active_dendrite_enabled,
+                           prediction_active_dendrite_learning_rate=prediction_active_dendrite_learning_rate,
+                           prediction_active_dendrite_trace_retention=prediction_active_dendrite_trace_retention,
+                           prediction_active_dendrite_coincidence_weight=prediction_active_dendrite_coincidence_weight,
                            l2e_weight_cap_frac=l2e_weight_cap_frac,
                            pos_weight_floor=pos_weight_floor,
                            l2e_init_mode=l2e_init_mode,
@@ -1295,6 +1354,17 @@ class SimulationEngine:
                 "and prediction_column_enabled (Phase 19-v2 local-coincidence "
                 "architecture) are mutually exclusive experimental prediction "
                 "mechanisms -- enable only one at a time.")
+        # Phase 34: the active-dendrite coincidence mechanism REPLACES the
+        # Phase 30 subthreshold decoder's own somatic-integration path
+        # entirely (see prediction_active_dendrite_enabled's docstring) --
+        # never both at once.
+        if p['prediction_active_dendrite_enabled'] and p['prediction_subthreshold_decoder_enabled']:
+            raise ValueError(
+                "prediction_active_dendrite_enabled (Phase 34 active-dendrite "
+                "coincidence) and prediction_subthreshold_decoder_enabled "
+                "(Phase 30 subthreshold decoder) are mutually exclusive -- "
+                "the former replaces the latter's somatic-integration path "
+                "entirely. Enable only one at a time.")
         self._build_prediction_column_population(p, thr_l1)
 
         # L2E leak is independently switchable from the shared L2I neuron's fast
@@ -1678,6 +1748,15 @@ class SimulationEngine:
         self.l2_inhibition_frac = self.params['l2_inhibition_frac']
         self.l2_inhibition_magnitude = self.l2_inhibition_frac * self.params['threshold_l2']
         self.current_pattern = initial_pattern    # name backing self.input_vec
+        # Passive queue-origin telemetry (Codex preflight request): tracks the
+        # most recent step at which self.input_vec actually changed value,
+        # detected reactively at the top of step() by comparing against a
+        # snapshot -- covers every mutation path (set_pattern, auto-cycle,
+        # probes, set_input, toggle_pixel) uniformly, without hooking each
+        # call site individually. Read-only bookkeeping: never influences
+        # scheduling, delivery, potentials, weights, or RNG.
+        self._last_pattern_switch_t = 0
+        self._prev_input_vec_snapshot = self.input_vec.copy()
         self.auto_cycle = False
         self.visit_steps = max(1, self.params['cycle_period'])   # steps per pattern visit
         self.trained_streak = 3                   # consecutive same-winner ROUNDS = trained
@@ -1803,6 +1882,21 @@ class SimulationEngine:
             np.zeros(N_OUT) for _ in range(self.prediction_feedback_delay))
         self.s_to_pcol_queue = deque(
             np.zeros(N_PIX) for _ in range(self.prediction_feedback_delay))
+        # Passive queue-origin telemetry (Codex preflight request): parallel
+        # deques of the SAME length, tracking the originating outer timestep
+        # of each queued delivery vector (-1 for the pre-fill placeholders,
+        # which never carry a real spike anyway). Popped/pushed in lockstep
+        # with the real vectors in step() -- read-only, never consulted by
+        # any scheduling/delivery/learning decision, only by the telemetry
+        # below.
+        self._pcol_feedback_origin_t = deque(-1 for _ in range(self.prediction_feedback_delay))
+        self._pcol_sensory_origin_t = deque(-1 for _ in range(self.prediction_feedback_delay))
+        # Sparse log (appended ONLY on an actual dendritic-spike event) and a
+        # dense, overwritten-every-step probe (all N_PIX columns, whether or
+        # not a spike occurred) -- see _active_dendrite_event's caller in
+        # step() for how these fields are computed.
+        self.active_dendrite_event_log: list = []
+        self._active_dendrite_last_probe: dict = {}
 
         # FSCI/ISM Phase 30: local subthreshold coincidence decoder (see
         # Phase18b_Lecture14_Local_Coincidence_Architecture_Contract.md's
@@ -1817,6 +1911,20 @@ class SimulationEngine:
         self.prediction_subthreshold_u_decay = float(np.exp(-1.0 / max(1e-6, float(p['prediction_subthreshold_u_tau']))))
         self._pcol_z_R = np.zeros(N_OUT)     # presynaptic trace of REAL L2Ej spikes
         self._pcol_u_S = np.zeros(N_PIX)     # per-PCi local sensory eligibility trace
+
+        # Phase 34: active-dendrite local coincidence prediction (see
+        # prediction_active_dendrite_enabled's constructor docstring for the
+        # full, CORRECTED contract). Separate bounded traces from Phase 30's
+        # z_R/u_S -- different retention (flat, not tau-derived) and an
+        # explicit [0, 1] clip -- allocated unconditionally whenever PC
+        # exists (cheap); only ever advanced/consulted in step() when
+        # prediction_active_dendrite_enabled is on.
+        self.prediction_active_dendrite_enabled = bool(p['prediction_active_dendrite_enabled'])
+        self.prediction_active_dendrite_learning_rate = float(p['prediction_active_dendrite_learning_rate'])
+        self.prediction_active_dendrite_trace_retention = float(p['prediction_active_dendrite_trace_retention'])
+        self.prediction_active_dendrite_coincidence_weight = float(p['prediction_active_dendrite_coincidence_weight'])
+        self._pcol_ad_z = np.zeros(N_OUT)    # bounded presynaptic trace of REAL L2Ej spikes (learning only)
+        self._pcol_ad_u = np.zeros(N_PIX)    # bounded per-PCi sensory eligibility trace (learning only)
 
     def _apply_subthreshold_decoder_learning(self, pc, i):
         """FSCI/ISM Phase 30 EXPERIMENTAL CANDIDATE decoder rule (see the
@@ -1853,6 +1961,72 @@ class SimulationEngine:
         envelope = (1.0 - w[active] / w_max) ** 2
         growth = self.prediction_subthreshold_learning_rate * z[active] * u * envelope
         w[active] = np.clip(w[active] + growth, 0.0, w_max)
+
+    def _apply_active_dendrite_decoder_learning(self, pc, i):
+        """Phase 34 decoder-learning rule -- runs EVERY step, for PCi at
+        index i, using ONLY the bounded, decaying traces _pcol_ad_z/
+        _pcol_ad_u (updated in step() from this step's raw feedback/sensory
+        arrival vectors -- see prediction_active_dendrite_enabled's
+        docstring). Structurally identical to _apply_subthreshold_decoder_
+        learning (same two gates, same saturating positive-only envelope);
+        the only differences are the trace source (bounded flat-retention
+        traces, not tau-derived exp decay) and the learning rate. These
+        traces are NEVER read by _active_dendrite_event -- the physical
+        dendritic-spike decision is a separate, stricter, same-step-only
+        condition (see that method).
+
+            delta_d_ji = eta_ad * z_j^R * u_i^S * (1 - d_ji/d_max)^2
+
+        `u_i^S <= 0` skips the whole update for every j. Among the eight
+        feedback indices, only those with z_j^R > 0 move. Monotonic,
+        saturating, POSITIVE-ONLY growth, bounded to
+        [0, prediction_feedback_max]. Reads only this PCi's own trace
+        entries and its own weights -- no pattern name, no owner table, no
+        cross-neuron comparison."""
+        u = self._pcol_ad_u[i]
+        if u <= 0.0:
+            return   # no paired sensory eligibility -- no update at all, any j
+        z = self._pcol_ad_z
+        active = z > 0.0
+        if not active.any():
+            return   # no R_j trace active -- no update
+        w = pc._weights_array[:N_OUT]
+        w_max = self.prediction_feedback_max
+        envelope = (1.0 - w[active] / w_max) ** 2
+        growth = self.prediction_active_dendrite_learning_rate * z[active] * u * envelope
+        w[active] = np.clip(w[active] + growth, 0.0, w_max)
+
+    def _active_dendrite_event(self, i, sensory_arrival_i, feedback_arrival_vec, d_before):
+        """CORRECTION TO PHASE 34 CONTRACT (verbatim, overrides the original
+        active-dendrite event condition, which gated firing on the decayed
+        trace product u_i^S * z_j^R >= 0.7): a physical dendritic spike now
+        requires CURRENT-STEP delivered events ONLY --
+
+            sensory_arrival_i(t) == 1
+            feedback_arrival_j(t) == 1     (for at least one source j)
+            d_ji_before_learning >= prediction_active_dendrite_coincidence_weight
+
+        `d_before` must be captured by the caller BEFORE this step's own
+        call to _apply_active_dendrite_decoder_learning -- "evaluate
+        dendritic firing using d_ji before this step's learning update. If
+        the current event raises d_ji across 350, the next coincident event
+        may fire." This method deliberately reads the RAW this-step arrival
+        values (sensory_arrival_i, feedback_arrival_vec = lat_vec_pcol[i],
+        dec_vec_pcol -- the already-delayed real spike vectors popped in
+        step(), never the decayed _pcol_ad_z/_pcol_ad_u traces): "do not
+        permit residual traces alone to generate the dendritic spike." This
+        makes ONE engine timestep the exact preregistered coincidence
+        window and prevents repeated isolated inputs from becoming an
+        OR-over-time. Multiple qualifying sources still only ever produce
+        one bounded injection (see step()) -- never additive across
+        sources. Sensory-alone or feedback-alone (whole vector zero) always
+        returns False, regardless of any trace or weight state."""
+        if sensory_arrival_i <= 0.5:
+            return False
+        active_j = feedback_arrival_vec > 0.5
+        if not active_j.any():
+            return False
+        return bool((active_j & (d_before >= self.prediction_active_dendrite_coincidence_weight)).any())
 
     def _apply_prediction_column_learning(self, pc):
         """Phase 19-v2 decoder-learning event -- runs ONLY on PCi's own
@@ -2690,6 +2864,15 @@ class SimulationEngine:
         #    spike timing and event ordering are unchanged.
         input_arrives = (t % self.params['input_period'] == 0)
         cycle_boundary = (t % self.params['cycle_period'] == 0)
+        # Passive queue-origin telemetry (Codex preflight request): detect an
+        # input switch reactively by comparing against last step's snapshot
+        # -- covers every mutation path (set_pattern, auto-cycle, probes,
+        # set_input, toggle_pixel) uniformly without hooking each call site.
+        # Read-only: never influences scheduling, delivery, potentials,
+        # weights, or RNG.
+        if not np.array_equal(self.input_vec, self._prev_input_vec_snapshot):
+            self._last_pattern_switch_t = t
+            self._prev_input_vec_snapshot = self.input_vec.copy()
         self._inh_events = []
         self._reset_events = []
         # Phase 7: apply any delayed L2I->L2E delivery scheduled on a previous
@@ -2783,6 +2966,8 @@ class SimulationEngine:
         if self.prediction_column_enabled:
             dec_vec_pcol = self.l2e_to_pcol_queue.popleft()
             lat_vec_pcol = self.s_to_pcol_queue.popleft()
+            feedback_origin_t = self._pcol_feedback_origin_t.popleft()
+            sensory_origin_t = self._pcol_sensory_origin_t.popleft()
             if self.prediction_subthreshold_decoder_enabled:
                 # FSCI/ISM Phase 30: short presynaptic/eligibility traces,
                 # built from the SAME already-delayed real event vectors the
@@ -2793,22 +2978,79 @@ class SimulationEngine:
                 # timing violation is introduced.
                 self._pcol_z_R = self._pcol_z_R * self.prediction_subthreshold_z_decay + dec_vec_pcol
                 self._pcol_u_S = self._pcol_u_S * self.prediction_subthreshold_u_decay + lat_vec_pcol
-            for i, pc in enumerate(self.pcol):
-                combined = np.concatenate([dec_vec_pcol, [lat_vec_pcol[i]]])
-                pc.receive_input(combined, t=t)
-            if self.prediction_subthreshold_decoder_enabled and not self.plasticity_frozen:
-                # Runs EVERY step, for EVERY PCi, regardless of whether PCi
-                # itself physically spikes this step -- the explicit fix for
-                # the existing rule's cold-start plateau (Phase 19's
-                # report). Firing itself and the PCi->Ii inhibition path
-                # (below, gated on pcol_spiked) are completely untouched.
+            elif self.prediction_active_dendrite_enabled:
+                # Phase 34 (CORRECTED contract): bounded, decaying traces --
+                # used ONLY by _apply_active_dendrite_decoder_learning below,
+                # NEVER by the dendritic-fire decision (which reads
+                # dec_vec_pcol/lat_vec_pcol directly -- see
+                # _active_dendrite_event).
+                retention = self.prediction_active_dendrite_trace_retention
+                self._pcol_ad_z = np.minimum(1.0, self._pcol_ad_z * retention + dec_vec_pcol)
+                self._pcol_ad_u = np.minimum(1.0, self._pcol_ad_u * retention + lat_vec_pcol)
+
+            if self.prediction_active_dendrite_enabled:
+                # Phase 34 (CORRECTED contract): NEVER additive at the soma
+                # -- pc.receive_input() is deliberately not called at all in
+                # this mode. For each PCi: capture d_ji BEFORE this event's
+                # own learning update, evaluate the strict same-step
+                # coincidence condition against that pre-update value, apply
+                # the (separate, trace-based) decoder learning, then -- only
+                # if the coincidence condition held -- inject a single
+                # bounded charge of magnitude prediction_threshold directly
+                # into the membrane (bypassing receive_input's per-synapse
+                # weighting entirely).
                 for i, pc in enumerate(self.pcol):
-                    self._apply_subthreshold_decoder_learning(pc, i)
+                    d_before = pc._weights_array[:N_OUT].copy()
+                    fires = self._active_dendrite_event(i, lat_vec_pcol[i], dec_vec_pcol, d_before)
+                    if not self.plasticity_frozen:
+                        self._apply_active_dendrite_decoder_learning(pc, i)
+                    if fires and pc.refractory_timer <= 0:
+                        pc.potential = pc.potential + self.prediction_threshold
+                    # Passive queue-origin telemetry (Codex preflight request):
+                    # observational only -- computed from state already
+                    # captured above (feedback_origin_t/sensory_origin_t,
+                    # popped in lockstep with the real delivery vectors),
+                    # never fed back into fires/d_before/potential/weights.
+                    used_stale = (feedback_origin_t < self._last_pattern_switch_t
+                                  or sensory_origin_t < self._last_pattern_switch_t)
+                    target_active_now = bool(self.input_vec[i] > 0.5)
+                    if not used_stale:
+                        classification = 'current-correct'
+                    elif target_active_now:
+                        classification = 'stale-but-same-pixel'
+                    else:
+                        classification = 'stale-wrong-pixel'
+                    probe = dict(
+                        step=t, pc_i=i, fired=bool(fires),
+                        feedback_origin_t=int(feedback_origin_t),
+                        sensory_origin_t=int(sensory_origin_t),
+                        last_pattern_switch_t=int(self._last_pattern_switch_t),
+                        used_stale_queue_data=bool(used_stale),
+                        target_currently_active=target_active_now,
+                        suppression_classification=classification)
+                    self._active_dendrite_last_probe[i] = probe
+                    if fires:
+                        self.active_dendrite_event_log.append(probe)
+            else:
+                for i, pc in enumerate(self.pcol):
+                    combined = np.concatenate([dec_vec_pcol, [lat_vec_pcol[i]]])
+                    pc.receive_input(combined, t=t)
+                if self.prediction_subthreshold_decoder_enabled and not self.plasticity_frozen:
+                    # Runs EVERY step, for EVERY PCi, regardless of whether PCi
+                    # itself physically spikes this step -- the explicit fix for
+                    # the existing rule's cold-start plateau (Phase 19's
+                    # report). Firing itself and the PCi->Ii inhibition path
+                    # (below, gated on pcol_spiked) are completely untouched.
+                    for i, pc in enumerate(self.pcol):
+                        self._apply_subthreshold_decoder_learning(pc, i)
+
             for i, pc in enumerate(self.pcol):
                 if pc.check_threshold():
                     pc.fire()
                     pcol_spiked[i] = 1.0
-                    if not self.plasticity_frozen and not self.prediction_subthreshold_decoder_enabled:
+                    if (not self.plasticity_frozen
+                            and not self.prediction_subthreshold_decoder_enabled
+                            and not self.prediction_active_dendrite_enabled):
                         self._apply_prediction_column_learning(pc)
 
         # 2b/2c. Deliver L1E->L2E feedforward charge and resolve L2 competition.
@@ -2931,6 +3173,8 @@ class SimulationEngine:
         if self.prediction_column_enabled:
             self.l2e_to_pcol_queue.append(l2e.copy())
             self.s_to_pcol_queue.append(l1e.copy())
+            self._pcol_feedback_origin_t.append(t)
+            self._pcol_sensory_origin_t.append(t)
 
         # 2d. Deliver L2E winner spike immediately to all L1I neurons (feedback).
         #     l2e is length N_OUT with a 1 at the winner index, matching each
