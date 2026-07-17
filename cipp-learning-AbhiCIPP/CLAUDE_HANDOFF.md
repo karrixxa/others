@@ -233,6 +233,38 @@
   prediction-loop phase per the plan's own structure (encoder was never
   meant to solve ownership alone), reported honestly rather than
   oversold. See `Phase29_Centered_Encoder_Ownership_Gate.md`.
+- Phase 30 (FSCI/ISM): promoted Phase 29's centered encoder and a NEW local
+  subthreshold coincidence decoder (`R_j->PCi` traces `z_j^R`/`u_i^S`,
+  `delta_d_ji = eta_sub*z_j^R*u_i^S*(1-d/d_max)^2`, applied every step
+  regardless of PCi's own spike -- the cold-start fix) into two real,
+  default-OFF `SimulationEngine` flags (`centered_encoder_enabled`,
+  `prediction_subthreshold_decoder_enabled`), both byte-identical when off.
+  16 new tests. Full suite 438 passed / 5 pre-existing failures.
+- Phase 31/32 (FSCI/ISM): full A-F condition grid (30 seeds x 2 pattern
+  permutations x continuous-switching interleaved schedule, 360 runs) plus
+  a dedicated leak-isolation 2x2 (120 runs). FOUND AND FIXED a real bug:
+  `copy.deepcopy` doesn't duplicate closures, so the decoder-functional-
+  check's naive probe was silently stepping the ORIGINAL CausalTracer-
+  instrumented engine instead of an independent copy -- fixed with
+  `_unpatched_deepcopy` + an explicit membrane/queue reset (this eliminated
+  a false "reconstructed from feedback alone" positive). KEY FINDINGS:
+  leak is necessary (without it, ~100% PC spike rate, ~26-27% carryover,
+  pathological runaway) but not sufficient (leak-on carryover ~2.9%,
+  statistically unchanged from Phase 19's documented ~2.92%); active
+  prediction never destroys ownership relative to the encoder-only
+  condition in either pattern permutation, but no condition reaches four
+  stable owners (best: standard/F 3.13/4); decoder maturation (feedback-
+  alone firing) is 0% in every condition within this grid's 15-cycle
+  window (an honest negative -- longer-timescale maturation, matching
+  Phase 19/20's original 10,000+-step scale, remains untested). **OVERALL
+  FSCI/ISM VERDICT: PARTIAL -- the full active circuit (conditions E/F) is
+  NOT promoted** (the hardest success-gate bars -- four stable owners,
+  material carryover improvement, realistic decoder maturation -- are not
+  met); the centered encoder alone (condition B) has strong, reproducible,
+  mechanism-confirming support across two independent grids and remains a
+  defensible narrower candidate for a future, separate promotion decision.
+  See `Phase31_32_FSCI_ISM_Conditions_AF_And_Leak.md` and the consolidated
+  `FSCI_ISM_Final_Report.md`/`FSCI_ISM_Final_Report.json`.
 - Base branch `july14` is untouched and remains the protected base.
 - `four-pattern` branch exists (checked out in a separate worktree at
   `/home/charisxiong/Documents/others`) and is explicitly NOT merged here —
