@@ -2549,3 +2549,23 @@ go-ahead (compiled across Phases 7-12, still open at this checkpoint):
   power-law configs instead of the current shared one.
 - Whether `same_step_tie`-style ambiguity tracking should extend beyond just
   the presentation's first response (see Known problems).
+
+## Phase 35 Gate A/B checkpoint (Codex 1)
+
+- Branch: `phase35-dendrite-classes-codex1`, based exactly on
+  `4764f1758a7399439df2242dfa60819501fc2333`.
+- Added explicit BASAL/APICAL `DendriteCompartment` objects, explicit
+  compartment-targeted connections, and a `CoincidencePyramidalCell` that
+  composes those compartments with an ordinary `Neuron` soma.
+- Replaced only the opt-in prediction-column integration path. Physical basal
+  and apical delivery must occur in the same engine timestep; compartment event
+  state clears at timestep end and at presentation switches.
+- Only delivered apical decoder connections are plastic, gated by current-step
+  basal delivery. The firing decision precedes learning and uses
+  `d_before_learning`. The existing selective `PC_i -> L1I_i -> L1E_i` route is
+  retained.
+- Exact external checkpoint scripts: `test_phase35_gate_a.py` and
+  `test_phase35_gate_b.py` in the Phase 35 artifact directory. Results: Gate A
+  6/6 pass; Gate B 5/5 pass. Integrated Gate C was not run.
+- Default-off golden result remains the Phase 29 baseline condition: the same
+  five pre-existing numeric drifts out of 100 arrays.

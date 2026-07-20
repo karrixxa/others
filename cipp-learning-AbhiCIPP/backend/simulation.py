@@ -44,7 +44,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from layers import InputLayer                       # noqa: E402
 from cortical_column_flexible import CorticalColumn  # noqa: E402
 from neuron_flexible import UNIT, LEAK_SCALE, Neuron  # noqa: E402  fixed-point convention
-from snn import NeuronConfig                          # noqa: E402  engine-sourced neuron config
+from snn import CoincidencePyramidalCell, NeuronConfig  # noqa: E402
 
 
 PATTERNS = {
@@ -1671,23 +1671,13 @@ class SimulationEngine:
                              f'{len(self.neurons)} neurons, {len(self.synapses)} synapses)')
 
     def _build_prediction_column_population(self, p, thr_l1):
-        """Phase 19-v2 (LPS Lecture 14 LOCAL-COINCIDENCE prediction
-        architecture): nine "PC0".."PC8" neurons, one per input column i.
-        Each PCi has nine total afferents:
+        """Build nine two-compartment coincidence pyramidal cells.
 
-            index 0..7: LEARNED R_j->PCi feedback weight (one per L2Ej),
-                        init prediction_feedback_init, capped at
-                        prediction_feedback_max.
-            index 8:    FIXED S_i->PCi lateral-coincidence weight (never
-                        learned), value prediction_lateral_weight -- the
-                        "lime" connection in the annotated diagram, present
-                        ONLY for PCi's OWN paired column i (S_j->PCi for
-                        j != i does not exist at all).
-
-        A no-op (self.pcol = []) when prediction_column_enabled is off, so
-        every existing caller/test is byte-identical in that case. See
-        step() for the delivery/learning event and _apply_prediction_column_
-        learning for the delta rule."""
+        L1Ei explicitly targets PCi's fixed BASAL compartment.  Every L2Ej
+        explicitly targets every PCi's plastic APICAL compartment through
+        decoder d[j,i].  Their ordinary neuron soma receives charge only after
+        same-delivery-step coincidence.  The default-off path builds nothing.
+        """
         self.prediction_column_enabled = bool(p['prediction_column_enabled'])
         self.prediction_lateral_weight = float(p['prediction_lateral_weight'])
         self.prediction_feedback_init = float(p['prediction_feedback_init'])
@@ -1705,12 +1695,17 @@ class SimulationEngine:
         self.pcol: list = []
         if self.prediction_column_enabled:
             for _i in range(N_PIX):
-                pc = Neuron(n_inputs=N_OUT + 1, threshold=self.prediction_threshold,
+                soma = Neuron(n_inputs=1, threshold=self.prediction_threshold,
                            refractory_period=p['refractory'], learning_rate=0.0,
                            weight_cap=self.prediction_feedback_max,
                            leak_rate=self.prediction_leak)
-                pc._weights_array = np.full(N_OUT + 1, self.prediction_feedback_init)
-                pc._weights_array[N_OUT] = self.prediction_lateral_weight   # fixed lateral, index 8
+                soma._weights_array = np.array([1.0])
+                pc = CoincidencePyramidalCell(
+                    soma=soma, basal_source=f'L1E{_i}',
+                    apical_sources=[f'L2E{j}' for j in range(N_OUT)],
+                    basal_weight=self.prediction_lateral_weight,
+                    apical_weights=[self.prediction_feedback_init] * N_OUT,
+                    coincidence_threshold=self.prediction_threshold)
                 self.pcol.append(pc)
         # Delayed FIFO queues carrying the queued R_j->PCi feedback AND
         # S_i->PCi lateral delivery vectors TOGETHER -- same one-step-
@@ -1732,46 +1727,21 @@ class SimulationEngine:
             np.zeros(N_PIX) for _ in range(self.prediction_feedback_delay))
 
     def _apply_prediction_column_learning(self, pc):
-        """Phase 19-v2 decoder-learning event -- runs ONLY on PCi's own
-        physical spike (called from step() immediately after pc.fire()).
-        EXPERIMENTAL CANDIDATE, not a Lecture 14 equation (see
-        Phase18b_Lecture14_Local_Coincidence_Architecture_Contract.md):
+        """Update only physically delivered apical decoder connections.
 
-            delta_w[j] = eta_prediction * (1 - w[j]/w_max)^2   (eligible j only)
-
-        Two SEPARATE gates, per the corrected design (physical firing and
-        learning are not the same event):
-
-        1. S_i ELIGIBILITY GATE (whole-neuron, checked first): learning
-           requires THIS delivery's own lateral component (index N_OUT, the
-           S_i->PCi term popped from s_to_pcol_queue -- see step()) to have
-           been active. No recent S_i eligibility means NO decoder update
-           at all this event, for ANY R_j index -- even if PCi physically
-           fired from mature feedback alone. This is what keeps "mature
-           feedback-only PCi firing" (the eventual input-free reconstruction
-           capability) from ALSO being treated as evidence that pixel i was
-           truly present -- firing and teaching are deliberately decoupled.
-        2. Per-synapse ELIGIBILITY (R_j credit): among the eight feedback
-           indices, only those whose queued delivery this event actually
-           carried a 1 (read off pc's own _last_input_spikes, set by
-           receive_input earlier this same call -- no separate bookkeeping)
-           grow.
-
-        Monotonic, saturating, POSITIVE-ONLY growth -- this rule never
-        depresses a synapse. The fixed lateral index (N_OUT) is never
-        touched by any learning rule. Reads ONLY this neuron's own
-        _last_input_spikes and its own _weights_array -- no pattern name, no
-        owner table, no argmax, no cross-neuron comparison, no rival state,
-        no software target."""
-        if not (pc._last_input_spikes[N_OUT] > 0.5):
-            return   # no recent S_i eligibility this event -- no update at all
-        eligible = pc._last_input_spikes[:N_OUT] > 0.5
-        if not eligible.any():
+        A same-step basal event gates learning.  No trace, label, ownership,
+        rival, or nonlocal state participates.  The firing decision is resolved
+        before this method, so it always uses d_before_learning.
+        """
+        if not (pc.basal.active and pc.apical.active):
             return
-        w = pc._weights_array[:N_OUT]
         w_max = self.prediction_feedback_max
-        growth = self.prediction_learning_rate * (1.0 - w[eligible] / w_max) ** 2
-        w[eligible] = np.clip(w[eligible] + growth, 0.0, w_max)
+        for connection in pc.apical_connections:
+            if not any(event.source == connection.source and event.signal > 0.0
+                       for event in pc.apical.deliveries):
+                continue
+            growth = self.prediction_learning_rate * (1.0 - connection.weight / w_max) ** 2
+            connection.weight = float(np.clip(connection.weight + growth, 0.0, w_max))
 
     def _compute_geometry(self):
         """Returns (l1e_xy, l1i_xy, l2e_xy), each an (n,2) array of (x,y) --
@@ -1879,10 +1849,12 @@ class SimulationEngine:
             for j in range(N_OUT):
                 for i in range(N_PIX):
                     self.synapses.append(dict(id=f'colfb{j}->{i}', source=f'L2E{j}',
-                                              target=f'PC{i}', kind='col_feedback'))
+                                              target=f'PC{i}', target_compartment='apical',
+                                              kind='col_feedback'))
             for i in range(N_PIX):
                 self.synapses.append(dict(id=f'lat{i}', source=f'L1E{i}',
-                                          target=f'PC{i}', kind='col_lateral'))
+                                          target=f'PC{i}', target_compartment='basal',
+                                          kind='col_lateral'))
 
     def _apply_l2e_distances(self):
         """Populate each L2E's per-afferent DELIVERY distance: euclidean(L2E_home,
@@ -2655,14 +2627,16 @@ class SimulationEngine:
             dec_vec_pcol = self.l2e_to_pcol_queue.popleft()
             lat_vec_pcol = self.s_to_pcol_queue.popleft()
             for i, pc in enumerate(self.pcol):
-                combined = np.concatenate([dec_vec_pcol, [lat_vec_pcol[i]]])
-                pc.receive_input(combined, t=t)
+                pc.deliver_basal(lat_vec_pcol[i], t)
+                for j in range(N_OUT):
+                    pc.deliver_apical(j, dec_vec_pcol[j], t)
             for i, pc in enumerate(self.pcol):
-                if pc.check_threshold():
+                should_fire = pc.resolve_coincidence(t)
+                if not self.plasticity_frozen:
+                    self._apply_prediction_column_learning(pc)
+                if should_fire:
                     pc.fire()
                     pcol_spiked[i] = 1.0
-                    if not self.plasticity_frozen:
-                        self._apply_prediction_column_learning(pc)
 
         # 2b/2c. Deliver L1E->L2E feedforward charge and resolve L2 competition.
         #     PHASE 7: every L2E that crosses threshold this step FIRES (no
@@ -2963,6 +2937,15 @@ class SimulationEngine:
           later L2E spike order    -> later_responses ([(t, nid), ...])
           latency to second        -> latency_to_second_response
         """
+        # A delayed event belongs to the presentation that scheduled it.  Never
+        # let a queued basal/apical pair cross a pattern or probe boundary.
+        if self.prediction_column_enabled and hasattr(self, 'l2e_to_pcol_queue'):
+            self.l2e_to_pcol_queue = deque(
+                np.zeros(N_OUT) for _ in range(self.prediction_feedback_delay))
+            self.s_to_pcol_queue = deque(
+                np.zeros(N_PIX) for _ in range(self.prediction_feedback_delay))
+            for pc in self.pcol:
+                pc.clear_compartments()
         if self.presentation_id > 0:
             self.presentation_log.append(dict(
                 id=self.presentation_id, pattern=self.presentation_pattern,
@@ -3205,10 +3188,10 @@ class SimulationEngine:
         # constant value at build time).
         if self.prediction_column_enabled:
             for i in range(N_PIX):
-                pcw = self.pcol[i]._weights_array
+                pcw = self.pcol[i].decoder_weights
                 for j in range(N_OUT):
                     w[f'colfb{j}->{i}'] = float(pcw[j])
-                w[f'lat{i}'] = float(pcw[N_OUT])
+                w[f'lat{i}'] = float(self.pcol[i].basal_connection.weight)
         return w
 
     def _detect_weight_changes(self):
@@ -3360,6 +3343,14 @@ class SimulationEngine:
                                        'L2E->P rule needs a pixel-local teaching signal for Pi, '
                                        'not labels or a global reconstruction error.')
                     ),
+                    prediction_column=dict(
+                        enabled=self.prediction_column_enabled,
+                        pc_ids=[f'PC{i}' for i in range(N_PIX)]
+                        if self.prediction_column_enabled else [],
+                        roles=['basal', 'apical'] if self.prediction_column_enabled else [],
+                        decoder_shape=[N_OUT, N_PIX],
+                        output_route='PC_i -> L1I_i -> L1E_i'
+                        if self.prediction_column_to_i_enabled else None),
                     params=self.params)
 
     def dynamic_state(self) -> dict:
@@ -3499,6 +3490,18 @@ class SimulationEngine:
                         learning_note=('Phase 19A does not implement active L2E->P plasticity. '
                                        'A future local rule must use only signals local to Pi and '
                                        'its incoming decoder synapses.')),
+                    prediction_column=dict(
+                        enabled=self.prediction_column_enabled,
+                        spiked={f'PC{i}': bool(self.spiked[f'PC{i}']) for i in range(N_PIX)}
+                        if self.prediction_column_enabled else {},
+                        compartments={
+                            f'PC{i}': dict(
+                                basal_sources=list(pc.last_basal_sources),
+                                apical_sources=list(pc.last_apical_sources),
+                                coincidence_step=pc.last_coincidence_step,
+                                d_before_learning=pc.last_d_before_learning)
+                            for i, pc in enumerate(self.pcol)}
+                        if self.prediction_column_enabled else {}),
                     # Phase 10: adaptive-threshold ablation state/trajectory
                     # (L2E only; a_i and its history stay 0/empty for every
                     # other population always, and for L2E itself whenever the

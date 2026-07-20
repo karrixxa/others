@@ -16,5 +16,9 @@ from snn.entity import NeuralEntity
 from snn.membrane import Membrane
 from snn.synapses import SynapseBank
 from snn.config import NeuronConfig
+from snn.dendrite import (CoincidencePyramidalCell, DendriteCompartment,
+                          DendriticConnection, DendriteRole)
 
-__all__ = ["NeuralEntity", "Membrane", "SynapseBank", "NeuronConfig"]
+__all__ = ["NeuralEntity", "Membrane", "SynapseBank", "NeuronConfig",
+           "CoincidencePyramidalCell", "DendriteCompartment",
+           "DendriticConnection", "DendriteRole"]
