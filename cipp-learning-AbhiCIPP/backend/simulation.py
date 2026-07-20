@@ -1725,6 +1725,27 @@ class SimulationEngine:
             np.zeros(N_OUT) for _ in range(self.prediction_feedback_delay))
         self.s_to_pcol_queue = deque(
             np.zeros(N_PIX) for _ in range(self.prediction_feedback_delay))
+        # Passive provenance travels beside (and never controls) the two
+        # physical vectors.  One metadata list occupies each delay slot.
+        self.pcol_delivery_metadata_queue = deque(
+            [] for _ in range(self.prediction_feedback_delay))
+        self._prediction_column_last_deliveries = []
+
+    def _prediction_column_origin_class(self, records, pixel_index):
+        """Classify an arrived physical pair without affecting its delivery."""
+        origins = {record['origin_pattern'] for record in records
+                   if record.get('origin_pattern') is not None}
+        if len(origins) > 1:
+            return 'mixed'
+        if not origins or self.current_pattern in origins:
+            return 'current-correct'
+        origin = next(iter(origins))
+        origin_vector = PATTERNS.get(origin, PROBES.get(origin, [0] * N_PIX))
+        current_vector = PATTERNS.get(
+            self.current_pattern, PROBES.get(self.current_pattern, [0] * N_PIX))
+        if origin_vector[pixel_index] and current_vector[pixel_index]:
+            return 'stale-same-pixel'
+        return 'stale-wrong-pixel'
 
     def _apply_prediction_column_learning(self, pc):
         """Update only physically delivered apical decoder connections.
@@ -2626,10 +2647,19 @@ class SimulationEngine:
         if self.prediction_column_enabled:
             dec_vec_pcol = self.l2e_to_pcol_queue.popleft()
             lat_vec_pcol = self.s_to_pcol_queue.popleft()
+            arrival_metadata = self.pcol_delivery_metadata_queue.popleft()
+            delivered_records = []
             for i, pc in enumerate(self.pcol):
                 pc.deliver_basal(lat_vec_pcol[i], t)
                 for j in range(N_OUT):
                     pc.deliver_apical(j, dec_vec_pcol[j], t)
+                target_records = [record for record in arrival_metadata
+                                  if record['target'] == f'PC{i}']
+                origin_class = self._prediction_column_origin_class(target_records, i)
+                for record in target_records:
+                    delivered_records.append(dict(record, delivered_step=t,
+                                                  origin_class=origin_class))
+            self._prediction_column_last_deliveries = delivered_records
             for i, pc in enumerate(self.pcol):
                 should_fire = pc.resolve_coincidence(t)
                 if not self.plasticity_frozen:
@@ -2758,6 +2788,24 @@ class SimulationEngine:
         if self.prediction_column_enabled:
             self.l2e_to_pcol_queue.append(l2e.copy())
             self.s_to_pcol_queue.append(l1e.copy())
+            scheduled = []
+            for j in range(N_OUT):
+                if not l2e[j]:
+                    continue
+                for i in range(N_PIX):
+                    scheduled.append(dict(
+                        source=f'L2E{j}', target=f'PC{i}',
+                        target_compartment='apical', scheduled_step=t,
+                        arrival_step=t + self.prediction_feedback_delay,
+                        origin_pattern=self.current_pattern))
+            for i in range(N_PIX):
+                if l1e[i]:
+                    scheduled.append(dict(
+                        source=f'L1E{i}', target=f'PC{i}',
+                        target_compartment='basal', scheduled_step=t,
+                        arrival_step=t + self.prediction_feedback_delay,
+                        origin_pattern=self.current_pattern))
+            self.pcol_delivery_metadata_queue.append(scheduled)
 
         # 2d. Deliver L2E winner spike immediately to all L1I neurons (feedback).
         #     l2e is length N_OUT with a 1 at the winner index, matching each
@@ -2937,15 +2985,6 @@ class SimulationEngine:
           later L2E spike order    -> later_responses ([(t, nid), ...])
           latency to second        -> latency_to_second_response
         """
-        # A delayed event belongs to the presentation that scheduled it.  Never
-        # let a queued basal/apical pair cross a pattern or probe boundary.
-        if self.prediction_column_enabled and hasattr(self, 'l2e_to_pcol_queue'):
-            self.l2e_to_pcol_queue = deque(
-                np.zeros(N_OUT) for _ in range(self.prediction_feedback_delay))
-            self.s_to_pcol_queue = deque(
-                np.zeros(N_PIX) for _ in range(self.prediction_feedback_delay))
-            for pc in self.pcol:
-                pc.clear_compartments()
         if self.presentation_id > 0:
             self.presentation_log.append(dict(
                 id=self.presentation_id, pattern=self.presentation_pattern,
@@ -3501,7 +3540,13 @@ class SimulationEngine:
                                 coincidence_step=pc.last_coincidence_step,
                                 d_before_learning=pc.last_d_before_learning)
                             for i, pc in enumerate(self.pcol)}
-                        if self.prediction_column_enabled else {}),
+                        if self.prediction_column_enabled else {},
+                        pending_deliveries=[dict(record) for slot in
+                                            self.pcol_delivery_metadata_queue
+                                            for record in slot]
+                        if self.prediction_column_enabled else [],
+                        last_deliveries=list(self._prediction_column_last_deliveries)
+                        if self.prediction_column_enabled else []),
                     # Phase 10: adaptive-threshold ablation state/trajectory
                     # (L2E only; a_i and its history stay 0/empty for every
                     # other population always, and for L2E itself whenever the

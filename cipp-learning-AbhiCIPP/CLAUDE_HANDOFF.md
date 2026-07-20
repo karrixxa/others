@@ -2569,3 +2569,28 @@ go-ahead (compiled across Phases 7-12, still open at this checkpoint):
   6/6 pass; Gate B 5/5 pass. Integrated Gate C was not run.
 - Default-off golden result remains the Phase 29 baseline condition: the same
   five pre-existing numeric drifts out of 100 arrays.
+
+## Phase 35 conformance repair checkpoint (Codex 1)
+
+- Fixed the switch-boundary loss of already-scheduled basal/apical physical
+  events by leaving all delay queues intact across `_start_presentation`.
+- Added a passive metadata queue aligned with the physical queues. Each arrived
+  event reports scheduled/arrival/delivered steps, source, target, target
+  compartment, origin pattern, and one of `current-correct`,
+  `stale-same-pixel`, `stale-wrong-pixel`, or `mixed`. Telemetry never gates or
+  changes delivery.
+- Added `test_phase35_conformance_repair.py` covering preservation,
+  exactly-once delivery, provenance telemetry, and the direct production
+  maturity boundary.
+- The reported maturity mismatch is an oracle expectation mismatch, not a
+  production defect. Production implements the established saturating update
+  `eta * (1 - d/d_max)^2`; at `d=4`, `eta=1`, `d_max=11`, the first delta is
+  `0.4049586776859504`, not `1`. The update crosses 5 on event three, which does
+  not fire; event four uses the matured stored value and fires. No learning
+  equation or parameter changed.
+- Gate A: 6/6. Repaired Gate B: 6/6. New regressions: 2/2. A 100-step isolated
+  Phase 29/default-off comparison is hash-identical.
+- The full standalone suite reports 32 pass, three missing-pytest environment
+  blocks, and five failures. Four opt-in Phase 19-22 failures reproduce
+  unchanged at frozen `4e712a4`; the fifth is the known Phase 29 golden drift.
+  No repair regression was observed.
