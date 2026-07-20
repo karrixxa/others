@@ -1,0 +1,2169 @@
+{
+  "audits": [
+    {
+      "agent": "Claude",
+      "commit": "4e712a4b7dea033b9191680a4b4e3577d93ca304",
+      "conclusion": "Gate A/B reproduced, but the original queue-deletion behavior and four opt-in regressions required repair/reclassification.",
+      "original_path": "/home/cxiong/codex-runs/claude-phase35-gate-a-b-review",
+      "runtime": "not reported",
+      "slug": "claude-gate-a-b-review",
+      "source": "claude-phase35-gate-a-b-review",
+      "verdict": "MIXED"
+    },
+    {
+      "agent": "Claude",
+      "commit": "db30ceadbe18cf90e01f6d54dee0203f342b24a8",
+      "conclusion": "Naturally matured prediction suppresses explained sensory activity, but does not repair L2 ownership or collision dynamics.",
+      "original_path": "/home/cxiong/codex-runs/claude-phase35-mature-efficacy",
+      "runtime": "~100 s",
+      "slug": "claude-mature-efficacy",
+      "source": "claude-phase35-mature-efficacy",
+      "verdict": "MATURE_ACTIVE_SUPPRESSION_EFFECTIVE_BUT_OWNERSHIP_NEUTRAL"
+    },
+    {
+      "agent": "Claude",
+      "commit": "oracle-only; production comparison target 4e712a4",
+      "conclusion": "The original independent gate enumeration was real, but decoder indexing, clearing, carryover, and exactly-once coverage had gaps.",
+      "original_path": "/home/cxiong/codex-runs/claude-phase35-oracle-review",
+      "runtime": "not reported",
+      "slug": "claude-oracle-review",
+      "source": "claude-phase35-oracle-review",
+      "verdict": "ORACLE_VALID_WITH_COVERAGE_GAPS"
+    },
+    {
+      "agent": "Claude",
+      "commit": "db30ceadbe18cf90e01f6d54dee0203f342b24a8",
+      "conclusion": "Queue carryover repair, provenance telemetry, Gate A/B, default-off equivalence, and emergent maturity ordering were independently verified.",
+      "original_path": "/home/cxiong/codex-runs/claude-phase35-repair-review",
+      "runtime": "not reported",
+      "slug": "claude-repair-review",
+      "source": "claude-phase35-repair-review",
+      "verdict": "REPAIR_VERIFIED_NO_NEW_REGRESSIONS"
+    },
+    {
+      "agent": "Claude",
+      "commit": "db30ceadbe18cf90e01f6d54dee0203f342b24a8",
+      "conclusion": "A local residual-driven selective L2 switch can fit existing step ordering, with accumulation safeguards and explicit negative controls.",
+      "original_path": "/home/cxiong/codex-runs/claude-phase35-selective-switch-timing-contract",
+      "runtime": "static analysis; no simulation",
+      "slug": "claude-selective-switch-timing-contract",
+      "source": "claude-phase35-selective-switch-timing-contract",
+      "verdict": "LOCAL_SELECTIVE_SWITCH_TIMING_VALID"
+    },
+    {
+      "agent": "Claude",
+      "commit": "db30ceadbe18cf90e01f6d54dee0203f342b24a8",
+      "conclusion": "PC-to-local-I suppression causally affects later sensory activity but cannot alter the already-resolved same-step L2 competition.",
+      "original_path": "/home/cxiong/codex-runs/claude-phase35-suppression-causal-reach",
+      "runtime": "~116 s",
+      "slug": "claude-suppression-causal-reach",
+      "source": "claude-phase35-suppression-causal-reach",
+      "verdict": "SUPPRESSION_CHANGES_LATER_ACTIVITY_ONLY"
+    },
+    {
+      "agent": "Codex 1",
+      "commit": "db30ceadbe18cf90e01f6d54dee0203f342b24a8",
+      "conclusion": "Scheduled events now survive switches exactly once; direct production maturity follows the established saturating quadratic update.",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-conformance-repair",
+      "runtime": "not reported",
+      "slug": "codex1-conformance-repair",
+      "source": "codex1-phase35-conformance-repair",
+      "verdict": "QUEUE_FIXED_MATURITY_WAS_ADAPTER_ERROR"
+    },
+    {
+      "agent": "Codex 1",
+      "commit": "db30ceadbe18cf90e01f6d54dee0203f342b24a8",
+      "conclusion": "A one-step first-spike path can precede rivals in 19/29 tied seeds; 10/29 already need same-step symmetry breaking.",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-exact-tie-audit",
+      "runtime": "344.88 s",
+      "slug": "codex1-exact-tie-audit",
+      "source": "codex1-phase35-exact-tie-audit",
+      "verdict": "FAST_FIRST_SPIKE_PATH_CAN_RESOLVE_MOST_TIES"
+    },
+    {
+      "agent": "Codex 1",
+      "commit": "4e712a4b7dea033b9191680a4b4e3577d93ca304",
+      "conclusion": "Introduced explicit basal/apical dendrites, local coincidence, sparse decoder learning, and paired PC output with default-off compatibility.",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-implementation",
+      "runtime": "not reported",
+      "slug": "codex1-implementation",
+      "source": "codex1-phase35-implementation",
+      "verdict": "GATE_A_B_PASS"
+    },
+    {
+      "agent": "Codex 1",
+      "commit": "db30ceadbe18cf90e01f6d54dee0203f342b24a8",
+      "conclusion": "The paired/defer-once path was an external Phase 29 monkeypatch, not a native repaired-lineage mechanism, so no comparison was run.",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-paired-failure-audit",
+      "runtime": "<60 s",
+      "slug": "codex1-paired-failure-audit",
+      "source": "codex1-phase35-paired-failure-audit",
+      "verdict": "EXISTING_PAIRED_PATH_UNAVAILABLE"
+    },
+    {
+      "agent": "Codex 1",
+      "commit": "db30ceadbe18cf90e01f6d54dee0203f342b24a8",
+      "conclusion": "All genuine secondary race spikes occurred before shared L2I threshold crossing; delivery delay and residual charge were not primary.",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-race-timing-decomposition",
+      "runtime": "0.99 s offline",
+      "slug": "codex1-race-timing-decomposition",
+      "source": "codex1-phase35-race-timing-decomposition",
+      "verdict": "ACCUMULATION_WINDOW_DOMINATES"
+    },
+    {
+      "agent": "Codex 1",
+      "commit": "db30ceadbe18cf90e01f6d54dee0203f342b24a8",
+      "conclusion": "Decoder-source fragmentation is driven primarily by multiple L2 responders receiving credit before shared inhibition resolves.",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-source-fragmentation",
+      "runtime": "134.90 s",
+      "slug": "codex1-source-fragmentation",
+      "source": "codex1-phase35-source-fragmentation",
+      "verdict": "FRAGMENTATION_FROM_PRE_INHIBITION_RACE"
+    },
+    {
+      "agent": "Codex 2",
+      "commit": "db30ceadbe18cf90e01f6d54dee0203f342b24a8",
+      "conclusion": "At 25,600 steps, 11 clean complete pattern decoders emerge, but per-seed pattern coverage remains incomplete.",
+      "original_path": "/home/cxiong/codex-runs/codex2-phase35-decoder-selectivity",
+      "runtime": "offline analysis; not reported",
+      "slug": "codex2-decoder-selectivity",
+      "source": "codex2-phase35-decoder-selectivity",
+      "verdict": "CLEAN_PATTERN_DECODERS_EMERGE"
+    },
+    {
+      "agent": "Codex 2",
+      "commit": "independent oracle; pre-repair comparison target 4e712a4",
+      "conclusion": "The original oracle found zero counterexamples over its bounded two-event domain, before later review corrected contract gaps.",
+      "original_path": "/home/cxiong/codex-runs/codex2-phase35-dendrite-oracle",
+      "runtime": "not reported",
+      "slug": "codex2-dendrite-oracle",
+      "source": "codex2-phase35-dendrite-oracle",
+      "verdict": "SEMANTIC_CONTRACT_CONSISTENT"
+    },
+    {
+      "agent": "Codex 2",
+      "commit": "db30ceadbe18cf90e01f6d54dee0203f342b24a8",
+      "conclusion": "Longer exposure improves decoder coverage, but persistent L2 ownership collisions prevent robust complete four-pattern coverage.",
+      "original_path": "/home/cxiong/codex-runs/codex2-phase35-full-decoder-coverage",
+      "runtime": "630.38 s",
+      "slug": "codex2-full-decoder-coverage",
+      "source": "codex2-phase35-full-decoder-coverage",
+      "verdict": "COLLISION_BLOCKS_COMPLETE_COVERAGE"
+    },
+    {
+      "agent": "Codex 2",
+      "commit": "4e712a4b7dea033b9191680a4b4e3577d93ca304",
+      "conclusion": "Production matched physical gating/locality but exposed real switch-queue loss and an oracle learning-equation mismatch.",
+      "original_path": "/home/cxiong/codex-runs/codex2-phase35-implementation-conformance",
+      "runtime": "not reported",
+      "slug": "codex2-implementation-conformance",
+      "source": "codex2-phase35-implementation-conformance",
+      "verdict": "MIXED"
+    },
+    {
+      "agent": "Codex 2",
+      "commit": "db30ceadbe18cf90e01f6d54dee0203f342b24a8",
+      "conclusion": "Maturity eventually occurs, delayed by elapsed time and 4\u20136-source fragmentation; one seed reinforces a collided owner.",
+      "original_path": "/home/cxiong/codex-runs/codex2-phase35-long-horizon-maturity",
+      "runtime": "263.40 s",
+      "slug": "codex2-long-horizon-maturity",
+      "source": "codex2-phase35-long-horizon-maturity",
+      "verdict": "MIXED_MATURITY_FAILURE"
+    },
+    {
+      "agent": "Codex 2",
+      "commit": "4e712a4b7dea033b9191680a4b4e3577d93ca304",
+      "conclusion": "Reduced the true queue-loss defect and demonstrated that maturity divergence came from the oracle's linear update, not production.",
+      "original_path": "/home/cxiong/codex-runs/codex2-phase35-mismatch-reduction",
+      "runtime": "not reported",
+      "slug": "codex2-mismatch-reduction",
+      "source": "codex2-phase35-mismatch-reduction",
+      "verdict": "QUEUE_DEFECT_REAL_MATURITY_ORACLE_MISMATCH"
+    },
+    {
+      "agent": "Codex 2",
+      "commit": "db30ceadbe18cf90e01f6d54dee0203f342b24a8",
+      "conclusion": "At 3,200 steps no decoder matures; local updates and repaired stale carryover are correct but source-specific exposure is diffuse.",
+      "original_path": "/home/cxiong/codex-runs/codex2-phase35-natural-exposure-audit",
+      "runtime": "46.71 s",
+      "slug": "codex2-natural-exposure-audit",
+      "source": "codex2-phase35-natural-exposure-audit",
+      "verdict": "NATURAL_EXPOSURE_INSUFFICIENT"
+    },
+    {
+      "agent": "Codex 2",
+      "commit": "db30ceadbe18cf90e01f6d54dee0203f342b24a8",
+      "conclusion": "The corrected oracle agrees with repaired production on gating, learning, maturity ordering, carryover, locality, and default-off behavior.",
+      "original_path": "/home/cxiong/codex-runs/codex2-phase35-oracle-v2",
+      "runtime": "not reported",
+      "slug": "codex2-oracle-v2",
+      "source": "codex2-phase35-oracle-v2",
+      "verdict": "REPAIRED_PRODUCTION_CONFORMS_TO_ORACLE_V2"
+    }
+  ],
+  "checkpoint": "db30ceadbe18cf90e01f6d54dee0203f342b24a8",
+  "excluded_incomplete": [
+    "/home/cxiong/codex-runs/codex2-phase35-residual-switch-feasibility",
+    "/home/cxiong/codex-runs/codex2-phase35-base-checkout",
+    "/home/cxiong/codex-runs/codex2-phase35-natural-exposure-checkout",
+    "/home/cxiong/codex-runs/codex2-phase35-v2-checkout.bv1HPm",
+    "/home/cxiong/codex-runs/codex2-phase35-checkout.gqJzv8"
+  ],
+  "files": [
+    {
+      "archived_path": "research/phase35/claude-gate-a-b-review/diff_review.md",
+      "audit": "claude-gate-a-b-review",
+      "disposition": "committed",
+      "original_path": "/home/cxiong/codex-runs/claude-phase35-gate-a-b-review/diff_review.md",
+      "original_sha256": "ed4f27c2813d95ba3495079dbb7a4f51d42df8b8484dc0db9aa8772ec0aaf0fc",
+      "original_size_bytes": 9404
+    },
+    {
+      "audit": "claude-gate-a-b-review",
+      "disposition": "excluded_generated_bulk",
+      "original_path": "/home/cxiong/codex-runs/claude-phase35-gate-a-b-review/test_log.txt",
+      "reason": "log, bundle, redundant aggregate, or generated timeline",
+      "sha256": "23a566b7c5ed5954ab58d981a831593832c17eb1f2e9910909536813be87b407",
+      "size_bytes": 13836
+    },
+    {
+      "archived_path": "research/phase35/claude-gate-a-b-review/results.json",
+      "audit": "claude-gate-a-b-review",
+      "disposition": "committed",
+      "original_path": "/home/cxiong/codex-runs/claude-phase35-gate-a-b-review/results.json",
+      "original_sha256": "a46b88369c1a09c25e2ec5039e263ea4d8433d506be3bcd2d1d9f0419452c2d6",
+      "original_size_bytes": 24769
+    },
+    {
+      "archived_path": "research/phase35/claude-gate-a-b-review/progress.md",
+      "audit": "claude-gate-a-b-review",
+      "disposition": "committed",
+      "original_path": "/home/cxiong/codex-runs/claude-phase35-gate-a-b-review/progress.md",
+      "original_sha256": "915ff8929e18c4c7d39aa8283c18e533673bf8b6d57b12c04ea7f775dfa4e5c0",
+      "original_size_bytes": 2409
+    },
+    {
+      "archived_path": "research/phase35/claude-gate-a-b-review/report.md",
+      "audit": "claude-gate-a-b-review",
+      "disposition": "committed",
+      "original_path": "/home/cxiong/codex-runs/claude-phase35-gate-a-b-review/report.md",
+      "original_sha256": "50ebe130ead884051f2e4cfa42465f979019509aaf0fce31074001e5a9573dc3",
+      "original_size_bytes": 13064
+    },
+    {
+      "audit": "claude-mature-efficacy",
+      "disposition": "excluded_generated_bulk",
+      "original_path": "/home/cxiong/codex-runs/claude-phase35-mature-efficacy/calibration_log.txt",
+      "reason": "log, bundle, redundant aggregate, or generated timeline",
+      "sha256": "05d2da9f82b232c283f353d76178488b33f41956b338d0f17d4307949248f493",
+      "size_bytes": 3826
+    },
+    {
+      "archived_path": "research/phase35/claude-mature-efficacy/results.json",
+      "audit": "claude-mature-efficacy",
+      "disposition": "committed",
+      "original_path": "/home/cxiong/codex-runs/claude-phase35-mature-efficacy/results.json",
+      "original_sha256": "1906c63c701b837fa5f96fc476d44961ff32f0f6292a2405f11e7710c641a227",
+      "original_size_bytes": 12402
+    },
+    {
+      "audit": "claude-mature-efficacy",
+      "disposition": "excluded_generated_bulk",
+      "original_path": "/home/cxiong/codex-runs/claude-phase35-mature-efficacy/aggregate_rows.json",
+      "reason": "log, bundle, redundant aggregate, or generated timeline",
+      "sha256": "33bf170adeaa18f65e8b730ee3a7adc94145d81a771c5d63dbd94ed7eebf0896",
+      "size_bytes": 5394
+    },
+    {
+      "archived_path": "research/phase35/claude-mature-efficacy/progress.md",
+      "audit": "claude-mature-efficacy",
+      "disposition": "committed",
+      "original_path": "/home/cxiong/codex-runs/claude-phase35-mature-efficacy/progress.md",
+      "original_sha256": "65a161e3bbd6c93881730c816ee347092875577bfbb5a28e3523c6a46a3a0b5a",
+      "original_size_bytes": 3815
+    },
+    {
+      "archived_path": "research/phase35/claude-mature-efficacy/report.md",
+      "audit": "claude-mature-efficacy",
+      "disposition": "committed",
+      "original_path": "/home/cxiong/codex-runs/claude-phase35-mature-efficacy/report.md",
+      "original_sha256": "78c495e53a611cefd4badca3f4d8219f54442e1c44631f40d593b5ac3fa61b31",
+      "original_size_bytes": 15091
+    },
+    {
+      "audit": "claude-mature-efficacy",
+      "disposition": "excluded_generated_bulk",
+      "original_path": "/home/cxiong/codex-runs/claude-phase35-mature-efficacy/per_seed/seed_10.json",
+      "reason": "log, bundle, redundant aggregate, or generated timeline",
+      "sha256": "f33c591a8227f118fa71ff1de7506b06b86a9447ab0f24c6636a3f777004ab06",
+      "size_bytes": 108739
+    },
+    {
+      "audit": "claude-mature-efficacy",
+      "disposition": "excluded_generated_bulk",
+      "original_path": "/home/cxiong/codex-runs/claude-phase35-mature-efficacy/per_seed/seed_3.json",
+      "reason": "log, bundle, redundant aggregate, or generated timeline",
+      "sha256": "843ef00f65d7e0c71f34e9b8e0312571dc72276cb814a35d1986ad3219a8df6b",
+      "size_bytes": 108746
+    },
+    {
+      "audit": "claude-mature-efficacy",
+      "disposition": "excluded_generated_bulk",
+      "original_path": "/home/cxiong/codex-runs/claude-phase35-mature-efficacy/per_seed/seed_14.json",
+      "reason": "log, bundle, redundant aggregate, or generated timeline",
+      "sha256": "3ea2e83110088d4c644e5bd1dc7599338767c9dfd6b450a2c8a6309f78a99619",
+      "size_bytes": 111944
+    },
+    {
+      "audit": "claude-mature-efficacy",
+      "disposition": "excluded_generated_bulk",
+      "original_path": "/home/cxiong/codex-runs/claude-phase35-mature-efficacy/per_seed/seed_1.json",
+      "reason": "log, bundle, redundant aggregate, or generated timeline",
+      "sha256": "c03aac7fcae0aaf4355c76e70db3245766c38a62e2192bafad514cde9b580fe8",
+      "size_bytes": 108727
+    },
+    {
+      "audit": "claude-mature-efficacy",
+      "disposition": "excluded_generated_bulk",
+      "original_path": "/home/cxiong/codex-runs/claude-phase35-mature-efficacy/per_seed/seed_22.json",
+      "reason": "log, bundle, redundant aggregate, or generated timeline",
+      "sha256": "5fd4ccf9bea56457f3a2c4fdfab9523c218949da4b253641603161bb1aa0eec1",
+      "size_bytes": 107754
+    },
+    {
+      "audit": "claude-mature-efficacy",
+      "disposition": "excluded_generated_bulk",
+      "original_path": "/home/cxiong/codex-runs/claude-phase35-mature-efficacy/per_seed/seed_17.json",
+      "reason": "log, bundle, redundant aggregate, or generated timeline",
+      "sha256": "f36225428bd6fecb2c162ca7391e34ae89359052824668f229b2e372e8087e88",
+      "size_bytes": 112433
+    },
+    {
+      "archived_path": "research/phase35/claude-mature-efficacy/scripts/calibrate_long.py",
+      "audit": "claude-mature-efficacy",
+      "disposition": "committed",
+      "original_path": "/home/cxiong/codex-runs/claude-phase35-mature-efficacy/scripts/calibrate_long.py",
+      "original_sha256": "54852b74a804d6111edf58b632a528935e7f220c45c26abb051b261813e01b3e",
+      "original_size_bytes": 1812
+    },
+    {
+      "archived_path": "research/phase35/claude-mature-efficacy/scripts/aggregate.py",
+      "audit": "claude-mature-efficacy",
+      "disposition": "committed",
+      "original_path": "/home/cxiong/codex-runs/claude-phase35-mature-efficacy/scripts/aggregate.py",
+      "original_sha256": "8c874e32caeb91d2db22153a6a4dea6507cda1aebcf78d6a6e7c0232d7cf5dfd",
+      "original_size_bytes": 4197
+    },
+    {
+      "archived_path": "research/phase35/claude-mature-efficacy/scripts/lib.py",
+      "audit": "claude-mature-efficacy",
+      "disposition": "committed",
+      "original_path": "/home/cxiong/codex-runs/claude-phase35-mature-efficacy/scripts/lib.py",
+      "original_sha256": "d28465d5dfe6ab205e9568dda704c8224fbbf1f0a4c73a85d65090e11a878ea0",
+      "original_size_bytes": 12816
+    },
+    {
+      "archived_path": "research/phase35/claude-mature-efficacy/scripts/run_seed.py",
+      "audit": "claude-mature-efficacy",
+      "disposition": "committed",
+      "original_path": "/home/cxiong/codex-runs/claude-phase35-mature-efficacy/scripts/run_seed.py",
+      "original_sha256": "3c852fd658090f51c0a8d97a84764f752472ed36f3aaf2a07927463569b6cc6b",
+      "original_size_bytes": 4423
+    },
+    {
+      "archived_path": "research/phase35/claude-mature-efficacy/scripts/calibrate.py",
+      "audit": "claude-mature-efficacy",
+      "disposition": "committed",
+      "original_path": "/home/cxiong/codex-runs/claude-phase35-mature-efficacy/scripts/calibrate.py",
+      "original_sha256": "aa12cffcba4af9b12ec524a00ecd972ba53da573256ce3917deb46a428ce6feb",
+      "original_size_bytes": 3006
+    },
+    {
+      "archived_path": "research/phase35/claude-oracle-review/progress.md",
+      "audit": "claude-oracle-review",
+      "disposition": "committed",
+      "original_path": "/home/cxiong/codex-runs/claude-phase35-oracle-review/progress.md",
+      "original_sha256": "d8e7348837249c0c426109560662340a1337eca2ddfc784ed1d03bc0ecbbae44",
+      "original_size_bytes": 1590
+    },
+    {
+      "archived_path": "research/phase35/claude-oracle-review/report.md",
+      "audit": "claude-oracle-review",
+      "disposition": "committed",
+      "original_path": "/home/cxiong/codex-runs/claude-phase35-oracle-review/report.md",
+      "original_sha256": "71f040d6463e77a6e4eeb7247bbeb4961eecffad0a4462b7dcaed5642f2b4a7f",
+      "original_size_bytes": 7866
+    },
+    {
+      "archived_path": "research/phase35/claude-oracle-review/coverage_review.json",
+      "audit": "claude-oracle-review",
+      "disposition": "committed",
+      "original_path": "/home/cxiong/codex-runs/claude-phase35-oracle-review/coverage_review.json",
+      "original_sha256": "c7866f6f98388442893f81ccb21d1fa157a2d995699c2d1ce55100de5eedec7b",
+      "original_size_bytes": 17338
+    },
+    {
+      "archived_path": "research/phase35/claude-oracle-review/results.json",
+      "audit": "claude-oracle-review",
+      "disposition": "committed",
+      "generated": "compact ledger summary because no original results.json existed",
+      "original_path": null
+    },
+    {
+      "archived_path": "research/phase35/claude-repair-review/diff_review.md",
+      "audit": "claude-repair-review",
+      "disposition": "committed",
+      "original_path": "/home/cxiong/codex-runs/claude-phase35-repair-review/diff_review.md",
+      "original_sha256": "a950ea4771b056de4d9891a1d71c8d2458e9da8f085e7692dec8dd49ec8a44fe",
+      "original_size_bytes": 4149
+    },
+    {
+      "audit": "claude-repair-review",
+      "disposition": "excluded_generated_bulk",
+      "original_path": "/home/cxiong/codex-runs/claude-phase35-repair-review/test_log.txt",
+      "reason": "log, bundle, redundant aggregate, or generated timeline",
+      "sha256": "66a8ede43f45d1b8c2e4015ea42362da3ac90e997be638a8d355ddb57595fd6d",
+      "size_bytes": 13961
+    },
+    {
+      "archived_path": "research/phase35/claude-repair-review/results.json",
+      "audit": "claude-repair-review",
+      "disposition": "committed",
+      "original_path": "/home/cxiong/codex-runs/claude-phase35-repair-review/results.json",
+      "original_sha256": "9032a30349fd02ab2050e4fef8beb7080b927e3d4b1d7b8194863a1d228fa6ae",
+      "original_size_bytes": 16777
+    },
+    {
+      "archived_path": "research/phase35/claude-repair-review/progress.md",
+      "audit": "claude-repair-review",
+      "disposition": "committed",
+      "original_path": "/home/cxiong/codex-runs/claude-phase35-repair-review/progress.md",
+      "original_sha256": "1c48e8ef2550827a208d546aede87476704facdc75b96861d02d7a9f7f3e4c5e",
+      "original_size_bytes": 2911
+    },
+    {
+      "archived_path": "research/phase35/claude-repair-review/report.md",
+      "audit": "claude-repair-review",
+      "disposition": "committed",
+      "original_path": "/home/cxiong/codex-runs/claude-phase35-repair-review/report.md",
+      "original_sha256": "7bab827675f613dc6ade15c0d8ec8779160bad4934e8927b550fa301e8f35534",
+      "original_size_bytes": 12296
+    },
+    {
+      "archived_path": "research/phase35/claude-selective-switch-timing-contract/report.md",
+      "audit": "claude-selective-switch-timing-contract",
+      "disposition": "committed",
+      "original_path": "/home/cxiong/codex-runs/claude-phase35-selective-switch-timing-contract/report.md",
+      "original_sha256": "863782a22b922c2531cffa708512325d997d2e865009be3e19857433f32636bc",
+      "original_size_bytes": 20598
+    },
+    {
+      "archived_path": "research/phase35/claude-selective-switch-timing-contract/results.json",
+      "audit": "claude-selective-switch-timing-contract",
+      "disposition": "committed",
+      "generated": "compact ledger summary because no original results.json existed",
+      "original_path": null
+    },
+    {
+      "archived_path": "research/phase35/claude-suppression-causal-reach/results.json",
+      "audit": "claude-suppression-causal-reach",
+      "disposition": "committed",
+      "original_path": "/home/cxiong/codex-runs/claude-phase35-suppression-causal-reach/results.json",
+      "original_sha256": "b22907dcc095ff6328730140a69bedddb43540a46087447bd5018dde36b54b88",
+      "original_size_bytes": 10537
+    },
+    {
+      "archived_path": "research/phase35/claude-suppression-causal-reach/progress.md",
+      "audit": "claude-suppression-causal-reach",
+      "disposition": "committed",
+      "original_path": "/home/cxiong/codex-runs/claude-phase35-suppression-causal-reach/progress.md",
+      "original_sha256": "a7bb8463ab583e774fd82f820d1b662594b8d5dd465c56d1550f2af1261d8f85",
+      "original_size_bytes": 3321
+    },
+    {
+      "archived_path": "research/phase35/claude-suppression-causal-reach/report.md",
+      "audit": "claude-suppression-causal-reach",
+      "disposition": "committed",
+      "original_path": "/home/cxiong/codex-runs/claude-phase35-suppression-causal-reach/report.md",
+      "original_sha256": "f198e70ddce22b46223760f8431591af86072f33cc3d75387adce10ee5b1f0d1",
+      "original_size_bytes": 10895
+    },
+    {
+      "audit": "claude-suppression-causal-reach",
+      "disposition": "excluded_generated_bulk",
+      "original_path": "/home/cxiong/codex-runs/claude-phase35-suppression-causal-reach/per_seed/seed_10.json",
+      "reason": "log, bundle, redundant aggregate, or generated timeline",
+      "sha256": "6bbccadf3e240878019d723918db78dd56ca98bc931ca2b8a969bf19c6774ba8",
+      "size_bytes": 7981
+    },
+    {
+      "audit": "claude-suppression-causal-reach",
+      "disposition": "excluded_generated_bulk",
+      "original_path": "/home/cxiong/codex-runs/claude-phase35-suppression-causal-reach/per_seed/seed_2_tied.json",
+      "reason": "log, bundle, redundant aggregate, or generated timeline",
+      "sha256": "decb11626772846a51c88a05364950bf64783358810c44959e482863bb1b482e",
+      "size_bytes": 7986
+    },
+    {
+      "audit": "claude-suppression-causal-reach",
+      "disposition": "excluded_generated_bulk",
+      "original_path": "/home/cxiong/codex-runs/claude-phase35-suppression-causal-reach/per_seed/seed_3.json",
+      "reason": "log, bundle, redundant aggregate, or generated timeline",
+      "sha256": "e8769491d90aca3156e76ed1a1f8669ea72260e5c25ff0d2efaaba2ddd5c3d73",
+      "size_bytes": 7986
+    },
+    {
+      "audit": "claude-suppression-causal-reach",
+      "disposition": "excluded_generated_bulk",
+      "original_path": "/home/cxiong/codex-runs/claude-phase35-suppression-causal-reach/per_seed/seed_14.json",
+      "reason": "log, bundle, redundant aggregate, or generated timeline",
+      "sha256": "07fb2cf0dde1cfbe11e1e0ad77141cc1e46ffc140a882655cfe9bd780eaebf95",
+      "size_bytes": 7981
+    },
+    {
+      "audit": "claude-suppression-causal-reach",
+      "disposition": "excluded_generated_bulk",
+      "original_path": "/home/cxiong/codex-runs/claude-phase35-suppression-causal-reach/per_seed/seed_1.json",
+      "reason": "log, bundle, redundant aggregate, or generated timeline",
+      "sha256": "db2b3db3e50177f064280be769d52aeb667d88aa0f5e7ac3fdb4095284ffb698",
+      "size_bytes": 7986
+    },
+    {
+      "audit": "claude-suppression-causal-reach",
+      "disposition": "excluded_generated_bulk",
+      "original_path": "/home/cxiong/codex-runs/claude-phase35-suppression-causal-reach/per_seed/seed_22.json",
+      "reason": "log, bundle, redundant aggregate, or generated timeline",
+      "sha256": "20691382349836ec68b9d3fda276e1ae71c1c316312da9176d19f5de98ad8dca",
+      "size_bytes": 7993
+    },
+    {
+      "audit": "claude-suppression-causal-reach",
+      "disposition": "excluded_generated_bulk",
+      "original_path": "/home/cxiong/codex-runs/claude-phase35-suppression-causal-reach/per_seed/seed_17.json",
+      "reason": "log, bundle, redundant aggregate, or generated timeline",
+      "sha256": "d1ef682dcd65595a8403b25cb2ba8ab784f48f944104003503f5e17783fe8de7",
+      "size_bytes": 7987
+    },
+    {
+      "archived_path": "research/phase35/claude-suppression-causal-reach/scripts/lib.py",
+      "audit": "claude-suppression-causal-reach",
+      "disposition": "committed",
+      "original_path": "/home/cxiong/codex-runs/claude-phase35-suppression-causal-reach/scripts/lib.py",
+      "original_sha256": "d28465d5dfe6ab205e9568dda704c8224fbbf1f0a4c73a85d65090e11a878ea0",
+      "original_size_bytes": 12816
+    },
+    {
+      "archived_path": "research/phase35/claude-suppression-causal-reach/scripts/causal_trace.py",
+      "audit": "claude-suppression-causal-reach",
+      "disposition": "committed",
+      "original_path": "/home/cxiong/codex-runs/claude-phase35-suppression-causal-reach/scripts/causal_trace.py",
+      "original_sha256": "4ad1536411decf81c32a69bfa317eaf778a84b60ee7cefbb61efcb9a42f755c2",
+      "original_size_bytes": 7778
+    },
+    {
+      "audit": "codex1-conformance-repair",
+      "disposition": "excluded_generated_bulk",
+      "kind": "directory_tree",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-conformance-repair/repo",
+      "reason": "duplicate repository, cache, or environment tree",
+      "size_bytes": 20769271
+    },
+    {
+      "audit": "codex1-conformance-repair",
+      "disposition": "excluded_generated_bulk",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-conformance-repair/full-test_flow_rate.py.log",
+      "reason": "log, bundle, redundant aggregate, or generated timeline",
+      "sha256": "38ccea8c2f14a94c1e5cb12b4cac402917fd5575b5a66136dda20ae87997909d",
+      "size_bytes": 882
+    },
+    {
+      "audit": "codex1-conformance-repair",
+      "disposition": "excluded_generated_bulk",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-conformance-repair/full-test_refractory_gating.py.log",
+      "reason": "log, bundle, redundant aggregate, or generated timeline",
+      "sha256": "c5bdd70f5a9c64c29c206d91076e4526ff9fd2d2df0991332b9e41b114c12f99",
+      "size_bytes": 578
+    },
+    {
+      "audit": "codex1-conformance-repair",
+      "disposition": "excluded_generated_bulk",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-conformance-repair/phase35-conformance-repair-db30ceadbe18cf90e01f6d54dee0203f342b24a8.bundle",
+      "reason": "log, bundle, redundant aggregate, or generated timeline",
+      "sha256": "1b330b7402913a5ed92402fba41f1105d687ca1ed080985bef470903f8c3587e",
+      "size_bytes": 2462079
+    },
+    {
+      "audit": "codex1-conformance-repair",
+      "disposition": "excluded_generated_bulk",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-conformance-repair/full-test_balanced_init.py.log",
+      "reason": "log, bundle, redundant aggregate, or generated timeline",
+      "sha256": "8c52ed928c781d5f9a93e626e516af6dd26ee5d8010421c6845f8139f24f8a3b",
+      "size_bytes": 676
+    },
+    {
+      "archived_path": "research/phase35/codex1-conformance-repair/production_maturity_trace.py",
+      "audit": "codex1-conformance-repair",
+      "disposition": "committed",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-conformance-repair/production_maturity_trace.py",
+      "original_sha256": "aa26b318816143a1a94177b7abd8ba2c7d852c658454689735f111eea313161b",
+      "original_size_bytes": 2338
+    },
+    {
+      "audit": "codex1-conformance-repair",
+      "disposition": "excluded_generated_bulk",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-conformance-repair/full-test_inhibitory_plasticity.py.log",
+      "reason": "log, bundle, redundant aggregate, or generated timeline",
+      "sha256": "9abf50e22032913e25e948a8a2b900cbb60f3c26833d1af4fd5def10d96c8c5f",
+      "size_bytes": 2225
+    },
+    {
+      "audit": "codex1-conformance-repair",
+      "disposition": "excluded_generated_bulk",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-conformance-repair/full-test_l1i_causal_feedback.py.log",
+      "reason": "log, bundle, redundant aggregate, or generated timeline",
+      "sha256": "8c282bc4285b0a468db6a8d8324b2799ee4d592c9fda6ed8ad69b0ccb4daf330",
+      "size_bytes": 1026
+    },
+    {
+      "audit": "codex1-conformance-repair",
+      "disposition": "excluded_generated_bulk",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-conformance-repair/full-suite.tsv",
+      "reason": "log, bundle, redundant aggregate, or generated timeline",
+      "sha256": "bd5397cb8ea2e4860b765d3c97b201da03be1e2a03f03e39cff445c0158636b3",
+      "size_bytes": 1611
+    },
+    {
+      "audit": "codex1-conformance-repair",
+      "disposition": "excluded_generated_bulk",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-conformance-repair/full-test_l2_chunked_charge.py.log",
+      "reason": "log, bundle, redundant aggregate, or generated timeline",
+      "sha256": "939cb56e257fe4138f1eba5bcfd60f89ff50c174cbfb5fc701b30b8bf6ce5ffa",
+      "size_bytes": 452
+    },
+    {
+      "audit": "codex1-conformance-repair",
+      "disposition": "excluded_generated_bulk",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-conformance-repair/full-test_loser_depression_protection.py.log",
+      "reason": "log, bundle, redundant aggregate, or generated timeline",
+      "sha256": "2c39790f7473fe27db0664d05b37c9049b62a284f6fd516a2975b709e608f3e3",
+      "size_bytes": 1528
+    },
+    {
+      "audit": "codex1-conformance-repair",
+      "disposition": "excluded_generated_bulk",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-conformance-repair/default-off.log",
+      "reason": "log, bundle, redundant aggregate, or generated timeline",
+      "sha256": "5dce44da885f77e6c1869dbe067b2701a1d1583fea8c153d4b5867cd36c50bda",
+      "size_bytes": 194
+    },
+    {
+      "audit": "codex1-conformance-repair",
+      "disposition": "excluded_generated_bulk",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-conformance-repair/full-test_phase20_frozen_reconstruction.py.log",
+      "reason": "log, bundle, redundant aggregate, or generated timeline",
+      "sha256": "92a4402aa7500be89815edbd434ff73ec69e6c9f63113b6f60fcf8f10ddaa122",
+      "size_bytes": 888
+    },
+    {
+      "audit": "codex1-conformance-repair",
+      "disposition": "excluded_generated_bulk",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-conformance-repair/full-test_hard_reset_inhibition.py.log",
+      "reason": "log, bundle, redundant aggregate, or generated timeline",
+      "sha256": "3533a2b6358f6ca979ed774fa37b21d53b7b80999fc7ca926366c90c9633409b",
+      "size_bytes": 776
+    },
+    {
+      "audit": "codex1-conformance-repair",
+      "disposition": "excluded_generated_bulk",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-conformance-repair/full-test_l2_competition.py.log",
+      "reason": "log, bundle, redundant aggregate, or generated timeline",
+      "sha256": "568b9384b7b02751c38a368080ca4080886e38d66870ea0045eaaec0245aa9e7",
+      "size_bytes": 976
+    },
+    {
+      "audit": "codex1-conformance-repair",
+      "disposition": "excluded_generated_bulk",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-conformance-repair/phase35-conformance-repair-db30ceadbe18cf90e01f6d54dee0203f342b24a8.bundle.sha256",
+      "reason": "log, bundle, redundant aggregate, or generated timeline",
+      "sha256": "4f64c779cfc5326ef2f697e1e56e7d2894f2886a743369a372f2550236cf9857",
+      "size_bytes": 199
+    },
+    {
+      "audit": "codex1-conformance-repair",
+      "disposition": "excluded_generated_bulk",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-conformance-repair/full-test_assembly_flow_credit.py.log",
+      "reason": "log, bundle, redundant aggregate, or generated timeline",
+      "sha256": "799b7c64e1ab19ccf498429ecf33c61578a17359e728d4fd4b5162056f231699",
+      "size_bytes": 398
+    },
+    {
+      "audit": "codex1-conformance-repair",
+      "disposition": "excluded_generated_bulk",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-conformance-repair/gate-a.log",
+      "reason": "log, bundle, redundant aggregate, or generated timeline",
+      "sha256": "b18dcec4e705ccc3973aefa7638db6c9caad7b8ea3e5e8ef2bf822f919f37ed7",
+      "size_bytes": 233
+    },
+    {
+      "audit": "codex1-conformance-repair",
+      "disposition": "excluded_generated_bulk",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-conformance-repair/full-test_prediction_phase19.py.log",
+      "reason": "log, bundle, redundant aggregate, or generated timeline",
+      "sha256": "c4fe187ac0cd80463b3c8023ff68083515f42fda42a4f9046f6eeffcb0cd05c9",
+      "size_bytes": 707
+    },
+    {
+      "audit": "codex1-conformance-repair",
+      "disposition": "excluded_generated_bulk",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-conformance-repair/conformance-regression.log",
+      "reason": "log, bundle, redundant aggregate, or generated timeline",
+      "sha256": "0381e25517a5287c079aa7e9ca5daa6937bb8d1de866bf9399e27d89330b9591",
+      "size_bytes": 162
+    },
+    {
+      "audit": "codex1-conformance-repair",
+      "disposition": "excluded_generated_bulk",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-conformance-repair/full-test_structural_free_energy.py.log",
+      "reason": "log, bundle, redundant aggregate, or generated timeline",
+      "sha256": "baaa975b79080b269da163e675480f3626361c3d66728c2171a209b314442298",
+      "size_bytes": 982
+    },
+    {
+      "audit": "codex1-conformance-repair",
+      "disposition": "excluded_generated_bulk",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-conformance-repair/full-test_geometry_phase.py.log",
+      "reason": "log, bundle, redundant aggregate, or generated timeline",
+      "sha256": "61a9a02e31c95a2174f3fec5d004e63ebe678aacd89f5e1d38733ebe1cdafbaa",
+      "size_bytes": 1150
+    },
+    {
+      "audit": "codex1-conformance-repair",
+      "disposition": "excluded_generated_bulk",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-conformance-repair/full-test_phase28a_local_common_input_feasibility.py.log",
+      "reason": "log, bundle, redundant aggregate, or generated timeline",
+      "sha256": "dac3e52741a2b0b03536287e4c2d3d494859d857660f17057f4f074b64d2a51b",
+      "size_bytes": 264
+    },
+    {
+      "audit": "codex1-conformance-repair",
+      "disposition": "excluded_generated_bulk",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-conformance-repair/queue-before.log",
+      "reason": "log, bundle, redundant aggregate, or generated timeline",
+      "sha256": "e59e68dfb60ec2c0045628c84527abe2bca24c8f2c8ad158c8bf5ca24deb6924",
+      "size_bytes": 523
+    },
+    {
+      "audit": "codex1-conformance-repair",
+      "disposition": "excluded_generated_bulk",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-conformance-repair/full-test_l1i_immediate_relay.py.log",
+      "reason": "log, bundle, redundant aggregate, or generated timeline",
+      "sha256": "86ded0039f0912a4691453cc70df825d33e9e8a16df7512ed9536ebd8763b629",
+      "size_bytes": 410
+    },
+    {
+      "audit": "codex1-conformance-repair",
+      "disposition": "excluded_generated_bulk",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-conformance-repair/full-test_constant_input_feedback.py.log",
+      "reason": "log, bundle, redundant aggregate, or generated timeline",
+      "sha256": "f7ae798215023fb2a5fd2997db1033117b277b0512c024deef5da51942e96392",
+      "size_bytes": 416
+    },
+    {
+      "audit": "codex1-conformance-repair",
+      "disposition": "excluded_generated_bulk",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-conformance-repair/full-test_l2i_causal_inhibition.py.log",
+      "reason": "log, bundle, redundant aggregate, or generated timeline",
+      "sha256": "0f02909df08cb421e0e05979f753ced2ddb59f46839db606cc7b73bba8abf4ea",
+      "size_bytes": 900
+    },
+    {
+      "audit": "codex1-conformance-repair",
+      "disposition": "excluded_generated_bulk",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-conformance-repair/full-test_competitive_reset.py.log",
+      "reason": "log, bundle, redundant aggregate, or generated timeline",
+      "sha256": "7286485a0543ccd92bdd86ff7b5cfaab4e8f4ce9d907ee8854456e31453c5d2e",
+      "size_bytes": 1744
+    },
+    {
+      "audit": "codex1-conformance-repair",
+      "disposition": "excluded_generated_bulk",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-conformance-repair/frozen-4e712a4-test_phase21_selective_inhibition.py.log",
+      "reason": "log, bundle, redundant aggregate, or generated timeline",
+      "sha256": "4fd2024f92294ca9ff6f5852bdef9c150af3b38979de02e45a4c4174f2061a07",
+      "size_bytes": 1366
+    },
+    {
+      "audit": "codex1-conformance-repair",
+      "disposition": "excluded_generated_bulk",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-conformance-repair/full-test_phase13b_tracer_timing.py.log",
+      "reason": "log, bundle, redundant aggregate, or generated timeline",
+      "sha256": "bf88895ec5688a4ae9b617cffe268bcd5b7d1eadb03f8428c379a0675f1ce2e0",
+      "size_bytes": 246
+    },
+    {
+      "audit": "codex1-conformance-repair",
+      "disposition": "excluded_generated_bulk",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-conformance-repair/full-test_phase35_conformance_repair.py.log",
+      "reason": "log, bundle, redundant aggregate, or generated timeline",
+      "sha256": "0381e25517a5287c079aa7e9ca5daa6937bb8d1de866bf9399e27d89330b9591",
+      "size_bytes": 162
+    },
+    {
+      "audit": "codex1-conformance-repair",
+      "disposition": "excluded_generated_bulk",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-conformance-repair/full-tests_golden_test_golden_equiv.py.log",
+      "reason": "log, bundle, redundant aggregate, or generated timeline",
+      "sha256": "b2432bd7285c9456c1de8011148b9e3c8ef0dea29d986fe062bc6de88227ac3e",
+      "size_bytes": 758
+    },
+    {
+      "audit": "codex1-conformance-repair",
+      "disposition": "excluded_generated_bulk",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-conformance-repair/full-test_phase22_full_interaction.py.log",
+      "reason": "log, bundle, redundant aggregate, or generated timeline",
+      "sha256": "2d8be1da825a472930140673db91adda15f77231972947d70882fe8d6c20dedf",
+      "size_bytes": 1071
+    },
+    {
+      "audit": "codex1-conformance-repair",
+      "disposition": "excluded_generated_bulk",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-conformance-repair/full-test_prediction_column_phase19.py.log",
+      "reason": "log, bundle, redundant aggregate, or generated timeline",
+      "sha256": "8673f835da67a9b66ddbbda1cb40e76592853650ce8fc7b47c9c30eb4f058fa3",
+      "size_bytes": 768
+    },
+    {
+      "audit": "codex1-conformance-repair",
+      "disposition": "excluded_generated_bulk",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-conformance-repair/frozen-4e712a4-test_phase22_full_interaction.py.log",
+      "reason": "log, bundle, redundant aggregate, or generated timeline",
+      "sha256": "4f23733c63a3b30e91e6de3d551fdcd369929fe4d32862eef61e67c271f5b3c2",
+      "size_bytes": 1063
+    },
+    {
+      "audit": "codex1-conformance-repair",
+      "disposition": "excluded_generated_bulk",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-conformance-repair/full-test_neuron.py.log",
+      "reason": "log, bundle, redundant aggregate, or generated timeline",
+      "sha256": "25ba0f512f22c23b53b2f9b29f1843017d764687a93e6eb307bcecb8d4175ebd",
+      "size_bytes": 1778
+    },
+    {
+      "audit": "codex1-conformance-repair",
+      "disposition": "excluded_generated_bulk",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-conformance-repair/full-test_phase29_centered_encoder_ownership_gate.py.log",
+      "reason": "log, bundle, redundant aggregate, or generated timeline",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    {
+      "audit": "codex1-conformance-repair",
+      "disposition": "excluded_generated_bulk",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-conformance-repair/full-test_inhibitory_delta_rule.py.log",
+      "reason": "log, bundle, redundant aggregate, or generated timeline",
+      "sha256": "c10b19bca176893985bf40fa5e7eaf8efc3a499abd4c2f3ca8d72f484289001f",
+      "size_bytes": 702
+    },
+    {
+      "audit": "codex1-conformance-repair",
+      "disposition": "excluded_generated_bulk",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-conformance-repair/full-test_pretrained_l2i_recruitment.py.log",
+      "reason": "log, bundle, redundant aggregate, or generated timeline",
+      "sha256": "4a3ca02e9daa93bcac64558d06e088431c217849f9ff728be226f82d6efa176d",
+      "size_bytes": 2575
+    },
+    {
+      "audit": "codex1-conformance-repair",
+      "disposition": "excluded_generated_bulk",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-conformance-repair/full-test_phase27_l2_ownership_causal_audit.py.log",
+      "reason": "log, bundle, redundant aggregate, or generated timeline",
+      "sha256": "43c634ea840b01cf7943c23df91e24d1cfc6f48b2bfc6c62d80a7ff501bff053",
+      "size_bytes": 258
+    },
+    {
+      "archived_path": "research/phase35/codex1-conformance-repair/results.json",
+      "audit": "codex1-conformance-repair",
+      "disposition": "committed",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-conformance-repair/results.json",
+      "original_sha256": "4209d9a5d8a59427148b0e8189439d83475b33f0952ea6d89392cc47e97c0f5e",
+      "original_size_bytes": 1905
+    },
+    {
+      "audit": "codex1-conformance-repair",
+      "disposition": "excluded_generated_bulk",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-conformance-repair/frozen-4e712a4-test_phase20_frozen_reconstruction.py.log",
+      "reason": "log, bundle, redundant aggregate, or generated timeline",
+      "sha256": "334c0986832ba7391a8e4ccce3ce467f2b0e10a17c831ea9eb774713e38180bd",
+      "size_bytes": 880
+    },
+    {
+      "audit": "codex1-conformance-repair",
+      "disposition": "excluded_generated_bulk",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-conformance-repair/full-test_representation_candidate.py.log",
+      "reason": "log, bundle, redundant aggregate, or generated timeline",
+      "sha256": "03e92d02f7c71d71d9d66b281a79088f240b029c979286a5f452d67c9d0b59a8",
+      "size_bytes": 790
+    },
+    {
+      "audit": "codex1-conformance-repair",
+      "disposition": "excluded_generated_bulk",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-conformance-repair/queue-after.log",
+      "reason": "log, bundle, redundant aggregate, or generated timeline",
+      "sha256": "ebf948c1b8737f917228c2b4d51e0c779f3ab950f8ca1a2fd40c59eba2b3cbca",
+      "size_bytes": 21
+    },
+    {
+      "audit": "codex1-conformance-repair",
+      "disposition": "excluded_generated_bulk",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-conformance-repair/full-test_phase16_harness.py.log",
+      "reason": "log, bundle, redundant aggregate, or generated timeline",
+      "sha256": "db805f40f07de09589890aa030c1e38f391fb00485db7c7392b3f12b782e3ac9",
+      "size_bytes": 583
+    },
+    {
+      "archived_path": "research/phase35/codex1-conformance-repair/progress.md",
+      "audit": "codex1-conformance-repair",
+      "disposition": "committed",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-conformance-repair/progress.md",
+      "original_sha256": "46bfaac1defd0fa23e65a4007491c29e313ce1a2b100cbdcc8ca10b035d7dfa1",
+      "original_size_bytes": 972
+    },
+    {
+      "audit": "codex1-conformance-repair",
+      "disposition": "excluded_generated_bulk",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-conformance-repair/full-test_observability_phase.py.log",
+      "reason": "log, bundle, redundant aggregate, or generated timeline",
+      "sha256": "b85e16446783f9a8a012952f6eb123c59ba7fe533f44c2294a51b648891716dd",
+      "size_bytes": 844
+    },
+    {
+      "audit": "codex1-conformance-repair",
+      "disposition": "excluded_generated_bulk",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-conformance-repair/full-test_adaptive_threshold.py.log",
+      "reason": "log, bundle, redundant aggregate, or generated timeline",
+      "sha256": "c631554298419cf2acee92acbc1ecc023245df125190aba0f12147bb801f727b",
+      "size_bytes": 1838
+    },
+    {
+      "archived_path": "research/phase35/codex1-conformance-repair/default_off_equivalence.py",
+      "audit": "codex1-conformance-repair",
+      "disposition": "committed",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-conformance-repair/default_off_equivalence.py",
+      "original_sha256": "fde6d0d740fb2acde1b7b42e1ebf2b71e397ae8b62678a5773bbf7f19b0bf586",
+      "original_size_bytes": 1076
+    },
+    {
+      "archived_path": "research/phase35/codex1-conformance-repair/test_phase35_gate_b_repair.py",
+      "audit": "codex1-conformance-repair",
+      "disposition": "committed",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-conformance-repair/test_phase35_gate_b_repair.py",
+      "original_sha256": "631707a117a60c860ebc5bf02039f70985bce219ae57dc912e90116f6a39affc",
+      "original_size_bytes": 1032
+    },
+    {
+      "audit": "codex1-conformance-repair",
+      "disposition": "excluded_generated_bulk",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-conformance-repair/full-test_phase21_selective_inhibition.py.log",
+      "reason": "log, bundle, redundant aggregate, or generated timeline",
+      "sha256": "d697aeb12be21d854c10db2dd73cf50fa07b6424530262d45a455df99d5d8d8d",
+      "size_bytes": 1374
+    },
+    {
+      "audit": "codex1-conformance-repair",
+      "disposition": "excluded_generated_bulk",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-conformance-repair/full-test_influence_phase.py.log",
+      "reason": "log, bundle, redundant aggregate, or generated timeline",
+      "sha256": "b60ca40557411a402a49386d3323cd3aa6f8f715b13b2cc7f48b2ecc0c00e728",
+      "size_bytes": 1022
+    },
+    {
+      "audit": "codex1-conformance-repair",
+      "disposition": "excluded_generated_bulk",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-conformance-repair/gate-b-repair.log",
+      "reason": "log, bundle, redundant aggregate, or generated timeline",
+      "sha256": "9ce8dcaa16656a80ea3b09a94dd93a80252743e1633d931cdaae4418a2ffe6f3",
+      "size_bytes": 323
+    },
+    {
+      "archived_path": "research/phase35/codex1-conformance-repair/report.md",
+      "audit": "codex1-conformance-repair",
+      "disposition": "committed",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-conformance-repair/report.md",
+      "original_sha256": "751afd3050539aeace688a1c64a8226591392064eac62b3e906ef56e3ecac1ee",
+      "original_size_bytes": 3298
+    },
+    {
+      "audit": "codex1-conformance-repair",
+      "disposition": "excluded_generated_bulk",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-conformance-repair/full-test_8line_consolidation.py.log",
+      "reason": "log, bundle, redundant aggregate, or generated timeline",
+      "sha256": "2ca54805beba45a385b9fab5b294df33c95f3e2f42921d85f3aeee5973bec811",
+      "size_bytes": 787
+    },
+    {
+      "audit": "codex1-conformance-repair",
+      "disposition": "excluded_generated_bulk",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-conformance-repair/full-test_diagnostic_schedule.py.log",
+      "reason": "log, bundle, redundant aggregate, or generated timeline",
+      "sha256": "740d546c2ad61b8eab1453eed5bd38da7e9f47fb6ce2334bb2f17ed552b40269",
+      "size_bytes": 726
+    },
+    {
+      "archived_path": "research/phase35/codex1-conformance-repair/test_queue_carryover.py",
+      "audit": "codex1-conformance-repair",
+      "disposition": "committed",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-conformance-repair/test_queue_carryover.py",
+      "original_sha256": "4e56e58aac835881084a2420f4ec33dad7f27d1dc2e4d3a0f90e8a2936231a8d",
+      "original_size_bytes": 3062
+    },
+    {
+      "audit": "codex1-conformance-repair",
+      "disposition": "excluded_generated_bulk",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-conformance-repair/full-test_l2_leak_toggle.py.log",
+      "reason": "log, bundle, redundant aggregate, or generated timeline",
+      "sha256": "61513ac7dc69324ef801f8aa890e8cdb96be54f7a3cc8bcb1f53fb3e0451ef13",
+      "size_bytes": 477
+    },
+    {
+      "archived_path": "research/phase35/codex1-conformance-repair/maturity_trace.json",
+      "audit": "codex1-conformance-repair",
+      "disposition": "committed",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-conformance-repair/maturity_trace.json",
+      "original_sha256": "58fba8abd16561e2c0cf4987fa32608edda40da1229037336d1f21975de989ba",
+      "original_size_bytes": 2290
+    },
+    {
+      "audit": "codex1-conformance-repair",
+      "disposition": "excluded_generated_bulk",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-conformance-repair/full-test_phase11_validation.py.log",
+      "reason": "log, bundle, redundant aggregate, or generated timeline",
+      "sha256": "4ea43c814d62f70de93486d75bb2177454714d3246e564d1c51ffea70b89c041",
+      "size_bytes": 781
+    },
+    {
+      "audit": "codex1-conformance-repair",
+      "disposition": "excluded_generated_bulk",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-conformance-repair/full-test_phase23_frequency_measurement.py.log",
+      "reason": "log, bundle, redundant aggregate, or generated timeline",
+      "sha256": "01568dfd1488943b6e8a93d1acb6d0b2bd8ced8b8e368f4dcae37ac5262b1570",
+      "size_bytes": 617
+    },
+    {
+      "audit": "codex1-exact-tie-audit",
+      "disposition": "excluded_generated_bulk",
+      "kind": "directory_tree",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-exact-tie-audit/repo",
+      "reason": "duplicate repository, cache, or environment tree",
+      "size_bytes": 20769271
+    },
+    {
+      "audit": "codex1-exact-tie-audit",
+      "disposition": "excluded_generated_bulk",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-exact-tie-audit/run.log",
+      "reason": "log, bundle, redundant aggregate, or generated timeline",
+      "sha256": "cbb10a9536cb889338cabcd5ce4e56b6e9bf6de3ab5d453b45bd66a72106c602",
+      "size_bytes": 301
+    },
+    {
+      "audit": "codex1-exact-tie-audit",
+      "disposition": "excluded_generated_bulk",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-exact-tie-audit/summary.json",
+      "reason": "log, bundle, redundant aggregate, or generated timeline",
+      "sha256": "9e2071173f16acaf2456d4ca4b4ca383d97c0b6f731016b6dd9549478220d304",
+      "size_bytes": 1383
+    },
+    {
+      "archived_path": "research/phase35/codex1-exact-tie-audit/run_audit.py",
+      "audit": "codex1-exact-tie-audit",
+      "disposition": "committed",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-exact-tie-audit/run_audit.py",
+      "original_sha256": "5de297e2fa77384b35c0929a11733456ad19d95c258a4c66b70a4aa31abf77e3",
+      "original_size_bytes": 11447
+    },
+    {
+      "audit": "codex1-exact-tie-audit",
+      "disposition": "excluded_generated_bulk",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-exact-tie-audit/summary.log",
+      "reason": "log, bundle, redundant aggregate, or generated timeline",
+      "sha256": "9e2071173f16acaf2456d4ca4b4ca383d97c0b6f731016b6dd9549478220d304",
+      "size_bytes": 1383
+    },
+    {
+      "archived_path": "research/phase35/codex1-exact-tie-audit/results.json",
+      "audit": "codex1-exact-tie-audit",
+      "disposition": "committed",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-exact-tie-audit/results.json",
+      "original_sha256": "4532596e16ee07f2a8f20e4cedeab632716277216a57a94a7cd744cd50995d53",
+      "original_size_bytes": 357782
+    },
+    {
+      "archived_path": "research/phase35/codex1-exact-tie-audit/progress.md",
+      "audit": "codex1-exact-tie-audit",
+      "disposition": "committed",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-exact-tie-audit/progress.md",
+      "original_sha256": "82cb8c900cb07d127714f37f2a6b31b8c462d313b3f6b329de008a04ee3936eb",
+      "original_size_bytes": 501
+    },
+    {
+      "archived_path": "research/phase35/codex1-exact-tie-audit/summarize.py",
+      "audit": "codex1-exact-tie-audit",
+      "disposition": "committed",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-exact-tie-audit/summarize.py",
+      "original_sha256": "b2b90ceb3220a65af0cd33cc8a8d9b232f7899213f1f57726b02cb7f56c514c7",
+      "original_size_bytes": 3090
+    },
+    {
+      "archived_path": "research/phase35/codex1-exact-tie-audit/report.md",
+      "audit": "codex1-exact-tie-audit",
+      "disposition": "committed",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-exact-tie-audit/report.md",
+      "original_sha256": "3895760dc103d2e077bbdc3c77c9a1718585a8dd87beb9123149242ec44b112d",
+      "original_size_bytes": 4935
+    },
+    {
+      "audit": "codex1-implementation",
+      "disposition": "excluded_generated_bulk",
+      "kind": "directory_tree",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-implementation/baseline-repo",
+      "reason": "duplicate repository, cache, or environment tree",
+      "size_bytes": 20755454
+    },
+    {
+      "audit": "codex1-implementation",
+      "disposition": "excluded_generated_bulk",
+      "kind": "directory_tree",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-implementation/repo",
+      "reason": "duplicate repository, cache, or environment tree",
+      "size_bytes": 20762438
+    },
+    {
+      "audit": "codex1-implementation",
+      "disposition": "excluded_generated_bulk",
+      "kind": "directory_tree",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-implementation/__pycache__",
+      "reason": "duplicate repository, cache, or environment tree",
+      "size_bytes": 7918
+    },
+    {
+      "audit": "codex1-implementation",
+      "disposition": "excluded_generated_bulk",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-implementation/baseline-test_balanced_init.py.log",
+      "reason": "log, bundle, redundant aggregate, or generated timeline",
+      "sha256": "8c52ed928c781d5f9a93e626e516af6dd26ee5d8010421c6845f8139f24f8a3b",
+      "size_bytes": 676
+    },
+    {
+      "archived_path": "research/phase35/codex1-implementation/test_phase35_gate_b.py",
+      "audit": "codex1-implementation",
+      "disposition": "committed",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-implementation/test_phase35_gate_b.py",
+      "original_sha256": "58491418da8e145b2c1ef4018e6b1d236bbf28cb1c3bd0ce2ed817e79cf39829",
+      "original_size_bytes": 3766
+    },
+    {
+      "audit": "codex1-implementation",
+      "disposition": "excluded_generated_bulk",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-implementation/baseline-test_observability_phase.py.log",
+      "reason": "log, bundle, redundant aggregate, or generated timeline",
+      "sha256": "b85e16446783f9a8a012952f6eb123c59ba7fe533f44c2294a51b648891716dd",
+      "size_bytes": 844
+    },
+    {
+      "audit": "codex1-implementation",
+      "disposition": "excluded_generated_bulk",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-implementation/baseline-test_phase28a_local_common_input_feasibility.py.log",
+      "reason": "log, bundle, redundant aggregate, or generated timeline",
+      "sha256": "daee2a284b8bef31703138a8012e9ab96c1a966953383e162c766ae1bfdfe946",
+      "size_bytes": 269
+    },
+    {
+      "archived_path": "research/phase35/codex1-implementation/test_phase35_gate_a.py",
+      "audit": "codex1-implementation",
+      "disposition": "committed",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-implementation/test_phase35_gate_a.py",
+      "original_sha256": "20e16e54acd763798f4afc3d17e9d34e6c4839633a12b79983f062f0348065e7",
+      "original_size_bytes": 3519
+    },
+    {
+      "audit": "codex1-implementation",
+      "disposition": "excluded_generated_bulk",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-implementation/baseline-test_diagnostic_schedule.py.log",
+      "reason": "log, bundle, redundant aggregate, or generated timeline",
+      "sha256": "740d546c2ad61b8eab1453eed5bd38da7e9f47fb6ce2334bb2f17ed552b40269",
+      "size_bytes": 726
+    },
+    {
+      "audit": "codex1-implementation",
+      "disposition": "excluded_generated_bulk",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-implementation/baseline-test_phase11_validation.py.log",
+      "reason": "log, bundle, redundant aggregate, or generated timeline",
+      "sha256": "4ea43c814d62f70de93486d75bb2177454714d3246e564d1c51ffea70b89c041",
+      "size_bytes": 781
+    },
+    {
+      "audit": "codex1-implementation",
+      "disposition": "excluded_generated_bulk",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-implementation/baseline-test_hard_reset_inhibition.py.log",
+      "reason": "log, bundle, redundant aggregate, or generated timeline",
+      "sha256": "3533a2b6358f6ca979ed774fa37b21d53b7b80999fc7ca926366c90c9633409b",
+      "size_bytes": 776
+    },
+    {
+      "audit": "codex1-implementation",
+      "disposition": "excluded_generated_bulk",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-implementation/baseline-test_l1i_causal_feedback.py.log",
+      "reason": "log, bundle, redundant aggregate, or generated timeline",
+      "sha256": "8c282bc4285b0a468db6a8d8324b2799ee4d592c9fda6ed8ad69b0ccb4daf330",
+      "size_bytes": 1026
+    },
+    {
+      "audit": "codex1-implementation",
+      "disposition": "excluded_generated_bulk",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-implementation/baseline-test_loser_depression_protection.py.log",
+      "reason": "log, bundle, redundant aggregate, or generated timeline",
+      "sha256": "2c39790f7473fe27db0664d05b37c9049b62a284f6fd516a2975b709e608f3e3",
+      "size_bytes": 1528
+    },
+    {
+      "audit": "codex1-implementation",
+      "disposition": "excluded_generated_bulk",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-implementation/gate-a.log",
+      "reason": "log, bundle, redundant aggregate, or generated timeline",
+      "sha256": "b18dcec4e705ccc3973aefa7638db6c9caad7b8ea3e5e8ef2bf822f919f37ed7",
+      "size_bytes": 233
+    },
+    {
+      "audit": "codex1-implementation",
+      "disposition": "excluded_generated_bulk",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-implementation/phase35-gate-a-b-4e712a4b7dea033b9191680a4b4e3577d93ca304.bundle.sha256",
+      "reason": "log, bundle, redundant aggregate, or generated timeline",
+      "sha256": "bb79d6d09e2e3de124d35919334edbd1634005852036aabf94df7d5fe22811ff",
+      "size_bytes": 185
+    },
+    {
+      "audit": "codex1-implementation",
+      "disposition": "excluded_generated_bulk",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-implementation/baseline-test_constant_input_feedback.py.log",
+      "reason": "log, bundle, redundant aggregate, or generated timeline",
+      "sha256": "f7ae798215023fb2a5fd2997db1033117b277b0512c024deef5da51942e96392",
+      "size_bytes": 416
+    },
+    {
+      "audit": "codex1-implementation",
+      "disposition": "excluded_generated_bulk",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-implementation/baseline-test_pretrained_l2i_recruitment.py.log",
+      "reason": "log, bundle, redundant aggregate, or generated timeline",
+      "sha256": "4a3ca02e9daa93bcac64558d06e088431c217849f9ff728be226f82d6efa176d",
+      "size_bytes": 2575
+    },
+    {
+      "audit": "codex1-implementation",
+      "disposition": "excluded_generated_bulk",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-implementation/gate-b.log",
+      "reason": "log, bundle, redundant aggregate, or generated timeline",
+      "sha256": "2f8a4b4b90779fd82517b541e3f998e5091dd5e3656f104579bc4e0cb4330366",
+      "size_bytes": 251
+    },
+    {
+      "audit": "codex1-implementation",
+      "disposition": "excluded_generated_bulk",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-implementation/baseline-test_phase23_frequency_measurement.py.log",
+      "reason": "log, bundle, redundant aggregate, or generated timeline",
+      "sha256": "ae9e40f832bba73893c05da28d023a32f4b3edd7fc1494c00a16833d95a8ad65",
+      "size_bytes": 617
+    },
+    {
+      "audit": "codex1-implementation",
+      "disposition": "excluded_generated_bulk",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-implementation/baseline-test_l1i_immediate_relay.py.log",
+      "reason": "log, bundle, redundant aggregate, or generated timeline",
+      "sha256": "86ded0039f0912a4691453cc70df825d33e9e8a16df7512ed9536ebd8763b629",
+      "size_bytes": 410
+    },
+    {
+      "audit": "codex1-implementation",
+      "disposition": "excluded_generated_bulk",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-implementation/baseline-test_assembly_flow_credit.py.log",
+      "reason": "log, bundle, redundant aggregate, or generated timeline",
+      "sha256": "799b7c64e1ab19ccf498429ecf33c61578a17359e728d4fd4b5162056f231699",
+      "size_bytes": 398
+    },
+    {
+      "audit": "codex1-implementation",
+      "disposition": "excluded_generated_bulk",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-implementation/baseline-test_prediction_phase19.py.log",
+      "reason": "log, bundle, redundant aggregate, or generated timeline",
+      "sha256": "c4fe187ac0cd80463b3c8023ff68083515f42fda42a4f9046f6eeffcb0cd05c9",
+      "size_bytes": 707
+    },
+    {
+      "audit": "codex1-implementation",
+      "disposition": "excluded_generated_bulk",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-implementation/golden-post.log",
+      "reason": "log, bundle, redundant aggregate, or generated timeline",
+      "sha256": "b2432bd7285c9456c1de8011148b9e3c8ef0dea29d986fe062bc6de88227ac3e",
+      "size_bytes": 758
+    },
+    {
+      "audit": "codex1-implementation",
+      "disposition": "excluded_generated_bulk",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-implementation/baseline-test_flow_rate.py.log",
+      "reason": "log, bundle, redundant aggregate, or generated timeline",
+      "sha256": "38ccea8c2f14a94c1e5cb12b4cac402917fd5575b5a66136dda20ae87997909d",
+      "size_bytes": 882
+    },
+    {
+      "audit": "codex1-implementation",
+      "disposition": "excluded_generated_bulk",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-implementation/baseline-test_phase13b_tracer_timing.py.log",
+      "reason": "log, bundle, redundant aggregate, or generated timeline",
+      "sha256": "e78a412e27c97765891ad9b3dde51387c1c224445680ac60be7f1b77f9f6ec35",
+      "size_bytes": 251
+    },
+    {
+      "audit": "codex1-implementation",
+      "disposition": "excluded_generated_bulk",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-implementation/baseline-test_refractory_gating.py.log",
+      "reason": "log, bundle, redundant aggregate, or generated timeline",
+      "sha256": "c5bdd70f5a9c64c29c206d91076e4526ff9fd2d2df0991332b9e41b114c12f99",
+      "size_bytes": 578
+    },
+    {
+      "audit": "codex1-implementation",
+      "disposition": "excluded_generated_bulk",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-implementation/baseline-test_neuron.py.log",
+      "reason": "log, bundle, redundant aggregate, or generated timeline",
+      "sha256": "25ba0f512f22c23b53b2f9b29f1843017d764687a93e6eb307bcecb8d4175ebd",
+      "size_bytes": 1778
+    },
+    {
+      "audit": "codex1-implementation",
+      "disposition": "excluded_generated_bulk",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-implementation/baseline-test_phase16_harness.py.log",
+      "reason": "log, bundle, redundant aggregate, or generated timeline",
+      "sha256": "db805f40f07de09589890aa030c1e38f391fb00485db7c7392b3f12b782e3ac9",
+      "size_bytes": 583
+    },
+    {
+      "audit": "codex1-implementation",
+      "disposition": "excluded_generated_bulk",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-implementation/phase35-gate-a-b-4e712a4b7dea033b9191680a4b4e3577d93ca304.bundle",
+      "reason": "log, bundle, redundant aggregate, or generated timeline",
+      "sha256": "656b3a63522ddcb5f9960765769f90e167c660fb9ea5f7bbdbb4feaa6e727685",
+      "size_bytes": 2459024
+    },
+    {
+      "audit": "codex1-implementation",
+      "disposition": "excluded_generated_bulk",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-implementation/baseline-test_phase29_centered_encoder_ownership_gate.py.log",
+      "reason": "log, bundle, redundant aggregate, or generated timeline",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    {
+      "audit": "codex1-implementation",
+      "disposition": "excluded_generated_bulk",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-implementation/baseline-test_phase27_l2_ownership_causal_audit.py.log",
+      "reason": "log, bundle, redundant aggregate, or generated timeline",
+      "sha256": "4909d3923c438bd76e609bbe9e97c483d0375c2d23406844578a1072a4ead0e9",
+      "size_bytes": 263
+    },
+    {
+      "audit": "codex1-implementation",
+      "disposition": "excluded_generated_bulk",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-implementation/baseline-test_competitive_reset.py.log",
+      "reason": "log, bundle, redundant aggregate, or generated timeline",
+      "sha256": "7286485a0543ccd92bdd86ff7b5cfaab4e8f4ce9d907ee8854456e31453c5d2e",
+      "size_bytes": 1744
+    },
+    {
+      "audit": "codex1-implementation",
+      "disposition": "excluded_generated_bulk",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-implementation/baseline-test_l2_competition.py.log",
+      "reason": "log, bundle, redundant aggregate, or generated timeline",
+      "sha256": "568b9384b7b02751c38a368080ca4080886e38d66870ea0045eaaec0245aa9e7",
+      "size_bytes": 976
+    },
+    {
+      "audit": "codex1-implementation",
+      "disposition": "excluded_generated_bulk",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-implementation/baseline-test_l2_chunked_charge.py.log",
+      "reason": "log, bundle, redundant aggregate, or generated timeline",
+      "sha256": "939cb56e257fe4138f1eba5bcfd60f89ff50c174cbfb5fc701b30b8bf6ce5ffa",
+      "size_bytes": 452
+    },
+    {
+      "audit": "codex1-implementation",
+      "disposition": "excluded_generated_bulk",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-implementation/baseline-test_structural_free_energy.py.log",
+      "reason": "log, bundle, redundant aggregate, or generated timeline",
+      "sha256": "baaa975b79080b269da163e675480f3626361c3d66728c2171a209b314442298",
+      "size_bytes": 982
+    },
+    {
+      "archived_path": "research/phase35/codex1-implementation/implementation_contract.md",
+      "audit": "codex1-implementation",
+      "disposition": "committed",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-implementation/implementation_contract.md",
+      "original_sha256": "ccddf7a3a96e5feb5bb3fdff32908a14bfb8dee226642cf70c3ffa920d4d5030",
+      "original_size_bytes": 2682
+    },
+    {
+      "audit": "codex1-implementation",
+      "disposition": "excluded_generated_bulk",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-implementation/baseline-test_phase21_selective_inhibition.py.log",
+      "reason": "log, bundle, redundant aggregate, or generated timeline",
+      "sha256": "df5645a5a34e0e0a0d48d035c9a4058f4ee2a76b851d0d312a6ee62c1117f753",
+      "size_bytes": 1718
+    },
+    {
+      "audit": "codex1-implementation",
+      "disposition": "excluded_generated_bulk",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-implementation/baseline-test_influence_phase.py.log",
+      "reason": "log, bundle, redundant aggregate, or generated timeline",
+      "sha256": "b60ca40557411a402a49386d3323cd3aa6f8f715b13b2cc7f48b2ecc0c00e728",
+      "size_bytes": 1022
+    },
+    {
+      "audit": "codex1-implementation",
+      "disposition": "excluded_generated_bulk",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-implementation/phase19-post.log",
+      "reason": "log, bundle, redundant aggregate, or generated timeline",
+      "sha256": "b4b1dee6b771cb8f15188053d3af384d8ef6c502c1f20f2d4e5c112b023a50c5",
+      "size_bytes": 760
+    },
+    {
+      "archived_path": "research/phase35/codex1-implementation/results.json",
+      "audit": "codex1-implementation",
+      "disposition": "committed",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-implementation/results.json",
+      "original_sha256": "2afa484c11c90afe57a0eb5a4b3c54098be21e949f7d932501913550e367b494",
+      "original_size_bytes": 1727
+    },
+    {
+      "audit": "codex1-implementation",
+      "disposition": "excluded_generated_bulk",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-implementation/baseline-test_representation_candidate.py.log",
+      "reason": "log, bundle, redundant aggregate, or generated timeline",
+      "sha256": "03e92d02f7c71d71d9d66b281a79088f240b029c979286a5f452d67c9d0b59a8",
+      "size_bytes": 790
+    },
+    {
+      "audit": "codex1-implementation",
+      "disposition": "excluded_generated_bulk",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-implementation/baseline-test_l2_leak_toggle.py.log",
+      "reason": "log, bundle, redundant aggregate, or generated timeline",
+      "sha256": "61513ac7dc69324ef801f8aa890e8cdb96be54f7a3cc8bcb1f53fb3e0451ef13",
+      "size_bytes": 477
+    },
+    {
+      "audit": "codex1-implementation",
+      "disposition": "excluded_generated_bulk",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-implementation/baseline.tsv",
+      "reason": "log, bundle, redundant aggregate, or generated timeline",
+      "sha256": "7fb639c8c5dcb912b40f8f26565c4305023e9c07139770645efa060238e9f464",
+      "size_bytes": 1574
+    },
+    {
+      "audit": "codex1-implementation",
+      "disposition": "excluded_generated_bulk",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-implementation/baseline-test_8line_consolidation.py.log",
+      "reason": "log, bundle, redundant aggregate, or generated timeline",
+      "sha256": "2ca54805beba45a385b9fab5b294df33c95f3e2f42921d85f3aeee5973bec811",
+      "size_bytes": 787
+    },
+    {
+      "audit": "codex1-implementation",
+      "disposition": "excluded_generated_bulk",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-implementation/baseline-test_inhibitory_delta_rule.py.log",
+      "reason": "log, bundle, redundant aggregate, or generated timeline",
+      "sha256": "c10b19bca176893985bf40fa5e7eaf8efc3a499abd4c2f3ca8d72f484289001f",
+      "size_bytes": 702
+    },
+    {
+      "audit": "codex1-implementation",
+      "disposition": "excluded_generated_bulk",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-implementation/baseline-test_geometry_phase.py.log",
+      "reason": "log, bundle, redundant aggregate, or generated timeline",
+      "sha256": "61a9a02e31c95a2174f3fec5d004e63ebe678aacd89f5e1d38733ebe1cdafbaa",
+      "size_bytes": 1150
+    },
+    {
+      "audit": "codex1-implementation",
+      "disposition": "excluded_generated_bulk",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-implementation/baseline-test_l2i_causal_inhibition.py.log",
+      "reason": "log, bundle, redundant aggregate, or generated timeline",
+      "sha256": "0f02909df08cb421e0e05979f753ced2ddb59f46839db606cc7b73bba8abf4ea",
+      "size_bytes": 900
+    },
+    {
+      "audit": "codex1-implementation",
+      "disposition": "excluded_generated_bulk",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-implementation/baseline-test_adaptive_threshold.py.log",
+      "reason": "log, bundle, redundant aggregate, or generated timeline",
+      "sha256": "c631554298419cf2acee92acbc1ecc023245df125190aba0f12147bb801f727b",
+      "size_bytes": 1838
+    },
+    {
+      "archived_path": "research/phase35/codex1-implementation/progress.md",
+      "audit": "codex1-implementation",
+      "disposition": "committed",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-implementation/progress.md",
+      "original_sha256": "fd0879ff354e03bb737549ba6fa90b5092ea391498e6738fc6a19785ca7960a9",
+      "original_size_bytes": 861
+    },
+    {
+      "audit": "codex1-implementation",
+      "disposition": "excluded_generated_bulk",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-implementation/baseline-test_phase20_frozen_reconstruction.py.log",
+      "reason": "log, bundle, redundant aggregate, or generated timeline",
+      "sha256": "9962bd20efd9527f62ac05b7d8176823be07b72f0697f8693bfd3a3e91455c3f",
+      "size_bytes": 1464
+    },
+    {
+      "audit": "codex1-implementation",
+      "disposition": "excluded_generated_bulk",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-implementation/baseline-test_phase22_full_interaction.py.log",
+      "reason": "log, bundle, redundant aggregate, or generated timeline",
+      "sha256": "dee299c2b755c52f8b358631b0db95f254e81071ec7603fbf99415eed380c0be",
+      "size_bytes": 1033
+    },
+    {
+      "audit": "codex1-implementation",
+      "disposition": "excluded_generated_bulk",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-implementation/baseline-test_inhibitory_plasticity.py.log",
+      "reason": "log, bundle, redundant aggregate, or generated timeline",
+      "sha256": "9abf50e22032913e25e948a8a2b900cbb60f3c26833d1af4fd5def10d96c8c5f",
+      "size_bytes": 2225
+    },
+    {
+      "audit": "codex1-implementation",
+      "disposition": "excluded_generated_bulk",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-implementation/baseline-tests_golden_test_golden_equiv.py.log",
+      "reason": "log, bundle, redundant aggregate, or generated timeline",
+      "sha256": "b2432bd7285c9456c1de8011148b9e3c8ef0dea29d986fe062bc6de88227ac3e",
+      "size_bytes": 758
+    },
+    {
+      "archived_path": "research/phase35/codex1-implementation/report.md",
+      "audit": "codex1-implementation",
+      "disposition": "committed",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-implementation/report.md",
+      "original_sha256": "7d57652efcf2c02bfb3b931ee9d19d2f7656872fd74b9fe199bec51b420e558c",
+      "original_size_bytes": 2231
+    },
+    {
+      "audit": "codex1-implementation",
+      "disposition": "excluded_generated_bulk",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-implementation/baseline-test_prediction_column_phase19.py.log",
+      "reason": "log, bundle, redundant aggregate, or generated timeline",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    {
+      "audit": "codex1-implementation",
+      "disposition": "excluded_generated_bulk",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-implementation/baseline-test_prediction_column_phase19-rerun.log",
+      "reason": "log, bundle, redundant aggregate, or generated timeline",
+      "sha256": "1a0502dd9767349ccea32a359eaef82ee9cc811d44b0f429fecd959894f0f052",
+      "size_bytes": 5039
+    },
+    {
+      "audit": "codex1-paired-failure-audit",
+      "disposition": "excluded_generated_bulk",
+      "kind": "directory_tree",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-paired-failure-audit/repo",
+      "reason": "duplicate repository, cache, or environment tree",
+      "size_bytes": 20769271
+    },
+    {
+      "archived_path": "research/phase35/codex1-paired-failure-audit/results.json",
+      "audit": "codex1-paired-failure-audit",
+      "disposition": "committed",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-paired-failure-audit/results.json",
+      "original_sha256": "03b123602e1da0a0e694f6dbc86e3846d863558c2f3ef7d736d894862d8ce692",
+      "original_size_bytes": 1003
+    },
+    {
+      "archived_path": "research/phase35/codex1-paired-failure-audit/progress.md",
+      "audit": "codex1-paired-failure-audit",
+      "disposition": "committed",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-paired-failure-audit/progress.md",
+      "original_sha256": "bd058567343f030b3f0049f6ba169414b2447c42351fe00e2ea879b0f6fa3722",
+      "original_size_bytes": 955
+    },
+    {
+      "archived_path": "research/phase35/codex1-paired-failure-audit/report.md",
+      "audit": "codex1-paired-failure-audit",
+      "disposition": "committed",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-paired-failure-audit/report.md",
+      "original_sha256": "7e182324e88d8be743a3fccd8410d57fc6056769e03c070de71ce122086b0375",
+      "original_size_bytes": 2526
+    },
+    {
+      "audit": "codex1-race-timing-decomposition",
+      "disposition": "excluded_generated_bulk",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-race-timing-decomposition/run.log",
+      "reason": "log, bundle, redundant aggregate, or generated timeline",
+      "sha256": "3b2cdda2df987fa5f3a3963b6af88b3aa1cfee05983b363a2feb32690c6ddab2",
+      "size_bytes": 662
+    },
+    {
+      "archived_path": "research/phase35/codex1-race-timing-decomposition/validate.py",
+      "audit": "codex1-race-timing-decomposition",
+      "disposition": "committed",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-race-timing-decomposition/validate.py",
+      "original_sha256": "61cec8dccec7710eba38e741abc84f096683b117251376879e437ab33b9d7d83",
+      "original_size_bytes": 1252
+    },
+    {
+      "archived_path": "research/phase35/codex1-race-timing-decomposition/results.json",
+      "audit": "codex1-race-timing-decomposition",
+      "disposition": "committed",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-race-timing-decomposition/results.json",
+      "original_sha256": "81c98008983e1712e41ab2a3bd11716a36c45c32d743b5e7e58a7f6139e21796",
+      "original_size_bytes": 160510
+    },
+    {
+      "archived_path": "research/phase35/codex1-race-timing-decomposition/progress.md",
+      "audit": "codex1-race-timing-decomposition",
+      "disposition": "committed",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-race-timing-decomposition/progress.md",
+      "original_sha256": "8106cb50503b951914f74da64362a302fa7e05e0538913227b79aab204f977f7",
+      "original_size_bytes": 780
+    },
+    {
+      "archived_path": "research/phase35/codex1-race-timing-decomposition/report.md",
+      "audit": "codex1-race-timing-decomposition",
+      "disposition": "committed",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-race-timing-decomposition/report.md",
+      "original_sha256": "00fc95dd7e113c6d9ea08cb590331ce87fb5c6c885bebe7400b21b625936ded0",
+      "original_size_bytes": 3945
+    },
+    {
+      "audit": "codex1-race-timing-decomposition",
+      "disposition": "excluded_generated_bulk",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-race-timing-decomposition/event_decomposition.json",
+      "reason": "log, bundle, redundant aggregate, or generated timeline",
+      "sha256": "5c54a524aca17947b8da4151da62dcfe6f54cae1efe1d5a9edda9f0fcd4f6682",
+      "size_bytes": 146945
+    },
+    {
+      "audit": "codex1-race-timing-decomposition",
+      "disposition": "excluded_generated_bulk",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-race-timing-decomposition/validation.log",
+      "reason": "log, bundle, redundant aggregate, or generated timeline",
+      "sha256": "f60e4269ba4f97eb9148e9da9b06df0ea29711c0f465dbf50cca61576c9aaf8b",
+      "size_bytes": 161
+    },
+    {
+      "archived_path": "research/phase35/codex1-race-timing-decomposition/run_decomposition.py",
+      "audit": "codex1-race-timing-decomposition",
+      "disposition": "committed",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-race-timing-decomposition/run_decomposition.py",
+      "original_sha256": "cf27c2c55f222081f5ea791240f5a5e3b666dcb842aad4d1c7bcce5cfdae2c16",
+      "original_size_bytes": 9521
+    },
+    {
+      "audit": "codex1-source-fragmentation",
+      "disposition": "excluded_generated_bulk",
+      "kind": "directory_tree",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-source-fragmentation/repo",
+      "reason": "duplicate repository, cache, or environment tree",
+      "size_bytes": 20769271
+    },
+    {
+      "audit": "codex1-source-fragmentation",
+      "disposition": "stored_separately",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-source-fragmentation/seed-2-trace.json",
+      "reason": "large raw per-step trace/timeline",
+      "release_bundle": "phase35-large-raw-traces-db30cead.tar.gz",
+      "sha256": "b30c5f06fcbe8e5671c146e313a0968494157329551bb5da50e5787de27b6b8d",
+      "size_bytes": 26128549
+    },
+    {
+      "audit": "codex1-source-fragmentation",
+      "disposition": "stored_separately",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-source-fragmentation/seed-4-trace.json",
+      "reason": "large raw per-step trace/timeline",
+      "release_bundle": "phase35-large-raw-traces-db30cead.tar.gz",
+      "sha256": "2aca22331407d24cfddeccf79131e2c447b7fc1e05b0af274545972e1978efd0",
+      "size_bytes": 25615589
+    },
+    {
+      "audit": "codex1-source-fragmentation",
+      "disposition": "stored_separately",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-source-fragmentation/smoke.json",
+      "reason": "large raw per-step trace/timeline",
+      "release_bundle": "phase35-large-raw-traces-db30cead.tar.gz",
+      "sha256": "244b431e5c9129851ae3b5a585d33496cac5aa0a2ab719942d9d95945e129edb",
+      "size_bytes": 61931
+    },
+    {
+      "audit": "codex1-source-fragmentation",
+      "disposition": "excluded_generated_bulk",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-source-fragmentation/run.log",
+      "reason": "log, bundle, redundant aggregate, or generated timeline",
+      "sha256": "0fefaa33f6e136a165fd23867cea1620a4fc188fffa431c6877c484638f892c4",
+      "size_bytes": 844
+    },
+    {
+      "audit": "codex1-source-fragmentation",
+      "disposition": "stored_separately",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-source-fragmentation/seed-1-trace.json",
+      "reason": "large raw per-step trace/timeline",
+      "release_bundle": "phase35-large-raw-traces-db30cead.tar.gz",
+      "sha256": "cb259e25b38c27f1dafc1a2d8b55974d4cacba5113c0c358da064cf76ce0c0ba",
+      "size_bytes": 24602661
+    },
+    {
+      "audit": "codex1-source-fragmentation",
+      "disposition": "stored_separately",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-source-fragmentation/seed-5-trace.json",
+      "reason": "large raw per-step trace/timeline",
+      "release_bundle": "phase35-large-raw-traces-db30cead.tar.gz",
+      "sha256": "9d2b0e47b797870834fcd41509db5a8849137bad2a1dd73273b3f4725773d77b",
+      "size_bytes": 25414802
+    },
+    {
+      "archived_path": "research/phase35/codex1-source-fragmentation/run_audit.py",
+      "audit": "codex1-source-fragmentation",
+      "disposition": "committed",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-source-fragmentation/run_audit.py",
+      "original_sha256": "a4faa9c534cd8af69c8000be5c32c9185c64450ca485e244d97f333d1031cd77",
+      "original_size_bytes": 16584
+    },
+    {
+      "audit": "codex1-source-fragmentation",
+      "disposition": "excluded_generated_bulk",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-source-fragmentation/production-check.log",
+      "reason": "log, bundle, redundant aggregate, or generated timeline",
+      "sha256": "0381e25517a5287c079aa7e9ca5daa6937bb8d1de866bf9399e27d89330b9591",
+      "size_bytes": 162
+    },
+    {
+      "archived_path": "research/phase35/codex1-source-fragmentation/results.json",
+      "audit": "codex1-source-fragmentation",
+      "disposition": "committed",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-source-fragmentation/results.json",
+      "original_sha256": "46050632c033c8e34a992d5901d82ea51eae4ca9c0a63680e43393b81292f215",
+      "original_size_bytes": 46597
+    },
+    {
+      "archived_path": "research/phase35/codex1-source-fragmentation/progress.md",
+      "audit": "codex1-source-fragmentation",
+      "disposition": "committed",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-source-fragmentation/progress.md",
+      "original_sha256": "f4d702551b6c731e8af0b95a129f2b57eca9c86bbae1237b7560d49a3751cb3f",
+      "original_size_bytes": 1112
+    },
+    {
+      "archived_path": "research/phase35/codex1-source-fragmentation/validate_audit.py",
+      "audit": "codex1-source-fragmentation",
+      "disposition": "committed",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-source-fragmentation/validate_audit.py",
+      "original_sha256": "1892f9e276826c49f7cf3442eb5cad92a859657cb848640862b0a6b9bb550947",
+      "original_size_bytes": 1988
+    },
+    {
+      "archived_path": "research/phase35/codex1-source-fragmentation/report.md",
+      "audit": "codex1-source-fragmentation",
+      "disposition": "committed",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-source-fragmentation/report.md",
+      "original_sha256": "61313e28dce7c0bafa4ce1af45932378c5a44c5c64045bc27d39f3c6c3ddf6f1",
+      "original_size_bytes": 4789
+    },
+    {
+      "audit": "codex1-source-fragmentation",
+      "disposition": "excluded_generated_bulk",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-source-fragmentation/validation.log",
+      "reason": "log, bundle, redundant aggregate, or generated timeline",
+      "sha256": "55238aa522985a080dca520b3511ee1a5095c252546e1e6ef972097e00439ff4",
+      "size_bytes": 113
+    },
+    {
+      "audit": "codex1-source-fragmentation",
+      "disposition": "stored_separately",
+      "original_path": "/home/cxiong/codex-runs/codex1-phase35-source-fragmentation/seed-3-trace.json",
+      "reason": "large raw per-step trace/timeline",
+      "release_bundle": "phase35-large-raw-traces-db30cead.tar.gz",
+      "sha256": "6ffd792542e679786fc0ae38c11408e7f1affe4d242ca341072139c1c16c1a31",
+      "size_bytes": 21619977
+    },
+    {
+      "archived_path": "research/phase35/codex2-decoder-selectivity/test_decoder_selectivity.py",
+      "audit": "codex2-decoder-selectivity",
+      "disposition": "committed",
+      "original_path": "/home/cxiong/codex-runs/codex2-phase35-decoder-selectivity/test_decoder_selectivity.py",
+      "original_sha256": "26ffcd6a07c3d31cfd2195601b9271cbc017a608b229e92e2ca1c95e022762b7",
+      "original_size_bytes": 731
+    },
+    {
+      "archived_path": "research/phase35/codex2-decoder-selectivity/analyze_decoder_selectivity.py",
+      "audit": "codex2-decoder-selectivity",
+      "disposition": "committed",
+      "original_path": "/home/cxiong/codex-runs/codex2-phase35-decoder-selectivity/analyze_decoder_selectivity.py",
+      "original_sha256": "e8f827659204db604b7eb04b515c99f07992ebe86f3cacf705a6c909ecc0f5f6",
+      "original_size_bytes": 7221
+    },
+    {
+      "archived_path": "research/phase35/codex2-decoder-selectivity/results.json",
+      "audit": "codex2-decoder-selectivity",
+      "disposition": "committed",
+      "original_path": "/home/cxiong/codex-runs/codex2-phase35-decoder-selectivity/results.json",
+      "original_sha256": "b7761e8dc7304e34b7272522987821bf5a07ea0bd10536d7fb7cc668a73c40fa",
+      "original_size_bytes": 63636
+    },
+    {
+      "archived_path": "research/phase35/codex2-decoder-selectivity/progress.md",
+      "audit": "codex2-decoder-selectivity",
+      "disposition": "committed",
+      "original_path": "/home/cxiong/codex-runs/codex2-phase35-decoder-selectivity/progress.md",
+      "original_sha256": "124c42a399204cb883d73552e0c50c09f56bca42dcb40df1d45ecd00efcf2be1",
+      "original_size_bytes": 708
+    },
+    {
+      "archived_path": "research/phase35/codex2-decoder-selectivity/report.md",
+      "audit": "codex2-decoder-selectivity",
+      "disposition": "committed",
+      "original_path": "/home/cxiong/codex-runs/codex2-phase35-decoder-selectivity/report.md",
+      "original_sha256": "c0fd9f33d59aac831cc4d3431e90c7bb04aba25e3630a7cec70fbc7811cd5eb4",
+      "original_size_bytes": 4427
+    },
+    {
+      "archived_path": "research/phase35/codex2-dendrite-oracle/semantic_contract.md",
+      "audit": "codex2-dendrite-oracle",
+      "disposition": "committed",
+      "original_path": "/home/cxiong/codex-runs/codex2-phase35-dendrite-oracle/semantic_contract.md",
+      "original_sha256": "f90c010afc2a0b36f44526eacd66d253a3726b95e941feeaac3c1d98ce830c26",
+      "original_size_bytes": 3322
+    },
+    {
+      "archived_path": "research/phase35/codex2-dendrite-oracle/results.json",
+      "audit": "codex2-dendrite-oracle",
+      "disposition": "committed",
+      "original_path": "/home/cxiong/codex-runs/codex2-phase35-dendrite-oracle/results.json",
+      "original_sha256": "e3b4dc55cf9cae991a902a09c12ed6ee4e5f43273e03275b07a385c4d3854a63",
+      "original_size_bytes": 1694
+    },
+    {
+      "archived_path": "research/phase35/codex2-dendrite-oracle/golden_cases.json",
+      "audit": "codex2-dendrite-oracle",
+      "disposition": "committed",
+      "original_path": "/home/cxiong/codex-runs/codex2-phase35-dendrite-oracle/golden_cases.json",
+      "original_sha256": "74145320904b66f9f658ee4a106ec7451aab4fb8d60e3a02b2b9272c96747db1",
+      "original_size_bytes": 29810
+    },
+    {
+      "archived_path": "research/phase35/codex2-dendrite-oracle/progress.md",
+      "audit": "codex2-dendrite-oracle",
+      "disposition": "committed",
+      "original_path": "/home/cxiong/codex-runs/codex2-phase35-dendrite-oracle/progress.md",
+      "original_sha256": "b1b6858634b5d22ca4d01a8e6efd20de30f6e47bd41a6824594f6313503316a2",
+      "original_size_bytes": 547
+    },
+    {
+      "archived_path": "research/phase35/codex2-dendrite-oracle/reference_oracle.py",
+      "audit": "codex2-dendrite-oracle",
+      "disposition": "committed",
+      "original_path": "/home/cxiong/codex-runs/codex2-phase35-dendrite-oracle/reference_oracle.py",
+      "original_sha256": "c7458313c47ad024fc91b900f2382f5099f8534d0515473e9f1718129143655b",
+      "original_size_bytes": 14400
+    },
+    {
+      "archived_path": "research/phase35/codex2-dendrite-oracle/report.md",
+      "audit": "codex2-dendrite-oracle",
+      "disposition": "committed",
+      "original_path": "/home/cxiong/codex-runs/codex2-phase35-dendrite-oracle/report.md",
+      "original_sha256": "0ff6e74b1f49b7c46ca99168c7b59d7148a32f76b96e6ed63a3941f7cc70cd58",
+      "original_size_bytes": 2925
+    },
+    {
+      "archived_path": "research/phase35/codex2-full-decoder-coverage/test_full_coverage_harness.py",
+      "audit": "codex2-full-decoder-coverage",
+      "disposition": "committed",
+      "original_path": "/home/cxiong/codex-runs/codex2-phase35-full-decoder-coverage/test_full_coverage_harness.py",
+      "original_sha256": "b31cce41034654700d4a248ec45653dd494479db431bb0cdac1c0df83b75c3cf",
+      "original_size_bytes": 790
+    },
+    {
+      "archived_path": "research/phase35/codex2-full-decoder-coverage/results.json",
+      "audit": "codex2-full-decoder-coverage",
+      "disposition": "committed",
+      "original_path": "/home/cxiong/codex-runs/codex2-phase35-full-decoder-coverage/results.json",
+      "original_sha256": "5e2fd64e8b50b3472324752d77be24786ec04ff4432b37213c7c9be4f875dd0d",
+      "original_size_bytes": 120643
+    },
+    {
+      "archived_path": "research/phase35/codex2-full-decoder-coverage/progress.md",
+      "audit": "codex2-full-decoder-coverage",
+      "disposition": "committed",
+      "original_path": "/home/cxiong/codex-runs/codex2-phase35-full-decoder-coverage/progress.md",
+      "original_sha256": "ed1a63909267e02a39e9b46c6a7af268d5455b21ca6f1a9ec233520ab897b5b3",
+      "original_size_bytes": 708
+    },
+    {
+      "archived_path": "research/phase35/codex2-full-decoder-coverage/run_full_coverage.py",
+      "audit": "codex2-full-decoder-coverage",
+      "disposition": "committed",
+      "original_path": "/home/cxiong/codex-runs/codex2-phase35-full-decoder-coverage/run_full_coverage.py",
+      "original_sha256": "9f1f5e28ee544fc908d04930c8b5ff71c5a97722beff75fce96c3d4e0efd85df",
+      "original_size_bytes": 10175
+    },
+    {
+      "archived_path": "research/phase35/codex2-full-decoder-coverage/report.md",
+      "audit": "codex2-full-decoder-coverage",
+      "disposition": "committed",
+      "original_path": "/home/cxiong/codex-runs/codex2-phase35-full-decoder-coverage/report.md",
+      "original_sha256": "64fb69ef9d9147d70716fc25e0b1867bcd4d4375dc125d3dd8b936fdaed04c41",
+      "original_size_bytes": 5116
+    },
+    {
+      "archived_path": "research/phase35/codex2-implementation-conformance/mismatch_traces.json",
+      "audit": "codex2-implementation-conformance",
+      "disposition": "committed",
+      "original_path": "/home/cxiong/codex-runs/codex2-phase35-implementation-conformance/mismatch_traces.json",
+      "original_sha256": "30d51642027fb73acf3126b8da153c71b9185b2de093c3ec17ebc289ac973916",
+      "original_size_bytes": 26965
+    },
+    {
+      "archived_path": "research/phase35/codex2-implementation-conformance/conformance_adapter.py",
+      "audit": "codex2-implementation-conformance",
+      "disposition": "committed",
+      "original_path": "/home/cxiong/codex-runs/codex2-phase35-implementation-conformance/conformance_adapter.py",
+      "original_sha256": "b6c909567ef71d0fa09adb202cc69fdc37065b5fa1f4a89ebf9e94aba67d5f88",
+      "original_size_bytes": 13552
+    },
+    {
+      "archived_path": "research/phase35/codex2-implementation-conformance/results.json",
+      "audit": "codex2-implementation-conformance",
+      "disposition": "committed",
+      "original_path": "/home/cxiong/codex-runs/codex2-phase35-implementation-conformance/results.json",
+      "original_sha256": "d0fbd75ac6b42f52ae50250b22f524b857ba114e8b88e27117b635ab53446bdd",
+      "original_size_bytes": 21937
+    },
+    {
+      "archived_path": "research/phase35/codex2-implementation-conformance/progress.md",
+      "audit": "codex2-implementation-conformance",
+      "disposition": "committed",
+      "original_path": "/home/cxiong/codex-runs/codex2-phase35-implementation-conformance/progress.md",
+      "original_sha256": "df050ba4ad2070b78932c154577245882c25ee6d97d4c8414e7a84e6bcc309d4",
+      "original_size_bytes": 910
+    },
+    {
+      "archived_path": "research/phase35/codex2-implementation-conformance/report.md",
+      "audit": "codex2-implementation-conformance",
+      "disposition": "committed",
+      "original_path": "/home/cxiong/codex-runs/codex2-phase35-implementation-conformance/report.md",
+      "original_sha256": "4fd4b7d6f7896542451cb6a3a6ddee63c3dc8f0ec21201564de7140b18e9e486",
+      "original_size_bytes": 5009
+    },
+    {
+      "archived_path": "research/phase35/codex2-long-horizon-maturity/run_long_horizon_maturity.py",
+      "audit": "codex2-long-horizon-maturity",
+      "disposition": "committed",
+      "original_path": "/home/cxiong/codex-runs/codex2-phase35-long-horizon-maturity/run_long_horizon_maturity.py",
+      "original_sha256": "9732c1b5e15b1340b713f2e4446984069de8a5527b50e011f6c7cd649c230090",
+      "original_size_bytes": 12693
+    },
+    {
+      "archived_path": "research/phase35/codex2-long-horizon-maturity/test_kinetics_harness.py",
+      "audit": "codex2-long-horizon-maturity",
+      "disposition": "committed",
+      "original_path": "/home/cxiong/codex-runs/codex2-phase35-long-horizon-maturity/test_kinetics_harness.py",
+      "original_sha256": "154c5916f2963a7d36b2aed1f47cd007ac775508130f66ea1da9b95ed764cb7c",
+      "original_size_bytes": 1040
+    },
+    {
+      "archived_path": "research/phase35/codex2-long-horizon-maturity/results.json",
+      "audit": "codex2-long-horizon-maturity",
+      "disposition": "committed",
+      "original_path": "/home/cxiong/codex-runs/codex2-phase35-long-horizon-maturity/results.json",
+      "original_sha256": "dafc732963845e5955491e35722ef26dfd6cd1c29fea59b0c1a2444a406eae57",
+      "original_size_bytes": 559426
+    },
+    {
+      "archived_path": "research/phase35/codex2-long-horizon-maturity/progress.md",
+      "audit": "codex2-long-horizon-maturity",
+      "disposition": "committed",
+      "original_path": "/home/cxiong/codex-runs/codex2-phase35-long-horizon-maturity/progress.md",
+      "original_sha256": "f20d4f27ace3aed01b5a803f6420b4898e1c8d065dbb75e363dee475e96b1ace",
+      "original_size_bytes": 711
+    },
+    {
+      "archived_path": "research/phase35/codex2-long-horizon-maturity/report.md",
+      "audit": "codex2-long-horizon-maturity",
+      "disposition": "committed",
+      "original_path": "/home/cxiong/codex-runs/codex2-phase35-long-horizon-maturity/report.md",
+      "original_sha256": "c3d8dd15cd7fdf405751de66c52155cf112ffc026214d502a7311a1b569f24c6",
+      "original_size_bytes": 6908
+    },
+    {
+      "archived_path": "research/phase35/codex2-mismatch-reduction/minimal_counterexamples.json",
+      "audit": "codex2-mismatch-reduction",
+      "disposition": "committed",
+      "original_path": "/home/cxiong/codex-runs/codex2-phase35-mismatch-reduction/minimal_counterexamples.json",
+      "original_sha256": "94bf590f6e0231bc40a3b55ee3faa80f726d0ac97345cf7eff0c3c254e3ec9c5",
+      "original_size_bytes": 1157
+    },
+    {
+      "archived_path": "research/phase35/codex2-mismatch-reduction/reproduce_mismatches.py",
+      "audit": "codex2-mismatch-reduction",
+      "disposition": "committed",
+      "original_path": "/home/cxiong/codex-runs/codex2-phase35-mismatch-reduction/reproduce_mismatches.py",
+      "original_sha256": "4cf7007a8176350b66315e37e0eeca9a46e40d2475f1774d2418edeae71d3b46",
+      "original_size_bytes": 9486
+    },
+    {
+      "archived_path": "research/phase35/codex2-mismatch-reduction/results.json",
+      "audit": "codex2-mismatch-reduction",
+      "disposition": "committed",
+      "original_path": "/home/cxiong/codex-runs/codex2-phase35-mismatch-reduction/results.json",
+      "original_sha256": "1a6f3bf595c7545e9bcebb6ca778fb948e99834b7da322c04fe04b78b5f7f32e",
+      "original_size_bytes": 7381
+    },
+    {
+      "archived_path": "research/phase35/codex2-mismatch-reduction/adapter_audit.md",
+      "audit": "codex2-mismatch-reduction",
+      "disposition": "committed",
+      "original_path": "/home/cxiong/codex-runs/codex2-phase35-mismatch-reduction/adapter_audit.md",
+      "original_sha256": "7bd4802458952a1675078fc7dbf85c6b6236b91783116af230469c06067251ff",
+      "original_size_bytes": 2053
+    },
+    {
+      "archived_path": "research/phase35/codex2-mismatch-reduction/progress.md",
+      "audit": "codex2-mismatch-reduction",
+      "disposition": "committed",
+      "original_path": "/home/cxiong/codex-runs/codex2-phase35-mismatch-reduction/progress.md",
+      "original_sha256": "204e627b86a982e46a07fa4a58aa0b38225f767614e93e6aa1e5a464f86801d9",
+      "original_size_bytes": 806
+    },
+    {
+      "archived_path": "research/phase35/codex2-mismatch-reduction/report.md",
+      "audit": "codex2-mismatch-reduction",
+      "disposition": "committed",
+      "original_path": "/home/cxiong/codex-runs/codex2-phase35-mismatch-reduction/report.md",
+      "original_sha256": "3c502a4b13c1864ce505c0018c28b6ad24ca194dfb977c526afb8c3134f29ae5",
+      "original_size_bytes": 4302
+    },
+    {
+      "archived_path": "research/phase35/codex2-natural-exposure-audit/run_natural_exposure_audit.py",
+      "audit": "codex2-natural-exposure-audit",
+      "disposition": "committed",
+      "original_path": "/home/cxiong/codex-runs/codex2-phase35-natural-exposure-audit/run_natural_exposure_audit.py",
+      "original_sha256": "d540e0cac5afa00059bf2354fecc3b01f286a8e97421a59cbb5789367c31b035",
+      "original_size_bytes": 16338
+    },
+    {
+      "archived_path": "research/phase35/codex2-natural-exposure-audit/test_measurement_harness.py",
+      "audit": "codex2-natural-exposure-audit",
+      "disposition": "committed",
+      "original_path": "/home/cxiong/codex-runs/codex2-phase35-natural-exposure-audit/test_measurement_harness.py",
+      "original_sha256": "9d1d869049b49cc956e7ea36c364c025437af75a1d241b4d0d314f24c99613a2",
+      "original_size_bytes": 884
+    },
+    {
+      "audit": "codex2-natural-exposure-audit",
+      "disposition": "stored_separately",
+      "original_path": "/home/cxiong/codex-runs/codex2-phase35-natural-exposure-audit/results.json",
+      "reason": "large raw per-step trace/timeline",
+      "release_bundle": "phase35-large-raw-traces-db30cead.tar.gz",
+      "sha256": "f657e4d9106807cc5b2723e188f7f247bf3e98f593a8b8a43ed7ea54b06dd9eb",
+      "size_bytes": 5374071
+    },
+    {
+      "archived_path": "research/phase35/codex2-natural-exposure-audit/progress.md",
+      "audit": "codex2-natural-exposure-audit",
+      "disposition": "committed",
+      "original_path": "/home/cxiong/codex-runs/codex2-phase35-natural-exposure-audit/progress.md",
+      "original_sha256": "317118b9a498bc7c864b9f5e3ebc1473f0843b0bc12dc968c2d84e43551f7f22",
+      "original_size_bytes": 677
+    },
+    {
+      "archived_path": "research/phase35/codex2-natural-exposure-audit/report.md",
+      "audit": "codex2-natural-exposure-audit",
+      "disposition": "committed",
+      "original_path": "/home/cxiong/codex-runs/codex2-phase35-natural-exposure-audit/report.md",
+      "original_sha256": "027311c94f2338fc4fa524ae526cf223dd732f52f054fac39bc81c6aed00b723",
+      "original_size_bytes": 7291
+    },
+    {
+      "audit": "codex2-natural-exposure-audit",
+      "disposition": "stored_separately",
+      "original_path": "/home/cxiong/codex-runs/codex2-phase35-natural-exposure-audit/timeline.csv",
+      "reason": "large raw per-step trace/timeline",
+      "release_bundle": "phase35-large-raw-traces-db30cead.tar.gz",
+      "sha256": "80ac6e15d47e098de3cc46f756ee31cdadcd81e0dd703ba7bbbc692e23f23f21",
+      "size_bytes": 2501276
+    },
+    {
+      "archived_path": "research/phase35/codex2-natural-exposure-audit/results.json",
+      "audit": "codex2-natural-exposure-audit",
+      "disposition": "committed",
+      "generated": "compact projection with raw collections stored separately",
+      "original_path": null
+    },
+    {
+      "archived_path": "research/phase35/codex2-oracle-v2/reference_oracle_v2.py",
+      "audit": "codex2-oracle-v2",
+      "disposition": "committed",
+      "original_path": "/home/cxiong/codex-runs/codex2-phase35-oracle-v2/reference_oracle_v2.py",
+      "original_sha256": "26c7c28f4d5e4293688959c41558c5dbf5fc5c6c85d06465d90b53ae82774f5e",
+      "original_size_bytes": 11442
+    },
+    {
+      "archived_path": "research/phase35/codex2-oracle-v2/golden_cases_v2.json",
+      "audit": "codex2-oracle-v2",
+      "disposition": "committed",
+      "original_path": "/home/cxiong/codex-runs/codex2-phase35-oracle-v2/golden_cases_v2.json",
+      "original_sha256": "704c0faefa35450e9c8f778ab3957fcca0837f406b79f2a49e2dd5b9eedc934f",
+      "original_size_bytes": 57261
+    },
+    {
+      "archived_path": "research/phase35/codex2-oracle-v2/semantic_contract_v2.md",
+      "audit": "codex2-oracle-v2",
+      "disposition": "committed",
+      "original_path": "/home/cxiong/codex-runs/codex2-phase35-oracle-v2/semantic_contract_v2.md",
+      "original_sha256": "9d92d3b353b308d44f905fae5917f7ef62a1ffcb5551f10ddacad8e479951316",
+      "original_size_bytes": 3896
+    },
+    {
+      "archived_path": "research/phase35/codex2-oracle-v2/results.json",
+      "audit": "codex2-oracle-v2",
+      "disposition": "committed",
+      "original_path": "/home/cxiong/codex-runs/codex2-phase35-oracle-v2/results.json",
+      "original_sha256": "35b29e34976f0aeea2ad6e13270afc00533781fddca25455029936b537cce9ca",
+      "original_size_bytes": 28961
+    },
+    {
+      "archived_path": "research/phase35/codex2-oracle-v2/production_conformance_v2.py",
+      "audit": "codex2-oracle-v2",
+      "disposition": "committed",
+      "original_path": "/home/cxiong/codex-runs/codex2-phase35-oracle-v2/production_conformance_v2.py",
+      "original_sha256": "f6ee7ba5de00bc598a1b598536ddcf884f4677186bdcb451a2914a051d111f01",
+      "original_size_bytes": 9740
+    },
+    {
+      "archived_path": "research/phase35/codex2-oracle-v2/mismatch_traces_v2.json",
+      "audit": "codex2-oracle-v2",
+      "disposition": "committed",
+      "original_path": "/home/cxiong/codex-runs/codex2-phase35-oracle-v2/mismatch_traces_v2.json",
+      "original_sha256": "16538eacad0d2464e4b95857b218f8682f08c3e1c22ca8dd1cdd9ca1e372bb5b",
+      "original_size_bytes": 33
+    },
+    {
+      "archived_path": "research/phase35/codex2-oracle-v2/report.md",
+      "audit": "codex2-oracle-v2",
+      "disposition": "committed",
+      "original_path": "/home/cxiong/codex-runs/codex2-phase35-oracle-v2/report.md",
+      "original_sha256": "fc789d3594f83d94a9eb70b0db66d4ab997e231d7d18141125921d1642d19569",
+      "original_size_bytes": 4206
+    }
+  ],
+  "release_bundle": "phase35-large-raw-traces-db30cead.tar.gz",
+  "release_bundle_local_path": "/home/cxiong/codex-runs/phase35-research-ledger-release/phase35-large-raw-traces-db30cead.tar.gz",
+  "release_bundle_sha256": "81e4ebbd55b6b7196175ebb1e74691be88e050e61423f8ba6c3065ae214a199b",
+  "release_bundle_size_bytes": 5343995,
+  "schema_version": 1,
+  "source_root": "/home/cxiong/codex-runs"
+}
