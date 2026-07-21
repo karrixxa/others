@@ -946,6 +946,15 @@ class SimulationEngine:
                  # is a bounded oracle-feasibility ablation, not a claimed
                  # biological conductance model.
                  switchi_paired_shunt_enabled: bool = False,
+                 # Phase 38: smallest default-OFF natural paired L2 ownership
+                 # mechanism. Each SwitchI_j can shunt ONLY its paired L2E_j,
+                 # and may fire only from a coincidence between: (1) current
+                 # local learned prediction support for L2E_j carried by the
+                 # existing PC_i population, (2) current unexpected/residual
+                 # L1 evidence for L2E_j, and (3) that same neuron's recent
+                 # spike trace. No labels, oracle owner identity, argmax
+                 # dependence, or zero-delay reset.
+                 switchi_local_mismatch_enabled: bool = False,
                  switchi_trace_decay: float = 0.75,
                  switchi_coincidence_threshold: float = 0.15,
                  switchi_shunt_frac: float = 0.5,
@@ -1126,6 +1135,7 @@ class SimulationEngine:
                            prediction_column_persistent_conductance_enabled=(
                                prediction_column_persistent_conductance_enabled),
                            switchi_paired_shunt_enabled=switchi_paired_shunt_enabled,
+                           switchi_local_mismatch_enabled=switchi_local_mismatch_enabled,
                            switchi_trace_decay=switchi_trace_decay,
                            switchi_coincidence_threshold=switchi_coincidence_threshold,
                            switchi_shunt_frac=switchi_shunt_frac,
@@ -1206,6 +1216,12 @@ class SimulationEngine:
                 "only meaningful when PC_i spikes are physically delivered to "
                 "L1I_i).")
         self.switchi_paired_shunt_enabled = bool(p['switchi_paired_shunt_enabled'])
+        self.switchi_local_mismatch_enabled = bool(p['switchi_local_mismatch_enabled'])
+        if self.switchi_local_mismatch_enabled and not bool(p['prediction_column_enabled']):
+            raise ValueError(
+                "switchi_local_mismatch_enabled requires prediction_column_enabled "
+                "(the local mismatch trigger uses the existing PC_i prediction "
+                "population as its learned prediction signal).")
         self.switchi_trace_decay = float(np.clip(p['switchi_trace_decay'], 0.0, 1.0))
         self.switchi_coincidence_threshold = float(
             np.clip(p['switchi_coincidence_threshold'], 0.0, 1.0))
@@ -1645,6 +1661,7 @@ class SimulationEngine:
         self.l2_charge: dict[str, float] = {}         # POST-inhibition, pre-update diagnostic
         self.switchi_recent_spike_trace = np.zeros(N_OUT, dtype=float)
         self._switchi_last_events: list[dict] = []
+        self._switchi_local_last_events: list[dict] = []
         self.l2_inh_phase_debug: list[dict] = []      # per-inhibited-L2E phase record (see step())
         # Phase 6: the exposed "representation candidate" -- the presentation's
         # first physical L2E threshold crossing, or None until one occurs, or
@@ -2678,6 +2695,66 @@ class SimulationEngine:
                 v_post=round(float(e.potential), 4),
                 delta=round(delta, 4)))
 
+    def _switchi_prediction_decoder_row(self, j: int) -> np.ndarray:
+        if not self.prediction_column_enabled:
+            return np.zeros(N_PIX, dtype=float)
+        return np.array([self.pcol[i].decoder_weights[j] for i in range(N_PIX)], dtype=float)
+
+    def _apply_switchi_local_mismatch_shunt(self, l1e_vec, pcol_spiked, t):
+        """Phase 38: paired local mismatch shunt.
+
+        Strictly local ingredients for SwitchI_j:
+        - current PC_i spikes from the existing learned local prediction path
+        - L2E_j's own decoder row onto those PC_i targets
+        - L2E_j's own feedforward weights from the current L1E_i sensory vector
+        - L2E_j's own recent-spike trace
+
+        Matching repetition produces zero unexpected L1 evidence and therefore
+        zero shunt drive. Only the paired L2E_j membrane can be attenuated.
+        """
+        self._switchi_local_last_events = []
+        if not self.switchi_local_mismatch_enabled:
+            return
+        pred_vec = np.array(pcol_spiked, dtype=float)
+        l1e_vec = np.array(l1e_vec, dtype=float)
+        unexpected_vec = l1e_vec * (1.0 - pred_vec)
+        pred_scale = max(float(self.prediction_feedback_max), 1.0)
+        thr_l2 = float(self.params['threshold_l2']) or 1.0
+        for j, e in enumerate(self.l2.excitatory_neurons):
+            decoder_row = self._switchi_prediction_decoder_row(j)
+            ff_pos = np.maximum(effective_weights(e), 0.0)
+            prediction_drive = float(np.dot(decoder_row, pred_vec))
+            mismatch_drive = float(np.dot(ff_pos, unexpected_vec))
+            matched_drive = float(np.dot(ff_pos, l1e_vec * pred_vec))
+            trace_before = float(self.switchi_recent_spike_trace[j])
+            prediction_norm = min(max(prediction_drive / pred_scale, 0.0), 1.0)
+            mismatch_norm = min(max(mismatch_drive / thr_l2, 0.0), 1.0)
+            trace_norm = min(max(trace_before, 0.0), 1.0)
+            coincidence = prediction_norm * mismatch_norm * trace_norm
+            fired = bool(
+                prediction_norm > 0.0 and mismatch_norm > 0.0 and trace_norm > 0.0
+                and coincidence >= self.switchi_coincidence_threshold)
+            v_pre = float(e.potential)
+            delta = 0.0
+            if fired and e.refractory_timer <= 0:
+                delta = v_pre * self.switchi_shunt_frac
+                e.potential = max(e.potential - delta, e.resting_potential)
+            self._switchi_local_last_events.append(dict(
+                target=f'L2E{j}',
+                t=t,
+                prediction_drive=round(prediction_drive, 4),
+                prediction_norm=round(prediction_norm, 4),
+                mismatch_drive=round(mismatch_drive, 4),
+                mismatch_norm=round(mismatch_norm, 4),
+                matched_drive=round(matched_drive, 4),
+                trace_before=round(trace_before, 4),
+                coincidence=round(coincidence, 4),
+                fired=fired,
+                shunt_frac=round(self.switchi_shunt_frac, 4),
+                v_pre=round(v_pre, 4),
+                v_post=round(float(e.potential), 4),
+                delta=round(delta, 4)))
+
     # ------------------------------------------------------------------- step
     def step(self) -> dict:
         l1, l2 = self.l1, self.l2
@@ -2702,6 +2779,7 @@ class SimulationEngine:
         self._reset_events = []
         self._prediction_column_last_output_delivery = []
         self._prediction_column_last_conductance = []
+        self._switchi_local_last_events = []
         # Phase 7: apply any delayed L2I->L2E delivery scheduled on a previous
         # step and now due, BEFORE this step's own L1E/L2E processing -- same
         # one-step-register precedent as l1i_feedback_delay below.
@@ -2851,6 +2929,7 @@ class SimulationEngine:
                 ff_vec[i] = 1.0
 
         self._apply_switchi_paired_shunt(ff_vec, t)
+        self._apply_switchi_local_mismatch_shunt(l1e, pcol_spiked, t)
 
         l2e = np.zeros(N_OUT)
         l2i = 0.0
@@ -3596,6 +3675,7 @@ class SimulationEngine:
         l2e_states = [self._l2e_status(j) for j in range(N_OUT)]
         ownership = self._ownership_summary()
         weights = self._feedforward_weight_summary()
+        switchi_firing = sum(1 for row in self._switchi_local_last_events if row.get('fired'))
         return dict(
             detected_pattern=named['name'] if named else 'manual',
             detected_role=named['role'] if named else 'manual',
@@ -3607,6 +3687,7 @@ class SimulationEngine:
             exact_zero_feedforward=weights['exact_zero_count'],
             min_feedforward_weight=weights['min_weight'],
             min_positive_feedforward_weight=weights['min_positive_weight'],
+            switchi_local_firing=switchi_firing,
         )
 
     # ------------------------------------------------------------ serialization
@@ -3681,6 +3762,14 @@ class SimulationEngine:
                     switchi_paired_l2_shunt=dict(
                         enabled=self.switchi_paired_shunt_enabled,
                         output_route='SwitchI_j -> L2E_j' if self.switchi_paired_shunt_enabled else None,
+                        trace_decay=round(float(self.switchi_trace_decay), 4),
+                        coincidence_threshold=round(float(self.switchi_coincidence_threshold), 4),
+                        shunt_frac=round(float(self.switchi_shunt_frac), 4)),
+                    switchi_local_l2_ownership=dict(
+                        enabled=self.switchi_local_mismatch_enabled,
+                        trigger=('decoder_row_j · PC(t), ff_j · unexpected_L1(t), '
+                                 'and paired recent-spike trace'),
+                        output_route='SwitchI_j -> L2E_j' if self.switchi_local_mismatch_enabled else None,
                         trace_decay=round(float(self.switchi_trace_decay), 4),
                         coincidence_threshold=round(float(self.switchi_coincidence_threshold), 4),
                         shunt_frac=round(float(self.switchi_shunt_frac), 4)),
@@ -3867,6 +3956,12 @@ class SimulationEngine:
                                             for j, v in enumerate(self.switchi_recent_spike_trace)},
                         last_events=list(self._switchi_last_events)
                         if self.switchi_paired_shunt_enabled else []),
+                    switchi_local_l2_ownership=dict(
+                        enabled=self.switchi_local_mismatch_enabled,
+                        recent_spike_trace={f'L2E{j}': round(float(v), 4)
+                                            for j, v in enumerate(self.switchi_recent_spike_trace)},
+                        last_events=list(self._switchi_local_last_events)
+                        if self.switchi_local_mismatch_enabled else []),
                     simulator_status=self.simulator_status(),
                     # Phase 10: adaptive-threshold ablation state/trajectory
                     # (L2E only; a_i and its history stay 0/empty for every
