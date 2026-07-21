@@ -12,12 +12,13 @@ PC_IDX = 3
 ACTIVE_ROW = "row 1"
 
 
-def _engine(persistent=False):
+def _engine(delivery=False, persistent=False):
     kw = dict(
         DASHBOARD_PRESET,
         seed=1,
         prediction_column_enabled=True,
         prediction_column_to_i_enabled=True,
+        prediction_column_to_i_delivery_enabled=delivery,
         prediction_column_persistent_conductance_enabled=persistent,
         pretrained_l1i_regulation=True,
         prediction_feedback_init=400.0,
@@ -72,16 +73,53 @@ def test_persistent_predictive_conductance_requires_selective_topology():
     )
 
 
-def test_default_off_predictive_path_stays_instantaneous_only():
-    engine = _engine(persistent=False)
+def test_delivery_gate_requires_selective_topology():
+    try:
+        SimulationEngine(
+            seed=1,
+            prediction_column_enabled=True,
+            prediction_column_to_i_delivery_enabled=True,
+            **DASHBOARD_PRESET,
+        )
+        raised = False
+    except ValueError:
+        raised = True
+    assert raised, (
+        "prediction_column_to_i_delivery_enabled must require the paired "
+        "selective PC_i -> L1I_i topology"
+    )
+
+
+def test_shadow_gate_keeps_paired_topology_but_blocks_physical_delivery():
+    engine = _engine(delivery=False, persistent=False)
     _prime_single_pc_event(engine)
 
     engine.step()
     _clear_future_pc_events(engine)
 
     assert engine.spiked["PC3"], "the primed basal+apical pair must physically fire PC3"
-    assert engine.spiked["L1I3"], "PC3's spike must reach only its paired L1I3 this step"
-    assert engine.spiked["L1E3"], "paired L1E3 must still spike on the priming step (one-step delay preserved)"
+    assert not engine.spiked["L1I3"], "shadow mode must keep the paired route physically silent"
+    assert engine.spiked["L1E3"], "paired L1E3 must still spike on the priming step"
+    assert len(engine.l1.inhibitory_neurons[PC_IDX].weights) == 1, "paired topology must still be built"
+    assert engine._prediction_column_last_output_delivery[PC_IDX]["delivered_signal"] == 0.0
+
+    engine.step()
+    l1e3 = engine.l1.excitatory_neurons[PC_IDX]
+    assert engine.spiked["L1E3"], "without physical PC->L1I delivery, no paired inhibition may arrive later"
+    assert not engine._inh_events
+    assert l1e3.inh_trace == 0.0
+    assert l1e3.inh_trace_pending == 0.0
+
+def test_instantaneous_delivery_is_paired_and_delayed():
+    engine = _engine(delivery=True, persistent=False)
+    _prime_single_pc_event(engine)
+
+    engine.step()
+    _clear_future_pc_events(engine)
+
+    assert engine.spiked["PC3"]
+    assert engine.spiked["L1I3"]
+    assert engine.spiked["L1E3"], "the original one-step delay must remain intact on the priming step"
     assert [i for i in range(N_PIX) if engine.spiked[f"L1I{i}"]] == [PC_IDX]
 
     engine.step()
@@ -97,7 +135,7 @@ def test_default_off_predictive_path_stays_instantaneous_only():
 
 
 def test_predictive_conductance_is_paired_delayed_persistent_and_decays():
-    engine = _engine(persistent=True)
+    engine = _engine(delivery=True, persistent=True)
     _prime_single_pc_event(engine)
 
     engine.step()

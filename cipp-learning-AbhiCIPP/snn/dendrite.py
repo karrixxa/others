@@ -92,6 +92,8 @@ class CoincidencePyramidalCell:
         self.last_d_before_learning = None
         self.last_basal_sources = ()
         self.last_apical_sources = ()
+        self.last_basal_charge = 0.0
+        self.last_apical_charge = 0.0
 
     @property
     def decoder_weights(self):
@@ -124,6 +126,8 @@ class CoincidencePyramidalCell:
     def resolve_coincidence(self, step):
         self.last_basal_sources = tuple(event.source for event in self.basal.deliveries)
         self.last_apical_sources = tuple(event.source for event in self.apical.deliveries)
+        self.last_basal_charge = float(self.basal.charge)
+        self.last_apical_charge = float(self.apical.charge)
         same_step = (self.basal.active and self.apical.active
                      and self.basal.delivery_step == step
                      and self.apical.delivery_step == step)
@@ -153,6 +157,12 @@ class CoincidencePyramidalCell:
     def update(self, dt=1):
         self.soma.update()
         self.clear_compartments()
+
+    def __getstate__(self):
+        return self.__dict__.copy()
+
+    def __setstate__(self, state):
+        self.__dict__.update(state)
 
     def __getattr__(self, name):
         return getattr(self.soma, name)

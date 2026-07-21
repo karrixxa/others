@@ -608,8 +608,9 @@ class Neuron(NeuralEntity):
                 # inhibitory effect, then start a decaying conductance tail on
                 # later steps without changing this event's arrival time.
                 self.potential = max(self.potential - w_delivered, self.resting_potential)
-                self.inh_trace_pending += (w_delivered * (1.0 - self.inh_trace_decay)
-                                           if self.inh_trace_normalized else w_delivered)
+                tail_seed = (w_delivered * (1.0 - self.inh_trace_decay)
+                             if self.inh_trace_normalized else w_delivered)
+                self.inh_trace_pending += tail_seed
                 v_post = float(self.potential)
             elif self.inhibitory_flow_rate:
                 # Inhibitory FLOW: inject the gate into a decaying inhibitory current
@@ -618,11 +619,13 @@ class Neuron(NeuralEntity):
                 # the learning rule below still uses v_pre.
                 self.inh_trace += (w_delivered * (1.0 - self.inh_trace_decay)
                                    if self.inh_trace_normalized else w_delivered)
+                tail_seed = 0.0
                 v_post = v_pre
             else:
                 # Linear one-shot discharge FLOORED at rest:
                 # inhibition cannot push the membrane below resting potential.
                 self.potential = max(self.potential - w_delivered, self.resting_potential)
+                tail_seed = 0.0
                 v_post = float(self.potential)
             # Normalized closeness to firing, clamped to [0, 1] (saturating rule;
             # also recorded in the event below).
@@ -638,7 +641,11 @@ class Neuron(NeuralEntity):
             self._weights_array[idx] = -w_new      # keep the inhibitory sign
             events.append(dict(index=int(idx), v_pre=v_pre, v_post=v_post,
                                theta=theta, p=p, w_before=w,
-                               delta_w=w_new - w, w_after=w_new))
+                               delta_w=w_new - w, w_after=w_new,
+                               w_delivered=w_delivered,
+                               tail_seeded=tail_seed,
+                               inh_trace_after=float(self.inh_trace),
+                               inh_trace_pending_after=float(self.inh_trace_pending)))
         # Loser depression: a real inhibitory discharge (events non-empty) means
         # this neuron was a suppressed near-winner; depress the active positive
         # feedforward gates that made it one. Opt-in; see _depress_losers.

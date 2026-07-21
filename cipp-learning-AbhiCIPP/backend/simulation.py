@@ -906,6 +906,13 @@ class SimulationEngine:
                  # same-step delivery convention (see step()'s "2d. Deliver
                  # L2E winner spike immediately to all L1I neurons").
                  prediction_column_to_i_enabled: bool = False,
+                 # Phase 36.1: keep Phase 21's paired PC_i -> L1I_i topology
+                 # and decoder-learning path intact, but gate ONLY the real
+                 # physical output delivery into L1I. Default OFF makes "shadow"
+                 # and "active-topology" conditions use identical PC/L1I
+                 # construction, weights, RNG, and routing dimensions while the
+                 # paired output remains physically silent.
+                 prediction_column_to_i_delivery_enabled: bool = False,
                  # Phase 36: keep Phase 21's selective PC_i -> L1I_i -> L1E_i
                  # topology and same one-step L1I->L1E arrival delay, but add a
                  # persistent inhibitory conductance TAIL after that ordinary
@@ -1089,6 +1096,8 @@ class SimulationEngine:
                            prediction_feedback_delay=prediction_feedback_delay,
                            prediction_leak_diagnostic_disable=prediction_leak_diagnostic_disable,
                            prediction_column_to_i_enabled=prediction_column_to_i_enabled,
+                           prediction_column_to_i_delivery_enabled=(
+                               prediction_column_to_i_delivery_enabled),
                            prediction_column_persistent_conductance_enabled=(
                                prediction_column_persistent_conductance_enabled),
                            pretrained_l1i_regulation=pretrained_l1i_regulation,
@@ -1144,6 +1153,14 @@ class SimulationEngine:
             raise ValueError(
                 "prediction_column_to_i_enabled requires prediction_column_enabled "
                 "(selective L1I input needs an actual PC population to draw from).")
+        self.prediction_column_to_i_delivery_enabled = bool(
+            p['prediction_column_to_i_delivery_enabled'])
+        if (self.prediction_column_to_i_delivery_enabled
+                and not self.prediction_column_to_i_enabled):
+            raise ValueError(
+                "prediction_column_to_i_delivery_enabled requires "
+                "prediction_column_to_i_enabled (the physical delivery gate only "
+                "applies to the paired PC_i -> L1I_i route).")
         self.prediction_column_persistent_conductance_enabled = bool(
             p['prediction_column_persistent_conductance_enabled'])
         if (self.prediction_column_persistent_conductance_enabled
@@ -1152,6 +1169,13 @@ class SimulationEngine:
                 "prediction_column_persistent_conductance_enabled requires "
                 "prediction_column_to_i_enabled (the persistent tail is only "
                 "defined on the paired PC_i -> L1I_i -> L1E_i path).")
+        if (self.prediction_column_persistent_conductance_enabled
+                and not self.prediction_column_to_i_delivery_enabled):
+            raise ValueError(
+                "prediction_column_persistent_conductance_enabled requires "
+                "prediction_column_to_i_delivery_enabled (the persistent tail is "
+                "only meaningful when PC_i spikes are physically delivered to "
+                "L1I_i).")
         l1i_n_feedback = 1 if self.prediction_column_to_i_enabled else N_OUT
         self.l1 = InputLayer(n_neurons=N_PIX, threshold=thr_l1,
                              refractory_period=p['refractory'], learning_rate=p['learning_rate'],
@@ -1757,6 +1781,8 @@ class SimulationEngine:
         self.pcol_delivery_metadata_queue = deque(
             [] for _ in range(self.prediction_feedback_delay))
         self._prediction_column_last_deliveries = []
+        self._prediction_column_last_output_delivery = []
+        self._prediction_column_last_conductance = []
 
     def _prediction_column_origin_class(self, records, pixel_index):
         """Classify an arrived physical pair without affecting its delivery."""
@@ -2183,6 +2209,7 @@ class SimulationEngine:
                # Phase 21: selective local predictive inhibition (PCi->Ii),
                # kept as two SEPARATE factorial variables.
                'prediction_column_to_i_enabled',
+               'prediction_column_to_i_delivery_enabled',
                'prediction_column_persistent_conductance_enabled',
                'pretrained_l1i_regulation')
 
@@ -2212,6 +2239,7 @@ class SimulationEngine:
                      'pretrained_l2i_recruitment', 'prediction_excitatory_enabled',
                      'prediction_column_enabled', 'prediction_leak_diagnostic_disable',
                      'prediction_column_to_i_enabled',
+                     'prediction_column_to_i_delivery_enabled',
                      'prediction_column_persistent_conductance_enabled',
                      'pretrained_l1i_regulation'):
                 v = bool(v)
@@ -2587,6 +2615,8 @@ class SimulationEngine:
         cycle_boundary = (t % self.params['cycle_period'] == 0)
         self._inh_events = []
         self._reset_events = []
+        self._prediction_column_last_output_delivery = []
+        self._prediction_column_last_conductance = []
         # Phase 7: apply any delayed L2I->L2E delivery scheduled on a previous
         # step and now due, BEFORE this step's own L1E/L2E processing -- same
         # one-step-register precedent as l1i_feedback_delay below.
@@ -2610,7 +2640,14 @@ class SimulationEngine:
             else:
                 e.receive_input(np.array([0.0, ext]))
             if self.prediction_column_persistent_conductance_enabled:
-                e.advance_inhibitory_conductance()
+                tail_before = float(e.inh_trace)
+                delivered_tail = float(e.advance_inhibitory_conductance())
+                self._prediction_column_last_conductance.append(dict(
+                    target=f'L1E{i}',
+                    delivered_tail=round(delivered_tail, 4),
+                    tail_before=round(tail_before, 4),
+                    tail_after=round(float(e.inh_trace), 4),
+                    pending_after=round(float(e.inh_trace_pending), 4)))
             # L1I feedback is a one-step delayed pulse. With constant presentation,
             # a pulse at t exactly cancels its paired pixel drive at t+1 and is then
             # consumed when this register is replaced at the end of the step.
@@ -2855,8 +2892,18 @@ class SimulationEngine:
         # convention -- this is the first time PCi's own output affects any
         # other neuron (Phase 19/20 were shadow-only, zero output).
         if self.prediction_column_to_i_enabled:
+            delivered_pc_feedback = (
+                pcol_spiked.copy() if self.prediction_column_to_i_delivery_enabled
+                else np.zeros(N_PIX))
             for i, inh in enumerate(l1.inhibitory_neurons):
-                inh.receive_input(np.array([pcol_spiked[i]]), t=t)
+                signal = float(delivered_pc_feedback[i])
+                inh.receive_input(np.array([signal]), t=t)
+                self._prediction_column_last_output_delivery.append(dict(
+                    source=f'PC{i}',
+                    target=f'L1I{i}',
+                    delivery_enabled=bool(self.prediction_column_to_i_delivery_enabled),
+                    attempted_spike=bool(pcol_spiked[i] > 0.5),
+                    delivered_signal=signal))
         else:
             for inh in l1.inhibitory_neurons:
                 inh.receive_input(l2e, t=t)
@@ -2869,8 +2916,12 @@ class SimulationEngine:
             # feedback-weight training. l2e is delivered identically to every L1I
             # (2d), so a winner (l2e nonzero) makes every L1I relay. Output stays
             # binary and the downstream L1I->L1E inhibition path is unchanged.
-            fb_present = 1.0 if np.any(l2e > 0) else 0.0
-            l1i = np.full(len(l1.inhibitory_neurons), fb_present)
+            if self.prediction_column_to_i_enabled:
+                l1i = np.array([1.0 if row['delivered_signal'] > 0.5 else 0.0
+                                for row in self._prediction_column_last_output_delivery])
+            else:
+                fb_present = 1.0 if np.any(l2e > 0) else 0.0
+                l1i = np.full(len(l1.inhibitory_neurons), fb_present)
         else:
             # Trainable threshold integrator: fire only when accumulated feedback
             # crossed L1I's own (learned/leaky) threshold.
@@ -3423,6 +3474,9 @@ class SimulationEngine:
                         decoder_shape=[N_OUT, N_PIX],
                         output_route='PC_i -> L1I_i -> L1E_i'
                         if self.prediction_column_to_i_enabled else None,
+                        output_delivery_enabled=(
+                            self.prediction_column_to_i_delivery_enabled
+                            if self.prediction_column_to_i_enabled else False),
                         persistent_conductance=(
                             self.prediction_column_persistent_conductance_enabled
                             if self.prediction_column_to_i_enabled else False)),
@@ -3573,6 +3627,8 @@ class SimulationEngine:
                             f'PC{i}': dict(
                                 basal_sources=list(pc.last_basal_sources),
                                 apical_sources=list(pc.last_apical_sources),
+                                basal_charge=round(float(pc.last_basal_charge), 4),
+                                apical_charge=round(float(pc.last_apical_charge), 4),
                                 coincidence_step=pc.last_coincidence_step,
                                 d_before_learning=pc.last_d_before_learning)
                             for i, pc in enumerate(self.pcol)}
@@ -3583,6 +3639,13 @@ class SimulationEngine:
                         if self.prediction_column_enabled else [],
                         last_deliveries=list(self._prediction_column_last_deliveries)
                         if self.prediction_column_enabled else [],
+                        last_output_delivery=list(self._prediction_column_last_output_delivery)
+                        if self.prediction_column_enabled else [],
+                        last_conductance=list(self._prediction_column_last_conductance)
+                        if self.prediction_column_enabled else [],
+                        output_delivery_enabled=(
+                            self.prediction_column_to_i_delivery_enabled
+                            if self.prediction_column_enabled else False),
                         persistent_conductance_enabled=(
                             self.prediction_column_persistent_conductance_enabled
                             if self.prediction_column_enabled else False)),
