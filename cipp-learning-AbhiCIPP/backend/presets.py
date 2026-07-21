@@ -175,6 +175,14 @@ EDGE_DETECTOR_CANDIDATE_PRESET = dict(
 #     pathway. The existing FINITE-DELAY L2I->L2E competitive reset itself
 #     (Neuron.apply_delayed_inhibition's unconditional bounded, floor-limited
 #     transient subtraction) is untouched by either flag and still runs.
+#   - prediction_learning_rate=1.5: Phase 39.1 -- the engine's own
+#     constructor DEFAULT for this stays 0.15 (reverted; 1.5 as a default
+#     silently changed global behavior for every other caller). 1.5 is set
+#     explicitly HERE ONLY, so this preset alone gets the accelerated decoder
+#     timescale (~7,100 steps to mature vs. ~71,000 at 0.15 -- see
+#     Phase39_Prediction_Maturity_Timescale.md), and every other caller
+#     (DASHBOARD_PRESET, existing tests, EDGE_DETECTOR_CANDIDATE_PRESET) is
+#     completely unaffected.
 #   - Everything else (inverse-square distance geometry, the bounded
 #     saturating signed+structural-free-energy potentiation rule, the
 #     positive feedforward floor, passive-decay/leak flags, the absence of
@@ -185,6 +193,7 @@ FINAL_CANDIDATE_PRESET = dict(
     DASHBOARD_PRESET,
     l2e_init_mode='edge_detector_candidate',
     prediction_column_enabled=True,
+    prediction_learning_rate=1.5,
     switchi_local_mismatch_enabled=True,
     switchi_paired_shunt_enabled=False,
     loser_depression=False,

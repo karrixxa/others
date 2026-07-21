@@ -19,10 +19,19 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 from .simulation import SimulationEngine
-from .presets import DASHBOARD_PRESET
+from .presets import DASHBOARD_PRESET, FINAL_CANDIDATE_PRESET
 from neuron_flexible import UNIT   # fixed-point scale (potentials/thresholds run at * UNIT)
 from .serializer import topology_message, full_state
 from .websocket import ConnectionManager, SimulationRunner
+
+# Phase 39.1: named, selectable presets. DASHBOARD_PRESET stays the
+# reproducible baseline the engine is actually built from below; adding an
+# entry here only makes a preset SELECTABLE via POST /api/preset, it never
+# changes what the server boots with.
+NAMED_PRESETS = {
+    'dashboard': DASHBOARD_PRESET,
+    'final_candidate': FINAL_CANDIDATE_PRESET,
+}
 
 FRONTEND_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "frontend")
 
@@ -59,6 +68,7 @@ app = FastAPI(title="SNN Dashboard")
 # rationale. Only `seed` is supplied here (persisted separately; changes only on
 # an explicit Reseed, not a restart).
 engine = SimulationEngine(seed=_load_seed(), **DASHBOARD_PRESET)
+engine.active_preset_name = 'dashboard'   # display label only, matches the preset just built above
 manager = ConnectionManager()
 runner = SimulationRunner(engine, manager)
 
@@ -720,9 +730,33 @@ async def set_autocycle(body: AutoCycleBody):
 async def set_config(body: ConfigBody):
     runner.running = False
     applied = engine.apply_config(body.overrides)
+    engine.active_preset_name = 'custom'   # matches SimulationEngine._build()'s own reset
     await manager.broadcast(topology_message(engine))
     await runner.broadcast_dynamic()
     return {"applied": applied, **_current_config()}
+
+
+class PresetBody(BaseModel):
+    name: str
+
+
+@app.get("/api/preset")
+async def get_preset():
+    return {"active_preset": engine.active_preset_name,
+           "config_fingerprint": engine.config_fingerprint(),
+           "available": sorted(NAMED_PRESETS.keys())}
+
+
+@app.post("/api/preset")
+async def set_preset(body: PresetBody):
+    if body.name not in NAMED_PRESETS:
+        return JSONResponse(status_code=400, content={"error": f"unknown preset '{body.name}'",
+                                                       "available": sorted(NAMED_PRESETS.keys())})
+    runner.running = False
+    result = engine.select_preset(body.name, NAMED_PRESETS[body.name])
+    await manager.broadcast(topology_message(engine))
+    await runner.broadcast_dynamic()
+    return {**result, **_current_config()}
 
 
 # ----------------------------------------------------------------- websocket

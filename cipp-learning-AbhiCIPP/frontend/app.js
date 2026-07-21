@@ -180,6 +180,27 @@ function updateStatusPanel(dyn) {
   set('sim-pc-maturity', pcLabel);
   set('sim-prediction-state', predState);
   set('sim-exact-zero', String(exactZero));
+
+  // "Prediction coincidence" panel (Phase 39.1) -- the existing PC_i
+  // population plus Phase 38's local eligibility/mismatch shunt, all
+  // read directly off status.prediction_coincidence (already-broadcast
+  // dynamic state; nothing computed client-side).
+  const px = status.prediction_coincidence || {};
+  const pxPc = px.pc || {};
+  set('pcx-fire-count', String(pxPc.spike_history_total ?? 0));
+  set('pcx-first-step', pxPc.first_fire_step == null ? '—' : String(pxPc.first_fire_step));
+  set('pcx-elig-events', String(px.eligibility_events_total ?? 0));
+  set('pcx-residual-events', String(px.residual_events_total ?? 0));
+  set('pcx-requests', String(px.requests_queued_total ?? 0));
+  set('pcx-applied', String(px.deliveries_applied_total ?? 0));
+
+  // Active preset / configuration fingerprint (Phase 39.1).
+  set('preset-active', status.active_preset || '—');
+  set('preset-fingerprint', status.config_fingerprint || '—');
+  const presetSelect = el('preset-select');
+  if (presetSelect && document.activeElement !== presetSelect && status.active_preset) {
+    presetSelect.value = status.active_preset === 'custom' ? presetSelect.value : status.active_preset;
+  }
 }
 
 function onStatus(state) {

@@ -1,0 +1,54 @@
+{
+  "verdict": "PASS_FINAL_CANDIDATE",
+  "metrics": {
+    "distinct_owners": 4,
+    "per_pattern_owner": {
+      "row 1": "L2E0",
+      "col 1": "L2E6",
+      "diag \\": "L2E3",
+      "diag /": "L2E5"
+    },
+    "per_pattern_consistency": {
+      "row 1": 0.94,
+      "col 1": 0.8,
+      "diag \\": 0.83,
+      "diag /": 0.91
+    },
+    "collisions": {},
+    "collision_stable": false,
+    "tyrant_share": {
+      "L2E0": 0.2475,
+      "L2E3": 0.2475,
+      "L2E1": 0.0225,
+      "L2E5": 0.25,
+      "L2E7": 0.03,
+      "L2E6": 0.2025
+    },
+    "max_tyrant_share": 0.25,
+    "same_step_multi_firer_steps": 18,
+    "index_bias_counts": {
+      "L2E0": 5,
+      "L2E1": 1,
+      "L2E2": 1,
+      "L2E3": 14,
+      "L2E5": 8,
+      "L2E6": 4,
+      "L2E7": 3
+    },
+    "silent_l2e": [
+      "L2E4"
+    ],
+    "active_l2e_count": 7,
+    "pc_fire_events": 5980,
+    "first_pc_fire_step": 794,
+    "nonzero_eligibility_events": 5994,
+    "switchi_requests_queued": 3275,
+    "switchi_deliveries_applied": 524,
+    "paired_target_violations": [],
+    "causal_violations": [],
+    "exact_zero_feedforward_weights": 0,
+    "config_fingerprint": "final_candidate:5dc75ac77bc4",
+    "total_steps": 8000,
+    "wall_seconds": 89.5
+  }
+}

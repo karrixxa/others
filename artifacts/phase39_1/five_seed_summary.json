@@ -1,0 +1,123 @@
+{
+  "seeds_run": [
+    1,
+    2,
+    3,
+    4,
+    5
+  ],
+  "stopped_at_first_failure": null,
+  "all_passed": true,
+  "per_seed": [
+    {
+      "seed": 1,
+      "verdict": "PASS_FINAL_CANDIDATE",
+      "per_pattern_owner": {
+        "row 1": "L2E5",
+        "col 1": "L2E6",
+        "diag \\": "L2E7",
+        "diag /": "L2E4"
+      },
+      "collisions": {},
+      "max_tyrant_share": 0.25,
+      "pc_fire_events": 6483,
+      "first_pc_fire_step": 1242,
+      "nonzero_eligibility_events": 6920,
+      "switchi_requests_queued": 3314,
+      "switchi_deliveries_applied": 336,
+      "paired_target_violations": 0,
+      "causal_violations": 0,
+      "exact_zero_feedforward_weights": 0,
+      "silent_l2e_count": 2,
+      "wall_seconds": 69.1
+    },
+    {
+      "seed": 2,
+      "verdict": "PASS_FINAL_CANDIDATE",
+      "per_pattern_owner": {
+        "row 1": "L2E0",
+        "col 1": "L2E6",
+        "diag \\": "L2E3",
+        "diag /": "L2E5"
+      },
+      "collisions": {},
+      "max_tyrant_share": 0.25,
+      "pc_fire_events": 5980,
+      "first_pc_fire_step": 794,
+      "nonzero_eligibility_events": 5994,
+      "switchi_requests_queued": 3275,
+      "switchi_deliveries_applied": 524,
+      "paired_target_violations": 0,
+      "causal_violations": 0,
+      "exact_zero_feedforward_weights": 0,
+      "silent_l2e_count": 1,
+      "wall_seconds": 89.5
+    },
+    {
+      "seed": 3,
+      "verdict": "PASS_FINAL_CANDIDATE",
+      "per_pattern_owner": {
+        "row 1": "L2E7",
+        "col 1": "L2E4",
+        "diag \\": "L2E6",
+        "diag /": "L2E2"
+      },
+      "collisions": {},
+      "max_tyrant_share": 0.235,
+      "pc_fire_events": 5920,
+      "first_pc_fire_step": 1548,
+      "nonzero_eligibility_events": 6503,
+      "switchi_requests_queued": 3487,
+      "switchi_deliveries_applied": 561,
+      "paired_target_violations": 0,
+      "causal_violations": 0,
+      "exact_zero_feedforward_weights": 0,
+      "silent_l2e_count": 2,
+      "wall_seconds": 83.633
+    },
+    {
+      "seed": 4,
+      "verdict": "PASS_FINAL_CANDIDATE",
+      "per_pattern_owner": {
+        "row 1": "L2E4",
+        "col 1": "L2E5",
+        "diag \\": "L2E3",
+        "diag /": "L2E1"
+      },
+      "collisions": {},
+      "max_tyrant_share": 0.23,
+      "pc_fire_events": 5914,
+      "first_pc_fire_step": 1042,
+      "nonzero_eligibility_events": 6756,
+      "switchi_requests_queued": 3281,
+      "switchi_deliveries_applied": 445,
+      "paired_target_violations": 0,
+      "causal_violations": 0,
+      "exact_zero_feedforward_weights": 0,
+      "silent_l2e_count": 1,
+      "wall_seconds": 68.764
+    },
+    {
+      "seed": 5,
+      "verdict": "PASS_FINAL_CANDIDATE",
+      "per_pattern_owner": {
+        "row 1": "L2E4",
+        "col 1": "L2E5",
+        "diag \\": "L2E7",
+        "diag /": "L2E1"
+      },
+      "collisions": {},
+      "max_tyrant_share": 0.245,
+      "pc_fire_events": 6080,
+      "first_pc_fire_step": 965,
+      "nonzero_eligibility_events": 6092,
+      "switchi_requests_queued": 3333,
+      "switchi_deliveries_applied": 552,
+      "paired_target_violations": 0,
+      "causal_violations": 0,
+      "exact_zero_feedforward_weights": 0,
+      "silent_l2e_count": 2,
+      "wall_seconds": 70.823
+    }
+  ]
+}

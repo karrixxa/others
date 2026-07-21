@@ -193,6 +193,18 @@ export class Controls {
     document.getElementById('p-clear').addEventListener('click', () => { this.activePattern = null; this.api.post('/api/clear'); });
     document.getElementById('p-noise').addEventListener('click', () => { this.activePattern = null; this.api.post('/api/noise/0.15'); });
     this._wireAutoCycle();
+    this._wirePresetSelect();
+  }
+
+  // Phase 39.1: explicit preset selection (dashboard / final_candidate).
+  // Rebuilds the engine server-side via SimulationEngine.select_preset() --
+  // same apply_config() path every other config change already uses.
+  _wirePresetSelect() {
+    const select = document.getElementById('preset-select');
+    if (!select) return;
+    select.addEventListener('change', () => {
+      this.api.post('/api/preset', { name: select.value });
+    });
   }
 
   _wireAutoCycle() {

@@ -50,8 +50,12 @@ export class Raster {
     this._firstMarkedThisPresentation = false;
 
     // Per-population lane toggles (Phase 14) -- replaces the old single
-    // showL1 boolean with independent L1E/L1I/L2E/L2I visibility.
+    // showL1 boolean with independent L1E/L1I/L2E/L2I visibility. showPC
+    // (Phase 39.1) is the existing PC_i "Prediction coincidence" population
+    // (group 'L1P', already built by prediction_column_enabled) -- same
+    // toggle pattern, not a new population.
     this.showL1E = true; this.showL1I = true; this.showL2E = true; this.showL2I = true;
+    this.showPC = true;
     // View toggles (Phase 14), all local rendering state.
     this.showCharge = false;         // discrete-only is the preserved default
     this.hideSilentLanes = true;
@@ -94,6 +98,7 @@ export class Raster {
       'raster-show-boundaries': 'showBoundaries', 'raster-show-inhibition': 'showInhibitionMarkers',
       'raster-show-first-response': 'showFirstResponse',
       'raster-l1e': 'showL1E', 'raster-l1i': 'showL1I', 'raster-l2e': 'showL2E', 'raster-l2i': 'showL2I',
+      'raster-pc': 'showPC',
     };
     for (const [id, prop] of Object.entries(BIND_PROP)) {
       const el = document.getElementById(id);
@@ -202,6 +207,10 @@ export class Raster {
     if (n.group === 'L1I') return this.showL1I;
     if (n.group === 'L2E') return this.showL2E;
     if (n.group === 'L2I') return this.showL2I;
+    // 'L1P': the PC_i "Prediction coincidence" population (layer L1, type P --
+    // prediction_column_enabled) and the older, mutually-exclusive P_i
+    // replay population share this group; only one is ever built at once.
+    if (n.group === 'L1P') return this.showPC;
     return true;
   }
 

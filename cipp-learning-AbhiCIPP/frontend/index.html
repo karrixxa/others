@@ -92,6 +92,39 @@
       </section>
 
       <section class="panel" data-section>
+        <header class="panel-head"><span>Prediction coincidence</span><span class="chev"></span></header>
+        <div class="panel-body">
+          <p class="config-desc">The existing PC_i coincidence population (Phase 19-v2) and Phase 38's paired
+            local eligibility/mismatch shunt -- observability only, not a new binding layer.</p>
+          <div class="status-grid">
+            <div class="status-card"><span class="status-k">PC firings</span><span class="status-v" id="pcx-fire-count">—</span></div>
+            <div class="status-card"><span class="status-k">First PC fire step</span><span class="status-v" id="pcx-first-step">—</span></div>
+            <div class="status-card"><span class="status-k">Eligibility events</span><span class="status-v" id="pcx-elig-events">—</span></div>
+            <div class="status-card"><span class="status-k">Residual (R_i) events</span><span class="status-v" id="pcx-residual-events">—</span></div>
+            <div class="status-card"><span class="status-k">SwitchI requests queued</span><span class="status-v" id="pcx-requests">—</span></div>
+            <div class="status-card"><span class="status-k">Paired shunts applied</span><span class="status-v" id="pcx-applied">—</span></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel" data-section>
+        <header class="panel-head"><span>Preset</span><span class="chev"></span></header>
+        <div class="panel-body">
+          <label class="field">
+            <span>Active configuration</span>
+            <select id="preset-select">
+              <option value="dashboard">dashboard (baseline)</option>
+              <option value="final_candidate">final_candidate (Phase 39 opt-in)</option>
+            </select>
+          </label>
+          <div class="status-grid">
+            <div class="status-card"><span class="status-k">Active preset</span><span class="status-v" id="preset-active">—</span></div>
+            <div class="status-card full"><span class="status-k">Config fingerprint</span><span class="status-v sm" id="preset-fingerprint">—</span></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel" data-section>
         <header class="panel-head"><span>Pattern Selection</span><span class="chev"></span></header>
         <div class="panel-body">
           <div class="pixel-grid" id="pixel-grid"></div>
@@ -315,6 +348,7 @@
       <label class="check"><input type="checkbox" id="raster-l1i" checked /> L1I</label>
       <label class="check"><input type="checkbox" id="raster-l2e" checked /> L2E</label>
       <label class="check"><input type="checkbox" id="raster-l2i" checked /> L2I</label>
+      <label class="check"><input type="checkbox" id="raster-pc" checked /> Prediction coincidence (PC)</label>
     </div>
     <div class="viz-scroll" id="raster-scroll">
       <div class="viz-spacer" id="raster-spacer"></div>

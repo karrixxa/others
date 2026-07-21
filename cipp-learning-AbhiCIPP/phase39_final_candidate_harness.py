@@ -25,15 +25,10 @@ TOPOLOGY_SEED = 1
 N_CYCLES = 100  # 100 * 4 * 20 = 8000 steps -- bounded, one seed only
 
 
-def _config_fingerprint(engine: SimulationEngine) -> str:
-    keys = sorted(FINAL_CANDIDATE_PRESET.keys()) + ['seed', 'topology_seed']
-    parts = [f"{k}={engine.params.get(k)}" for k in keys]
-    return "|".join(parts)
-
-
-def run() -> dict:
+def run(seed: int = SEED, topology_seed: int = TOPOLOGY_SEED) -> dict:
     t_wall = time.time()
-    engine = SimulationEngine(seed=SEED, topology_seed=TOPOLOGY_SEED, **FINAL_CANDIDATE_PRESET)
+    engine = SimulationEngine(seed=seed, topology_seed=topology_seed, **FINAL_CANDIDATE_PRESET)
+    engine.active_preset_name = 'final_candidate'
 
     presentations = []
     same_step_multi_firer_steps = 0
@@ -160,7 +155,7 @@ def run() -> dict:
         paired_target_violations=paired_target_violations,
         causal_violations=causal_violations,
         exact_zero_feedforward_weights=exact_zero_ff,
-        config_fingerprint=_config_fingerprint(engine),
+        config_fingerprint=engine.config_fingerprint(),
         total_steps=N_CYCLES * len(CYCLE_ORDER) * PRESENTATION_STEPS,
         wall_seconds=round(time.time() - t_wall, 3),
     )

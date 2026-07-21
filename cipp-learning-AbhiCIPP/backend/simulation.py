@@ -33,6 +33,7 @@ default.
 
 from __future__ import annotations
 
+import hashlib
 import os
 import sys
 from collections import deque, defaultdict
@@ -861,22 +862,17 @@ class SimulationEngine:
                  # _apply_prediction_column_learning). Separately named, never
                  # aliased to learning_rate/eta_pred/l2e_lr_frac.
                  #
-                 # Phase 39: raised from 0.15 to 1.5 (single production change,
-                 # decoder learning timescale only). Calculation from this exact
-                 # recurrence at the default init=50/max=1200/threshold=500/
-                 # lateral=150 (crossing point d=350): at eta=0.15 the closed-form
-                 # step count to reach 350 is 2946 events -- already documented in
-                 # the Phase 35 ledger. The Phase 38.2 natural smoke measured the
-                 # real qualifying-event RATE directly (basal+apical co-delivery,
-                 # not steps): ~0.041 events/step. 2946 events / 0.041 events-per-
-                 # step ~= 71,000 steps to mature -- far past any bounded smoke.
-                 # eta=1.5 needs 295 events for the same crossing (still hundreds
-                 # of genuine, physically-delivered coincidences -- never a
-                 # one-shot/pre-saturated jump), ~7,100 steps at the same measured
-                 # rate: a ~10x reduction matching the ~10x eta increase, not a
-                 # threshold or init/max change. See Phase39_Prediction_Maturity_
-                 # Timescale.md for the full derivation.
-                 prediction_learning_rate: float = 1.5,
+                 # Phase 39.1: Phase 39 raised this DEFAULT to 1.5, which silently
+                 # changed global/default behavior for every caller that doesn't
+                 # pass this explicitly (the live dashboard, and any test relying
+                 # on the constructor default). Reverted to the original 0.15 --
+                 # the accelerated 1.5 value now lives ONLY in
+                 # backend.presets.FINAL_CANDIDATE_PRESET, an explicit opt-in.
+                 # See Phase39_Prediction_Maturity_Timescale.md for the full
+                 # derivation of why 1.5 is needed for that preset specifically
+                 # (2946 events / ~71,000 steps to mature at 0.15 vs. 295 events /
+                 # ~7,100 steps at 1.5, both from the same measured event rate).
+                 prediction_learning_rate: float = 0.15,
                  # PCi's own firing threshold. Separately named from
                  # threshold/threshold_l2 -- this population's coincidence
                  # detection is calibrated against ITS OWN scale, not L1/L2's.
@@ -1684,6 +1680,20 @@ class SimulationEngine:
         self._switchi_local_last_deliveries: list[dict] = []
         self._switchi_local_last_residual: list[dict] = []
         self._switchi_local_last_diag: dict = {}
+        # Phase 39.1: cumulative "Prediction coincidence" UI counters -- pure
+        # bookkeeping, read by simulator_status()/prediction_coincidence(),
+        # never read by any physical/learning code path.
+        self._switchi_local_residual_events_total = 0
+        self._switchi_local_eligibility_events_total = 0
+        self._switchi_local_requests_queued_total = 0
+        self._switchi_local_deliveries_applied_total = 0
+        # Phase 39.1: a plain display label, never read by any dynamics code
+        # and never part of self.params/TUNABLE. Every _build() (a fresh
+        # construction, reset(), or a bare apply_config() override) resets
+        # this to 'custom'; select_preset() is the only thing that then sets
+        # it to a named preset, immediately after _build() (via apply_config)
+        # has applied that exact preset's own dict.
+        self.active_preset_name = 'custom'
         self.l2_inh_phase_debug: list[dict] = []      # per-inhibited-L2E phase record (see step())
         # Phase 6: the exposed "representation candidate" -- the presentation's
         # first physical L2E threshold crossing, or None until one occurs, or
@@ -1863,6 +1873,7 @@ class SimulationEngine:
         self._prediction_column_last_deliveries = []
         self._prediction_column_last_output_delivery = []
         self._prediction_column_last_conductance = []
+        self._pc_first_fire_step = None
 
     def _prediction_column_origin_class(self, records, pixel_index):
         """Classify an arrived physical pair without affecting its delivery."""
@@ -1945,7 +1956,11 @@ class SimulationEngine:
             for i in range(N_PIX):
                 nid = f'PC{i}'
                 self.neurons[nid] = self.pcol[i]
-                self.meta[nid] = dict(id=nid, label=f'pred-col {i}', layer='L1', type='P',
+                # Phase 39.1: display label only ('Prediction coincidence' --
+                # the existing PC_i coincidence population, not a new one).
+                # id/layer/type/pixel_index/pos are unchanged; nothing that
+                # affects dynamics reads this string.
+                self.meta[nid] = dict(id=nid, label=f'Prediction coincidence {i}', layer='L1', type='P',
                                       pixel_index=i, threshold=self.prediction_threshold,
                                       pos=[round(float(l1e_xy[i, 0]), 4), round(float(l1e_xy[i, 1]), 4), 1.5])
         for j in range(N_OUT):
@@ -2294,6 +2309,13 @@ class SimulationEngine:
                # Phase 37: paired L2 oracle-feasibility shunt.
                'switchi_paired_shunt_enabled', 'switchi_trace_decay',
                'switchi_coincidence_threshold', 'switchi_shunt_frac',
+               # Phase 38: delayed local eligibility/mismatch shunt. This was
+               # missing here since Phase 38's own commit -- apply_config
+               # silently dropped it (not in TUNABLE => filtered out below),
+               # so the live config panel could never actually enable Phase
+               # 38's mechanism. Fixed as part of Phase 39.1's preset-select
+               # wiring.
+               'switchi_local_mismatch_enabled',
                'pretrained_l1i_regulation')
 
     def apply_config(self, overrides: dict):
@@ -2324,7 +2346,7 @@ class SimulationEngine:
                      'prediction_column_to_i_enabled',
                      'prediction_column_to_i_delivery_enabled',
                      'prediction_column_persistent_conductance_enabled',
-                     'switchi_paired_shunt_enabled',
+                     'switchi_paired_shunt_enabled', 'switchi_local_mismatch_enabled',
                      'pretrained_l1i_regulation'):
                 v = bool(v)
             elif k in ('seed', 'refractory', 'l2_charge_chunks', 'l2_inhibition_delay',
@@ -2343,6 +2365,19 @@ class SimulationEngine:
         self._build()
         self._log('control', f'config applied: {applied}')
         return applied
+
+    def select_preset(self, name: str, preset: dict) -> dict:
+        """Phase 39.1: apply a named, pre-defined preset dict (e.g.
+        backend.presets.DASHBOARD_PRESET / FINAL_CANDIDATE_PRESET) through the
+        existing apply_config() path -- no new config-application mechanism,
+        just a named entry point that also records which preset is active for
+        display. `seed` is deliberately excluded from `preset` (presets never
+        set it; the caller's already-loaded/current seed is preserved)."""
+        applied = self.apply_config({k: v for k, v in preset.items() if k in self.TUNABLE})
+        self.active_preset_name = name
+        self._log('control', f'preset selected: {name}')
+        return dict(applied=applied, active_preset=self.active_preset_name,
+                    config_fingerprint=self.config_fingerprint())
 
     def set_feedforward_weight(self, j: int, i: int, weight: float) -> float:
         """Manually set L2E neuron j's feedforward weight FROM pixel i (afferent index
@@ -2756,6 +2791,7 @@ class SimulationEngine:
             delivered.append(row)
         self._switchi_local_pending = remaining
         self._switchi_local_last_deliveries = delivered
+        self._switchi_local_deliveries_applied_total += sum(1 for row in delivered if row['applied'])
         return delivered
 
     def _update_switchi_local_eligibility(self, pcol_spiked):
@@ -2784,6 +2820,7 @@ class SimulationEngine:
                 strength = min(max(self.pcol[i].decoder_weights[j] / pred_scale, 0.0), 1.0)
                 old = float(self.switchi_local_elig[j, i])
                 self.switchi_local_elig[j, i] = old + strength * (1.0 - old)
+                self._switchi_local_eligibility_events_total += 1
 
     def _queue_switchi_local_requests(self, l1e_vec, pcol_spiked, t):
         self._switchi_local_last_events = []
@@ -2836,6 +2873,8 @@ class SimulationEngine:
                     contributors=contributors,
                 ))
                 self._switchi_local_last_requests.append(dict(row))
+        self._switchi_local_residual_events_total += len(residual_pixels)
+        self._switchi_local_requests_queued_total += len(self._switchi_local_last_requests)
         self._switchi_local_last_diag = dict(
             pc_firing_events=int(np.sum(np.array(pcol_spiked, dtype=float) > 0.5)),
             residual_events=len(residual_pixels),
@@ -3306,6 +3345,11 @@ class SimulationEngine:
         if pred_col is not None:
             for i in range(N_PIX):
                 self.spiked[f'PC{i}'] = bool(pred_col[i]); self.freq[f'PC{i}'].append(pred_col[i])
+            # Phase 39.1: first-ever PC fire step, for the UI's "Prediction
+            # coincidence" panel -- set once, read-only observability, never
+            # reset except by a full engine rebuild (_build()).
+            if self._pc_first_fire_step is None and any(pred_col):
+                self._pc_first_fire_step = self.timestep
         for j in range(N_OUT):
             self.spiked[f'L2E{j}'] = bool(l2e[j]); self.freq[f'L2E{j}'].append(l2e[j])
         self.spiked['L2I'] = bool(l2i); self.freq['L2I'].append(l2i)
@@ -3751,7 +3795,7 @@ class SimulationEngine:
     def _pc_summary(self) -> dict:
         if not self.prediction_column_enabled:
             return dict(enabled=False, current_spikes=0, max_activation=0.0,
-                        spike_history_total=0, mature_columns=0)
+                        spike_history_total=0, mature_columns=0, first_fire_step=None)
         pcs = [self.neurons[f'PC{i}'] for i in range(N_PIX)]
         max_activation = max(
             (float(pc.potential) / max(float(pc.threshold), 1.0) for pc in pcs),
@@ -3765,6 +3809,30 @@ class SimulationEngine:
             max_activation=round(float(max_activation), 4),
             spike_history_total=int(spike_history_total),
             mature_columns=int(mature_columns),
+            first_fire_step=self._pc_first_fire_step,
+        )
+
+    def prediction_coincidence_panel(self) -> dict:
+        """Phase 39.1: UI-facing summary of the EXISTING PC coincidence
+        population plus Phase 38's local eligibility/mismatch shunt --
+        labeled 'Prediction coincidence' for the dashboard. Read-only: every
+        field here is copied from state the engine already produces
+        (pc_summary, the switchi_local cumulative counters, the last-step
+        diagnostics); nothing is computed or gated here, and nothing here
+        feeds back into any physical/learning code path. This is NOT a new
+        population or mechanism -- PC_i / SwitchI_j already exist (Phases
+        19-v2 and 38); this method only names and groups their existing
+        observability for display."""
+        pc = self._pc_summary()
+        return dict(
+            label='Prediction coincidence',
+            pc=pc,
+            switchi_local_enabled=self.switchi_local_mismatch_enabled,
+            eligibility_events_total=self._switchi_local_eligibility_events_total,
+            residual_events_total=self._switchi_local_residual_events_total,
+            requests_queued_total=self._switchi_local_requests_queued_total,
+            deliveries_applied_total=self._switchi_local_deliveries_applied_total,
+            last_step_diag=dict(self._switchi_local_last_diag),
         )
 
     def simulator_status(self) -> dict:
@@ -3792,7 +3860,22 @@ class SimulationEngine:
             min_feedforward_weight=weights['min_weight'],
             min_positive_feedforward_weight=weights['min_positive_weight'],
             switchi_local_firing=switchi_firing,
+            prediction_coincidence=self.prediction_coincidence_panel(),
+            active_preset=self.active_preset_name,
+            config_fingerprint=self.config_fingerprint(),
         )
+
+    def config_fingerprint(self) -> str:
+        """Phase 39.1: a short, deterministic string identifying exactly which
+        resolved parameter values built this engine -- read-only, derived
+        entirely from self.params over the engine's own TUNABLE key set
+        (never a separate stored truth, never a hard-coded reference to any
+        one named preset). Used by the UI to display/confirm the active
+        configuration; changing what it reports never changes any dynamics."""
+        keys = sorted(set(self.TUNABLE) | {'seed', 'topology_seed', 'l2e_init_mode'})
+        parts = [f"{k}={self.params.get(k)}" for k in keys]
+        digest = hashlib.sha256("|".join(parts).encode()).hexdigest()[:12]
+        return f"{self.active_preset_name}:{digest}"
 
     # ------------------------------------------------------------ serialization
     def topology(self) -> dict:
