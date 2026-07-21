@@ -617,6 +617,10 @@ CONFIG_SPEC = [
              "own output affects any other neuron (Phases 19-20 were shadow-"
              "only). OFF (default) is byte-identical to the existing global "
              "L2E->L1I feedback topology."},
+    {"key": "prediction_column_persistent_conductance_enabled", "label": "Persistent PCi output conductance", "kind": "toggle",
+     "desc": "Requires selective PCi->Ii inhibition. Keeps the ordinary paired "
+             "PCi->L1Ii->L1Ei inhibitory hit and adds a decaying conductance "
+             "tail on later steps only for that paired predictive-output path."},
     {"key": "pretrained_l1i_regulation", "label": "Pre-trained L1I regulation", "kind": "toggle",
      "desc": "SEPARATE factorial variable from the toggle above: fixes every "
              "incoming L1I weight (whichever topology) at L1I's own resolved "

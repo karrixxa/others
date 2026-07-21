@@ -298,6 +298,12 @@ class Neuron(NeuralEntity):
         self.inh_trace_decay = 0.8
         self.inh_trace_normalized = True
         self.inh_trace = 0.0                # pending inhibitory current (drains in update)
+        self.inh_trace_pending = 0.0        # conductance tail injected after this step's drain
+        # Optional hybrid mode for a paired predictive path: keep the ordinary
+        # same-step inhibitory hit, then seed a decaying tail for later steps.
+        # Default OFF preserves the legacy "trace-only" inhibitory_flow_rate
+        # behaviour everywhere else.
+        self.inhibitory_persistent_after_discharge = False
         # Inhibitory-gate plasticity rule (see apply_inhibition). inhibitory_delta_rule
         # False = legacy SATURATING rule (dw = eta*p*(1 - w^2/w_max); every gate
         # converges to the same ceiling sqrt(w_max), so gates end up uniform). True =
@@ -597,7 +603,15 @@ class Neuron(NeuralEntity):
             w = -float(self._weights_array[idx])   # magnitude of the inhibitory gate (RAW, for learning)
             w_delivered = w * float(delivery_influence[idx]) if delivery_influence is not None else w
             v_pre = float(self.potential)
-            if self.inhibitory_flow_rate:
+            if self.inhibitory_flow_rate and self.inhibitory_persistent_after_discharge:
+                # Hybrid predictive-output mode: preserve the ordinary same-step
+                # inhibitory effect, then start a decaying conductance tail on
+                # later steps without changing this event's arrival time.
+                self.potential = max(self.potential - w_delivered, self.resting_potential)
+                self.inh_trace_pending += (w_delivered * (1.0 - self.inh_trace_decay)
+                                           if self.inh_trace_normalized else w_delivered)
+                v_post = float(self.potential)
+            elif self.inhibitory_flow_rate:
                 # Inhibitory FLOW: inject the gate into a decaying inhibitory current
                 # that drains the membrane over subsequent steps (see update()),
                 # rather than subtracting it all now. No instantaneous change here;
@@ -642,7 +656,25 @@ class Neuron(NeuralEntity):
             if self.hard_reset_clear_traces:
                 self.exc_trace = 0.0
                 self.inh_trace = 0.0
+                self.inh_trace_pending = 0.0
         return events
+
+    def advance_inhibitory_conductance(self):
+        """Apply one already-seeded inhibitory tail before threshold.
+
+        Used only by the hybrid paired predictive-output path: the ordinary
+        inhibitory discharge already landed on a previous step, and this method
+        delivers the remaining conductance on later steps without shifting that
+        original arrival time. Legacy inhibitory_flow_rate continues to drain in
+        update() instead.
+        """
+        if not (self.inhibitory_flow_rate and self.inhibitory_persistent_after_discharge):
+            return 0.0
+        current = float(self.inh_trace)
+        if current > 0.0:
+            self.potential = max(self.potential - current, self.resting_potential)
+            self.inh_trace *= self.inh_trace_decay
+        return current
 
     def _depress_losers(self, v_pre_loss):
         """Depress the ACTIVE positive feedforward gates of a neuron that was just
@@ -792,9 +824,13 @@ class Neuron(NeuralEntity):
             # so a single discharge keeps suppressing the target for ~1/(1-decay)
             # steps instead of only on the step L2I fired. Not reset on fire -- the
             # pending inhibition drains fully regardless.
-            if self.inhibitory_flow_rate and self.inh_trace > 0.0:
+            if (self.inhibitory_flow_rate and not self.inhibitory_persistent_after_discharge
+                    and self.inh_trace > 0.0):
                 self.potential = max(self.potential - self.inh_trace, self.resting_potential)
                 self.inh_trace *= self.inh_trace_decay
+            if self.inh_trace_pending > 0.0:
+                self.inh_trace += self.inh_trace_pending
+                self.inh_trace_pending = 0.0
 
         # Homeostatic synaptic scaling (slow, activity-driven, non-Hebbian).
         # Frozen (probe presentation): skip so a probe cannot drift the resource

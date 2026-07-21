@@ -906,6 +906,17 @@ class SimulationEngine:
                  # same-step delivery convention (see step()'s "2d. Deliver
                  # L2E winner spike immediately to all L1I neurons").
                  prediction_column_to_i_enabled: bool = False,
+                 # Phase 36: keep Phase 21's selective PC_i -> L1I_i -> L1E_i
+                 # topology and same one-step L1I->L1E arrival delay, but add a
+                 # persistent inhibitory conductance TAIL after that ordinary
+                 # paired discharge lands. Requires prediction_column_to_i_enabled
+                 # because this feature is scoped ONLY to the paired predictive
+                 # output path, never the global L2E->L1I baseline.
+                 # Implementation deliberately reuses Neuron's existing
+                 # inhibitory-current decay constants (inh_trace_decay /
+                 # inh_trace_normalized) instead of inventing a second floor or
+                 # parallel inhibitory rule.
+                 prediction_column_persistent_conductance_enabled: bool = False,
                  # Phase 21: fixed/pretrained L1I regulation, KEPT AS A
                  # SEPARATE factorial variable from the input-topology flag
                  # above (per the independent review's correction #6 --
@@ -1078,6 +1089,8 @@ class SimulationEngine:
                            prediction_feedback_delay=prediction_feedback_delay,
                            prediction_leak_diagnostic_disable=prediction_leak_diagnostic_disable,
                            prediction_column_to_i_enabled=prediction_column_to_i_enabled,
+                           prediction_column_persistent_conductance_enabled=(
+                               prediction_column_persistent_conductance_enabled),
                            pretrained_l1i_regulation=pretrained_l1i_regulation,
                            l2e_weight_cap_frac=l2e_weight_cap_frac,
                            pos_weight_floor=pos_weight_floor,
@@ -1131,6 +1144,14 @@ class SimulationEngine:
             raise ValueError(
                 "prediction_column_to_i_enabled requires prediction_column_enabled "
                 "(selective L1I input needs an actual PC population to draw from).")
+        self.prediction_column_persistent_conductance_enabled = bool(
+            p['prediction_column_persistent_conductance_enabled'])
+        if (self.prediction_column_persistent_conductance_enabled
+                and not self.prediction_column_to_i_enabled):
+            raise ValueError(
+                "prediction_column_persistent_conductance_enabled requires "
+                "prediction_column_to_i_enabled (the persistent tail is only "
+                "defined on the paired PC_i -> L1I_i -> L1E_i path).")
         l1i_n_feedback = 1 if self.prediction_column_to_i_enabled else N_OUT
         self.l1 = InputLayer(n_neurons=N_PIX, threshold=thr_l1,
                              refractory_period=p['refractory'], learning_rate=p['learning_rate'],
@@ -1529,6 +1550,12 @@ class SimulationEngine:
         if self.prediction_column_enabled:
             for pc in self.pcol:
                 pc.distance_weighting = False
+        if self.prediction_column_persistent_conductance_enabled:
+            for e in self.l1.excitatory_neurons:
+                e.inhibitory_flow_rate = True
+                e.inhibitory_persistent_after_discharge = True
+                e.inh_trace_decay = p['inh_trace_decay']
+                e.inh_trace_normalized = bool(p['inh_trace_normalized'])
 
         # One-step feedback delay. L1I spikes produced at t inhibit paired L1E
         # neurons at t+1 only; the register is replaced every step.
@@ -2155,7 +2182,9 @@ class SimulationEngine:
                'prediction_leak_diagnostic_disable',
                # Phase 21: selective local predictive inhibition (PCi->Ii),
                # kept as two SEPARATE factorial variables.
-               'prediction_column_to_i_enabled', 'pretrained_l1i_regulation')
+               'prediction_column_to_i_enabled',
+               'prediction_column_persistent_conductance_enabled',
+               'pretrained_l1i_regulation')
 
     def apply_config(self, overrides: dict):
         """Merge tunable overrides into self.params and rebuild the network in
@@ -2182,7 +2211,9 @@ class SimulationEngine:
                      'adaptive_threshold', 'loser_depression_protection',
                      'pretrained_l2i_recruitment', 'prediction_excitatory_enabled',
                      'prediction_column_enabled', 'prediction_leak_diagnostic_disable',
-                     'prediction_column_to_i_enabled', 'pretrained_l1i_regulation'):
+                     'prediction_column_to_i_enabled',
+                     'prediction_column_persistent_conductance_enabled',
+                     'pretrained_l1i_regulation'):
                 v = bool(v)
             elif k in ('seed', 'refractory', 'l2_charge_chunks', 'l2_inhibition_delay',
                        'prediction_feedback_delay'):
@@ -2578,6 +2609,8 @@ class SimulationEngine:
                 e.receive_input(np.array([0.0, ext, replay_inputs[i]]))
             else:
                 e.receive_input(np.array([0.0, ext]))
+            if self.prediction_column_persistent_conductance_enabled:
+                e.advance_inhibitory_conductance()
             # L1I feedback is a one-step delayed pulse. With constant presentation,
             # a pulse at t exactly cancels its paired pixel drive at t+1 and is then
             # consumed when this register is replaced at the end of the step.
@@ -3389,7 +3422,10 @@ class SimulationEngine:
                         roles=['basal', 'apical'] if self.prediction_column_enabled else [],
                         decoder_shape=[N_OUT, N_PIX],
                         output_route='PC_i -> L1I_i -> L1E_i'
-                        if self.prediction_column_to_i_enabled else None),
+                        if self.prediction_column_to_i_enabled else None,
+                        persistent_conductance=(
+                            self.prediction_column_persistent_conductance_enabled
+                            if self.prediction_column_to_i_enabled else False)),
                     params=self.params)
 
     def dynamic_state(self) -> dict:
@@ -3546,7 +3582,10 @@ class SimulationEngine:
                                             for record in slot]
                         if self.prediction_column_enabled else [],
                         last_deliveries=list(self._prediction_column_last_deliveries)
-                        if self.prediction_column_enabled else []),
+                        if self.prediction_column_enabled else [],
+                        persistent_conductance_enabled=(
+                            self.prediction_column_persistent_conductance_enabled
+                            if self.prediction_column_enabled else False)),
                     # Phase 10: adaptive-threshold ablation state/trajectory
                     # (L2E only; a_i and its history stay 0/empty for every
                     # other population always, and for L2E itself whenever the
