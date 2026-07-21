@@ -11,7 +11,7 @@ import { Raster } from './raster.js';
 import { ChargeChart } from './charge.js';
 import { WeightsChart } from './weights.js';
 import { CausalStory } from './causal.js';
-import { firstResponderLabel } from './labels.js';
+import { firstResponderLabel, predictionOutputStateLabel, detectPatternLabel } from './labels.js';
 
 const api = {
   async post(path, body) {
@@ -32,6 +32,8 @@ const store = {
   confidence: new Map(),    // synapse id -> current confidence (L2E gates)
   stateById: new Map(),     // id -> latest dynamic neuron state
   patternVectors: {},
+  probeVectors: {},
+  patternRoles: {},
   // synapse id -> provenance string, recomputed fresh every dynamic message
   // from already-broadcast fields only (dyn.neurons[].spiked and
   // dyn.l2_inhibition.last_delivery/targets) -- never inferred beyond
@@ -101,6 +103,8 @@ function onMessage(msg) {
     store.weights = new Map(topo.synapses.map(s => [s.id, s.weight ?? 0]));
     store.confidence = new Map(topo.synapses.filter(s => s.confidence != null).map(s => [s.id, s.confidence]));
     store.patternVectors = topo.pattern_vectors || {};
+    store.probeVectors = topo.probe_vectors || {};
+    store.patternRoles = topo.pattern_roles || {};
     renderer.build(topo);
     charts.buildStatic(topo);
     controls.onTopology(topo);
@@ -126,6 +130,7 @@ function onMessage(msg) {
     inspector.refresh();   // re-renders if a neuron was already selected
     controls.onDynamic(dyn);
     updateTopbar(dyn, fps);
+    updateStatusPanel(dyn);
   }
 }
 
@@ -147,6 +152,34 @@ function updateTopbar(dyn, fps) {
       + (story.plasticity_frozen ? ' · frozen' : '');
     pres.style.color = story.plasticity_frozen ? 'var(--inh)' : 'var(--txt-1)';
   }
+}
+
+function updateStatusPanel(dyn) {
+  const status = dyn.simulator_status || {};
+  const ownership = status.ownership || {};
+  const pc = status.pc || {};
+  const pattern = detectPatternLabel(dyn.input || [], store.patternVectors || {}, store.probeVectors || {});
+  const modalOwner = ownership.modal_owner || '—';
+  const collisions = (ownership.collisions || [])
+    .map(row => `${row.owner}: ${row.patterns.join(', ')}`)
+    .join(' · ') || 'none';
+  const firstShare = ownership.clean_presentations
+    ? `${(100 * (ownership.first_responder_share || 0)).toFixed(1)}%`
+    : '—';
+  const exactZero = status.exact_zero_feedforward ?? 0;
+  const pcLabel = !pc.enabled
+    ? 'OFF'
+    : `${pc.current_spikes || 0} now · ${pc.spike_history_total || 0} total · max ${(pc.max_activation || 0).toFixed(2)}×thr`;
+  const predState = predictionOutputStateLabel(dyn.prediction_column);
+  const set = (id, value) => { const node = el(id); if (node) node.textContent = value; };
+  set('sim-detected-pattern', pattern);
+  set('sim-modal-owner', modalOwner);
+  set('sim-collisions', collisions);
+  set('sim-first-share', firstShare);
+  set('sim-active-l2e', `${status.active_l2e ?? 0} active / ${status.unrecruited_l2e ?? 0} unrecruited`);
+  set('sim-pc-maturity', pcLabel);
+  set('sim-prediction-state', predState);
+  set('sim-exact-zero', String(exactZero));
 }
 
 function onStatus(state) {

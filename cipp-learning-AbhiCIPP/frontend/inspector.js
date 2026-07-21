@@ -55,7 +55,7 @@ export class Inspector {
       if (syn.source === this.id) outgoing.push({ ...syn, w, conf, dist, infl, eff, cause, other: syn.target });
     }
     const strongest = [...incoming, ...outgoing].sort((a, b) => Math.abs(b.w) - Math.abs(a.w)).slice(0, 4);
-    const col = meta.type === 'E' ? 'var(--exc)' : 'var(--inh)';
+    const col = meta.type === 'E' ? 'var(--exc)' : meta.type === 'I' ? 'var(--inh)' : 'var(--accent-2)';
     const chargeBarPct = Math.max(0, Math.min(1, state.activation)) * 100;
     // Phase 3: legacy_distance_compat_active means the distance/influence/
     // effective numbers below are a TEMPORARY placeholder pinned to the
@@ -70,7 +70,7 @@ export class Inspector {
           <div class="insp-id">${this.id}</div>
           <div class="insp-tags">
             <span class="tag">${meta.layer}</span>
-            <span class="tag">${meta.type === 'E' ? 'excitatory' : 'inhibitory'}</span>
+            <span class="tag">${meta.type === 'E' ? 'excitatory' : meta.type === 'I' ? 'inhibitory' : 'prediction'}</span>
             ${state.assembly ? `<span class="tag" style="color:var(--win)">assembly</span>` : ''}
           </div>
         </div>

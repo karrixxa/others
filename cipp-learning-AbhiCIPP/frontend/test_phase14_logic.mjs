@@ -14,7 +14,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
 import { layerKey, edgeKey } from './edge_filters.js';
-import { firstResponderLabel } from './labels.js';
+import { firstResponderLabel, predictionOutputStateLabel, detectPatternLabel } from './labels.js';
 
 test('layerKey maps layer+type to the View Controls filter key', () => {
   assert.equal(layerKey('L1', 'E'), 'l1e');
@@ -50,4 +50,23 @@ test('firstResponderLabel distinguishes an ambiguous tie from no-responder-yet',
 
   const noStory = { winner: null };
   assert.equal(firstResponderLabel(noStory), '—');
+});
+
+test('predictionOutputStateLabel distinguishes off, shadow, instantaneous, and persistent', () => {
+  assert.equal(predictionOutputStateLabel({ enabled: false }), 'OFF');
+  assert.equal(predictionOutputStateLabel({
+    enabled: true, output_delivery_enabled: false, persistent_conductance_enabled: false,
+  }), 'shadow');
+  assert.equal(predictionOutputStateLabel({
+    enabled: true, output_delivery_enabled: true, persistent_conductance_enabled: false,
+  }), 'instantaneous');
+  assert.equal(predictionOutputStateLabel({
+    enabled: true, output_delivery_enabled: true, persistent_conductance_enabled: true,
+  }), 'persistent');
+});
+
+test('detectPatternLabel matches trained patterns, probes, and manual input', () => {
+  assert.equal(detectPatternLabel([1, 0], { row: [1, 0] }, { probe: [0, 1] }), 'row');
+  assert.equal(detectPatternLabel([0, 1], { row: [1, 0] }, { probe: [0, 1] }), 'probe');
+  assert.equal(detectPatternLabel([1, 1], { row: [1, 0] }, { probe: [0, 1] }), 'manual');
 });

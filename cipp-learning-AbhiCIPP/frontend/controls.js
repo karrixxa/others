@@ -44,6 +44,22 @@ export class Controls {
         lab.appendChild(document.createTextNode(' ' + s.label));
         item.appendChild(lab);
         this.configInputs[s.key] = () => cb.checked;
+      } else if (s.kind === 'select') {
+        const lab = document.createElement('label');
+        lab.className = 'field';
+        const span = document.createElement('span');
+        span.textContent = s.label;
+        const select = document.createElement('select');
+        for (const opt of (s.options || [])) {
+          const el = document.createElement('option');
+          el.value = opt.value;
+          el.textContent = opt.label;
+          el.selected = opt.value === val;
+          select.appendChild(el);
+        }
+        lab.append(span, select);
+        item.appendChild(lab);
+        this.configInputs[s.key] = () => select.value;
       } else {
         const lab = document.createElement('label');
         lab.className = 'field';

@@ -1,0 +1,495 @@
+{
+  "created_at": "2026-07-21",
+  "seed": 1,
+  "topology_seed": 1,
+  "note": "Initialization ablation only. This does not claim to solve ownership.",
+  "base_matrix_mean": 129.641,
+  "base_matrix_min": 54.5685,
+  "base_matrix_max": 199.9316,
+  "conditions": {
+    "mean_125_control": {
+      "target_mean": 125.0,
+      "actual_initial_mean": 125.0,
+      "actual_initial_min": 52.615,
+      "actual_initial_max": 192.7742,
+      "frozen": {
+        "cycles": 2,
+        "active_l2e_count": 5,
+        "active_l2e_ids": [
+          "L2E2",
+          "L2E3",
+          "L2E4",
+          "L2E5",
+          "L2E6"
+        ],
+        "threshold_crossings_total": 39,
+        "same_step_ties": 0,
+        "same_step_tie_rate": 0.0,
+        "first_responder_counts": {
+          "L2E5": 5,
+          "L2E3": 1,
+          "L2E4": 2
+        },
+        "first_responder_share": {
+          "L2E5": 0.625,
+          "L2E3": 0.125,
+          "L2E4": 0.25
+        },
+        "mean_response_latency": 3.125,
+        "presentations": [
+          {
+            "presentation_index": 0,
+            "pattern": "row 1",
+            "t_start": 0,
+            "t_end": 20,
+            "first_l2e_spiker": "L2E5",
+            "same_step_tie": false,
+            "response_latency": 7
+          },
+          {
+            "presentation_index": 1,
+            "pattern": "col 1",
+            "t_start": 20,
+            "t_end": 40,
+            "first_l2e_spiker": "L2E3",
+            "same_step_tie": false,
+            "response_latency": 2
+          },
+          {
+            "presentation_index": 2,
+            "pattern": "diag \\",
+            "t_start": 40,
+            "t_end": 60,
+            "first_l2e_spiker": "L2E5",
+            "same_step_tie": false,
+            "response_latency": 6
+          },
+          {
+            "presentation_index": 3,
+            "pattern": "diag /",
+            "t_start": 60,
+            "t_end": 80,
+            "first_l2e_spiker": "L2E4",
+            "same_step_tie": false,
+            "response_latency": 0
+          },
+          {
+            "presentation_index": 4,
+            "pattern": "row 1",
+            "t_start": 80,
+            "t_end": 100,
+            "first_l2e_spiker": "L2E5",
+            "same_step_tie": false,
+            "response_latency": 4
+          },
+          {
+            "presentation_index": 5,
+            "pattern": "col 1",
+            "t_start": 100,
+            "t_end": 120,
+            "first_l2e_spiker": "L2E4",
+            "same_step_tie": false,
+            "response_latency": 1
+          },
+          {
+            "presentation_index": 6,
+            "pattern": "diag \\",
+            "t_start": 120,
+            "t_end": 140,
+            "first_l2e_spiker": "L2E5",
+            "same_step_tie": false,
+            "response_latency": 5
+          },
+          {
+            "presentation_index": 7,
+            "pattern": "diag /",
+            "t_start": 140,
+            "t_end": 160,
+            "first_l2e_spiker": "L2E5",
+            "same_step_tie": false,
+            "response_latency": 0
+          }
+        ]
+      },
+      "plastic": {
+        "cycles": 8,
+        "distinct_owners": 2,
+        "per_pattern": {
+          "row 1": {
+            "modal_owner": "L2E5",
+            "n": 8,
+            "no_response_rate": 0.0
+          },
+          "col 1": {
+            "modal_owner": "L2E5",
+            "n": 8,
+            "no_response_rate": 0.0
+          },
+          "diag \\": {
+            "modal_owner": "L2E4",
+            "n": 8,
+            "no_response_rate": 0.0
+          },
+          "diag /": {
+            "modal_owner": "L2E5",
+            "n": 8,
+            "no_response_rate": 0.0
+          }
+        },
+        "collisions": {
+          "L2E5": [
+            "col 1",
+            "diag /",
+            "row 1"
+          ]
+        },
+        "tyrant_share": 0.5625,
+        "first_responder_counts": {
+          "L2E5": 18,
+          "L2E3": 2,
+          "L2E2": 3,
+          "L2E4": 7,
+          "L2E7": 2
+        },
+        "effective_rank": 3.8306,
+        "unrecruited_neurons": [
+          "L2E0",
+          "L2E1"
+        ],
+        "unrecruited_count": 2,
+        "recruited_l2e_count": 6,
+        "final_mean_weight": 126.8355,
+        "final_min_weight": 1.0,
+        "final_max_weight": 1430.2585
+      }
+    },
+    "mean_250_scaled": {
+      "target_mean": 250.0,
+      "actual_initial_mean": 250.0,
+      "actual_initial_min": 105.23,
+      "actual_initial_max": 385.5485,
+      "frozen": {
+        "cycles": 2,
+        "active_l2e_count": 5,
+        "active_l2e_ids": [
+          "L2E2",
+          "L2E3",
+          "L2E4",
+          "L2E5",
+          "L2E6"
+        ],
+        "threshold_crossings_total": 66,
+        "same_step_ties": 0,
+        "same_step_tie_rate": 0.0,
+        "first_responder_counts": {
+          "L2E5": 6,
+          "L2E4": 2
+        },
+        "first_responder_share": {
+          "L2E5": 0.75,
+          "L2E4": 0.25
+        },
+        "mean_response_latency": 1.875,
+        "presentations": [
+          {
+            "presentation_index": 0,
+            "pattern": "row 1",
+            "t_start": 0,
+            "t_end": 20,
+            "first_l2e_spiker": "L2E5",
+            "same_step_tie": false,
+            "response_latency": 3
+          },
+          {
+            "presentation_index": 1,
+            "pattern": "col 1",
+            "t_start": 20,
+            "t_end": 40,
+            "first_l2e_spiker": "L2E5",
+            "same_step_tie": false,
+            "response_latency": 4
+          },
+          {
+            "presentation_index": 2,
+            "pattern": "diag \\",
+            "t_start": 40,
+            "t_end": 60,
+            "first_l2e_spiker": "L2E5",
+            "same_step_tie": false,
+            "response_latency": 1
+          },
+          {
+            "presentation_index": 3,
+            "pattern": "diag /",
+            "t_start": 60,
+            "t_end": 80,
+            "first_l2e_spiker": "L2E4",
+            "same_step_tie": false,
+            "response_latency": 0
+          },
+          {
+            "presentation_index": 4,
+            "pattern": "row 1",
+            "t_start": 80,
+            "t_end": 100,
+            "first_l2e_spiker": "L2E5",
+            "same_step_tie": false,
+            "response_latency": 2
+          },
+          {
+            "presentation_index": 5,
+            "pattern": "col 1",
+            "t_start": 100,
+            "t_end": 120,
+            "first_l2e_spiker": "L2E5",
+            "same_step_tie": false,
+            "response_latency": 4
+          },
+          {
+            "presentation_index": 6,
+            "pattern": "diag \\",
+            "t_start": 120,
+            "t_end": 140,
+            "first_l2e_spiker": "L2E5",
+            "same_step_tie": false,
+            "response_latency": 1
+          },
+          {
+            "presentation_index": 7,
+            "pattern": "diag /",
+            "t_start": 140,
+            "t_end": 160,
+            "first_l2e_spiker": "L2E4",
+            "same_step_tie": false,
+            "response_latency": 0
+          }
+        ]
+      },
+      "plastic": {
+        "cycles": 8,
+        "distinct_owners": 3,
+        "per_pattern": {
+          "row 1": {
+            "modal_owner": "L2E5",
+            "n": 8,
+            "no_response_rate": 0.0
+          },
+          "col 1": {
+            "modal_owner": "L2E4",
+            "n": 8,
+            "no_response_rate": 0.0
+          },
+          "diag \\": {
+            "modal_owner": "L2E7",
+            "n": 8,
+            "no_response_rate": 0.0
+          },
+          "diag /": {
+            "modal_owner": "L2E4",
+            "n": 8,
+            "no_response_rate": 0.0
+          }
+        },
+        "collisions": {
+          "L2E4": [
+            "col 1",
+            "diag /"
+          ]
+        },
+        "tyrant_share": 0.3438,
+        "first_responder_counts": {
+          "L2E5": 10,
+          "L2E2": 3,
+          "L2E7": 4,
+          "L2E3": 2,
+          "L2E4": 11,
+          "L2E6": 2
+        },
+        "effective_rank": 5.0722,
+        "unrecruited_neurons": [
+          "L2E0",
+          "L2E1"
+        ],
+        "unrecruited_count": 2,
+        "recruited_l2e_count": 6,
+        "final_mean_weight": 185.6774,
+        "final_min_weight": 1.0,
+        "final_max_weight": 1545.483
+      }
+    },
+    "mean_400_scaled": {
+      "target_mean": 400.0,
+      "actual_initial_mean": 400.0,
+      "actual_initial_min": 168.3681,
+      "actual_initial_max": 616.8776,
+      "frozen": {
+        "cycles": 2,
+        "active_l2e_count": 5,
+        "active_l2e_ids": [
+          "L2E2",
+          "L2E3",
+          "L2E4",
+          "L2E5",
+          "L2E6"
+        ],
+        "threshold_crossings_total": 82,
+        "same_step_ties": 1,
+        "same_step_tie_rate": 0.125,
+        "first_responder_counts": {
+          "L2E5": 6,
+          "L2E2": 2
+        },
+        "first_responder_share": {
+          "L2E5": 0.75,
+          "L2E2": 0.25
+        },
+        "mean_response_latency": 1.25,
+        "presentations": [
+          {
+            "presentation_index": 0,
+            "pattern": "row 1",
+            "t_start": 0,
+            "t_end": 20,
+            "first_l2e_spiker": "L2E5",
+            "same_step_tie": false,
+            "response_latency": 2
+          },
+          {
+            "presentation_index": 1,
+            "pattern": "col 1",
+            "t_start": 20,
+            "t_end": 40,
+            "first_l2e_spiker": "L2E5",
+            "same_step_tie": false,
+            "response_latency": 0
+          },
+          {
+            "presentation_index": 2,
+            "pattern": "diag \\",
+            "t_start": 40,
+            "t_end": 60,
+            "first_l2e_spiker": "L2E5",
+            "same_step_tie": false,
+            "response_latency": 0
+          },
+          {
+            "presentation_index": 3,
+            "pattern": "diag /",
+            "t_start": 60,
+            "t_end": 80,
+            "first_l2e_spiker": "L2E2",
+            "same_step_tie": true,
+            "response_latency": 0
+          },
+          {
+            "presentation_index": 4,
+            "pattern": "row 1",
+            "t_start": 80,
+            "t_end": 100,
+            "first_l2e_spiker": "L2E5",
+            "same_step_tie": false,
+            "response_latency": 3
+          },
+          {
+            "presentation_index": 5,
+            "pattern": "col 1",
+            "t_start": 100,
+            "t_end": 120,
+            "first_l2e_spiker": "L2E5",
+            "same_step_tie": false,
+            "response_latency": 1
+          },
+          {
+            "presentation_index": 6,
+            "pattern": "diag \\",
+            "t_start": 120,
+            "t_end": 140,
+            "first_l2e_spiker": "L2E2",
+            "same_step_tie": false,
+            "response_latency": 3
+          },
+          {
+            "presentation_index": 7,
+            "pattern": "diag /",
+            "t_start": 140,
+            "t_end": 160,
+            "first_l2e_spiker": "L2E5",
+            "same_step_tie": false,
+            "response_latency": 1
+          }
+        ]
+      },
+      "plastic": {
+        "cycles": 8,
+        "distinct_owners": 2,
+        "per_pattern": {
+          "row 1": {
+            "modal_owner": "L2E5",
+            "n": 8,
+            "no_response_rate": 0.0
+          },
+          "col 1": {
+            "modal_owner": "L2E5",
+            "n": 8,
+            "no_response_rate": 0.0
+          },
+          "diag \\": {
+            "modal_owner": "L2E5",
+            "n": 8,
+            "no_response_rate": 0.0
+          },
+          "diag /": {
+            "modal_owner": "L2E2",
+            "n": 8,
+            "no_response_rate": 0.0
+          }
+        },
+        "collisions": {
+          "L2E5": [
+            "col 1",
+            "diag \\",
+            "row 1"
+          ]
+        },
+        "tyrant_share": 0.4062,
+        "first_responder_counts": {
+          "L2E5": 13,
+          "L2E2": 4,
+          "L2E7": 5,
+          "L2E4": 5,
+          "L2E3": 4,
+          "L2E6": 1
+        },
+        "effective_rank": 5.1697,
+        "unrecruited_neurons": [
+          "L2E0",
+          "L2E1"
+        ],
+        "unrecruited_count": 2,
+        "recruited_l2e_count": 6,
+        "final_mean_weight": 220.6843,
+        "final_min_weight": 1.0,
+        "final_max_weight": 1377.626
+      }
+    }
+  },
+  "gate": {
+    "mean_250": {
+      "recruits_more_l2e": false,
+      "does_not_increase_same_step_ties": true,
+      "lowers_tyrant_share": true,
+      "preserves_or_improves_distinct_ownership": true,
+      "passes_all": false
+    },
+    "mean_400": {
+      "recruits_more_l2e": false,
+      "does_not_increase_same_step_ties": false,
+      "lowers_tyrant_share": true,
+      "preserves_or_improves_distinct_ownership": true,
+      "passes_all": false
+    },
+    "retain_mean_250_as_switchi_candidate": false,
+    "reject_mean_400_immediately": true
+  },
+  "runtime_seconds": 12.46
+}

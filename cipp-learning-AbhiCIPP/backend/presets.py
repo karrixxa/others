@@ -142,3 +142,13 @@ DASHBOARD_PRESET = dict(
     symmetric_geometry=False,
     legacy_distance_compat=True,
 )
+
+# Measured developmental candidate from the one-seed initialization ablation on
+# Tuesday, July 21, 2026: reuse the legacy-wide random draw, then scale that
+# SAME matrix to mean 250 while preserving every relative difference. This is a
+# selectable simulator preset, not a new default and not a claim that stable
+# 4/4 ownership is solved.
+EDGE_DETECTOR_CANDIDATE_PRESET = dict(
+    DASHBOARD_PRESET,
+    l2e_init_mode='edge_detector_candidate',
+)

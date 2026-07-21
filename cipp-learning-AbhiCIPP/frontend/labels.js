@@ -12,3 +12,17 @@ export function firstResponderLabel(dyn, short = false) {
   if (dyn.causal_story?.same_step_tie) return short ? 'Ambiguous' : 'Ambiguous first response';
   return '—';
 }
+
+export function predictionOutputStateLabel(predCol) {
+  if (!predCol?.enabled) return 'OFF';
+  if (predCol.output_delivery_enabled && predCol.persistent_conductance_enabled) return 'persistent';
+  if (predCol.output_delivery_enabled) return 'instantaneous';
+  return 'shadow';
+}
+
+export function detectPatternLabel(input = [], patternVectors = {}, probeVectors = {}) {
+  const same = (a, b) => a.length === b.length && a.every((x, i) => x === b[i]);
+  for (const [name, vec] of Object.entries(patternVectors)) if (same(input, vec)) return name;
+  for (const [name, vec] of Object.entries(probeVectors)) if (same(input, vec)) return name;
+  return 'manual';
+}

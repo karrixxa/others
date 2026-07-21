@@ -15,8 +15,10 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { layerKey, edgeKey } from './edge_filters.js';
 
 const COLORS = {
-  E: 0x5eead4, I: 0xf0788c, winner: 0xffce5c,
+  E: 0x5eead4, I: 0xf0788c, P: 0xc084fc, winner: 0xffce5c,
   feedforward: 0x4cc38a, inhibition: 0xf0788c, excitation: 0x7c9cff, feedback: 0xc084fc,
+  decoder: 0xc084fc, prediction_replay: 0x8bde6b,
+  col_feedback: 0xc084fc, col_lateral: 0xf6bd60, col_inhibition_feedback: 0xf0788c,
   // Structural L2I->L2E competitive-reset fanout: fixed inhibitory styling, no
   // learned weight (rendered at a constant opacity, independent of the weak filter).
   reset_inhibition: 0xf0788c,

@@ -416,13 +416,18 @@ CONFIG_SPEC = [
      "min": 0.005, "max": 0.1, "step": 0.005,
      "desc": "Feedforward potentiation speed for L2E. Higher = faster, sharper RFs "
              "but noisier competition."},
-    {"key": "l2e_init_mode", "label": "Balanced L2E init", "kind": "toggle",
-     "desc": "ON = task-independent balanced feedforward init: narrow "
-             "jitter, then row/column-normalized (Sinkhorn) so every L2E starts with "
-             "equal total incoming weight and every pixel equal total outgoing weight "
-             "(mean 125). A FAIR developmental start -- no neuron or pixel privileged, "
-             "no task structure. OFF (default) = unconstrained legacy-wide "
-             "Uniform(50,200) initialization."},
+    {"key": "l2e_init_mode", "label": "L2E feedforward initialization", "kind": "select",
+     "options": [
+         {"value": "legacy_wide", "label": "legacy_wide (control)"},
+         {"value": "edge_detector_candidate", "label": "edge_detector_candidate (mean 250)"},
+         {"value": "balanced", "label": "balanced (Sinkhorn mean 125)"},
+     ],
+     "desc": "Developmental start only. legacy_wide is the current control: "
+             "unconstrained Uniform(50,200), mean 125. edge_detector_candidate "
+             "reuses that SAME random matrix and rescales it to mean 250 while "
+             "preserving every relative difference. balanced is the task-"
+             "independent Sinkhorn ablation at mean 125. Default stays "
+             "legacy_wide; mean 400 was rejected and is not exposed."},
     {"key": "l2e_init_jitter", "label": "Balanced-init jitter (eps)", "kind": "range",
      "min": 0.0, "max": 0.2, "step": 0.005,
      "desc": "Jitter for the balanced init: Z[j,i] ~ Uniform(1-eps, 1+eps) before "
@@ -690,11 +695,6 @@ class ConfigBody(BaseModel):
 def _current_config():
     p = engine.params
     values = {s["key"]: p.get(s["key"]) for s in CONFIG_SPEC}
-    # l2e_init_mode is a string param ('balanced'|'legacy_wide') surfaced as a bool
-    # TOGGLE (on == balanced); apply_config maps the bool back. Translate here so the
-    # toggle reflects the real mode.
-    if "l2e_init_mode" in values:
-        values["l2e_init_mode"] = (values["l2e_init_mode"] == "balanced")
     return {"spec": CONFIG_SPEC, "values": values}
 
 

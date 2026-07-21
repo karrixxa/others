@@ -406,6 +406,7 @@ L2E_BUDGET_MULT = 2
 # Uniform(50,200) init, preserved by the balanced mode so the LIF-accumulation scale
 # is unchanged -- only the balance/bias of the init differs, not its magnitude.
 L2E_INIT_MEAN = 125.0
+EDGE_DETECTOR_CANDIDATE_MEAN = 250.0
 L2E_INIT_JITTER = 0.05   # default jitter eps for the balanced init (Uniform(1-eps,1+eps))
 
 
@@ -453,6 +454,19 @@ def legacy_wide_feedforward_init(rng, n_out, n_pix):
     """ABLATION: the original wide-uniform init, Uniform(50, 200) (mean 125). Kept so
     the balanced init can be A/B'd against the historical unbalanced starting point."""
     return rng.uniform(50, 200, size=(n_out, n_pix))
+
+
+def scaled_legacy_wide_feedforward_init(rng, n_out, n_pix, target_mean):
+    """Generate the legacy-wide matrix once, then rescale that SAME draw to a new
+    mean while preserving every relative random difference.
+
+    This is measurement-only developmental scaling, not a new balancing rule:
+    no redraw, no Sinkhorn normalization, no pattern-aware structure. A base
+    legacy-wide matrix with mean m is multiplied by target_mean / m.
+    """
+    base = legacy_wide_feedforward_init(rng, n_out, n_pix)
+    mean = float(base.mean()) or 1.0
+    return base * (float(target_mean) / mean)
 
 
 class SimulationEngine:
@@ -1354,10 +1368,15 @@ class SimulationEngine:
         # Both keep mean 125 and draw from the dedicated feedforward stream (rng_ff).
         if p['l2e_init_mode'] == 'legacy_wide':
             ff_weights = legacy_wide_feedforward_init(rng_ff, N_OUT, N_PIX)
-        else:  # 'balanced'
+        elif p['l2e_init_mode'] == 'edge_detector_candidate':
+            ff_weights = scaled_legacy_wide_feedforward_init(
+                rng_ff, N_OUT, N_PIX, target_mean=EDGE_DETECTOR_CANDIDATE_MEAN)
+        elif p['l2e_init_mode'] == 'balanced':
             ff_weights = balanced_feedforward_init(rng_ff, N_OUT, N_PIX,
                                                    jitter=p['l2e_init_jitter'],
                                                    target_mean=L2E_INIT_MEAN)
+        else:
+            raise ValueError(f"unknown l2e_init_mode '{p['l2e_init_mode']}'")
         self.l2.set_feedforward_weights(ff_weights)
         self.l2.inhibitory_neuron.refractory_period = 0
         self.l2.inhibitory_neuron.threshold = thr_l2i   # Phase 2: L2I's own threshold
@@ -3482,6 +3501,114 @@ class SimulationEngine:
         self._log_seq += 1
         self.event_log.append(dict(seq=self._log_seq, t=self.timestep, kind=kind, message=message))
 
+    def _detected_named_input(self) -> dict | None:
+        vec = self.input_vec.astype(int).tolist()
+        for name, pat in PATTERNS.items():
+            if vec == list(map(int, pat)):
+                return dict(name=name, role=PATTERN_ROLE.get(name, 'train'))
+        for name, pat in PROBES.items():
+            if vec == list(map(int, pat)):
+                return dict(name=name, role=PATTERN_ROLE.get(name, 'probe'))
+        return None
+
+    def _prediction_output_state(self) -> str:
+        if not self.prediction_column_enabled:
+            return 'OFF'
+        if not self.prediction_column_to_i_enabled:
+            return 'shadow'
+        if not self.prediction_column_to_i_delivery_enabled:
+            return 'shadow'
+        if self.prediction_column_persistent_conductance_enabled:
+            return 'persistent'
+        return 'instantaneous'
+
+    def _ownership_summary(self) -> dict:
+        history = list(self.presentation_log)
+        clean = [row for row in history
+                 if not row.get('same_step_tie') and row.get('first_spiker')]
+        owner_counts: dict[str, int] = {}
+        owner_patterns: dict[str, set[str]] = {}
+        pattern_counts: dict[str, dict[str, int]] = {}
+        for row in clean:
+            owner = row['first_spiker']
+            pattern = row['pattern']
+            owner_counts[owner] = owner_counts.get(owner, 0) + 1
+            owner_patterns.setdefault(owner, set()).add(pattern)
+            pcounts = pattern_counts.setdefault(pattern, {})
+            pcounts[owner] = pcounts.get(owner, 0) + 1
+        modal_owner = None
+        modal_owner_count = 0
+        if owner_counts:
+            modal_owner, modal_owner_count = max(owner_counts.items(), key=lambda kv: (kv[1], kv[0]))
+        collisions = [
+            dict(owner=owner, patterns=sorted(patterns))
+            for owner, patterns in sorted(owner_patterns.items())
+            if len(patterns) > 1
+        ]
+        modal_by_pattern = {
+            pattern: max(counts.items(), key=lambda kv: (kv[1], kv[0]))[0]
+            for pattern, counts in pattern_counts.items() if counts
+        }
+        distinct_owners = len(set(modal_by_pattern.values()))
+        return dict(
+            total_presentations=len(history),
+            clean_presentations=len(clean),
+            same_step_ties=sum(1 for row in history if row.get('same_step_tie')),
+            modal_owner=modal_owner,
+            modal_owner_count=modal_owner_count,
+            first_responder_share=(
+                round(float(modal_owner_count / len(clean)), 4) if clean else 0.0),
+            collisions=collisions,
+            distinct_owners=distinct_owners,
+        )
+
+    def _feedforward_weight_summary(self) -> dict:
+        ff = np.array([self._all_weights()[f'ff{i}->{j}'] for j in range(N_OUT) for i in range(N_PIX)],
+                      dtype=float)
+        pos = ff[ff > 0]
+        return dict(
+            exact_zero_count=int(np.sum(np.isclose(ff, 0.0))),
+            min_weight=round(float(ff.min()) if ff.size else 0.0, 4),
+            min_positive_weight=round(float(pos.min()) if pos.size else 0.0, 4),
+        )
+
+    def _pc_summary(self) -> dict:
+        if not self.prediction_column_enabled:
+            return dict(enabled=False, current_spikes=0, max_activation=0.0,
+                        spike_history_total=0, mature_columns=0)
+        pcs = [self.neurons[f'PC{i}'] for i in range(N_PIX)]
+        max_activation = max(
+            (float(pc.potential) / max(float(pc.threshold), 1.0) for pc in pcs),
+            default=0.0)
+        spike_history_total = sum(self._neuron_total_spikes.get(f'PC{i}', 0) for i in range(N_PIX))
+        mature_columns = sum(1 for i in range(N_PIX)
+                             if self._neuron_total_spikes.get(f'PC{i}', 0) > 0)
+        return dict(
+            enabled=True,
+            current_spikes=int(sum(1 for i in range(N_PIX) if self.spiked[f'PC{i}'])),
+            max_activation=round(float(max_activation), 4),
+            spike_history_total=int(spike_history_total),
+            mature_columns=int(mature_columns),
+        )
+
+    def simulator_status(self) -> dict:
+        named = self._detected_named_input()
+        l2e_states = [self._l2e_status(j) for j in range(N_OUT)]
+        ownership = self._ownership_summary()
+        weights = self._feedforward_weight_summary()
+        return dict(
+            detected_pattern=named['name'] if named else 'manual',
+            detected_role=named['role'] if named else 'manual',
+            prediction_output_state=self._prediction_output_state(),
+            ownership=ownership,
+            active_l2e=sum(1 for row in l2e_states if row['status'] != 'unrecruited'),
+            unrecruited_l2e=sum(1 for row in l2e_states if row['status'] == 'unrecruited'),
+            pc=self._pc_summary(),
+            exact_zero_feedforward=weights['exact_zero_count'],
+            min_feedforward_weight=weights['min_weight'],
+            min_positive_feedforward_weight=weights['min_positive_weight'],
+        )
+
     # ------------------------------------------------------------ serialization
     def topology(self) -> dict:
         weights = self._all_weights()
@@ -3549,13 +3676,22 @@ class SimulationEngine:
                             if self.prediction_column_to_i_enabled else False),
                         persistent_conductance=(
                             self.prediction_column_persistent_conductance_enabled
-                            if self.prediction_column_to_i_enabled else False)),
+                            if self.prediction_column_to_i_enabled else False),
+                        output_state=self._prediction_output_state()),
                     switchi_paired_l2_shunt=dict(
                         enabled=self.switchi_paired_shunt_enabled,
                         output_route='SwitchI_j -> L2E_j' if self.switchi_paired_shunt_enabled else None,
                         trace_decay=round(float(self.switchi_trace_decay), 4),
                         coincidence_threshold=round(float(self.switchi_coincidence_threshold), 4),
                         shunt_frac=round(float(self.switchi_shunt_frac), 4)),
+                    init_modes=dict(
+                        default='legacy_wide',
+                        available=['legacy_wide', 'edge_detector_candidate', 'balanced'],
+                        edge_detector_candidate=dict(
+                            source='legacy_wide',
+                            target_mean=EDGE_DETECTOR_CANDIDATE_MEAN,
+                            preserves_relative_random_differences=True,
+                            note='Measured developmental candidate only; does not solve ownership by itself.')),
                     params=self.params)
 
     def dynamic_state(self) -> dict:
@@ -3731,6 +3867,7 @@ class SimulationEngine:
                                             for j, v in enumerate(self.switchi_recent_spike_trace)},
                         last_events=list(self._switchi_last_events)
                         if self.switchi_paired_shunt_enabled else []),
+                    simulator_status=self.simulator_status(),
                     # Phase 10: adaptive-threshold ablation state/trajectory
                     # (L2E only; a_i and its history stay 0/empty for every
                     # other population always, and for L2E itself whenever the
