@@ -1662,6 +1662,12 @@ class SimulationEngine:
         self.switchi_recent_spike_trace = np.zeros(N_OUT, dtype=float)
         self._switchi_last_events: list[dict] = []
         self._switchi_local_last_events: list[dict] = []
+        self.switchi_local_elig = np.zeros((N_OUT, N_PIX), dtype=float)
+        self._switchi_local_pending: list[dict] = []
+        self._switchi_local_last_requests: list[dict] = []
+        self._switchi_local_last_deliveries: list[dict] = []
+        self._switchi_local_last_residual: list[dict] = []
+        self._switchi_local_last_diag: dict = {}
         self.l2_inh_phase_debug: list[dict] = []      # per-inhibited-L2E phase record (see step())
         # Phase 6: the exposed "representation candidate" -- the presentation's
         # first physical L2E threshold crossing, or None until one occurs, or
@@ -2700,60 +2706,123 @@ class SimulationEngine:
             return np.zeros(N_PIX, dtype=float)
         return np.array([self.pcol[i].decoder_weights[j] for i in range(N_PIX)], dtype=float)
 
-    def _apply_switchi_local_mismatch_shunt(self, l1e_vec, pcol_spiked, t):
-        """Phase 38: paired local mismatch shunt.
-
-        Strictly local ingredients for SwitchI_j:
-        - current PC_i spikes from the existing learned local prediction path
-        - L2E_j's own decoder row onto those PC_i targets
-        - L2E_j's own feedforward weights from the current L1E_i sensory vector
-        - L2E_j's own recent-spike trace
-
-        Matching repetition produces zero unexpected L1 evidence and therefore
-        zero shunt drive. Only the paired L2E_j membrane can be attenuated.
-        """
-        self._switchi_local_last_events = []
+    def _deliver_scheduled_switchi_local(self, t):
+        self._switchi_local_last_deliveries = []
         if not self.switchi_local_mismatch_enabled:
-            return
-        pred_vec = np.array(pcol_spiked, dtype=float)
-        l1e_vec = np.array(l1e_vec, dtype=float)
-        unexpected_vec = l1e_vec * (1.0 - pred_vec)
-        pred_scale = max(float(self.prediction_feedback_max), 1.0)
-        thr_l2 = float(self.params['threshold_l2']) or 1.0
-        for j, e in enumerate(self.l2.excitatory_neurons):
-            decoder_row = self._switchi_prediction_decoder_row(j)
-            ff_pos = np.maximum(effective_weights(e), 0.0)
-            prediction_drive = float(np.dot(decoder_row, pred_vec))
-            mismatch_drive = float(np.dot(ff_pos, unexpected_vec))
-            matched_drive = float(np.dot(ff_pos, l1e_vec * pred_vec))
-            trace_before = float(self.switchi_recent_spike_trace[j])
-            prediction_norm = min(max(prediction_drive / pred_scale, 0.0), 1.0)
-            mismatch_norm = min(max(mismatch_drive / thr_l2, 0.0), 1.0)
-            trace_norm = min(max(trace_before, 0.0), 1.0)
-            coincidence = prediction_norm * mismatch_norm * trace_norm
-            fired = bool(
-                prediction_norm > 0.0 and mismatch_norm > 0.0 and trace_norm > 0.0
-                and coincidence >= self.switchi_coincidence_threshold)
+            return []
+        remaining = []
+        delivered = []
+        for rec in self._switchi_local_pending:
+            if rec['deliver_at'] > t:
+                remaining.append(rec)
+                continue
+            j = int(rec['target_index'])
+            e = self.l2.excitatory_neurons[j]
             v_pre = float(e.potential)
             delta = 0.0
-            if fired and e.refractory_timer <= 0:
+            applied = False
+            if e.refractory_timer <= 0:
                 delta = v_pre * self.switchi_shunt_frac
                 e.potential = max(e.potential - delta, e.resting_potential)
-            self._switchi_local_last_events.append(dict(
+                applied = delta > 0.0
+            row = dict(
                 target=f'L2E{j}',
-                t=t,
-                prediction_drive=round(prediction_drive, 4),
-                prediction_norm=round(prediction_norm, 4),
-                mismatch_drive=round(mismatch_drive, 4),
-                mismatch_norm=round(mismatch_norm, 4),
-                matched_drive=round(matched_drive, 4),
-                trace_before=round(trace_before, 4),
-                coincidence=round(coincidence, 4),
-                fired=fired,
-                shunt_frac=round(self.switchi_shunt_frac, 4),
+                fire_t=rec['fire_t'],
+                deliver_at=t,
+                request_value=round(float(rec['request_value']), 4),
+                residual_pixels=list(rec['residual_pixels']),
+                contributors=list(rec['contributors']),
+                applied=applied,
                 v_pre=round(v_pre, 4),
                 v_post=round(float(e.potential), 4),
-                delta=round(delta, 4)))
+                delta=round(delta, 4),
+            )
+            delivered.append(row)
+        self._switchi_local_pending = remaining
+        self._switchi_local_last_deliveries = delivered
+        return delivered
+
+    def _update_switchi_local_eligibility(self, pcol_spiked):
+        if not self.switchi_local_mismatch_enabled:
+            return
+        self.switchi_local_elig *= self.switchi_trace_decay
+        pred_scale = max(float(self.prediction_feedback_max), 1.0)
+        for i, fired in enumerate(pcol_spiked):
+            if fired <= 0.5:
+                continue
+            for j in range(N_OUT):
+                delivered = any(
+                    rec['target'] == f'PC{i}' and rec['source'] == f'L2E{j}'
+                    and rec['signal'] > 0.0
+                    for rec in self._prediction_column_last_deliveries
+                )
+                if not delivered:
+                    continue
+                strength = min(max(self.pcol[i].decoder_weights[j] / pred_scale, 0.0), 1.0)
+                old = float(self.switchi_local_elig[j, i])
+                self.switchi_local_elig[j, i] = old + strength * (1.0 - old)
+
+    def _queue_switchi_local_requests(self, l1e_vec, pcol_spiked, t):
+        self._switchi_local_last_events = []
+        self._switchi_local_last_requests = []
+        self._switchi_local_last_residual = []
+        if not self.switchi_local_mismatch_enabled:
+            self._switchi_local_last_diag = dict(
+                pc_firing_events=0, residual_events=0, nonzero_eligibility=0,
+                overlap_events=0, queued_requests=0, delivered_events=len(self._switchi_local_last_deliveries),
+                max_request_value=0.0, request_threshold=round(self.switchi_coincidence_threshold, 4))
+            return
+        residual_vec = np.logical_and(np.array(l1e_vec, dtype=float) > 0.5,
+                                      np.array(pcol_spiked, dtype=float) <= 0.5).astype(float)
+        residual_pixels = [int(i) for i, v in enumerate(residual_vec) if v > 0.5]
+        self._switchi_local_last_residual = [
+            dict(pixel_index=i, residual=True, basal_present=bool(l1e_vec[i] > 0.5), pc_fired=False)
+            for i in residual_pixels
+        ]
+        max_request = 0.0
+        overlap_events = 0
+        for j in range(N_OUT):
+            contributors = []
+            request = 0.0
+            for i in residual_pixels:
+                elig = float(self.switchi_local_elig[j, i])
+                if elig <= 0.0:
+                    continue
+                overlap_events += 1
+                request += elig
+                contributors.append(dict(pixel_index=i, elig=round(elig, 4)))
+            max_request = max(max_request, request)
+            row = dict(
+                target=f'L2E{j}',
+                t=t,
+                residual_pixels=list(residual_pixels),
+                request_value=round(request, 4),
+                contributors=contributors,
+                threshold=round(self.switchi_coincidence_threshold, 4),
+                queued=bool(request >= self.switchi_coincidence_threshold and contributors),
+                deliver_at=t + 2,
+            )
+            self._switchi_local_last_events.append(row)
+            if row['queued']:
+                self._switchi_local_pending.append(dict(
+                    target_index=j,
+                    fire_t=t,
+                    deliver_at=t + 2,
+                    request_value=float(request),
+                    residual_pixels=list(residual_pixels),
+                    contributors=contributors,
+                ))
+                self._switchi_local_last_requests.append(dict(row))
+        self._switchi_local_last_diag = dict(
+            pc_firing_events=int(np.sum(np.array(pcol_spiked, dtype=float) > 0.5)),
+            residual_events=len(residual_pixels),
+            nonzero_eligibility=int(np.count_nonzero(self.switchi_local_elig > 0.0)),
+            overlap_events=int(overlap_events),
+            queued_requests=len(self._switchi_local_last_requests),
+            delivered_events=len(self._switchi_local_last_deliveries),
+            max_request_value=round(float(max_request), 4),
+            request_threshold=round(self.switchi_coincidence_threshold, 4),
+        )
 
     # ------------------------------------------------------------------- step
     def step(self) -> dict:
@@ -2780,6 +2849,10 @@ class SimulationEngine:
         self._prediction_column_last_output_delivery = []
         self._prediction_column_last_conductance = []
         self._switchi_local_last_events = []
+        self._switchi_local_last_requests = []
+        self._switchi_local_last_residual = []
+        self._switchi_local_last_diag = {}
+        self._deliver_scheduled_switchi_local(t)
         # Phase 7: apply any delayed L2I->L2E delivery scheduled on a previous
         # step and now due, BEFORE this step's own L1E/L2E processing -- same
         # one-step-register precedent as l1i_feedback_delay below.
@@ -2900,6 +2973,7 @@ class SimulationEngine:
                 if should_fire:
                     pc.fire()
                     pcol_spiked[i] = 1.0
+            self._update_switchi_local_eligibility(pcol_spiked)
 
         # 2b/2c. Deliver L1E->L2E feedforward charge and resolve L2 competition.
         #     PHASE 7: every L2E that crosses threshold this step FIRES (no
@@ -2929,7 +3003,7 @@ class SimulationEngine:
                 ff_vec[i] = 1.0
 
         self._apply_switchi_paired_shunt(ff_vec, t)
-        self._apply_switchi_local_mismatch_shunt(l1e, pcol_spiked, t)
+        self._queue_switchi_local_requests(l1e, pcol_spiked, t)
 
         l2e = np.zeros(N_OUT)
         l2i = 0.0
@@ -3767,8 +3841,8 @@ class SimulationEngine:
                         shunt_frac=round(float(self.switchi_shunt_frac), 4)),
                     switchi_local_l2_ownership=dict(
                         enabled=self.switchi_local_mismatch_enabled,
-                        trigger=('decoder_row_j · PC(t), ff_j · unexpected_L1(t), '
-                                 'and paired recent-spike trace'),
+                        trigger=('R_i(t) = basal L1_i present and PC_i failed to fire; '
+                                 'request_j = sum_i elig[j,i] * R_i(t); delivery at t+2'),
                         output_route='SwitchI_j -> L2E_j' if self.switchi_local_mismatch_enabled else None,
                         trace_decay=round(float(self.switchi_trace_decay), 4),
                         coincidence_threshold=round(float(self.switchi_coincidence_threshold), 4),
@@ -3960,8 +4034,22 @@ class SimulationEngine:
                         enabled=self.switchi_local_mismatch_enabled,
                         recent_spike_trace={f'L2E{j}': round(float(v), 4)
                                             for j, v in enumerate(self.switchi_recent_spike_trace)},
+                        eligibility={
+                            f'L2E{j}': [round(float(v), 4) for v in self.switchi_local_elig[j]]
+                            for j in range(N_OUT)
+                        } if self.switchi_local_mismatch_enabled else {},
+                        pending=[dict(rec) for rec in self._switchi_local_pending]
+                        if self.switchi_local_mismatch_enabled else [],
+                        last_residual=list(self._switchi_local_last_residual)
+                        if self.switchi_local_mismatch_enabled else [],
+                        last_requests=list(self._switchi_local_last_requests)
+                        if self.switchi_local_mismatch_enabled else [],
+                        last_deliveries=list(self._switchi_local_last_deliveries)
+                        if self.switchi_local_mismatch_enabled else [],
                         last_events=list(self._switchi_local_last_events)
-                        if self.switchi_local_mismatch_enabled else []),
+                        if self.switchi_local_mismatch_enabled else [],
+                        diagnostics=dict(self._switchi_local_last_diag)
+                        if self.switchi_local_mismatch_enabled else {}),
                     simulator_status=self.simulator_status(),
                     # Phase 10: adaptive-threshold ablation state/trajectory
                     # (L2E only; a_i and its history stay 0/empty for every
