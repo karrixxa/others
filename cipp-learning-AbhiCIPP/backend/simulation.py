@@ -45,6 +45,7 @@ from layers import InputLayer                       # noqa: E402
 from cortical_column_flexible import CorticalColumn  # noqa: E402
 from neuron_flexible import UNIT, LEAK_SCALE, Neuron  # noqa: E402  fixed-point convention
 from snn import CoincidencePyramidalCell, NeuronConfig  # noqa: E402
+from snn.rules.delivery import effective_weights  # noqa: E402
 
 
 PATTERNS = {
@@ -924,6 +925,16 @@ class SimulationEngine:
                  # inh_trace_normalized) instead of inventing a second floor or
                  # parallel inhibitory rule.
                  prediction_column_persistent_conductance_enabled: bool = False,
+                 # Phase 37: explicit paired L2 membrane-shunt ablation,
+                 # default OFF. A SwitchI_j event is permitted only when the
+                 # current post-prediction residual L1 evidence for L2E_j
+                 # coincides with that same neuron's recent-spike trace. This
+                 # is a bounded oracle-feasibility ablation, not a claimed
+                 # biological conductance model.
+                 switchi_paired_shunt_enabled: bool = False,
+                 switchi_trace_decay: float = 0.75,
+                 switchi_coincidence_threshold: float = 0.15,
+                 switchi_shunt_frac: float = 0.5,
                  # Phase 21: fixed/pretrained L1I regulation, KEPT AS A
                  # SEPARATE factorial variable from the input-topology flag
                  # above (per the independent review's correction #6 --
@@ -1100,6 +1111,10 @@ class SimulationEngine:
                                prediction_column_to_i_delivery_enabled),
                            prediction_column_persistent_conductance_enabled=(
                                prediction_column_persistent_conductance_enabled),
+                           switchi_paired_shunt_enabled=switchi_paired_shunt_enabled,
+                           switchi_trace_decay=switchi_trace_decay,
+                           switchi_coincidence_threshold=switchi_coincidence_threshold,
+                           switchi_shunt_frac=switchi_shunt_frac,
                            pretrained_l1i_regulation=pretrained_l1i_regulation,
                            l2e_weight_cap_frac=l2e_weight_cap_frac,
                            pos_weight_floor=pos_weight_floor,
@@ -1176,6 +1191,11 @@ class SimulationEngine:
                 "prediction_column_to_i_delivery_enabled (the persistent tail is "
                 "only meaningful when PC_i spikes are physically delivered to "
                 "L1I_i).")
+        self.switchi_paired_shunt_enabled = bool(p['switchi_paired_shunt_enabled'])
+        self.switchi_trace_decay = float(np.clip(p['switchi_trace_decay'], 0.0, 1.0))
+        self.switchi_coincidence_threshold = float(
+            np.clip(p['switchi_coincidence_threshold'], 0.0, 1.0))
+        self.switchi_shunt_frac = float(np.clip(p['switchi_shunt_frac'], 0.0, 1.0))
         l1i_n_feedback = 1 if self.prediction_column_to_i_enabled else N_OUT
         self.l1 = InputLayer(n_neurons=N_PIX, threshold=thr_l1,
                              refractory_period=p['refractory'], learning_rate=p['learning_rate'],
@@ -1604,6 +1624,8 @@ class SimulationEngine:
         self.changed_confidence: list[dict] = []
         self.l2_drive: dict[str, float] = {}          # PRE-WTA snapshot (peak/margin)
         self.l2_charge: dict[str, float] = {}         # POST-inhibition, pre-update diagnostic
+        self.switchi_recent_spike_trace = np.zeros(N_OUT, dtype=float)
+        self._switchi_last_events: list[dict] = []
         self.l2_inh_phase_debug: list[dict] = []      # per-inhibited-L2E phase record (see step())
         # Phase 6: the exposed "representation candidate" -- the presentation's
         # first physical L2E threshold crossing, or None until one occurs, or
@@ -2211,6 +2233,9 @@ class SimulationEngine:
                'prediction_column_to_i_enabled',
                'prediction_column_to_i_delivery_enabled',
                'prediction_column_persistent_conductance_enabled',
+               # Phase 37: paired L2 oracle-feasibility shunt.
+               'switchi_paired_shunt_enabled', 'switchi_trace_decay',
+               'switchi_coincidence_threshold', 'switchi_shunt_frac',
                'pretrained_l1i_regulation')
 
     def apply_config(self, overrides: dict):
@@ -2241,6 +2266,7 @@ class SimulationEngine:
                      'prediction_column_to_i_enabled',
                      'prediction_column_to_i_delivery_enabled',
                      'prediction_column_persistent_conductance_enabled',
+                     'switchi_paired_shunt_enabled',
                      'pretrained_l1i_regulation'):
                 v = bool(v)
             elif k in ('seed', 'refractory', 'l2_charge_chunks', 'l2_inhibition_delay',
@@ -2593,6 +2619,46 @@ class SimulationEngine:
             self.l2_inh_phase_debug = delivery['targets']
         return applied_targets
 
+    def _apply_switchi_paired_shunt(self, ff_vec, t):
+        """Phase 37: explicit paired L2 membrane-shunt ablation.
+
+        This is intentionally not presented as a conductance model. A SwitchI_j
+        event is a local coincidence detector over two already-local quantities:
+        current residual post-prediction L1 evidence for L2E_j and that same
+        neuron's recent-spike trace. If the coincidence passes threshold, only
+        the paired L2E_j membrane is attenuated this step.
+        """
+        self._switchi_last_events = []
+        if not self.switchi_paired_shunt_enabled:
+            return
+        thr_l2 = float(self.params['threshold_l2']) or 1.0
+        for j, e in enumerate(self.l2.excitatory_neurons):
+            residual_drive = float(np.dot(np.maximum(effective_weights(e), 0.0), ff_vec))
+            trace_before = float(self.switchi_recent_spike_trace[j])
+            residual_norm = min(max(residual_drive / thr_l2, 0.0), 1.0)
+            trace_norm = min(max(trace_before, 0.0), 1.0)
+            coincidence = residual_norm * trace_norm
+            fired = bool(
+                residual_norm > 0.0 and trace_norm > 0.0
+                and coincidence >= self.switchi_coincidence_threshold)
+            v_pre = float(e.potential)
+            delta = 0.0
+            if fired and e.refractory_timer <= 0:
+                delta = v_pre * self.switchi_shunt_frac
+                e.potential = max(e.potential - delta, e.resting_potential)
+            self._switchi_last_events.append(dict(
+                target=f'L2E{j}',
+                t=t,
+                residual_drive=round(residual_drive, 4),
+                residual_norm=round(residual_norm, 4),
+                trace_before=round(trace_before, 4),
+                coincidence=round(coincidence, 4),
+                fired=fired,
+                shunt_frac=round(self.switchi_shunt_frac, 4),
+                v_pre=round(v_pre, 4),
+                v_post=round(float(e.potential), 4),
+                delta=round(delta, 4)))
+
     # ------------------------------------------------------------------- step
     def step(self) -> dict:
         l1, l2 = self.l1, self.l2
@@ -2765,6 +2831,8 @@ class SimulationEngine:
             if l1e[i]:
                 ff_vec[i] = 1.0
 
+        self._apply_switchi_paired_shunt(ff_vec, t)
+
         l2e = np.zeros(N_OUT)
         l2i = 0.0
         inhibited = []
@@ -2843,6 +2911,8 @@ class SimulationEngine:
         # for phase diagnostics. This read-only snapshot does not advance traces or
         # mutate any neuron; dynamic_state() reports the later live membrane phase.
         self.l2_charge = {f'L2E{j}': float(e.potential) for j, e in enumerate(l2.excitatory_neurons)}
+        self.switchi_recent_spike_trace = np.maximum(
+            self.switchi_recent_spike_trace * self.switchi_trace_decay, l2e)
 
         if self.prediction_excitatory_enabled:
             self._schedule_prediction_decoder_events(l2e, t)
@@ -3480,6 +3550,12 @@ class SimulationEngine:
                         persistent_conductance=(
                             self.prediction_column_persistent_conductance_enabled
                             if self.prediction_column_to_i_enabled else False)),
+                    switchi_paired_l2_shunt=dict(
+                        enabled=self.switchi_paired_shunt_enabled,
+                        output_route='SwitchI_j -> L2E_j' if self.switchi_paired_shunt_enabled else None,
+                        trace_decay=round(float(self.switchi_trace_decay), 4),
+                        coincidence_threshold=round(float(self.switchi_coincidence_threshold), 4),
+                        shunt_frac=round(float(self.switchi_shunt_frac), 4)),
                     params=self.params)
 
     def dynamic_state(self) -> dict:
@@ -3649,6 +3725,12 @@ class SimulationEngine:
                         persistent_conductance_enabled=(
                             self.prediction_column_persistent_conductance_enabled
                             if self.prediction_column_enabled else False)),
+                    switchi_paired_l2_shunt=dict(
+                        enabled=self.switchi_paired_shunt_enabled,
+                        recent_spike_trace={f'L2E{j}': round(float(v), 4)
+                                            for j, v in enumerate(self.switchi_recent_spike_trace)},
+                        last_events=list(self._switchi_last_events)
+                        if self.switchi_paired_shunt_enabled else []),
                     # Phase 10: adaptive-threshold ablation state/trajectory
                     # (L2E only; a_i and its history stay 0/empty for every
                     # other population always, and for L2E itself whenever the
