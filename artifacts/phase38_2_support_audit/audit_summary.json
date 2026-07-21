@@ -1,0 +1,57 @@
+{
+  "date": "2026-07-21",
+  "verdict": "PASS_INTEGRATION_WAITING_FOR_NATURAL_MATURITY",
+  "head": "7f7c383abc78bd362a670504753e84971b97571a",
+  "branch": "phase38-local-l2-ownership",
+  "dirty": true,
+  "dirty_files": [
+    "cipp-learning-AbhiCIPP/backend/simulation.py"
+  ],
+  "files_changed": [
+    "cipp-learning-AbhiCIPP/backend/simulation.py",
+    "artifacts/phase38_2_support_audit/audit_summary.json"
+  ],
+  "diff_verdict": "Only two unstaged schema-consumer fixes present; no unrelated changes detected.",
+  "tests": {
+    "passed": [
+      "pytest -q cipp-learning-AbhiCIPP/test_phase38_local_l2_ownership.py (8 passed)",
+      "py_compile cipp-learning-AbhiCIPP/backend/simulation.py",
+      "git diff --check"
+    ],
+    "failed": []
+  },
+  "integration": {
+    "pc_fire_step": 1,
+    "pc_fired_pixels": [3, 4, 5],
+    "request_step": 4,
+    "request_value": 2.25,
+    "queued_deliver_at": 6,
+    "delivery_step": 6,
+    "paired_target": "L2E4",
+    "paired_v_pre": 858.2051,
+    "paired_v_post": 429.1026,
+    "paired_delta": 429.1026
+  },
+  "natural_smoke": {
+    "prediction_enabled": true,
+    "basal_pc_deliveries": 1617,
+    "apical_pc_deliveries": 2124,
+    "decoder_weights_above_init": 44,
+    "max_coincident_pc_charge": 268.9928,
+    "pc_threshold": 500.0,
+    "pc_gap": 231.0072,
+    "pc_firing_count": 0,
+    "residual_count": 1620,
+    "nonzero_eligibility_count": 0,
+    "queued_switchi_events": 0,
+    "delivered_switchi_events": 0,
+    "distinct_owners": 3,
+    "tyrant_share": 0.5312,
+    "collisions": {
+      "L2E4": ["row 1", "diag /"]
+    },
+    "silence": 0,
+    "same_step_ties": 4
+  },
+  "first_causal_failure": "Natural path: no PC firing, so no eligibility overlap, no queued requests, and no SwitchI deliveries."
+}
