@@ -2751,9 +2751,16 @@ class SimulationEngine:
             if fired <= 0.5:
                 continue
             for j in range(N_OUT):
+                # Phase 38.2: _prediction_column_last_deliveries records never carry
+                # a 'signal' field (see the scheduling site a few hundred lines down
+                # -- the schema is source/target/target_compartment/scheduled_step/
+                # arrival_step/origin_pattern/delivered_step/origin_class). A record
+                # only exists here at all because L2E{j} physically fired and its
+                # apical event was scheduled and has now arrived, so presence of a
+                # matching apical-compartment record IS the delivered signal.
                 delivered = any(
                     rec['target'] == f'PC{i}' and rec['source'] == f'L2E{j}'
-                    and rec['signal'] > 0.0
+                    and rec['target_compartment'] == 'apical'
                     for rec in self._prediction_column_last_deliveries
                 )
                 if not delivered:
@@ -3749,7 +3756,14 @@ class SimulationEngine:
         l2e_states = [self._l2e_status(j) for j in range(N_OUT)]
         ownership = self._ownership_summary()
         weights = self._feedforward_weight_summary()
-        switchi_firing = sum(1 for row in self._switchi_local_last_events if row.get('fired'))
+        # Phase 38.2: _switchi_local_last_events rows record a QUEUED request at
+        # step t ('queued', not 'fired' -- that key was removed in Phase 38.1's
+        # delay refactor). Whether a shunt actually landed THIS step is instead
+        # the delivery-time 'applied' flag on _switchi_local_last_deliveries
+        # (set by _deliver_scheduled_switchi_local at t+2) -- the canonical
+        # record of a real, applied shunt, not a second truth field invented
+        # just for this status summary.
+        switchi_firing = sum(1 for row in self._switchi_local_last_deliveries if row.get('applied'))
         return dict(
             detected_pattern=named['name'] if named else 'manual',
             detected_role=named['role'] if named else 'manual',
