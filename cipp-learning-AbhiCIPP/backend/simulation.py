@@ -860,7 +860,23 @@ class SimulationEngine:
                  # = eta * spike(PCi) * eligibility(Rj) * (1 - w/w_max)^2, see
                  # _apply_prediction_column_learning). Separately named, never
                  # aliased to learning_rate/eta_pred/l2e_lr_frac.
-                 prediction_learning_rate: float = 0.15,
+                 #
+                 # Phase 39: raised from 0.15 to 1.5 (single production change,
+                 # decoder learning timescale only). Calculation from this exact
+                 # recurrence at the default init=50/max=1200/threshold=500/
+                 # lateral=150 (crossing point d=350): at eta=0.15 the closed-form
+                 # step count to reach 350 is 2946 events -- already documented in
+                 # the Phase 35 ledger. The Phase 38.2 natural smoke measured the
+                 # real qualifying-event RATE directly (basal+apical co-delivery,
+                 # not steps): ~0.041 events/step. 2946 events / 0.041 events-per-
+                 # step ~= 71,000 steps to mature -- far past any bounded smoke.
+                 # eta=1.5 needs 295 events for the same crossing (still hundreds
+                 # of genuine, physically-delivered coincidences -- never a
+                 # one-shot/pre-saturated jump), ~7,100 steps at the same measured
+                 # rate: a ~10x reduction matching the ~10x eta increase, not a
+                 # threshold or init/max change. See Phase39_Prediction_Maturity_
+                 # Timescale.md for the full derivation.
+                 prediction_learning_rate: float = 1.5,
                  # PCi's own firing threshold. Separately named from
                  # threshold/threshold_l2 -- this population's coincidence
                  # detection is calibrated against ITS OWN scale, not L1/L2's.

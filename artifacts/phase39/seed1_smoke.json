@@ -1,0 +1,53 @@
+{
+  "verdict": "PASS_FINAL_CANDIDATE",
+  "metrics": {
+    "distinct_owners": 4,
+    "per_pattern_owner": {
+      "row 1": "L2E5",
+      "col 1": "L2E6",
+      "diag \\": "L2E7",
+      "diag /": "L2E4"
+    },
+    "per_pattern_consistency": {
+      "row 1": 0.77,
+      "col 1": 0.86,
+      "diag \\": 0.91,
+      "diag /": 0.82
+    },
+    "collisions": {},
+    "collision_stable": false,
+    "tyrant_share": {
+      "L2E5": 0.205,
+      "L2E2": 0.0425,
+      "L2E4": 0.25,
+      "L2E3": 0.055,
+      "L2E7": 0.23,
+      "L2E6": 0.2175
+    },
+    "max_tyrant_share": 0.25,
+    "same_step_multi_firer_steps": 156,
+    "index_bias_counts": {
+      "L2E2": 1,
+      "L2E3": 149,
+      "L2E4": 12,
+      "L2E5": 145,
+      "L2E7": 5
+    },
+    "silent_l2e": [
+      "L2E0",
+      "L2E1"
+    ],
+    "active_l2e_count": 6,
+    "pc_fire_events": 6483,
+    "first_pc_fire_step": 1242,
+    "nonzero_eligibility_events": 6920,
+    "switchi_requests_queued": 3314,
+    "switchi_deliveries_applied": 336,
+    "paired_target_violations": [],
+    "causal_violations": [],
+    "exact_zero_feedforward_weights": 0,
+    "config_fingerprint": "assembly_decay_frac=0.0|assembly_flow_credit=False|confidence_consolidation=False|distance_min=1.0|distance_power=2.0|distance_ref=7.472|distance_weighting=True|ei_sat_mult=4.0|excitatory_flow_rate=False|hard_reset_clear_traces=True|homeostasis=False|inhibitory_delta_rule=False|l1i_immediate_relay=False|l1i_leak_enabled=False|l1i_threshold_frac=1.0|l2_charge_chunks=20|l2e_budget=False|l2e_init_mode=edge_detector_candidate|l2e_lr_frac=0.02|l2e_weight_cap_frac=0.3333333333333333|l2i_excitatory_flow_rate=False|l2i_hard_reset_losers=False|l2i_leak_enabled=False|l2i_threshold_frac=0.3333333333333333|leak_enabled=False|legacy_distance_compat=True|loser_depression=False|pos_weight_floor=1|prediction_column_enabled=True|refractory=0|signed_depression=False|signed_spike_learning=True|structural_fe_eta_floor=0.02|structural_free_energy=True|switchi_local_mismatch_enabled=True|switchi_paired_shunt_enabled=False|symmetric_geometry=False|seed=1|topology_seed=1",
+    "total_steps": 8000,
+    "wall_seconds": 74.029
+  }
+}

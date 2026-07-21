@@ -152,3 +152,41 @@ EDGE_DETECTOR_CANDIDATE_PRESET = dict(
     DASHBOARD_PRESET,
     l2e_init_mode='edge_detector_candidate',
 )
+
+# Phase 39: opt-in final-candidate preset. Combines already-supported engine
+# decisions; does NOT replace DASHBOARD_PRESET, which stays the reproducible
+# baseline (backend/api.py's live engine still builds from DASHBOARD_PRESET
+# unchanged). Every key below is an EXISTING flag, never a new mechanism:
+#
+#   - l2e_init_mode='edge_detector_candidate': medium nondegenerate feedforward
+#     starting weights (mean 250, legacy-wide draw rescaled, relative
+#     differences preserved -- see EDGE_DETECTOR_CANDIDATE_PRESET above).
+#   - prediction_column_enabled=True: prediction + local decoder learning on.
+#   - switchi_local_mismatch_enabled=True: Phase 38's delayed local
+#     eligibility/mismatch shunt (SwitchI_j -> paired L2E_j only).
+#   - switchi_paired_shunt_enabled stays DASHBOARD_PRESET's default (False):
+#     paired LOCAL shunting only -- Phase 37's separate raw-drive ablation
+#     never runs alongside Phase 38's mechanism.
+#   - loser_depression=False, l2i_hard_reset_losers=False: the broad
+#     (whole-pool, structural-weight) loser depression and the unconditional
+#     same-step-on-arrival hard membrane wipe are both off, so any observed
+#     suppression is attributable to the one precise, paired, delayed
+#     mechanism under test -- not a confound from either older, broader
+#     pathway. The existing FINITE-DELAY L2I->L2E competitive reset itself
+#     (Neuron.apply_delayed_inhibition's unconditional bounded, floor-limited
+#     transient subtraction) is untouched by either flag and still runs.
+#   - Everything else (inverse-square distance geometry, the bounded
+#     saturating signed+structural-free-energy potentiation rule, the
+#     positive feedforward floor, passive-decay/leak flags, the absence of
+#     any label/argmax/oracle mechanism -- none exist in this engine to
+#     begin with) is already DASHBOARD_PRESET's own default and is inherited
+#     unchanged.
+FINAL_CANDIDATE_PRESET = dict(
+    DASHBOARD_PRESET,
+    l2e_init_mode='edge_detector_candidate',
+    prediction_column_enabled=True,
+    switchi_local_mismatch_enabled=True,
+    switchi_paired_shunt_enabled=False,
+    loser_depression=False,
+    l2i_hard_reset_losers=False,
+)
