@@ -1,0 +1,5 @@
+{
+    "exits": {
+        "north": "loop_sector"
+    }
+}

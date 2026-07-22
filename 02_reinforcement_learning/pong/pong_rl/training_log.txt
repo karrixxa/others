@@ -1,0 +1,224 @@
+/home/cxiong/.local/lib/python3.12/site-packages/gymnasium/envs/registration.py:637: UserWarning: [33mWARN: Overriding environment ALE/Adventure-v5 already in registry.[0m
+  logger.warn(f"Overriding environment {new_spec.id} already in registry.")
+/home/cxiong/.local/lib/python3.12/site-packages/gymnasium/envs/registration.py:637: UserWarning: [33mWARN: Overriding environment ALE/AirRaid-v5 already in registry.[0m
+  logger.warn(f"Overriding environment {new_spec.id} already in registry.")
+/home/cxiong/.local/lib/python3.12/site-packages/gymnasium/envs/registration.py:637: UserWarning: [33mWARN: Overriding environment ALE/Alien-v5 already in registry.[0m
+  logger.warn(f"Overriding environment {new_spec.id} already in registry.")
+/home/cxiong/.local/lib/python3.12/site-packages/gymnasium/envs/registration.py:637: UserWarning: [33mWARN: Overriding environment ALE/Amidar-v5 already in registry.[0m
+  logger.warn(f"Overriding environment {new_spec.id} already in registry.")
+/home/cxiong/.local/lib/python3.12/site-packages/gymnasium/envs/registration.py:637: UserWarning: [33mWARN: Overriding environment ALE/Assault-v5 already in registry.[0m
+  logger.warn(f"Overriding environment {new_spec.id} already in registry.")
+/home/cxiong/.local/lib/python3.12/site-packages/gymnasium/envs/registration.py:637: UserWarning: [33mWARN: Overriding environment ALE/Asterix-v5 already in registry.[0m
+  logger.warn(f"Overriding environment {new_spec.id} already in registry.")
+/home/cxiong/.local/lib/python3.12/site-packages/gymnasium/envs/registration.py:637: UserWarning: [33mWARN: Overriding environment ALE/Asteroids-v5 already in registry.[0m
+  logger.warn(f"Overriding environment {new_spec.id} already in registry.")
+/home/cxiong/.local/lib/python3.12/site-packages/gymnasium/envs/registration.py:637: UserWarning: [33mWARN: Overriding environment ALE/Atlantis2-v5 already in registry.[0m
+  logger.warn(f"Overriding environment {new_spec.id} already in registry.")
+/home/cxiong/.local/lib/python3.12/site-packages/gymnasium/envs/registration.py:637: UserWarning: [33mWARN: Overriding environment ALE/Atlantis-v5 already in registry.[0m
+  logger.warn(f"Overriding environment {new_spec.id} already in registry.")
+/home/cxiong/.local/lib/python3.12/site-packages/gymnasium/envs/registration.py:637: UserWarning: [33mWARN: Overriding environment ALE/Backgammon-v5 already in registry.[0m
+  logger.warn(f"Overriding environment {new_spec.id} already in registry.")
+/home/cxiong/.local/lib/python3.12/site-packages/gymnasium/envs/registration.py:637: UserWarning: [33mWARN: Overriding environment ALE/BankHeist-v5 already in registry.[0m
+  logger.warn(f"Overriding environment {new_spec.id} already in registry.")
+/home/cxiong/.local/lib/python3.12/site-packages/gymnasium/envs/registration.py:637: UserWarning: [33mWARN: Overriding environment ALE/BasicMath-v5 already in registry.[0m
+  logger.warn(f"Overriding environment {new_spec.id} already in registry.")
+/home/cxiong/.local/lib/python3.12/site-packages/gymnasium/envs/registration.py:637: UserWarning: [33mWARN: Overriding environment ALE/BattleZone-v5 already in registry.[0m
+  logger.warn(f"Overriding environment {new_spec.id} already in registry.")
+/home/cxiong/.local/lib/python3.12/site-packages/gymnasium/envs/registration.py:637: UserWarning: [33mWARN: Overriding environment ALE/BeamRider-v5 already in registry.[0m
+  logger.warn(f"Overriding environment {new_spec.id} already in registry.")
+/home/cxiong/.local/lib/python3.12/site-packages/gymnasium/envs/registration.py:637: UserWarning: [33mWARN: Overriding environment ALE/Berzerk-v5 already in registry.[0m
+  logger.warn(f"Overriding environment {new_spec.id} already in registry.")
+/home/cxiong/.local/lib/python3.12/site-packages/gymnasium/envs/registration.py:637: UserWarning: [33mWARN: Overriding environment ALE/Blackjack-v5 already in registry.[0m
+  logger.warn(f"Overriding environment {new_spec.id} already in registry.")
+/home/cxiong/.local/lib/python3.12/site-packages/gymnasium/envs/registration.py:637: UserWarning: [33mWARN: Overriding environment ALE/Bowling-v5 already in registry.[0m
+  logger.warn(f"Overriding environment {new_spec.id} already in registry.")
+/home/cxiong/.local/lib/python3.12/site-packages/gymnasium/envs/registration.py:637: UserWarning: [33mWARN: Overriding environment ALE/Boxing-v5 already in registry.[0m
+  logger.warn(f"Overriding environment {new_spec.id} already in registry.")
+/home/cxiong/.local/lib/python3.12/site-packages/gymnasium/envs/registration.py:637: UserWarning: [33mWARN: Overriding environment ALE/Breakout-v5 already in registry.[0m
+  logger.warn(f"Overriding environment {new_spec.id} already in registry.")
+/home/cxiong/.local/lib/python3.12/site-packages/gymnasium/envs/registration.py:637: UserWarning: [33mWARN: Overriding environment ALE/Carnival-v5 already in registry.[0m
+  logger.warn(f"Overriding environment {new_spec.id} already in registry.")
+/home/cxiong/.local/lib/python3.12/site-packages/gymnasium/envs/registration.py:637: UserWarning: [33mWARN: Overriding environment ALE/Casino-v5 already in registry.[0m
+  logger.warn(f"Overriding environment {new_spec.id} already in registry.")
+/home/cxiong/.local/lib/python3.12/site-packages/gymnasium/envs/registration.py:637: UserWarning: [33mWARN: Overriding environment ALE/Centipede-v5 already in registry.[0m
+  logger.warn(f"Overriding environment {new_spec.id} already in registry.")
+/home/cxiong/.local/lib/python3.12/site-packages/gymnasium/envs/registration.py:637: UserWarning: [33mWARN: Overriding environment ALE/ChopperCommand-v5 already in registry.[0m
+  logger.warn(f"Overriding environment {new_spec.id} already in registry.")
+/home/cxiong/.local/lib/python3.12/site-packages/gymnasium/envs/registration.py:637: UserWarning: [33mWARN: Overriding environment ALE/CrazyClimber-v5 already in registry.[0m
+  logger.warn(f"Overriding environment {new_spec.id} already in registry.")
+/home/cxiong/.local/lib/python3.12/site-packages/gymnasium/envs/registration.py:637: UserWarning: [33mWARN: Overriding environment ALE/Crossbow-v5 already in registry.[0m
+  logger.warn(f"Overriding environment {new_spec.id} already in registry.")
+/home/cxiong/.local/lib/python3.12/site-packages/gymnasium/envs/registration.py:637: UserWarning: [33mWARN: Overriding environment ALE/Darkchambers-v5 already in registry.[0m
+  logger.warn(f"Overriding environment {new_spec.id} already in registry.")
+/home/cxiong/.local/lib/python3.12/site-packages/gymnasium/envs/registration.py:637: UserWarning: [33mWARN: Overriding environment ALE/Defender-v5 already in registry.[0m
+  logger.warn(f"Overriding environment {new_spec.id} already in registry.")
+/home/cxiong/.local/lib/python3.12/site-packages/gymnasium/envs/registration.py:637: UserWarning: [33mWARN: Overriding environment ALE/DemonAttack-v5 already in registry.[0m
+  logger.warn(f"Overriding environment {new_spec.id} already in registry.")
+/home/cxiong/.local/lib/python3.12/site-packages/gymnasium/envs/registration.py:637: UserWarning: [33mWARN: Overriding environment ALE/DonkeyKong-v5 already in registry.[0m
+  logger.warn(f"Overriding environment {new_spec.id} already in registry.")
+/home/cxiong/.local/lib/python3.12/site-packages/gymnasium/envs/registration.py:637: UserWarning: [33mWARN: Overriding environment ALE/DoubleDunk-v5 already in registry.[0m
+  logger.warn(f"Overriding environment {new_spec.id} already in registry.")
+/home/cxiong/.local/lib/python3.12/site-packages/gymnasium/envs/registration.py:637: UserWarning: [33mWARN: Overriding environment ALE/Earthworld-v5 already in registry.[0m
+  logger.warn(f"Overriding environment {new_spec.id} already in registry.")
+/home/cxiong/.local/lib/python3.12/site-packages/gymnasium/envs/registration.py:637: UserWarning: [33mWARN: Overriding environment ALE/ElevatorAction-v5 already in registry.[0m
+  logger.warn(f"Overriding environment {new_spec.id} already in registry.")
+/home/cxiong/.local/lib/python3.12/site-packages/gymnasium/envs/registration.py:637: UserWarning: [33mWARN: Overriding environment ALE/Enduro-v5 already in registry.[0m
+  logger.warn(f"Overriding environment {new_spec.id} already in registry.")
+/home/cxiong/.local/lib/python3.12/site-packages/gymnasium/envs/registration.py:637: UserWarning: [33mWARN: Overriding environment ALE/Entombed-v5 already in registry.[0m
+  logger.warn(f"Overriding environment {new_spec.id} already in registry.")
+/home/cxiong/.local/lib/python3.12/site-packages/gymnasium/envs/registration.py:637: UserWarning: [33mWARN: Overriding environment ALE/Et-v5 already in registry.[0m
+  logger.warn(f"Overriding environment {new_spec.id} already in registry.")
+/home/cxiong/.local/lib/python3.12/site-packages/gymnasium/envs/registration.py:637: UserWarning: [33mWARN: Overriding environment ALE/FishingDerby-v5 already in registry.[0m
+  logger.warn(f"Overriding environment {new_spec.id} already in registry.")
+/home/cxiong/.local/lib/python3.12/site-packages/gymnasium/envs/registration.py:637: UserWarning: [33mWARN: Overriding environment ALE/FlagCapture-v5 already in registry.[0m
+  logger.warn(f"Overriding environment {new_spec.id} already in registry.")
+/home/cxiong/.local/lib/python3.12/site-packages/gymnasium/envs/registration.py:637: UserWarning: [33mWARN: Overriding environment ALE/Freeway-v5 already in registry.[0m
+  logger.warn(f"Overriding environment {new_spec.id} already in registry.")
+/home/cxiong/.local/lib/python3.12/site-packages/gymnasium/envs/registration.py:637: UserWarning: [33mWARN: Overriding environment ALE/Frogger-v5 already in registry.[0m
+  logger.warn(f"Overriding environment {new_spec.id} already in registry.")
+/home/cxiong/.local/lib/python3.12/site-packages/gymnasium/envs/registration.py:637: UserWarning: [33mWARN: Overriding environment ALE/Frostbite-v5 already in registry.[0m
+  logger.warn(f"Overriding environment {new_spec.id} already in registry.")
+/home/cxiong/.local/lib/python3.12/site-packages/gymnasium/envs/registration.py:637: UserWarning: [33mWARN: Overriding environment ALE/Galaxian-v5 already in registry.[0m
+  logger.warn(f"Overriding environment {new_spec.id} already in registry.")
+/home/cxiong/.local/lib/python3.12/site-packages/gymnasium/envs/registration.py:637: UserWarning: [33mWARN: Overriding environment ALE/Gopher-v5 already in registry.[0m
+  logger.warn(f"Overriding environment {new_spec.id} already in registry.")
+/home/cxiong/.local/lib/python3.12/site-packages/gymnasium/envs/registration.py:637: UserWarning: [33mWARN: Overriding environment ALE/Gravitar-v5 already in registry.[0m
+  logger.warn(f"Overriding environment {new_spec.id} already in registry.")
+/home/cxiong/.local/lib/python3.12/site-packages/gymnasium/envs/registration.py:637: UserWarning: [33mWARN: Overriding environment ALE/Hangman-v5 already in registry.[0m
+  logger.warn(f"Overriding environment {new_spec.id} already in registry.")
+/home/cxiong/.local/lib/python3.12/site-packages/gymnasium/envs/registration.py:637: UserWarning: [33mWARN: Overriding environment ALE/HauntedHouse-v5 already in registry.[0m
+  logger.warn(f"Overriding environment {new_spec.id} already in registry.")
+/home/cxiong/.local/lib/python3.12/site-packages/gymnasium/envs/registration.py:637: UserWarning: [33mWARN: Overriding environment ALE/Hero-v5 already in registry.[0m
+  logger.warn(f"Overriding environment {new_spec.id} already in registry.")
+/home/cxiong/.local/lib/python3.12/site-packages/gymnasium/envs/registration.py:637: UserWarning: [33mWARN: Overriding environment ALE/HumanCannonball-v5 already in registry.[0m
+  logger.warn(f"Overriding environment {new_spec.id} already in registry.")
+/home/cxiong/.local/lib/python3.12/site-packages/gymnasium/envs/registration.py:637: UserWarning: [33mWARN: Overriding environment ALE/IceHockey-v5 already in registry.[0m
+  logger.warn(f"Overriding environment {new_spec.id} already in registry.")
+/home/cxiong/.local/lib/python3.12/site-packages/gymnasium/envs/registration.py:637: UserWarning: [33mWARN: Overriding environment ALE/Jamesbond-v5 already in registry.[0m
+  logger.warn(f"Overriding environment {new_spec.id} already in registry.")
+/home/cxiong/.local/lib/python3.12/site-packages/gymnasium/envs/registration.py:637: UserWarning: [33mWARN: Overriding environment ALE/JourneyEscape-v5 already in registry.[0m
+  logger.warn(f"Overriding environment {new_spec.id} already in registry.")
+/home/cxiong/.local/lib/python3.12/site-packages/gymnasium/envs/registration.py:637: UserWarning: [33mWARN: Overriding environment ALE/Kaboom-v5 already in registry.[0m
+  logger.warn(f"Overriding environment {new_spec.id} already in registry.")
+/home/cxiong/.local/lib/python3.12/site-packages/gymnasium/envs/registration.py:637: UserWarning: [33mWARN: Overriding environment ALE/Kangaroo-v5 already in registry.[0m
+  logger.warn(f"Overriding environment {new_spec.id} already in registry.")
+/home/cxiong/.local/lib/python3.12/site-packages/gymnasium/envs/registration.py:637: UserWarning: [33mWARN: Overriding environment ALE/KeystoneKapers-v5 already in registry.[0m
+  logger.warn(f"Overriding environment {new_spec.id} already in registry.")
+/home/cxiong/.local/lib/python3.12/site-packages/gymnasium/envs/registration.py:637: UserWarning: [33mWARN: Overriding environment ALE/KingKong-v5 already in registry.[0m
+  logger.warn(f"Overriding environment {new_spec.id} already in registry.")
+/home/cxiong/.local/lib/python3.12/site-packages/gymnasium/envs/registration.py:637: UserWarning: [33mWARN: Overriding environment ALE/Klax-v5 already in registry.[0m
+  logger.warn(f"Overriding environment {new_spec.id} already in registry.")
+/home/cxiong/.local/lib/python3.12/site-packages/gymnasium/envs/registration.py:637: UserWarning: [33mWARN: Overriding environment ALE/Koolaid-v5 already in registry.[0m
+  logger.warn(f"Overriding environment {new_spec.id} already in registry.")
+/home/cxiong/.local/lib/python3.12/site-packages/gymnasium/envs/registration.py:637: UserWarning: [33mWARN: Overriding environment ALE/Krull-v5 already in registry.[0m
+  logger.warn(f"Overriding environment {new_spec.id} already in registry.")
+/home/cxiong/.local/lib/python3.12/site-packages/gymnasium/envs/registration.py:637: UserWarning: [33mWARN: Overriding environment ALE/KungFuMaster-v5 already in registry.[0m
+  logger.warn(f"Overriding environment {new_spec.id} already in registry.")
+/home/cxiong/.local/lib/python3.12/site-packages/gymnasium/envs/registration.py:637: UserWarning: [33mWARN: Overriding environment ALE/LaserGates-v5 already in registry.[0m
+  logger.warn(f"Overriding environment {new_spec.id} already in registry.")
+/home/cxiong/.local/lib/python3.12/site-packages/gymnasium/envs/registration.py:637: UserWarning: [33mWARN: Overriding environment ALE/LostLuggage-v5 already in registry.[0m
+  logger.warn(f"Overriding environment {new_spec.id} already in registry.")
+/home/cxiong/.local/lib/python3.12/site-packages/gymnasium/envs/registration.py:637: UserWarning: [33mWARN: Overriding environment ALE/MarioBros-v5 already in registry.[0m
+  logger.warn(f"Overriding environment {new_spec.id} already in registry.")
+/home/cxiong/.local/lib/python3.12/site-packages/gymnasium/envs/registration.py:637: UserWarning: [33mWARN: Overriding environment ALE/MiniatureGolf-v5 already in registry.[0m
+  logger.warn(f"Overriding environment {new_spec.id} already in registry.")
+/home/cxiong/.local/lib/python3.12/site-packages/gymnasium/envs/registration.py:637: UserWarning: [33mWARN: Overriding environment ALE/MontezumaRevenge-v5 already in registry.[0m
+  logger.warn(f"Overriding environment {new_spec.id} already in registry.")
+/home/cxiong/.local/lib/python3.12/site-packages/gymnasium/envs/registration.py:637: UserWarning: [33mWARN: Overriding environment ALE/MrDo-v5 already in registry.[0m
+  logger.warn(f"Overriding environment {new_spec.id} already in registry.")
+/home/cxiong/.local/lib/python3.12/site-packages/gymnasium/envs/registration.py:637: UserWarning: [33mWARN: Overriding environment ALE/MsPacman-v5 already in registry.[0m
+  logger.warn(f"Overriding environment {new_spec.id} already in registry.")
+/home/cxiong/.local/lib/python3.12/site-packages/gymnasium/envs/registration.py:637: UserWarning: [33mWARN: Overriding environment ALE/NameThisGame-v5 already in registry.[0m
+  logger.warn(f"Overriding environment {new_spec.id} already in registry.")
+/home/cxiong/.local/lib/python3.12/site-packages/gymnasium/envs/registration.py:637: UserWarning: [33mWARN: Overriding environment ALE/Othello-v5 already in registry.[0m
+  logger.warn(f"Overriding environment {new_spec.id} already in registry.")
+/home/cxiong/.local/lib/python3.12/site-packages/gymnasium/envs/registration.py:637: UserWarning: [33mWARN: Overriding environment ALE/Pacman-v5 already in registry.[0m
+  logger.warn(f"Overriding environment {new_spec.id} already in registry.")
+/home/cxiong/.local/lib/python3.12/site-packages/gymnasium/envs/registration.py:637: UserWarning: [33mWARN: Overriding environment ALE/Phoenix-v5 already in registry.[0m
+  logger.warn(f"Overriding environment {new_spec.id} already in registry.")
+/home/cxiong/.local/lib/python3.12/site-packages/gymnasium/envs/registration.py:637: UserWarning: [33mWARN: Overriding environment ALE/Pitfall2-v5 already in registry.[0m
+  logger.warn(f"Overriding environment {new_spec.id} already in registry.")
+/home/cxiong/.local/lib/python3.12/site-packages/gymnasium/envs/registration.py:637: UserWarning: [33mWARN: Overriding environment ALE/Pitfall-v5 already in registry.[0m
+  logger.warn(f"Overriding environment {new_spec.id} already in registry.")
+/home/cxiong/.local/lib/python3.12/site-packages/gymnasium/envs/registration.py:637: UserWarning: [33mWARN: Overriding environment ALE/Pong-v5 already in registry.[0m
+  logger.warn(f"Overriding environment {new_spec.id} already in registry.")
+/home/cxiong/.local/lib/python3.12/site-packages/gymnasium/envs/registration.py:637: UserWarning: [33mWARN: Overriding environment ALE/Pooyan-v5 already in registry.[0m
+  logger.warn(f"Overriding environment {new_spec.id} already in registry.")
+/home/cxiong/.local/lib/python3.12/site-packages/gymnasium/envs/registration.py:637: UserWarning: [33mWARN: Overriding environment ALE/PrivateEye-v5 already in registry.[0m
+  logger.warn(f"Overriding environment {new_spec.id} already in registry.")
+/home/cxiong/.local/lib/python3.12/site-packages/gymnasium/envs/registration.py:637: UserWarning: [33mWARN: Overriding environment ALE/Qbert-v5 already in registry.[0m
+  logger.warn(f"Overriding environment {new_spec.id} already in registry.")
+/home/cxiong/.local/lib/python3.12/site-packages/gymnasium/envs/registration.py:637: UserWarning: [33mWARN: Overriding environment ALE/Riverraid-v5 already in registry.[0m
+  logger.warn(f"Overriding environment {new_spec.id} already in registry.")
+/home/cxiong/.local/lib/python3.12/site-packages/gymnasium/envs/registration.py:637: UserWarning: [33mWARN: Overriding environment ALE/RoadRunner-v5 already in registry.[0m
+  logger.warn(f"Overriding environment {new_spec.id} already in registry.")
+/home/cxiong/.local/lib/python3.12/site-packages/gymnasium/envs/registration.py:637: UserWarning: [33mWARN: Overriding environment ALE/Robotank-v5 already in registry.[0m
+  logger.warn(f"Overriding environment {new_spec.id} already in registry.")
+/home/cxiong/.local/lib/python3.12/site-packages/gymnasium/envs/registration.py:637: UserWarning: [33mWARN: Overriding environment ALE/Seaquest-v5 already in registry.[0m
+  logger.warn(f"Overriding environment {new_spec.id} already in registry.")
+/home/cxiong/.local/lib/python3.12/site-packages/gymnasium/envs/registration.py:637: UserWarning: [33mWARN: Overriding environment ALE/SirLancelot-v5 already in registry.[0m
+  logger.warn(f"Overriding environment {new_spec.id} already in registry.")
+/home/cxiong/.local/lib/python3.12/site-packages/gymnasium/envs/registration.py:637: UserWarning: [33mWARN: Overriding environment ALE/Skiing-v5 already in registry.[0m
+  logger.warn(f"Overriding environment {new_spec.id} already in registry.")
+/home/cxiong/.local/lib/python3.12/site-packages/gymnasium/envs/registration.py:637: UserWarning: [33mWARN: Overriding environment ALE/Solaris-v5 already in registry.[0m
+  logger.warn(f"Overriding environment {new_spec.id} already in registry.")
+/home/cxiong/.local/lib/python3.12/site-packages/gymnasium/envs/registration.py:637: UserWarning: [33mWARN: Overriding environment ALE/SpaceInvaders-v5 already in registry.[0m
+  logger.warn(f"Overriding environment {new_spec.id} already in registry.")
+/home/cxiong/.local/lib/python3.12/site-packages/gymnasium/envs/registration.py:637: UserWarning: [33mWARN: Overriding environment ALE/SpaceWar-v5 already in registry.[0m
+  logger.warn(f"Overriding environment {new_spec.id} already in registry.")
+/home/cxiong/.local/lib/python3.12/site-packages/gymnasium/envs/registration.py:637: UserWarning: [33mWARN: Overriding environment ALE/StarGunner-v5 already in registry.[0m
+  logger.warn(f"Overriding environment {new_spec.id} already in registry.")
+/home/cxiong/.local/lib/python3.12/site-packages/gymnasium/envs/registration.py:637: UserWarning: [33mWARN: Overriding environment ALE/Superman-v5 already in registry.[0m
+  logger.warn(f"Overriding environment {new_spec.id} already in registry.")
+/home/cxiong/.local/lib/python3.12/site-packages/gymnasium/envs/registration.py:637: UserWarning: [33mWARN: Overriding environment ALE/Surround-v5 already in registry.[0m
+  logger.warn(f"Overriding environment {new_spec.id} already in registry.")
+/home/cxiong/.local/lib/python3.12/site-packages/gymnasium/envs/registration.py:637: UserWarning: [33mWARN: Overriding environment ALE/Tennis-v5 already in registry.[0m
+  logger.warn(f"Overriding environment {new_spec.id} already in registry.")
+/home/cxiong/.local/lib/python3.12/site-packages/gymnasium/envs/registration.py:637: UserWarning: [33mWARN: Overriding environment ALE/Tetris-v5 already in registry.[0m
+  logger.warn(f"Overriding environment {new_spec.id} already in registry.")
+/home/cxiong/.local/lib/python3.12/site-packages/gymnasium/envs/registration.py:637: UserWarning: [33mWARN: Overriding environment ALE/TicTacToe3D-v5 already in registry.[0m
+  logger.warn(f"Overriding environment {new_spec.id} already in registry.")
+/home/cxiong/.local/lib/python3.12/site-packages/gymnasium/envs/registration.py:637: UserWarning: [33mWARN: Overriding environment ALE/TimePilot-v5 already in registry.[0m
+  logger.warn(f"Overriding environment {new_spec.id} already in registry.")
+/home/cxiong/.local/lib/python3.12/site-packages/gymnasium/envs/registration.py:637: UserWarning: [33mWARN: Overriding environment ALE/Trondead-v5 already in registry.[0m
+  logger.warn(f"Overriding environment {new_spec.id} already in registry.")
+/home/cxiong/.local/lib/python3.12/site-packages/gymnasium/envs/registration.py:637: UserWarning: [33mWARN: Overriding environment ALE/Turmoil-v5 already in registry.[0m
+  logger.warn(f"Overriding environment {new_spec.id} already in registry.")
+/home/cxiong/.local/lib/python3.12/site-packages/gymnasium/envs/registration.py:637: UserWarning: [33mWARN: Overriding environment ALE/Tutankham-v5 already in registry.[0m
+  logger.warn(f"Overriding environment {new_spec.id} already in registry.")
+/home/cxiong/.local/lib/python3.12/site-packages/gymnasium/envs/registration.py:637: UserWarning: [33mWARN: Overriding environment ALE/UpNDown-v5 already in registry.[0m
+  logger.warn(f"Overriding environment {new_spec.id} already in registry.")
+/home/cxiong/.local/lib/python3.12/site-packages/gymnasium/envs/registration.py:637: UserWarning: [33mWARN: Overriding environment ALE/Venture-v5 already in registry.[0m
+  logger.warn(f"Overriding environment {new_spec.id} already in registry.")
+/home/cxiong/.local/lib/python3.12/site-packages/gymnasium/envs/registration.py:637: UserWarning: [33mWARN: Overriding environment ALE/VideoCheckers-v5 already in registry.[0m
+  logger.warn(f"Overriding environment {new_spec.id} already in registry.")
+/home/cxiong/.local/lib/python3.12/site-packages/gymnasium/envs/registration.py:637: UserWarning: [33mWARN: Overriding environment ALE/VideoChess-v5 already in registry.[0m
+  logger.warn(f"Overriding environment {new_spec.id} already in registry.")
+/home/cxiong/.local/lib/python3.12/site-packages/gymnasium/envs/registration.py:637: UserWarning: [33mWARN: Overriding environment ALE/VideoCube-v5 already in registry.[0m
+  logger.warn(f"Overriding environment {new_spec.id} already in registry.")
+/home/cxiong/.local/lib/python3.12/site-packages/gymnasium/envs/registration.py:637: UserWarning: [33mWARN: Overriding environment ALE/VideoPinball-v5 already in registry.[0m
+  logger.warn(f"Overriding environment {new_spec.id} already in registry.")
+/home/cxiong/.local/lib/python3.12/site-packages/gymnasium/envs/registration.py:637: UserWarning: [33mWARN: Overriding environment ALE/WizardOfWor-v5 already in registry.[0m
+  logger.warn(f"Overriding environment {new_spec.id} already in registry.")
+/home/cxiong/.local/lib/python3.12/site-packages/gymnasium/envs/registration.py:637: UserWarning: [33mWARN: Overriding environment ALE/WordZapper-v5 already in registry.[0m
+  logger.warn(f"Overriding environment {new_spec.id} already in registry.")
+/home/cxiong/.local/lib/python3.12/site-packages/gymnasium/envs/registration.py:637: UserWarning: [33mWARN: Overriding environment ALE/YarsRevenge-v5 already in registry.[0m
+  logger.warn(f"Overriding environment {new_spec.id} already in registry.")
+/home/cxiong/.local/lib/python3.12/site-packages/gymnasium/envs/registration.py:637: UserWarning: [33mWARN: Overriding environment ALE/Zaxxon-v5 already in registry.[0m
+  logger.warn(f"Overriding environment {new_spec.id} already in registry.")
+/home/cxiong/.local/lib/python3.12/site-packages/torch/cuda/__init__.py:187: UserWarning: CUDA initialization: The NVIDIA driver on your system is too old (found version 12020). Please update your GPU driver by downloading and installing a new version from the URL: http://www.nvidia.com/Download/index.aspx Alternatively, go to: https://pytorch.org to install a PyTorch version that has been compiled with your version of the CUDA driver. (Triggered internally at /pytorch/c10/cuda/CUDAFunctions.cpp:119.)
+  return torch._C._cuda_getDeviceCount() > 0
+Traceback (most recent call last):
+  File "/home/cxiong/pong_rl/train_dqn.py", line 174, in <module>
+    train()
+  File "/home/cxiong/pong_rl/train_dqn.py", line 96, in train
+    env = gym.make(ENV_NAME)
+          ^^^^^^^^^^^^^^^^^^
+  File "/home/cxiong/.local/lib/python3.12/site-packages/gymnasium/envs/registration.py", line 682, in make
+    env_spec = _find_spec(id)
+               ^^^^^^^^^^^^^^
+  File "/home/cxiong/.local/lib/python3.12/site-packages/gymnasium/envs/registration.py", line 527, in _find_spec
+    _check_version_exists(ns, name, version)
+  File "/home/cxiong/.local/lib/python3.12/site-packages/gymnasium/envs/registration.py", line 424, in _check_version_exists
+    raise error.VersionNotFound(message)
+gymnasium.error.VersionNotFound: Environment version `v5` for environment `Pong` doesn't exist. It provides versioned environments: [ `v0`, `v4` ].

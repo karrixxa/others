@@ -1,0 +1,38 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*.class
+
+# Environments
+venv/
+venv_new/
+.env
+.venv
+
+# Databases and Keys
+*.db
+.gateway_keys
+
+# Legacy Root Files (Keep on Kant, Remove from GitLab)
+api.py
+builder.py
+character_builder.py
+character_manager.py
+character_options.json
+character_system_v3.py
+char_agent.py
+char_agent_v2.py
+char_gen_agent.py
+database_manager.py
+full_game_test.py
+interactive_forge.py
+interactive_unified_builder.py
+test_char_gen.py
+test_jarvis.py
+index.html
+visualizer.html
+assets.json
+
+# Legacy Folders
+dd_game_design/
+plan_buffers/

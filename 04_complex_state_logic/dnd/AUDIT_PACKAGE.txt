@@ -1,0 +1,637 @@
+================================================================================
+HERMES RPG - SYSTEM AUDIT PACKAGE
+================================================================================
+
+--- SECTION 1: PROJECT OVERVIEW ---
+Project: Collaborative C2 RPG Architecture
+Goal: Create a 'Unified Entity' (Character + Tactical AI Agent) bound by Entity_ID.
+Key Components: Perception Feed, Plan Buffer, and Global Item Registries.
+
+--- SECTION 2: DATABASE SCHEMA ---
+
+Table: characters
+ - character_id (TEXT)
+ - entity_id (TEXT)
+ - user_id (TEXT)
+ - name (TEXT)
+ - class_id (TEXT)
+ - species_id (TEXT)
+ - background (TEXT)
+ - alignment (TEXT)
+ - level (INTEGER)
+ - xp (INTEGER)
+
+Table: character_stats
+ - character_id (TEXT)
+ - strength (INTEGER)
+ - dexterity (INTEGER)
+ - constitution (INTEGER)
+ - intelligence (INTEGER)
+ - wisdom (INTEGER)
+ - charisma (INTEGER)
+
+Table: character_rp
+ - character_id (TEXT)
+ - traits (TEXT)
+ - ideal (TEXT)
+ - bond (TEXT)
+ - flaw (TEXT)
+ - motivation (TEXT)
+ - fear (TEXT)
+ - backstory (TEXT)
+
+Table: game_state
+ - character_id (TEXT)
+ - current_hp (INTEGER)
+ - temp_hp (INTEGER)
+ - active_weapon_id (TEXT)
+ - active_armor_id (TEXT)
+ - location_id (TEXT)
+ - turn_status (TEXT)
+ - last_action (TEXT)
+ - armor_class (INTEGER)
+
+Table: active_conditions
+ - character_id (TEXT)
+ - condition_id (TEXT)
+ - timestamp_applied (DATETIME)
+
+Table: registry_classes
+ - class_id (TEXT)
+ - name (TEXT)
+ - base_hit_die (INTEGER)
+ - base_ac (INTEGER)
+ - stat_priority (TEXT)
+ - description (TEXT)
+
+Table: registry_species
+ - species_id (TEXT)
+ - name (TEXT)
+ - speed (INTEGER)
+ - trait (TEXT)
+ - description (TEXT)
+
+Table: registry_items
+ - item_id (TEXT)
+ - name (TEXT)
+ - type (TEXT)
+ - damage_dice (TEXT)
+ - attack_bonus (INTEGER)
+ - damage_bonus (INTEGER)
+ - ability_used (TEXT)
+ - weight (REAL)
+ - value (INTEGER)
+
+Table: registry_conditions
+ - condition_id (TEXT)
+ - name (TEXT)
+ - blocked_actions (TEXT)
+ - penalty_modifier (REAL)
+
+Table: inventory
+ - inventory_id (INTEGER)
+ - character_id (TEXT)
+ - item_id (TEXT)
+ - quantity (INTEGER)
+ - is_equipped (BOOLEAN)
+
+Table: agent_personas
+ - agent_id (TEXT)
+ - entity_id (TEXT)
+ - persona_name (TEXT)
+ - tactical_weights (TEXT)
+ - interaction_style (TEXT)
+ - tone (TEXT)
+
+Table: plan_buffer
+ - entity_id (TEXT)
+ - draft_plan (TEXT)
+ - last_updated (DATETIME)
+ - status (TEXT)
+
+Table: lobby_state
+ - entity_id (TEXT)
+ - user_id (TEXT)
+ - agent_id (TEXT)
+ - is_ready (BOOLEAN)
+ - handshake_timestamp (DATETIME)
+
+
+--- SECTION 3: SOURCE CODE ---
+
+--- FILE: jarvis_agent.py ---
+import sqlite3
+import json
+import os
+
+DB_PATH = "/home/cxiong/hermes_rpg/hermes_rpg.db"
+
+class JarvisAgent:
+    def __init__(self, entity_id):
+        self.entity_id = entity_id
+        self.db_path = DB_PATH
+        self.character_id = self._get_character_id()
+        self.persona = self._load_persona()
+
+    def _get_connection(self):
+        conn = sqlite3.connect(self.db_path)
+        conn.row_factory = sqlite3.Row
+        return conn
+
+    def _get_character_id(self):
+        conn = self._get_connection()
+        res = conn.execute("SELECT character_id FROM characters WHERE entity_id = ?", (self.entity_id,)).fetchone()
+        conn.close()
+        return res['character_id'] if res else None
+
+    def _load_persona(self):
+        conn = self._get_connection()
+        res = conn.execute("SELECT * FROM agent_personas WHERE entity_id = ?", (self.entity_id,)).fetchone()
+        conn.close()
+        if res:
+            p = dict(res)
+            p['tactical_weights'] = json.loads(p['tactical_weights'])
+            return p
+        return None
+
+    def get_perception_feed(self):
+        conn = self._get_connection()
+        sql = """
+            SELECT gs.current_hp, gs.temp_hp, gs.turn_status, 
+            cs.strength, cs.dexterity, cs.constitution, cs.intelligence, cs.wisdom, cs.charisma,
+            ri.name as active_weapon, ri.damage_dice as weapon_dmg,
+            GROUP_CONCAT(ac.condition_id) as conditions
+            FROM game_state gs
+            JOIN character_stats cs ON gs.character_id = cs.character_id
+            LEFT JOIN inventory inv ON gs.character_id = inv.character_id AND inv.is_equipped = 1
+            LEFT JOIN registry_items ri ON inv.item_id = ri.item_id
+            LEFT JOIN active_conditions ac ON gs.character_id = ac.character_id
+            WHERE gs.character_id = ?
+            GROUP BY gs.character_id
+        """
+        res = conn.execute(sql, (self.character_id,)).fetchone()
+        conn.close()
+        return dict(res) if res else None
+
+    def get_tactical_advice(self, user_message):
+        feed = self.get_perception_feed()
+        if not feed: return "I'm having trouble accessing your vitals."
+        weights = self.persona['tactical_weights']
+        if weights['aggression'] > 0.7 and feed['current_hp'] > 5:
+            advice = f"You're looking strong. I suggest an immediate aggressive push using your {feed['active_weapon']}."
+        elif weights['caution'] > 0.7:
+            advice = "Safety first. I recommend finding cover."
+        elif feed['current_hp'] < 5:
+            advice = "CRITICAL: Your health is low. Retreat immediately."
+        else:
+            advice = "The situation is stable. I suggest a balanced approach."
+        return f"[JARVIS TACTICAL]: {advice}"
+
+========================================
+
+--- FILE: gateway_cli.py ---
+import os
+import json
+import sqlite3
+from jarvis_agent import JarvisAgent
+
+class GatewayCLI:
+    def __init__(self):
+        self.entity_id = None
+        self.jarvis = None
+        self.is_running = True
+
+    def authenticate(self):
+        print("\n" + "!"*60)
+        print("⚠️  IMPORTANT: Your Entity ID is the unique key to your character.")
+        print("If you lose it, you cannot sync with Jarvis or the Engine.")
+        print("SAVE IT IN A SAFE PLACE!")
+        print("!"*60)
+        
+        while True:
+            print("\n--- 🔑 Hermes Gateway Authentication ---")
+            user_input = input("Enter Entity ID (e.g. ent_c96f4d62) OR Character Name: ").strip()
+            
+            if not user_input:
+                print("⚠️  Input was empty. Please enter something.")
+                continue
+
+            if not user_input.startswith("ent_"):
+                conn = sqlite3.connect("/home/cxiong/hermes_rpg/hermes_rpg.db")
+                conn.row_factory = sqlite3.Row
+                res = conn.execute("SELECT entity_id FROM characters WHERE name = ?", (user_input,)).fetchone()
+                conn.close()
+                if res:
+                    user_input = res['entity_id']
+                else:
+                    print(f"❌ Could not find a character named '{user_input}'.")
+                    continue
+
+            try:
+                self.jarvis = JarvisAgent(user_input)
+                if self.jarvis.get_perception_feed() is None:
+                    print(f"❌ Entity {user_input} not found in database.")
+                    continue
+                
+                self.entity_id = user_input
+                print(f"✅ Successfully bound to Entity: {self.entity_id}")
+                print(f"🤖 Jarvis is now ONLINE and synced to your tactical profile.")
+                return True
+            except Exception as e:
+                print(f"❌ Sync Error: {e}")
+
+    def handle_jarvis(self, message):
+        """
+        TRD 3.1: Instead of a static string, we generate a 'Prompt Package' 
+        that the LLM uses to think.
+        """
+        print("\n[JARVIS IS ANALYZING PERCEPTION FEED...]")
+        feed = self.jarvis.get_perception_feed()
+        persona = self.jarvis.persona
+        
+        # This is the "Context Packet" that makes Jarvis "smart"
+        context_packet = {
+            "entity_id": self.entity_id,
+            "perception_feed": feed,
+            "persona_weights": persona['tactical_weights'],
+            "user_request": message
+        }
+        
+        print("\n" + "-"*30)
+        print("\033[94m[SENDER: JARVIS_BRIDGE]\033[0m")
+        print(f"RAW_CONTEXT: {json.dumps(context_packet)}")
+        print("\n(Copy the RAW_CONTEXT above and send it to your Hermes Agent to get the tactical response!)")
+        print("-"*30)
+
+    def handle_game(self, action):
+        print(f"\n[ENGINE]: Sending action '{action}' to engine...")
+        print(f"Result: Action {action} executed successfully. (Simulated)")
+
+    def game_loop(self):
+        if not self.authenticate():
+            return
+
+        print("\n" + "="*50)
+        print("WELCOME TO THE COMMAND CENTER")
+        print("Narrative Stream: Story and World")
+        print("Tactical Stream: Jarvis AI Advice")
+        print("="*50)
+        print("\nCOMMANDS: /game [action] | /jarvis [message] | /status | /quit")
+
+        while self.is_running:
+            try:
+                user_input = input("\n> ").strip()
+                if not user_input: continue
+                if user_input.startswith("/quit"):
+                    self.is_running = False
+                elif user_input.startswith("/jarvis"):
+                    msg = user_input.replace("/jarvis", "").strip()
+                    self.handle_jarvis(msg)
+                elif user_input.startswith("/game"):
+                    act = user_input.replace("/game", "").strip()
+                    self.handle_game(act)
+                elif user_input == "/status":
+                    feed = self.jarvis.get_perception_feed()
+                    print(f"\n--- CURRENT VITALS ---")
+                    print(json.dumps(feed, indent=2))
+                else:
+                    print("\nUnknown command. Use /jarvis or /game.")
+            except KeyboardInterrupt:
+                break
+
+if __name__ == "__main__":
+    gateway = GatewayCLI()
+    gateway.game_loop()
+
+========================================
+
+--- FILE: interactive_unified_builder.py ---
+import sqlite3
+import json
+import uuid
+import os
+import math
+from difflib import get_close_matches
+
+DB_PATH = "/home/cxiong/hermes_rpg/hermes_rpg.db"
+OPTIONS_PATH = "/home/cxiong/hermes_rpg/character_options.json"
+
+class DBHandler:
+    def __init__(self, db_path=DB_PATH):
+        self.db_path = db_path
+
+    def query(self, sql, params=(), commit=False):
+        conn = sqlite3.connect(self.db_path)
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        cursor.execute(sql, params)
+        result = cursor.fetchall()
+        if commit: conn.commit()
+        conn.close()
+        return result
+
+    def execute(self, sql, params=()):
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+        cursor.execute(sql, params)
+        conn.commit()
+        conn.close()
+
+class InteractiveUnifiedBuilder:
+    def __init__(self):
+        self.db = DBHandler()
+        with open(OPTIONS_PATH, 'r') as f:
+            self.options = json.load(f)
+
+        self.playstyle_map = {
+            "1": ("Strong/tanky",     "Fighter", "Dwarf",    "Soldier"),
+            "2": ("Sneaky/fast",      "Rogue",   "Elf",      "Criminal"),
+            "3": ("Magic/smart",      "Wizard",  "Human",    "Scholar"),
+            "4": ("Healing/support",  "Cleric",  "Dwarf",    "Acolyte"),
+            "5": ("Ranged/survival",  "Ranger",  "Elf",      "Outlander"),
+            "6": ("Social/charming",  "Bard",    "Tiefling", "Noble"),
+        }
+        
+        self.class_alternatives = {
+            "Fighter": "Ranger",  "Ranger": "Fighter",
+            "Rogue":   "Bard",    "Bard":   "Rogue",
+            "Wizard":  "Cleric",  "Cleric": "Wizard",
+        }
+
+        self.species_alternatives = {
+            "Fighter": ("Orc",      "Strong and hard to knock down — great for frontline combat."),
+            "Rogue":   ("Halfling", "Small, quick, and unusually lucky — perfect for stealth."),
+            "Wizard":  ("Tiefling", "Mysterious and magical, good for spellcasting."),
+            "Cleric":  ("Human",    "Flexible and adaptable, works well for any support role."),
+            "Ranger":  ("Human",    "Flexible and adaptable, solid for any combat style."),
+            "Bard":    ("Elf",      "Graceful and perceptive, great for social and performance roles."),
+        }
+
+        self.background_alternatives = {
+            "Fighter": ("Outlander", "Wilderness survival and danger awareness."),
+            "Rogue":   ("Noble",     "Social status and connections — useful for deception."),
+            "Wizard":  ("Acolyte",   "Temple knowledge overlaps well with arcane study."),
+            "Cleric":  ("Scholar",   "Academic knowledge pairs well with spiritual wisdom."),
+            "Ranger":  ("Soldier",   "Military discipline and combat experience."),
+            "Bard":    ("Criminal",  "Underworld contacts and street smarts fuel a charming con artist."),
+        }
+
+        self.tactical_options = {
+            "1": ("Aggressive", "Prioritizes damage and pressure. Jarvis will suggest bold attacks."),
+            "2": ("Cautious",    "Prioritizes survival and stealth. Jarvis will suggest cover and planning."),
+            "3": ("Balanced",    "A mix of both. Jarvis will adapt based on the current threat."),
+            "4": ("Supportive",  "Prioritizes team utility and healing. Jarvis will focus on buffing allies."),
+        }
+
+    def normalize_choice(self, user_input, options_list):
+        if not user_input: return None
+        clean = user_input.strip().lower()
+        for o in options_list:
+            if o.lower() == clean: return o
+        matches = get_close_matches(clean, [o.lower() for o in options_list], n=1, cutoff=0.6)
+        if matches:
+            for o in options_list:
+                if o.lower() == matches[0]: return o
+        return None
+
+    def describe_options(self, category):
+        data = self.options.get(category, {})
+        return "\n".join(f"  - {n}: {data.get(n, {}).get('description', 'No description')}" for n in data.keys())
+
+    def pick_with_fallback(self, category, recommended, next_best_name, next_best_desc, label):
+        options_list = list(self.options.get(category, {}).keys())
+        if input(f"Does {recommended} work? (y/n): ").strip().lower() == 'y':
+            return recommended
+        
+        print(f"\n  If not {recommended}, I'd suggest:")
+        print(f"  ➤ {next_best_name}: {next_best_desc}")
+        if input(f"  Go with {next_best_name}? (y/n): ").strip().lower() == 'y':
+            return next_best_name
+        
+        print(f"\n  All {label}s:\n" + self.describe_options(category))
+        while True:
+            choice = input(f"\n  Which {label}? ").strip()
+            result = self.normalize_choice(choice, options_list)
+            if result: return result
+            print(f"  ⚠️  '{choice}' not recognised — try again.")
+
+    def build_and_save(self, data):
+        name = data['name']
+        char_class = data['class']
+        species = data['species']
+        background = data['background']
+        weapon_name = data['weapon']
+        style = data['style']
+        uid = data['user_id']
+
+        char_id = f"char_{name.replace(' ','_').lower()}_{uuid.uuid4().hex[:4]}"
+        entity_id = f"ent_{uuid.uuid4().hex[:8]}"
+        agent_id = f"jarvis_{char_id}"
+
+        priority = self.options['classes'][char_class]['stat_priority']
+        stat_array = sorted(self.options['stat_array'], reverse=True)
+        scores = {s: stat_array[i] for i, s in enumerate(priority)}
+        
+        self.db.execute("INSERT INTO characters (character_id, entity_id, user_id, name, class_id, species_id, background, alignment) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", 
+                       (char_id, entity_id, uid, name, char_class, species, background, "True Neutral"))
+
+        self.db.execute("INSERT INTO character_stats (character_id, strength, dexterity, constitution, intelligence, wisdom, charisma) VALUES (?, ?, ?, ?, ?, ?, ?)", 
+                       (char_id, scores['Strength'], scores['Dexterity'], scores['Constitution'], scores['Intelligence'], scores['Wisdom'], scores['Charisma']))
+
+        style_weights = {
+            "Aggressive": {"aggression": 0.9, "caution": 0.1, "support": 0.3, "social": 0.2},
+            "Cautious":    {"aggression": 0.2, "caution": 0.9, "support": 0.4, "social": 0.3},
+            "Balanced":    {"aggression": 0.5, "caution": 0.5, "support": 0.5, "social": 0.5},
+            "Supportive":  {"aggression": 0.3, "caution": 0.6, "support": 0.9, "social": 0.6},
+        }.get(style, {"aggression": 0.5, "caution": 0.5, "support": 0.5, "social": 0.5})
+
+        self.db.execute("INSERT INTO agent_personas (agent_id, entity_id, persona_name, tactical_weights, interaction_style, tone) VALUES (?, ?, ?, ?, ?, ?)", 
+                       (agent_id, entity_id, f"Jarvis-{name}", json.dumps(style_weights), "Collaborative C2", "Strategic and Concise"))
+
+        item_query = self.db.query("SELECT item_id FROM registry_items WHERE name = ?", (weapon_name,))
+        weapon_id = item_query[0]['item_id'] if item_query else None
+        if weapon_id:
+            self.db.execute("INSERT INTO inventory (character_id, item_id, is_equipped) VALUES (?, ?, 1)", (char_id, weapon_id))
+
+        hit_die = self.options['classes'][char_class].get('hit_die', 8)
+        max_hp = hit_die + math.floor((scores['Constitution'] - 10) / 2)
+        
+        self.db.execute("INSERT INTO game_state (character_id, current_hp, active_weapon_id, turn_status) VALUES (?, ?, ?, 'ready')", 
+                       (char_id, max_hp, weapon_id))
+
+        self.db.execute("INSERT INTO lobby_state (entity_id, user_id, agent_id, is_ready) VALUES (?, ?, ?, 1)", 
+                       (entity_id, uid, agent_id))
+
+        return entity_id, agent_id
+
+    def run(self):
+        print("\n─── 🛡️  Hermes Unified Character Builder 🛡️  ───")
+        name = input("Character name: ").strip()
+        user_id = input("Your user ID (Enter to auto-generate): ").strip() or f"user_{name.replace(' ','_').lower()}"
+
+        print("\nHow do you want to play?")
+        for k, v in self.playstyle_map.items():
+            print(f"  {k}. {v[0]}")
+        
+        choice = input("\nPick 1-6: ").strip()
+        style_name, rec_class, rec_species, rec_bg = self.playstyle_map.get(choice, ("Custom", "Rogue", "Elf", "Criminal"))
+
+        # TIERED CLASS PICKING
+        alt_class = self.class_alternatives.get(rec_class, "Fighter")
+        alt_class_desc = self.options['classes'].get(alt_class, {}).get('description', '')
+        final_class = self.pick_with_fallback("classes", rec_class, alt_class, alt_class_desc, "class")
+        
+        # TIERED SPECIES PICKING
+        rec_species, rec_bg = self.playstyle_map.get(choice, ("Custom", "Rogue", "Elf", "Criminal"))[2:] 
+        # Update recs based on the FINAL class chosen
+        # Simplified: using the species_alternatives map
+        alt_sp, alt_sp_desc = self.species_alternatives.get(final_class, ("Human", "Flexible and adaptable."))
+        final_species = self.pick_with_fallback("species", rec_species, alt_sp, alt_sp_desc, "species")
+        
+        # TIERED BACKGROUND PICKING
+        alt_bg, alt_bg_desc = self.background_alternatives.get(final_class, ("Outlander", "Wilderness survival."))
+        final_bg = self.pick_with_fallback("backgrounds", rec_bg, alt_bg, alt_bg_desc, "background")
+
+        # WEAPON
+        print("\nChoose your starting weapon:")
+        weapons = self.options['weapon_options'].get(final_class, [])
+        if weapons:
+            for i, w in enumerate(weapons):
+                print(f"  {i+1}. {w['name']} ({w['damage']})")
+            try:
+                idx = int(input("\nPick a number: ").strip()) - 1
+                weapon_name = weapons[idx]['name']
+            except:
+                weapon_name = weapons[0]['name']
+        else:
+            weapon_name = "None"
+
+        # JARVIS PERSONA
+        print("\n--- 🤖 Synchronizing Jarvis Tactical Persona ---")
+        print("How should your companion agent assist you?")
+        for k, v in self.tactical_options.items():
+            print(f"  {k}. {v[0]}: {v[1]}")
+        
+        t_choice = input("\nPick 1-4: ").strip()
+        final_style = self.tactical_options.get(t_choice, ("Balanced", ""))[0]
+
+        data = {
+            "name": name, "class": final_class, "species": final_species, 
+            "background": final_bg, "weapon": weapon_name, "style": final_style, "user_id": user_id
+        }
+        
+        ent_id, agt_id = self.build_and_save(data)
+        
+        print("\n─── ✨ Unified Entity Created ✨ ───")
+        print(f"Character: {name} ({final_class} {final_species})")
+        print(f"Jarvis Persona: {final_style}")
+        print(f"Entity ID: {ent_id}")
+        print(f"Agent ID: {agt_id}")
+        print(f"Lobby Status: READY")
+
+if __name__ == "__main__":
+    builder = InteractiveUnifiedBuilder()
+    builder.run()
+
+========================================
+
+--- FILE: character_options.json ---
+{
+  "classes": {
+    "Fighter": {
+      "description": "A master of martial combat, skilled with a variety of weapons and armor.",
+      "stat_priority": ["Strength", "Constitution", "Dexterity", "Wisdom", "Intelligence", "Charisma"],
+      "hit_die": 10,
+      "base_ac": 16,
+      "armor": "chain mail",
+      "feature": "Second Wind",
+      "skill_options": ["Athletics", "Intimidation"],
+      "default_items": ["Explorer's Pack", "Shield"]
+    },
+    "Rogue": {
+      "description": "A sneak and trickster, specializing in stealth and precision strikes.",
+      "stat_priority": ["Dexterity", "Intelligence", "Charisma", "Constitution", "Wisdom", "Strength"],
+      "hit_die": 8,
+      "base_ac": 14,
+      "armor": "leather armor",
+      "feature": "Sneak Attack",
+      "skill_options": ["Stealth", "Sleight of Hand", "Acrobatics"],
+      "default_items": ["Thieves' Tools", "Burglar's Pack"]
+    },
+    "Wizard": {
+      "description": "A scholarly magic-user capable of manipulating the fabric of reality.",
+      "stat_priority": ["Intelligence", "Wisdom", "Dexterity", "Constitution", "Charisma", "Strength"],
+      "hit_die": 6,
+      "base_ac": 12,
+      "armor": "none",
+      "feature": "Arcane Recovery",
+      "skill_options": ["Arcana", "History", "Investigation"],
+      "default_items": ["Spellbook", "Arcane Focus"]
+    },
+    "Cleric": {
+      "description": "A divine agent of a deity, blending healing magic with armored combat.",
+      "stat_priority": ["Wisdom", "Strength", "Constitution", "Intelligence", "Charisma", "Dexterity"],
+      "hit_die": 8,
+      "base_ac": 16,
+      "armor": "chain mail",
+      "feature": "Channel Divinity",
+      "skill_options": ["Insight", "Religion", "Medicine"],
+      "default_items": ["Holy Symbol", "Mace"]
+    },
+    "Ranger": {
+      "description": "A wilderness expert and combatant, tracking prey and surviving the wilds.",
+      "stat_priority": ["Dexterity", "Wisdom", "Constitution", "Strength", "Intelligence", "Charisma"],
+      "hit_die": 10,
+      "base_ac": 14,
+      "armor": "leather armor",
+      "feature": "Favored Enemy",
+      "skill_options": ["Survival", "Nature", "Perception"],
+      "default_items": ["Longbow", "Quiver"]
+    },
+    "Bard": {
+      "description": "A versatile entertainer and magic-user, influencing others with art.",
+      "stat_priority": ["Charisma", "Dexterity", "Constitution", "Intelligence", "Wisdom", "Strength"],
+      "hit_die": 8,
+      "base_ac": 14,
+      "armor": "leather armor",
+      "feature": "Bardic Inspiration",
+      "skill_options": ["Performance", "Persuasion", "Deception"],
+      "default_items": ["Lute", "Diplomat's Pack"]
+    }
+  },
+  "species": {
+    "Human": { "description": "Versatile and ambitious.", "speed": 30, "trait": "Additional Language" },
+    "Elf": { "description": "Graceful and long-lived.", "speed": 30, "trait": "Darkvision" },
+    "Dwarf": { "description": "Sturdy and resilient.", "speed": 25, "trait": "Stonecunning" },
+    "Tiefling": { "description": "Touched by infernal blood.", "speed": 30, "trait": "Hellish Resistance" },
+    "Halfling": { "description": "Small, nimble, and lucky.", "speed": 25, "trait": "Lucky" },
+    "Orc": { "description": "Powerful and imposing.", "speed": 30, "trait": "Aggressive" }
+  },
+  "backgrounds": {
+    "Criminal": { "description": "A life of crime and shadows.", "skill": "Stealth", "theme": "Underworld" },
+    "Noble": { "description": "Born into wealth and influence.", "skill": "Persuasion", "theme": "High Society" },
+    "Acolyte": { "description": "Devoted service to a temple.", "skill": "Religion", "theme": "Faith" },
+    "Soldier": { "description": "Disciplined military service.", "skill": "Athletics", "theme": "War" },
+    "Scholar": { "description": "A life spent in pursuit of knowledge.", "skill": "History", "theme": "Academia" },
+    "Outlander": { "description": "Survivor of the wild frontier.", "skill": "Survival", "theme": "Wilderness" }
+  },
+  "stat_array": [15, 14, 13, 12, 10, 8],
+  "skills": {
+    "Athletics": "Strength", "Intimidation": "Charisma", "Stealth": "Dexterity",
+    "Sleight of Hand": "Dexterity", "Acrobatics": "Dexterity", "Arcana": "Intelligence",
+    "History": "Intelligence", "Investigation": "Intelligence", "Insight": "Wisdom",
+    "Religion": "Intelligence", "Medicine": "Wisdom", "Survival": "Wisdom",
+    "Nature": "Intelligence", "Perception": "Wisdom", "Performance": "Charisma",
+    "Persuasion": "Charisma", "Deception": "Charisma"
+  },
+  "weapon_options": {
+    "Fighter": [ { "name": "Longsword", "type": "Martial", "damage": "1d8", "ability_used": "Strength" } ],
+    "Rogue": [ { "name": "Shortsword", "type": "Martial", "damage": "1d6", "ability_used": "Dexterity" } ],
+    "Wizard": [ { "name": "Quarterstaff", "type": "Simple", "damage": "1d6", "ability_used": "Strength" } ],
+    "Cleric": [ { "name": "Mace", "type": "Simple", "damage": "1d6", "ability_used": "Strength" } ],
+    "Ranger": [ { "name": "Longbow", "type": "Martial", "damage": "1d8", "ability_used": "Dexterity" } ],
+    "Bard": [ { "name": "Rapier", "type": "Martial", "damage": "1d8", "ability_used": "Dexterity" } ]
+  }
+}
+
+========================================

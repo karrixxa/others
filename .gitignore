@@ -1,0 +1,12 @@
+*.pkl
+*.pth
+*.zip
+*.mp4
+*.npz
+*.db
+__pycache__/
+venv/
+.venv/
+.gradle/
+.idea/
+.vscode/

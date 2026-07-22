@@ -1,0 +1,10 @@
+[project]
+name = "c2-unified-api"
+version = "0.1.0"
+description = "C2 Unified Agent API for Character Builder and Jarvis Courier"
+dependencies = [
+    "fastapi",
+    "uvicorn",
+    "pydantic",
+    "httpx",
+]

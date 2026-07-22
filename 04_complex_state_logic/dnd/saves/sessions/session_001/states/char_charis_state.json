@@ -1,0 +1,41 @@
+{
+  "current_hp": 8,
+  "temporary_hp": 0,
+  "conditions": [],
+  "death_saves": {
+    "successes": 0,
+    "failures": 0,
+    "stable": false
+  },
+  "active_weapon": "Unarmed",
+  "location": "starting_area",
+  "turn_status": "ready",
+  "action_economy": {
+    "action_used": false,
+    "bonus_action_used": false,
+    "reaction_used": false,
+    "movement_used": 0,
+    "movement_remaining": 30
+  },
+  "combat_flags": {
+    "has_advantage": false,
+    "has_disadvantage": false,
+    "can_take_action": true,
+    "can_move": true,
+    "can_speak": true,
+    "can_cast_spells": true,
+    "can_react": true
+  },
+  "rest_state": {
+    "hit_dice_remaining": 1,
+    "features_available": {
+      "class_feature": true
+    },
+    "spell_slots": {
+      "1": {
+        "total": 2,
+        "remaining": 2
+      }
+    }
+  }
+}

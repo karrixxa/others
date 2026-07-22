@@ -1,0 +1,12 @@
+{
+    "sector_id": "sector_start_01",
+    "name": "The Awakening Chamber",
+    "description": "A cold, stone room dimly lit by flickering torches. The air is thick with dust.",
+    "entities": [],
+    "interactables": [],
+    "env_effects": [],
+    "exits": {
+        "north": "sector_hallway_01"
+    },
+    "danger_level": 1
+}

@@ -1,0 +1,173 @@
+import os
+import json
+import requests
+import sys
+from common_db import db
+from builder import CharacterBuilder
+
+# ==================================================================
+# JARVIS GATEWAY - CENTRALIZED AUTHORITY EDITION
+# ==================================================================
+# This Gateway acts as the 'Authority'. It delegates logic to the Bridge 
+# and performs the final commit to the CommonDB.
+# ==================================================================
+
+class UnifiedGateway:
+    def __init__(self):
+        self.current_entity_id = None
+        self.current_profile = None
+        self.bridge_url = "http://localhost:9090"
+        
+        # Storage paths (matching common_db.py)
+        self.storage_root = "/home/cxiong/hermes_rpg"
+        self.char_dir = os.path.join(self.storage_root, "characters")
+        os.makedirs(self.char_dir, exist_ok=True)
+
+    def clear_screen(self):
+        os.system('cls' if os.name == 'nt' else 'clear')
+
+    def print_jarvis_header(self):
+        print("\n" + "═"*60)
+        if not self.current_entity_id:
+            print(" 🤖 JARVIS | SYSTEM STANDBY (Authority Mode)")
+        else:
+            name = self.current_profile['identity']['name']
+            print(f" 🤖 JARVIS | ACTIVE: {name} [{self.current_entity_id}]")
+        print("═"*60)
+
+    def execute_commands(self, response_json):
+        \"\"\"The Authority's core function: executing commands sent by the Bridge.\"\"\"
+        if response_json.get("status") != "COMMAND_GENERATED":
+            return False, "No commands to execute."
+        
+        commands = response_json.get("commands", [])
+        for cmd in commands:
+            action = cmd.get("action")
+            e_type = cmd.get("entity_type")
+            e_id = cmd.get("entity_id")
+            data = cmd.get("data")
+
+            if action == "create_entity":
+                db.create_entity(e_type, e_id, data)
+            elif action == "update_entity":
+                db.update_entity(e_type, e_id, data)
+        
+        return True, f"Executed {len(commands)} commands."
+
+    def load_character(self, entity_id):
+        player = db.get_entity("player", entity_id)
+        if player:
+            self.current_profile = player
+            self.current_entity_id = entity_id
+            return True
+        return False
+
+    def render_character_sheet(self):
+        if not self.current_profile: return
+        
+        char = self.current_profile
+        gp = char.get('gameplay_profile', {})
+        idty = char.get('identity', {})
+        pos = char.get('position', {})
+        
+        print("\n" + "═"*40)
+        print("🛡️  AUTHORITY CHARACTER SHEET")
+        print("═"*40)
+        print(f"NAME:       {idty.get('name', 'Unknown'):<15} CLASS:      {idty.get('class', 'Unknown')}")
+        print(f"LEVEL:      {char.get('level', 1)}               POSITION:   ({pos.get('x',0)}, {pos.get('y',0)})")
+        print(f"ENTITY ID:  {char.get('entity_id', 'N/A')}")
+        
+        print("\n--- VITALS ---")
+        vitals = char.get('vitals', {})
+        print(f"HP: {vitals.get('current_hp', 0)} / {vitals.get('max_hp', 0)}")
+        print(f"STATUS: {vitals.get('status', 'Unknown')}")
+        
+        print("\n--- INVENTORY ---")
+        loot = gp.get('loot_bag', {})
+        for cat, items in loot.items():
+            print(f"{cat.capitalize()}: {[i.get('name') for i in items]}")
+        print("═"*40 + "\n")
+
+    def handle_creation(self):
+        self.clear_screen()
+        self.print_jarvis_header()
+        print("\nJarvis: Accessing the Character Forge via Bridge...")
+        
+        # Simple iterative creation for the 'workable game' model
+        name = input("Enter Character Name: ")
+        char_class = input("Enter Class (Warrior, Mage, Rogue): ")
+        species = input("Enter Species (Human, Elf, Orc): ")
+        
+        payload = {
+            "name": name,
+            "char_class": char_class,
+            "species": species,
+            "background": "Wanderer",
+            "weapon": "Basic Sword"
+        }
+        
+        try:
+            res = requests.post(f"{self.bridge_url}/character/create", json=payload).json()
+            success, msg = self.execute_commands(res)
+            if success:
+                self.current_entity_id = res['commands'][0]['data']['entity_id']
+                self.current_profile = res['commands'][0]['data']
+                print(f"\\n✅ Entity {self.current_entity_id} committed to DB.")
+            else:
+                print(f"\\n❌ Error: {msg}")
+        except Exception as e:
+            print(f"\\n❌ Bridge Connection Failed: {e}")
+
+    def handle_move(self, dx, dy):
+        if not self.current_entity_id:
+            print("Jarvis: Sir, you are not currently linked to an entity.")
+            return
+        
+        payload = {"entity_id": self.current_entity_id, "dx": dx, "dy": dy}
+        try:
+            res = requests.post(f"{self.bridge_url}/move", json=payload).json()
+            success, msg = self.execute_commands(res)
+            if success:
+                # Refresh local profile from DB
+                self.current_profile = db.get_entity("player", self.current_entity_id)
+                print(f"\\n✅ Movement executed. New Position: ({self.current_profile['position']['x']}, {self.current_profile['position']['y']})")
+            else:
+                print(f"\\n❌ Move Failed: {msg}")
+        except Exception as e:
+            print(f"\\n❌ Bridge Connection Failed: {e}")
+
+    def game_loop(self):
+        self.clear_screen()
+        while True:
+            self.print_jarvis_header()
+            if not self.current_entity_id:
+                print("\nCommands:\n  /create\n  /load [id]\n  /exit")
+            else:
+                print(f"\nActive: {self.current_profile['identity']['name']}")
+                print("Commands:\n  /stats    - Show Sheet\n  /move [dx] [dy] - Move on 20x20 Grid\n  /exit     - Quit")
+
+            cmd_input = input("\n> ").strip()
+            if not cmd_input: continue
+            
+            parts = cmd_input.split()
+            cmd = parts[0].lower()
+
+            if cmd == '/exit': break
+            elif cmd == '/create': self.handle_creation()
+            elif cmd == '/load' and len(parts) > 1:
+                if self.load_character(parts[1]):
+                    print(f"\\n✅ {parts[1]} loaded.")
+                else:
+                    print("❌ Not found.")
+            elif cmd == '/stats': self.render_character_sheet()
+            elif cmd == '/move' and len(parts) >= 3:
+                try:
+                    self.handle_move(int(parts[1]), int(parts[2]))
+                except ValueError:
+                    print("Invalid coordinates.")
+            else:
+                print("Jarvis: I'm afraid that command is not currently mapped, sir.")
+
+if __name__ == "__main__":
+    gateway = UnifiedGateway()
+    gateway.game_loop()

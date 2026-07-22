@@ -1,0 +1,11 @@
+--- ERROR AT 2026-06-22 08:28:39 ---\nTraceback (most recent call last):
+  File "/home/cxiong/hermes_rpg/api/main.py", line 67, in create_character
+    char_data = builder.build_character(
+                ^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: CharacterBuilder.build_character() got an unexpected keyword argument 'personality_type'
+\n--- ERROR AT 2026-06-22 08:28:43 ---\nTraceback (most recent call last):
+  File "/home/cxiong/hermes_rpg/api/main.py", line 67, in create_character
+    char_data = builder.build_character(
+                ^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: CharacterBuilder.build_character() got an unexpected keyword argument 'personality_type'
+\n

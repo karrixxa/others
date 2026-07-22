@@ -1,0 +1,175 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>✨ Digit Guesser ✨</title>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background: #f0f2f5;
+            font-family: 'Quicksand', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+        }
+        /* The Pop-up Modal Look */
+        .modal {
+            background: white;
+            padding: 30px;
+            border-radius: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: row;
+            gap: 30px;
+            align-items: center;
+            border: 8px solid #fff;
+            outline: 2px solid #ffc2d1;
+        }
+        .canvas-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+        canvas {
+            background: white;
+            border: 4px solid #ffc2d1;
+            border-radius: 20px;
+            cursor: crosshair;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.05);
+        }
+        .result-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 200px;
+            text-align: center;
+        }
+        .prediction-val {
+            font-size: 5rem;
+            font-weight: 700;
+            color: #ff8fab;
+            margin: 0;
+            line-height: 1;
+        }
+        .prediction-label {
+            font-size: 1.2rem;
+            color: #aaa;
+            margin-bottom: 10px;
+        }
+        .conf-list {
+            font-size: 0.8rem;
+            color: #888;
+            margin-top: 10px;
+            font-family: monospace;
+        }
+        #debug-img {
+            width: 60px;
+            height: 60px;
+            border: 3px solid #ffc2d1;
+            border-radius: 10px;
+            margin-top: 15px;
+            image-rendering: pixelated;
+        }
+        .btn-clear {
+            background: #ffb3c1;
+            border: none;
+            padding: 10px 25px;
+            color: white;
+            border-radius: 50px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s, background 0.2s;
+            font-family: 'Quicksand', sans-serif;
+        }
+        .btn-clear:hover {
+            background: #ff8fab;
+            transform: scale(1.05);
+        }
+        h2 { color: #ff8fab; margin-top: 0; font-size: 1.5rem; }
+    </style>
+</head>
+<body>
+    <div class="modal">
+        <div class="canvas-section">
+            <h2>✍️ Draw a Digit</h2>
+            <canvas id="canvas" width="280" height="280"></canvas>
+            <button class="btn-clear" id="clear-btn">Clear Canvas</button>
+        </div>
+        <div class="result-section">
+            <div class="prediction-label">Prediction</div>
+            <div class="prediction-val" id="prediction">?</div>
+            <div class="conf-list" id="conf-text">Waiting...</div>
+            <img id="debug-img" src="" alt="Model View">
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const clearBtn = document.getElementById('clear-btn');
+        const predText = document.getElementById('prediction');
+        const confText = document.getElementById('conf-text');
+        const debugImg = document.getElementById('debug-img');
+
+        let drawing = false;
+        let timeout = null;
+
+        ctx.lineWidth = 18;
+        ctx.lineCap = 'round';
+        ctx.strokeStyle = 'black';
+
+        function startDrawing(e) {
+            drawing = true;
+            draw(e);
+        }
+        function stopDrawing() {
+            drawing = false;
+            ctx.beginPath();
+            clearTimeout(timeout);
+            timeout = setTimeout(sendImage, 400);
+        }
+        function draw(e) {
+            if (!drawing) return;
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            ctx.lineTo(x, y);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+        }
+
+        function sendImage() {
+            const dataURL = canvas.toDataURL('image/png');
+            fetch('/predict', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ image: dataURL })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if(data.error) return;
+                predText.innerText = data.prediction;
+                confText.innerText = "Scores: " + data.confidence.join(" | ");
+                debugImg.src = data.debug_image;
+            });
+        }
+
+        canvas.addEventListener('mousedown', startDrawing);
+        canvas.addEventListener('mousemove', draw);
+        window.addEventListener('mouseup', stopDrawing);
+        clearBtn.addEventListener('click', () => {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            predText.innerText = "?";
+            confText.innerText = "Waiting...";
+            debugImg.src = "";
+        });
+    </script>
+</body>
+</html>

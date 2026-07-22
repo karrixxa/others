@@ -1,0 +1,57 @@
+{
+  "character_id": "char_charis",
+  "entity_id": "ent_31432ddb",
+  "current_hp": 9,
+  "temporary_hp": 0,
+  "conditions": [],
+  "death_saves": {
+    "successes": 0,
+    "failures": 0,
+    "stable": false
+  },
+  "active_weapon": "Shortsword",
+  "active_armor": "light",
+  "armor_class": 12,
+  "location": "starting_area",
+  "turn_status": "ready",
+  "last_action": null,
+  "concentrating_on": null,
+  "action_economy": {
+    "action_used": false,
+    "bonus_action_used": false,
+    "reaction_used": false,
+    "movement_used": 0,
+    "movement_remaining": 35
+  },
+  "movement": {
+    "speed": 35,
+    "is_prone": false,
+    "is_grappled": false,
+    "terrain": "normal"
+  },
+  "combat_flags": {
+    "has_advantage": false,
+    "has_disadvantage": false,
+    "can_take_action": true,
+    "can_move": true,
+    "can_speak": true,
+    "can_cast_spells": true,
+    "can_react": true
+  },
+  "rest_state": {
+    "hit_dice_remaining": 1,
+    "features_available": {
+      "Bardic Inspiration": true
+    },
+    "spell_slots": {
+      "1": {
+        "total": 2,
+        "remaining": 2
+      }
+    }
+  },
+  "spell_slots_remaining": {
+    "1": 2
+  },
+  "action_log": []
+}

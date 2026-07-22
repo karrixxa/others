@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digit AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #0a0a0c; color: #f0f0f0; overflow: hidden; }
+        .glass { background: rgba(24, 24, 31, 0.8); backdrop-filter: blur(12px); border: 1px solid rgba(42, 42, 53, 1); }
+        .pixelated { image-rendering: pixelated; }
+    </style>
+</head>
+<body class="h-screen w-screen flex items-center justify-center p-4">
+
+    <div class="glass rounded-3xl p-6 w-full max-w-md shadow-2xl">
+        <div class="flex justify-between items-center mb-6">
+            <h1 class="text-xl font-extrabold tracking-tight text-white">Digit AI</h1>
+            <div class="flex items-center gap-2">
+                <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500">Model:</span>
+                <select id="modelSelect" class="bg-gray-900 text-white text-[10px] font-bold px-2 py-1 rounded border border-gray-700 outline-none focus:border-blue-500">
+                    <option value="cnn">CNN</option>
+                    <option value="mlp">MLP</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="flex flex-col gap-6">
+            <div class="flex flex-col gap-3">
+                <div class="flex justify-between items-center">
+                    <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500">Draw Digit</span>
+                    <button id="clearCanvas" class="glass hover:bg-gray-800 text-gray-300 text-[10px] font-bold px-3 py-1 rounded-md transition-all">Clear</button>
+                </div>
+                <div class="relative bg-white rounded-xl overflow-hidden cursor-crosshair" style="width: 280px; height: 280px; margin: 0 auto;">
+                    <canvas id="drawCanvas" class="absolute inset-to-0 w-full h-full"></canvas>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div class="glass rounded-2xl p-4 flex flex-col">
+                    <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-3">Top Guesses</span>
+                    <div id="rankings" class="flex flex-col gap-2">
+                        <div class="text-xs text-gray-600 italic">Drawing...</div>
+                    </div>
+                </div>
+
+                <div class="glass rounded-2xl p-4 flex flex-col items-center justify-center">
+                    <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-3 w-full text-left">AI View</span>
+                    <div class="relative w-20 h-20 bg-black rounded-lg overflow-hidden">
+                        <canvas id="modelCanvas" class="pixelated w-full h-full"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let isDrawing = false;
+        const canvas = document.getElementById('drawCanvas');
+        const ctx = canvas.getContext('2d');
+        const modelCanvas = document.getElementById('modelCanvas');
+        const mCtx = modelCanvas.getContext('2d');
+        const rankContainer = document.getElementById('rankings');
+        const modelSelect = document.getElementById('modelSelect');
+
+        function resize() {
+            canvas.width = canvas.offsetWidth;
+            canvas.height = canvas.offsetHeight;
+            ctx.strokeStyle = 'black';
+            ctx.lineWidth = 20;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            ctx.fillStyle = 'white';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        canvas.addEventListener('mousedown', (e) => {
+            isDrawing = true;
+            const rect = canvas.getBoundingClientRect();
+            ctx.beginPath();
+            ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
+        });
+        canvas.addEventListener('mouseup', () => {
+            isDrawing = false;
+            sendPrediction();
+        });
+        canvas.addEventListener('mousemove', (e) => {
+            if (!isDrawing) return;
+            const rect = canvas.getBoundingClientRect();
+            ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
+            ctx.stroke();
+            
+            // Auto-predict: send a request every few movements (throttled)
+            if (Math.random() > 0.8) { 
+                sendPrediction();
+            }
+        });
+
+        document.getElementById('clearCanvas').addEventListener('click', () => {
+            ctx.fillStyle = 'white';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            rankContainer.innerHTML = '<div class="text-xs text-gray-600 italic">Draw something...</div>';
+        });
+
+        async function sendPrediction() {
+            const dataUrl = canvas.toDataURL('image/png');
+            const blob = await (await fetch(dataUrl)).blob();
+            const formData = new FormData();
+            formData.append('file', blob, 'image.png');
+            formData.append('model_type', modelSelect.value);
+
+            try {
+                const res = await fetch('/predict', { method: 'POST', body: formData });
+                const data = await res.json();
+                updateRankings(data.ranked);
+            } catch (e) { console.error("Error:", e); }
+        }
+
+        function updateRankings(ranked) {
+            rankContainer.innerHTML = '';
+            ranked.slice(0, 3).forEach((item, idx) => {
+                const row = document.createElement('div');
+                row.className = 'flex justify-between items-center text-xs';
+                const color = idx === 0 ? 'text-blue-400 font-bold' : 'text-gray-400';
+                row.innerHTML = `
+                    <span class="${color}">Digit ${item.digit}</span>
+                    <span class="text-gray-500 font-mono">${Math.round(item.prob * 100)}%</span>
+                `;
+                rankContainer.appendChild(row);
+            });
+        }
+
+        setInterval(() => {
+            modelCanvas.width = 28;
+            modelCanvas.height = 28;
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = 28;
+            tempCanvas.height = 28;
+            const tCtx = tempCanvas.getContext('2d');
+            tCtx.drawImage(canvas, 0, 0, 28, 28);
+            const imgData = tCtx.getImageData(0, 0, 28, 28);
+            const data = imgData.data;
+            for (let i = 0; i < data.length; i += 4) {
+                const avg = (data[i] + data[i+1] + data[i+2]) / 3;
+                const val = avg > 128 ? 0 : 255;
+                data[i] = data[i+1] = data[i+2] = val;
+            }
+            tCtx.putImageData(imgData, 0, 0);
+            mCtx.drawImage(tempCanvas, 0, 0);
+        }, 100);
+    </script>
+</body>
+</html>

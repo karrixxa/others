@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>LPS-3 · Cortical Column SNN</title>
+    <style>
+        :root {
+            --bg: #05080e; --c1: #0b1220; --c2: #0f1929;
+            --tx: #dce4f0; --mu: #3a5068; --bd: #162236;
+            --E: #4f8eff; --I: #f03e6a; --G: #0fcc7a; --A: #f5a623; --P: #9b72f5;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'SF Mono', monospace; background: var(--bg); color: var(--tx); padding: 10px; }
+        h1 { font-size: 14px; font-weight: 700; letter-spacing: .04em; margin-bottom: 1px; }
+        .sub { font-size: 8px; color: var(--mu); margin-bottom: 8px; }
+        .outer { display: grid; grid-template-columns: 195px 1fr; gap: 8px; }
+        .left { display: flex; flex-direction: column; gap: 6px; }
+        .right { display: flex; flex-direction: column; gap: 8px; }
+        .card { background: var(--c1); border: 1px solid var(--bd); border-radius: 7px; padding: 9px; }
+        .ct { font-size: 7px; text-transform: uppercase; letter-spacing: .09em; color: var(--mu); border-bottom: 1px solid var(--bd); padding-bottom: 3px; margin-bottom: 6px; }
+        .sr { display: flex; align-items: center; gap: 4px; margin-bottom: 3px; }
+        .sl { font-size: 8px; color: var(--mu); min-width: 70px; }
+        .sv { font-size: 8px; color: #38bdf8; min-width: 28px; text-align: right; }
+        input[type=range] { flex: 1; accent-color: var(--E); cursor: pointer; }
+        .cb { display: flex; align-items: center; gap: 4px; font-size: 9px; color: var(--mu); margin-bottom: 3px; cursor: pointer; }
+        .btn { width: 100%; padding: 6px; border: 1px solid var(--bd); border-radius: 4px; background: var(--c2); color: var(--tx); cursor: pointer; font-size: 10px; font-family: monospace; margin-bottom: 4px; }
+        .btn:hover { border-color: var(--E); }
+        .btn.on { background: #4f8eff18; border-color: var(--E); color: var(--E); }
+        .btn.grn { color: var(--G); border-color: #0fcc7a22; }
+        .pbank { display: grid; grid-template-columns: 1fr 1fr; gap: 3px; }
+        .pb { padding: 4px; border: 1px solid var(--bd); border-radius: 4px; background: var(--c2); cursor: pointer; font-size: 7px; color: var(--mu); text-align: center; }
+        .pb:hover, .pb.on { border-color: var(--E); color: var(--E); }
+        .pb.on { background: #4f8eff12; }
+        .pg { display: grid; grid-template-columns: repeat(3,7px); gap: 1px; margin: 0 auto 2px; width: 23px; }
+        .pp { width: 7px; height: 7px; border-radius: 1px; background: var(--bd); }
+        .pp.on { background: var(--E); }
+        .igrid { display: grid; grid-template-columns: repeat(3,36px); gap: 3px; width: 114px; margin: 0 auto 5px; }
+        .ic { width: 36px; height: 36px; border-radius: 4px; background: var(--c2); border: 1px solid var(--bd); display: flex; align-items: center; justify-content: center; font-size: 9px; color: var(--mu); }
+        .ic.on { background: #4f8eff1a; border-color: var(--E); color: var(--E); }
+        .tbar { height: 2px; background: var(--bd); border-radius: 1px; margin-bottom: 4px; }
+        .tfill { height: 100%; background: var(--E); border-radius: 1px; }
+        .cname { font-size: 10px; color: var(--E); font-weight: 700; text-align: center; margin-bottom: 2px; }
+        .ngrid { display: grid; gap: 4px; }
+        .nc { background: var(--c2); border: 1px solid var(--bd); border-radius: 5px; padding: 5px; transition: border-color .1s; }
+        .nc.winner { border-color: var(--G); box-shadow: 0 0 8px #0fcc7a2a; }
+        .nc.shunted { border-color: var(--I); opacity: .4; }
+        .nc.charging { border-color: var(--A); }
+        .nh { display: flex; justify-content: space-between; align-items: center; margin-bottom: 3px; }
+        .nid { font-size: 9px; font-weight: 700; }
+        .nbadge { font-size: 7px; font-weight: 700; padding: 1px 4px; border-radius: 2px; }
+        .bok { background: #064e3b; color: var(--G); }
+        .bref { background: #450a0a; color: var(--I); }
+        .binh { background: #2d1a00; color: var(--A); }
+        .bwin { background: #14532d; color: var(--G); }
+        .bfat { background: #1e1b4b; color: var(--P); }
+        .rfrow { display: flex; gap: 3px; align-items: center; margin-bottom: 3px; }
+        .rf { display: grid; grid-template-columns: repeat(3,9px); gap: 1px; }
+        .rc { width: 9px; height: 9px; border-radius: 1px; }
+        .vbwrap { background: var(--bd); border-radius: 2px; height: 4px; margin-bottom: 3px; position: relative; }
+        .vbfill { height: 100%; border-radius: 2px; transition: width .05s; }
+        .vbth { position: absolute; top: -2px; bottom: -2px; width: 1.5px; background: #f03e6a55; border-radius: 1px; }
+        .nst { font-size: 7px; color: var(--mu); }
+        #cvNet { border-radius: 6px; border: 1px solid var(--bd); display: block; width: 100%; }
+        #cvV { border-radius: 6px; border: 1px solid var(--bd); display: block; width: 100%; }
+        #cvFE { border-radius: 6px; border: 1px solid var(--bd); display: block; width: 100%; }
+        .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .mwrap { overflow-x: auto; }
+        .mtbl { border-collapse: collapse; font-size: 8px; white-space: nowrap; }
+        .mtbl th { color: var(--mu); padding: 2px 5px; border-bottom: 1px solid var(--bd); font-weight: 400; }
+        .mtbl td { padding: 2px 3px; text-align: center; }
+        .mc { display: inline-block; width: 30px; border-radius: 2px; padding: 1px 0; text-align: center; }
+        .sbar { display: grid; grid-template-columns: repeat(5,1fr); gap: 5px; }
+        .st { background: var(--c2); border: 1px solid var(--bd); border-radius: 4px; padding: 5px; text-align: center; }
+        .sv2 { font-size: 13px; font-weight: 700; font-family: monospace; }
+        .sl2 { font-size: 7px; color: var(--mu); margin-top: 1px; }
+        #log { height: 55px; overflow-y: auto; background: var(--bg); color: #38bdf8; font-size: 8px; padding: 5px; border-radius: 4px; border: 1px solid var(--bd); line-height: 1.9; }
+    </style>
+</head>
+<body>
+
+<h1>LPS-3 · Cortical Column SNN</h1>
+<div class="sub">Pyramidal E neurons · PV fast-spiking I interneurons (1 per E) · perisomatic shunting · STDP Hebbian · Dale's Law · self-organizing one-to-one</div>
+
+<div class="outer">
+    <div class="left">
+        <div class="card">
+            <div class="ct">Controls</div>
+            <button class="btn on" id="btnRun">⏸ Pause</button>
+            <button class="btn" id="btnReset">↺ Reset</button>
+            <button class="btn grn" id="btnCSV">📥 CSV</button>
+            <div style="font-size:8px;color:var(--mu);text-align:center;margin-bottom:3px" id="lblS">Spikes: 0</div>
+            <div class="sr"><span class="sl">Clock ms</span><input type="range" id="slCk" min="50" max="1500" step="25" value="150"><span class="sv" id="lCk">150</span></div>
+            <div class="sr"><span class="sl">Hold steps</span><input type="range" id="slH" min="5" max="60" step="5" value="20"><span class="sv" id="lH">20</span></div>
+            <div class="sr"><span class="sl">η LTP (E)</span><input type="range" id="slEt" min="5" max="40" step="1" value="20"><span class="sv" id="lEt">.20</span></div>
+            <div class="sr"><span class="sl">η E→I axon</span><input type="range" id="slEI" min="1" max="15" step="1" value="5"><span class="sv" id="lEI">.05</span></div>
+            <div class="sr"><span class="sl">I strength</span><input type="range" id="slIS" min="10" max="90" step="5" value="55"><span class="sv" id="lIS">55</span></div>
+            <div class="sr"><span class="sl">Noise %</span><input type="range" id="slNz" min="0" max="20" step="5" value="0"><span class="sv" id="lNz">0</span></div>
+            <label class="cb"><input type="checkbox" id="ckFE" checked> FE gates I strength</label>
+            <label class="cb"><input type="checkbox" id="ckDual" checked> Dual E+I growth</label>
+            <label class="cb"><input type="checkbox" id="ckWeak" checked> Weak LTP all neurons</label>
+            <label class="cb"><input type="checkbox" id="ckAdp" checked> Homeostatic threshold</label>
+            <label class="cb"><input type="checkbox" id="ckRef" checked> Refractory (5ms)</label>
+        </div>
+        <div class="card">
+            <div class="ct">Input stream</div>
+            <div class="cname" id="cname">—</div>
+            <div class="tbar"><div class="tfill" id="tfill" style="width:100%"></div></div>
+            <div class="igrid" id="igrid"></div>
+        </div>
+        <div class="card">
+            <div class="ct">Pattern set — click to toggle</div>
+            <div class="pbank" id="pbank"></div>
+        </div>
+    </div>
+
+    <div class="right">
+        <div class="card">
+            <div class="ct">Live cortical column — pyramidal E somas · PV interneurons (I) · all racing simultaneously</div>
+            <canvas id="cvNet"></canvas>
+            <div style="font-size:8px;color:var(--mu);margin-top:4px;display:flex;gap:10px;flex-wrap:wrap">
+                <span><span style="color:var(--E)">⬤</span> Pyramidal E soma · arc = charge level</span>
+                <span><span style="color:var(--I)">⬤</span> PV interneuron (1 per E)</span>
+                <span><span style="color:var(--A)">⚡</span> Perisomatic shunt</span>
+                <span>RF heatmap inside soma · W_EI bar below</span>
+            </div>
+        </div>
+        <div class="row2">
+            <div class="card">
+                <div class="ct">Membrane race V(t) — watch neurons charge · leader highlighted</div>
+                <canvas id="cvV"></canvas>
+            </div>
+            <div class="card">
+                <div class="ct">Free energy F_j — lower = better fit · ΔF = confidence</div>
+                <canvas id="cvFE"></canvas>
+            </div>
+        </div>
+        <div class="sbar">
+            <div class="st"><div class="sv2" id="stSpk">0</div><div class="sl2">spikes</div></div>
+            <div class="st"><div class="sv2" id="stDiag">—</div><div class="sl2">diagonal %</div></div>
+            <div class="st"><div class="sv2" id="stDF">—</div><div class="sl2">avg ΔF</div></div>
+            <div class="st"><div class="sv2" id="stIV">0.00</div><div class="sl2">I pool V</div></div>
+            <div class="st"><div class="sv2" id="stT">0</div><div class="sl2">step</div></div>
+        </div>
+        <div class="card">
+            <div class="ct">Receptive fields — watch weights drift toward target patterns</div>
+            <div class="ngrid" id="ngrid"></div>
+        </div>
+        <div class="card">
+            <div class="ct">Classification matrix — diagonal = perfect one-to-one · outlined cell = correct assignment</div>
+            <div class="mwrap" id="mwrap"></div>
+        </div>
+        <div class="card">
+            <div class="ct">Event log</div>
+            <div id="log">Ready. Starting with 4 patterns, 4 pyramidal neurons, 4 PV interneurons.</div>
+        </div>
+    </div>
+</div>
+
+<script>
+// ── PATTERNS ──────────────────────────────────────────────────────────────────
+const ALLP={
+  "vert-C":  [0,1,0,0,1,0,0,1,0],
+  "horiz-M": [0,0,0,1,1,1,0,0,0],
+  "diag-\\":  [1,0,0,0,1,0,0,0,1],
+  "X":       [1,0,1,0,1,0,1,0,1],
+  "plus":    [0,1,0,1,1,1,0,1,0],
+  "corners": [1,0,1,0,0,0,1,0,1],
+  "diag-/":  [0,0,1,0,1,0,1,0,0],
+  "vert-L":  [1,0,0,1,0,0,1,0,0],
+  "horiz-T": [1,1,1,0,0,0,0,0,0],
+  "dot-C":   [0,0,0,0,1,0,0,0,0],
+  "T-shape": [1,1,1,0,1,0,0,1,0],
+  "checker": [1,0,1,0,1,0,1,0,1],
+};
+const ANAMES=Object.keys(ALLP);
+let active=["vert-C","horiz-M","diag-\\","X"];
+
+// ── BIOPHYSICAL HYPERPARAMETERS (DYNAMIC ENGINE) ─────────────────────────────
+let ALPHA_E = 0.94;     // Modified dynamically during Priming Phase (originally baseline 0.88)
+let THETA_B = 0.70;     // Lowered during Priming Phase to beat the sub-threshold plateau (originally 1.0)
+const ALPHA_I = 0.70;   // PV fast-spiking leak multiplier
+const DT_TH   = 0.05;   // Adaptive threshold increment per spike
+const TH_DEC  = 0.97;   // Homeostatic threshold recovery decay
+let I_SCALE   = 1.35;   // Driven input gain scaling
+const REF_T   = 5;      // Refractory period duration
+const I_GAIN  = 1.8;    // Excitatory-to-Inhibitory axon collateral transfer gain
+
+const PAL=["#4f8eff","#0fcc7a","#f5a623","#9b72f5","#f03e6a","#38bdf8","#e879f9","#4ade80","#fbbf24","#f87171","#a78bfa","#34d399"];
+
+const g=id=>document.getElementById(id);
+const norm=a=>{const m=Math.sqrt(a.reduce((s,x)=>s+x*x,0));return a.map(x=>x/(m||1));};
+const rgb=hex=>[1,3,5].map(o=>parseInt(hex.slice(o,o+2),16));
+const nc=j=>PAL[j%PAL.length];
+
+// ── ENGINE STATE LAYERS ───────────────────────────────────────────────────────
+let W, W_EI;          
+let V_E, Th_E, Ref_E; 
+let V_I;             
+let wins, spikeLedger, totalSpikes, diagWins, timeStep;
+let histV, dfHist;
+let isRunning=true;
+let patSeq=[], patIdx=0, patStep=0;
+let curName="", curPx=[], noisyPx=[];
+
+// UI Animation Trace Multipliers
+let eSpikeFlash, eCharge, iFlash, shuntFlash, axonPulse, iSomaFlash;
+
+function N(){return active.length;}
+
+function initState() {
+  const n=N();
+  
+  // Set up early Priming Phase constraints
+  ALPHA_E = 0.94;
+  THETA_B = 0.70;
+  I_SCALE = 1.35;
+
+  W=active.map(name=>{
+    const base=ALLP[name].map(v=>v*0.72+Math.random()*0.18);
+    return norm(base);
+  });
+  W_EI=Array(n).fill(0.25);    
+  V_E=Array(n).fill(0);
+  Th_E=Array(n).fill(THETA_B);
+  Ref_E=Array(n).fill(0);
+  V_I=Array(n).fill(0);        
+  wins=Array.from({length:n},()=>({}));
+  spikeLedger=[]; totalSpikes=0; diagWins=0; timeStep=0;
+  histV=Array.from({length:n},()=>Array(100).fill(0));
+  dfHist=[];
+  
+  eSpikeFlash=Array(n).fill(0);
+  eCharge=Array(n).fill(0);
+  iFlash=Array(n).fill(0);
+  shuntFlash=Array(n).fill(0);
+  axonPulse=Array(n).fill(0);
+  iSomaFlash=Array(n).fill(0);
+  
+  patSeq=[...active].sort(()=>Math.random()-.5);
+  patIdx=0; patStep=0;
+  curName=patSeq[0]; curPx=[...ALLP[curName]];
+  
+  applyNoise();
+  buildNGrid();
+  resizeCanvases();
+  log2('↺ Reset. Somatic Priming Phase activated: Th=0.70, Tau_m optimized.');
+}
+
+function applyNoise(){
+  const p=+g('slNz').value/100;
+  noisyPx=curPx.map(v=>Math.random()<p?(v?0:1):v);
+  updateIGrid();
+  g('cname').textContent=curName;
+}
+
+function computeFE(px){
+  const sig=0.32;
+  return W.map(w=>px.reduce((s,xi,i)=>s+Math.pow(xi-w[i],2),0)/(2*sig*sig));
+}
+
+// ── CORTICAL CHANNEL TICK EXECUTION WITH AWAKENING SCHEDULE ──────────────────
+function step(){
+  timeStep++; patStep++;
+  const hold=+g('slH').value, n=N();
+  
+  // Dynamic Awakening Scheduling Protocol
+  if (timeStep <= 150) {
+    // Phase 1: Priming active to guarantee early structural plasticity alignment
+    THETA_B = 0.70;
+    ALPHA_E = 0.93;
+  } else if (timeStep > 150 && timeStep <= 400) {
+    // Phase 2: Maturation transition window. Linearly harden constants to biophysical targets
+    let factor = (timeStep - 150) / 250;
+    THETA_B = 0.70 + (0.30 * factor); // Linearly scales up to standard 1.0 threshold baseline
+    ALPHA_E = 0.93 - (0.05 * factor); // Tightens up down to standard 0.88 leaky memory
+  }
+
+  if(patStep>=hold){
+    patIdx=(patIdx+1)%patSeq.length;
+    if(patIdx===0) patSeq=[...active].sort(()=>Math.random()-.5);
+    curName=patSeq[patIdx]; curPx=[...ALLP[curName]];
+    patStep=0; applyNoise();
+    log2(`→ ${curName} [Tick: ${timeStep} | Target Th: ${THETA_B.toFixed(2)}]`);
+  }
+  
+  g('tfill').style.width=(100*(1-patStep/hold)).toFixed(1)+'%';
+  const x=noisyPx;
+  const FE=computeFE(x);
+  const srtFE=[...FE].sort((a,b)=>a-b);
+  const dF=n>1?srtFE[1]-srtFE[0]:0;
+  dfHist.push(dF); if(dfHist.length>100) dfHist.shift();
+
+  // Pyramidal cell integration step
+  for(let j=0;j<n;j++){
+    if(Ref_E[j]===0){
+      const Iexc=x.reduce((s,xi,i)=>s+xi*W[j][i],0)*I_SCALE;
+      V_E[j]=ALPHA_E*V_E[j]+Iexc;
+      V_E[j]=Math.max(0,V_E[j]);
+      eCharge[j]=Math.min(1,V_E[j]/Math.max(Th_E[j],0.01));
+    }
+  }
+
+  // Cross-validation of threshold crossings
+  let winner=-1, maxV=-Infinity;
+  for(let j=0;j<n;j++){
+    if(Ref_E[j]===0 && V_E[j]>=Th_E[j] && V_E[j]>maxV){ maxV=V_E[j]; winner=j; }
+  }
+
+  const etaE=+g('slEt').value/100;
+  const etaI=+g('slEI').value/100;
+  const iStr=+g('slIS').value/100;
+
+  if(winner>=0){
+    const winFE=FE[winner], minFE=Math.min(...FE);
+    const feGate=g('ckFE').checked?Math.exp(-(winFE-minFE)/0.45):1.0;
+    const Ich=maxV*W_EI[winner]*feGate*I_GAIN;
+    
+    V_I[winner]=Math.min(2.0,V_I[winner]+Ich);
+    eSpikeFlash[winner]=1.0; axonPulse[winner]=1.0; iSomaFlash[winner]=1.0;
+
+    // Perisomatic Shunting Inhibition Loop
+    for(let k=0;k<n;k++){
+      if(k!==winner && Ref_E[k]===0){
+        const shuntFrac=Math.tanh(V_I[winner]*0.9)*feGate*iStr;
+        V_E[k]=Math.max(0,V_E[k]*(1-shuntFrac));
+        shuntFlash[k]=Math.max(shuntFlash[k],shuntFrac);
+        iFlash[k]=Math.max(iFlash[k],0.85);
+      }
+    }
+
+    // Hebbian STDP Structural Plasticity Realignment
+    W[winner]=W[winner].map((w,i)=>w+etaE*(x[i]-w));
+    let nm=Math.sqrt(W[winner].reduce((s,v)=>s+v*v,0));
+    if(nm>1e-8) W[winner]=W[winner].map(v=>v/nm);
+
+    if(g('ckWeak').checked){
+      for(let k=0;k<n;k++){
+        if(k!==winner){
+          const weakEta=etaE*0.07;
+          W[k]=W[k].map((w,i)=>w+weakEta*(x[i]-w));
+          nm=Math.sqrt(W[k].reduce((s,v)=>s+v*v,0));
+          if(nm>1e-8) W[k]=W[k].map(v=>v/nm);
+        }
+      }
+    }
+
+    if(g('ckDual').checked){
+      W_EI[winner]=Math.min(1.8,W_EI[winner]+etaI*(1.0-W_EI[winner]));
+    }
+
+    if(g('ckRef').checked) Ref_E[winner]=REF_T;
+    if(g('ckAdp').checked) Th_E[winner]+=DT_TH;
+    V_E[winner]=0; eCharge[winner]=0;
+
+    wins[winner][curName]=(wins[winner][curName]||0)+1;
+    if(active.indexOf(curName)===winner) diagWins++;
+    totalSpikes++;
+    
+    spikeLedger.push({step:timeStep, pat:curName, winner, fe:FE[winner].toFixed(3), dF:dF.toFixed(3)});
+    g('lblS').textContent=`Spikes: ${totalSpikes}`;
+    log2(`⚡ E${winner}←${curName} [${timeStep<=150?'Priming':'Mature'}] FE=${FE[winner].toFixed(2)} ΔF=${dF.toFixed(2)}`);
+  } else {
+    if(g('ckAdp').checked){
+      for(let j=0;j<n;j++) Th_E[j]=THETA_B+(Th_E[j]-THETA_B)*TH_DEC;
+    }
+  }
+
+  // Handle fast-decay leak behaviors on interneurons
+  for(let j=0;j<n;j++) V_I[j]=ALPHA_I*V_I[j];
+  for(let j=0;j<n;j++){
+    eSpikeFlash[j]*=0.78; shuntFlash[j]*=0.72; axonPulse[j]*=0.76; iFlash[j]*=0.76; iSomaFlash[j]*=0.78;
+  }
+  for(let j=0;j<n;j++){ histV[j].push(V_E[j]); histV[j].shift(); }
+  
+  updateNCards(winner,FE);
+  updateMatrix();
+  updateStats(dF);
+}
+
+// ── CANVAS VISUALIZATION RENDERING SUBSYSTEMS ────────────────────────────────
+function drawNet(){
+  if(!cvN||cvN.width===0) return;
+  const W2=cvN.width, H=cvN.height, n=N();
+  ctN.clearRect(0,0,W2,H);
+  if(n===0) return;
+
+  const pxX=W2*0.09;
+  const pxRows=3, pxCols=3, pxGap=H/(pxRows+0.5);
+  const pxNodes=[];
+  for(let r=0;r<3;r++) for(let c=0;c<3;c++)
+    pxNodes.push({x:pxX+(c-1)*20, y:H*0.15+r*(pxGap*0.9)});
+
+  const eX=W2*0.46, iX=W2*0.72;
+  const eGap=H/(n+1);
+  const eNodes=active.map((_,j)=>({x:eX, y:eGap*(j+1)}));
+  const iNodes=active.map((_,j)=>({x:iX, y:eGap*(j+1)}));
+
+  const ER=Math.max(14,Math.min(22,H/(n+2)*0.45));
+  const IR=Math.max(9,ER*0.55);
+  const x=noisyPx;
+
+  // Afferent Axons (Pixels -> Pyramidal Cells)
+  for(let j=0;j<n;j++){
+    const e=eNodes[j], col=nc(j), [r,gg,b]=rgb(col), ch=eCharge[j];
+    for(let i=0;i<9;i++){
+      if(!x[i]) continue;
+      const p=pxNodes[i], w=W[j][i];
+      if(w<0.04) continue;
+      ctN.strokeStyle=`rgba(${r},${gg},${b},${Math.min(0.75,w*0.5+ch*0.4)})`;
+      ctN.lineWidth=0.5+w*2.2;
+      ctN.beginPath(); ctN.moveTo(p.x+7,p.y); ctN.lineTo(e.x-ER,e.y); ctN.stroke();
+    }
+  }
+
+  // Intra-Column Axon Collaterals (E -> PV Interneuron)
+  for(let j=0;j<n;j++){
+    const e=eNodes[j], iv=iNodes[j], pulse=axonPulse[j];
+    ctN.strokeStyle=`rgba(240,62,106,${0.15+pulse*0.75})`;
+    ctN.lineWidth=0.8+W_EI[j]*2.2+pulse*2;
+    ctN.beginPath(); ctN.moveTo(e.x+ER,e.y); ctN.lineTo(iv.x-IR,iv.y); ctN.stroke();
+  }
+
+  // Cross-Column Shunts (Winner PV -> Competing Somantic Membranes)
+  for(let j=0;j<n;j++){
+    const sf=iFlash[j]; if(sf<0.04) continue;
+    const iv=iNodes[j];
+    for(let k=0;k<n;k++){
+      if(k===j) continue;
+      const targetE=eNodes[k]; const sfk=shuntFlash[k]; if(sfk<0.03) continue;
+      ctN.strokeStyle=`rgba(245,166,35,${sfk*0.85})`;
+      ctN.lineWidth=0.8+sfk*3.5;
+      ctN.beginPath(); ctN.moveTo(iv.x+IR,iv.y); ctN.lineTo(targetE.x+ER,targetE.y); ctN.stroke();
+    }
+  }
+
+  // Pixels Matrix Nodes
+  for(let i=0;i<9;i++){
+    const p=pxNodes[i], on=!!x[i];
+    ctN.beginPath(); ctN.arc(p.x,p.y,6,0,Math.PI*2);
+    ctN.fillStyle=on?'#4f8eff1a':'#0f1929'; ctN.fill();
+    ctN.strokeStyle=on?'#4f8eff':'#162236'; ctN.lineWidth=on?1.5:0.8; ctN.stroke();
+  }
+
+  // Pyramidal Somas (Internal RF Map Visualizers)
+  for(let j=0;j<n;j++){
+    const e=eNodes[j], ch=eCharge[j], spk=eSpikeFlash[j];
+    const col=nc(j), [r,gg,b]=rgb(col);
+
+    ctN.beginPath(); ctN.arc(e.x,e.y,ER,0,Math.PI*2);
+    ctN.fillStyle=`rgba(${r},${gg},${b},${0.07+ch*0.16+spk*0.35})`; ctN.fill();
+    ctN.strokeStyle=Ref_E[j]>0?'#f03e6a':spk>0.2?col:`rgba(${r},${gg},${b},${0.28+ch*0.65})`;
+    ctN.lineWidth=Ref_E[j]>0?2.5:1.2+ch*2+spk*2; ctN.stroke();
+
+    const vPct=Math.min(1,V_E[j]/Math.max(Th_E[j],0.01));
+    if(vPct>0.01){
+      ctN.beginPath(); ctN.arc(e.x,e.y,ER+3.5,-Math.PI/2,-Math.PI/2+vPct*2*Math.PI);
+      ctN.strokeStyle=col; ctN.lineWidth=3.5; ctN.stroke();
+    }
+
+    const cs=Math.floor(ER*0.52), rfX=e.x-cs*1.5, rfY=e.y-cs*1.5;
+    for(let i=0;i<9;i++){
+      const ci=i%3, ri=Math.floor(i/3);
+      const alpha=W[j][i]/Math.max(...W[j],0.01);
+      ctN.fillStyle=`rgba(${r},${gg},${b},${alpha*0.9})`;
+      ctN.fillRect(rfX+ci*(cs+1),rfY+ri*(cs+1),cs,cs);
+    }
+  }
+
+  // Fast Inhibitory Interneuron Nodes
+  for(let j=0;j<n;j++){
+    const iv=iNodes[j], sf=iSomaFlash[j], vi=V_I[j];
+    ctN.beginPath(); ctN.arc(iv.x,iv.y,IR,0,Math.PI*2);
+    ctN.fillStyle=`rgba(240,62,106,${0.06+sf*0.22+vi*0.08})`; ctN.fill();
+    ctN.strokeStyle=`rgba(240,62,106,${0.2+sf*0.8})`; ctN.lineWidth=1+sf*2; ctN.stroke();
+  }
+}
+
+function drawVoltage(){
+  if(!cvV2||cvV2.width===0) return;
+  const W2=cvV2.width, H=cvV2.height, n=N();
+  ctV.clearRect(0,0,W2,H);
+  const maxTh=Math.max(...Th_E,1.2);
+  const sy=v=>H-((v+0.02)/(maxTh+0.2))*H;
+  const sx=i=>i*(W2/(histV[0].length-1));
+  
+  ctV.setLineDash([3,5]);
+  for(let j=0;j<n;j++){
+    const [r,gg,b]=rgb(nc(j));
+    ctV.strokeStyle=`rgba(${r},${gg},${b},0.25)`;
+    ctV.beginPath(); ctV.moveTo(0,sy(Th_E[j])); ctV.lineTo(W2,sy(Th_E[j])); ctV.stroke();
+  }
+  ctV.setLineDash([]);
+  const maxVE=Math.max(...V_E);
+  for(let j=0;j<n;j++){
+    const col=nc(j), leader=V_E[j]===maxVE && maxVE>0.1;
+    ctV.strokeStyle=col; ctV.lineWidth=leader?2.5:1; ctV.globalAlpha=leader?1:0.45;
+    ctV.beginPath();
+    histV[j].forEach((v,i)=>i===0?ctV.moveTo(sx(i),sy(v)):ctV.lineTo(sx(i),sy(v)));
+    ctV.stroke();
+  }
+  ctV.globalAlpha=1;
+}
+
+let feSmooth=[];
+function drawFE(){
+  if(!cvF||cvF.width===0) return;
+  const n=N(); if(feSmooth.length!==n) feSmooth=Array(n).fill(0);
+  const FE=computeFE(noisyPx);
+  const minFE=Math.min(...FE), maxFE=Math.max(...FE,minFE+0.001);
+  const W2=cvF.width, H=cvF.height;
+  ctF.clearRect(0,0,W2,H);
+  const barH=Math.max(8,Math.min(16,(H-22)/n-3));
+  let y0=5;
+  FE.forEach((f,j)=>{
+    const pct=1-(f-minFE)/(maxFE-minFE+0.001);
+    feSmooth[j]=feSmooth[j]*0.82+pct*0.18;
+    const bw=(W2-65)*feSmooth[j];
+    const col=nc(j);
+    ctF.fillStyle='#162236'; ctF.fillRect(52,y0,W2-65,barH);
+    ctF.fillStyle=col; ctF.fillRect(52,y0,bw,barH);
+    y0+=barH+3;
+  });
+}
+
+// ── DOM MATRIX RENDERING UTILITIES ───────────────────────────────────────────
+function buildNGrid(){
+  const ng=g('ngrid'), n=N(); ng.innerHTML='';
+  const cols=n<=4?n:n<=8?4:6; ng.style.gridTemplateColumns=`repeat(${cols},1fr)`;
+  for(let j=0;j<n;j++){
+    const col=nc(j);
+    ng.innerHTML+=`
+    <div class="nc" id="nc${j}" style="border-top:2px solid ${col}">
+      <div class="nh"><span class="nid" style="color:${col}">E${j}</span><span class="nbadge bok" id="nb${j}">READY</span></div>
+      <div class="rfrow"><div class="rf" id="rf${j}"></div><div style="font-size:6px;color:var(--mu)" id="nst${j}">V:0.00</div></div>
+      <div class="vbwrap"><div class="vbfill" id="vb${j}" style="width:0%;background:${col}"></div><div class="vbth" id="vth${j}"></div></div>
+    </div>`;
+  }
+}
+
+function updateNCards(winner,FE){
+  const n=N();
+  for(let j=0;j<n;j++){
+    const col=nc(j), maxW=Math.max(...W[j],0.01), [r,gg,b]=rgb(col), rf=g(`rf${j}`);
+    if(rf){
+      rf.innerHTML='';
+      W[j].forEach(w=>{
+        const d=document.createElement('div'); d.className='rc';
+        d.style.background=`rgba(${r},${gg},${b},${0.04+w/maxW*0.93})`; rf.appendChild(d);
+      });
+    }
+    const pct=Math.min(100,(V_E[j]/Math.max(Th_E[j],0.01))*100);
+    const vb=g(`vb${j}`); if(vb) vb.style.width=pct.toFixed(1)+'%';
+    const nst=g(`nst${j}`); if(nst) nst.innerHTML=`V:${V_E[j].toFixed(2)}<br>Th:${Th_E[j].toFixed(2)}`;
+  }
+}
+
+function updateMatrix(){
+  const wrap=g('mwrap'), n=N(), pats=active;
+  const colMax=pats.map(p=>Math.max(1,...wins.map(w=>w[p]||0)));
+  let html=`<table class="mtbl"><thead><tr><th>E\\Pat</th>`;
+  pats.forEach(p=>html+=`<th>${p}</th>`);
+  html+=`<th>owns</th></tr></thead><tbody>`;
+  
+  wins.forEach((w,j)=>{
+    const col=nc(j), [r,gg,b]=rgb(col);
+    html+=`<tr><td style="color:${col};font-weight:700">E${j}</td>`;
+    pats.forEach((p,pi)=>{
+      const c=w[p]||0, pct=c/colMax[pi], diag=pi===j;
+      html+=`<td><span class="mc" style="background:rgba(${r},${gg},${b},${0.04+pct*0.88});
+        ${diag?`outline:1.5px solid ${col};outline-offset:-1px`:''}">${c||''}</span></td>`;
+    });
+    const top=Object.entries(w).sort((a,b)=>b[1]-a[1])[0];
+    const best=top?top[0]:'—';
+    const isOK=best===pats[j];
+    html+=`<td style="font-size:7px;font-weight:bold;color:${isOK?'var(--G)':'var(--mu)'}">${best}</td></tr>`;
+  });
+  html+=`</tbody></table>`;
+  wrap.innerHTML=html;
+}
+
+function updateIGrid(){
+  const ig=g('igrid'); ig.innerHTML='';
+  noisyPx.forEach((v,i)=>{
+    const d=document.createElement('div'); d.className='ic'+(v?' on':''); d.textContent=i; ig.appendChild(d);
+  });
+}
+
+function buildPBank(){
+  const pb=g('pbank'); pb.innerHTML='';
+  ANAMES.forEach(name=>{
+    const on=active.includes(name);
+    let pgHtml=`<div class="pg">`;
+    ALLP[name].forEach(v=>pgHtml+=`<div class="pp${v?' on':''}"></div>`);
+    pgHtml+=`</div>`;
+    const d=document.createElement('div'); d.className='pb'+(on?' on':''); d.innerHTML=pgHtml+name;
+    d.onclick=()=>{
+      if(on && active.length>1){ active=active.filter(x=>x!==name); initState(); }
+      else if(!on && active.length<12){ active.push(name); initState(); }
+    };
+    pb.appendChild(d);
+  });
+}
+
+function updateStats(currentDF){
+  g('stSpk').textContent=totalSpikes; g('stT').textContent=timeStep;
+  let matchCount=0;
+  active.forEach((p,pi)=>{
+    let maxCount=-1, assignedIdx=-1;
+    for(let j=0;j<N();j++){
+      const cnt=wins[j][p]||0; if(cnt>maxCount){maxCount=cnt; assignedIdx=j;}
+    }
+    if(assignedIdx===pi && maxCount>0) matchCount++;
+  });
+  g('stDiag').textContent=`${active.length?Math.round((matchCount/active.length)*100):0}%`;
+  g('stDF').textContent=(dfHist.reduce((s,x)=>s+x,0)/(dfHist.length||1)).toFixed(2);
+  g('stIV').textContent=V_I.reduce((s,x)=>s+x,0).toFixed(2);
+}
+
+function log2(txt){
+  const el=g('log'); el.innerHTML+=`<div>[${new Date().toLocaleTimeString()}] ${txt}</div>`;
+  el.scrollTop=el.scrollHeight;
+}
+
+function resizeCanvases(){
+  [ [g('cvNet'),ctN], [g('cvV'),ctV], [g('cvFE'),ctF] ].forEach(([cv,ct])=>{
+    const rect=cv.getBoundingClientRect();
+    cv.width=rect.width*window.devicePixelRatio; cv.height=(cv.id==='cvNet'?175:80)*window.devicePixelRatio;
+    ct.scale(window.devicePixelRatio,window.devicePixelRatio);
+  });
+}
+
+// ── ENGINE MAIN HEARTBEAT LOOP ───────────────────────────────────────────────
+let lastTick=0;
+function tick(t){
+  if(!isRunning){ lastTick=0; requestAnimationFrame(tick); return; }
+  if(!lastTick) lastTick=t;
+  const interval=+g('slCk').value;
+  if(t-lastTick>=interval/10){ step(); lastTick=t; }
+  drawNet(); drawVoltage(); drawFE();
+  requestAnimationFrame(tick);
+}
+
+g('btnRun').onclick=function(){ isRunning=!isRunning; this.textContent=isRunning?'⏸ Pause':'▶ Run'; };
+g('btnReset').onclick=()=>initState();
+
+['slCk','slH','slEt','slEI','slIS','slNz'].forEach(id=>{
+  g(id).oninput=function(){
+    let val=this.value; if(id==='slEt'||id==='slEI') val=(+this.value/100).toFixed(2);
+    g(id.replace('sl','l')).textContent=val;
+  };
+});
+
+cvN=g('cvNet'); ctN=cvN.getContext('2d'); cvV2=g('cvV'); ctV=cvV2.getContext('2d'); cvF=g('cvFE'); ctF=cvF.getContext('2d');
+buildPBank(); initState(); requestAnimationFrame(tick);
+</script>
+</body>
+</html>

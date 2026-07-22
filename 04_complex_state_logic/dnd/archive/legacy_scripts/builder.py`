@@ -1,0 +1,436 @@
+import json
+import math
+import uuid
+import os
+from difflib import get_close_matches
+
+# ==================================================================
+# CONSTANTS & REGISTRIES
+# ==================================================================
+OPTIONS_PATH = '/home/cxiong/hermes_rpg/character_options.json'
+SAVE_ROOT = '/home/cxiong/hermes_rpg/saves/'
+SESSIONS_DIR = os.path.join(SAVE_ROOT, 'sessions/')
+
+def get_session_dir(session_id='default'):
+    path = os.path.join(SESSIONS_DIR, session_id)
+    os.makedirs(path, exist_ok=True)
+    return path
+
+ACTIVE_SESSION = 'session_001'
+CHARS_DIR = os.path.join(get_session_dir(ACTIVE_SESSION), 'characters/')
+STATES_DIR = os.path.join(get_session_dir(ACTIVE_SESSION), 'states/')
+
+os.makedirs(CHARS_DIR, exist_ok=True)
+os.makedirs(STATES_DIR, exist_ok=True)
+
+ARMOR_TABLE = {
+    "none": {"base_ac": 10, "type": "none"},
+    "leather armor": {"base_ac": 11, "type": "light"},
+    "scale mail": {"base_ac": 14, "type": "medium"},
+    "chain mail": {"base_ac": 16, "type": "heavy"},
+    "plate armor": {"base_ac": 18, "type": "heavy"},
+    "shield": {"base_ac": 2, "type": "shield"}
+}
+
+# Step 2: Saving Throw Proficiencies
+SAVE_PROFICIENCIES = {
+    "Fighter": ["Strength", "Constitution"],
+    "Rogue": ["Dexterity", "Intelligence"],
+    "Wizard": ["Intelligence", "Wisdom"],
+    "Cleric": ["Wisdom", "Charisma"],
+    "Ranger": ["Strength", "Dexterity"],
+    "Bard": ["Dexterity", "Charisma"]
+}
+
+SPELLCASTING_ABILITY = {"Wizard": "Intelligence", "Cleric": "Wisdom", "Bard": "Charisma"}
+SPELL_SLOTS_LV1 = {"Wizard": 2, "Cleric": 2, "Bard": 2}
+STARTING_CANTRIPS = {
+    "Wizard": ["Fire Bolt", "Prestidigitation", "Mage Hand"],
+    "Cleric": ["Sacred Flame", "Guidance", "Spare the Dying"],
+    "Bard": ["Vicious Mockery", "Prestidigitation", "Minor Illusion"]
+}
+STARTING_SPELLS = {
+    "Wizard": ["Magic Missile", "Shield", "Sleep", "Detect Magic"],
+    "Cleric": ["Healing Word", "Bless", "Cure Wounds", "Guiding Bolt"],
+    "Bard": ["Healing Word", "Charm Person", "Thunderwave", "Faerie Fire"]
+}
+
+CLASS_HIT_DIE = {
+    "Fighter": 10, "Rogue": 8, "Wizard": 6, "Cleric": 8, "Ranger": 10, "Bard": 8
+}
+
+SPECIES_LANGUAGES = {
+    "Human": ["Common"],
+    "Elf": ["Common", "Elvish"],
+    "Dwarf": ["Common", "Dwarvish"],
+    "Halfling": ["Common", "Halfling"],
+    "Orc": ["Common", "Orc"],
+    "Tiefling": ["Common", "Infernal"],
+}
+
+BACKGROUND_LANGUAGES = {
+    "Criminal": ["Thieves Cant"], "Noble": ["Choice"], "Acolyte": ["Celestial", "Choice"],
+    "Scholar": ["Choice", "Choice"], "Outlander": ["Choice"], "Soldier": []
+}
+
+BACKGROUND_TOOLS = {
+    "Criminal": ["Thieves Tools", "Gaming Set"], "Noble": ["Gaming Set"], "Acolyte": [],
+    "Soldier": ["Gaming Set", "Vehicles Land"], "Scholar": [], "Outlander": ["Musical Instrument"]
+}
+
+BACKGROUND_BONUS_SKILLS = {
+    "Criminal": "Deception", "Noble": "History", "Acolyte": "Religion",
+    "Soldier": "Intimidation", "Scholar": "History", "Outlander": "Perception"
+}
+
+HOMELAND_DEFAULTS = {
+    "Criminal": "a crowded port city",
+    "Noble": "a wealthy estate",
+    "Acolyte": "a temple complex",
+    "Soldier": "a garrison town",
+    "Scholar": "a city with a great library",
+    "Outlander": "a remote wilderness",
+}
+
+BACKGROUND_CONTACTS = {
+    "Criminal": "a criminal fence or gang contact",
+    "Noble": "a noble family or court connection",
+    "Acolyte": "a temple or religious order",
+    "Soldier": "a military unit or commander",
+    "Scholar": "a university or library",
+    "Outlander": "a tribe or wilderness community",
+}
+
+CLASS_FEATURES = {
+    "Fighter": ("Second Wind", "Once per short rest, bonus action to regain 1d10 + Fighter level HP."),
+    "Rogue": ("Sneak Attack", "Once per turn, deal extra 1d6 damage when you have advantage or an ally is adjacent."),
+    "Wizard": ("Arcane Recovery", "Once per long rest on a short rest, recover spell slots equal to half Wizard level rounded up."),
+    "Cleric": ("Channel Divinity", "Once per short rest, use a divine power based on your domain."),
+    "Ranger": ("Favored Enemy + Natural Explorer", "Advantage on checks vs chosen enemy type. Expertise in chosen terrain."),
+    "Bard": ("Bardic Inspiration", "Give an ally a d6 to add to one roll. Uses per long rest = Charisma modifier."),
+}
+
+SPECIES_TRAITS = {
+    "Human": ("Extra Skill Proficiency", "Choose one additional skill proficiency."),
+    "Elf": ("Darkvision 60ft", "Advantage on saves vs charm. Cannot be magically slept."),
+    "Dwarf": ("Darkvision 60ft", "Poison Resistance. Stonecunning."),
+    "Halfling": ("Lucky", "Reroll natural 1s on attack rolls, ability checks, saving throws."),
+    "Orc": ("Darkvision 60ft", "Relentless Endurance — once per long rest drop to 1 HP instead of 0."),
+    "Tiefling": ("Darkvision 60ft", "Fire Resistance. Know Thaumaturgy cantrip."),
+}
+
+BACKGROUND_FEATURES = {
+    "Criminal": ("Criminal Contact", "You have a reliable criminal contact network."),
+    "Noble": ("Position of Privilege", "People assume you have wealth and authority."),
+    "Acolyte": ("Shelter of the Faithful", "Temples of your faith will house and feed you."),
+    "Soldier": ("Military Rank", "Soldiers loyal to your faction recognize your rank."),
+    "Scholar": ("Researcher", "You know where to find almost any piece of information."),
+    "Outlander": ("Wanderer", "You can find food and fresh water in the wilderness."),
+}
+
+ALL_SKILLS = {
+    "Acrobatics": "Dexterity", "Animal Handling": "Wisdom", "Arcana": "Intelligence", "Athletics": "Strength",
+    "Deception": "Charisma", "History": "Intelligence", "Insight": "Wisdom", "Intimidation": "Charisma",
+    "Investigation": "Intelligence", "Medicine": "Wisdom", "Nature": "Intelligence", "Perception": "Wisdom",
+    "Performance": "Charisma", "Persuasion": "Charisma", "Religion": "Intelligence", "Sleight of Hand": "Dexterity",
+    "Stealth": "Dexterity", "Survival": "Wisdom",
+}
+
+JARVIS_WEIGHTS = {
+    "Fighter": {"aggression": 0.8, "caution": 0.2, "support": 0.1, "social": 0.1},
+    "Rogue": {"aggression": 0.5, "caution": 0.8, "support": 0.2, "social": 0.3},
+    "Wizard": {"aggression": 0.5, "caution": 0.6, "support": 0.5, "social": 0.2},
+    "Cleric": {"aggression": 0.3, "caution": 0.5, "support": 0.9, "social": 0.4},
+    "Ranger": {"aggression": 0.6, "caution": 0.6, "support": 0.3, "social": 0.2},
+    "Bard": {"aggression": 0.3, "caution": 0.4, "support": 0.6, "social": 0.9},
+}
+
+class CharacterBuilder:
+    def __init__(self, options_path=OPTIONS_PATH):
+        with open(options_path, 'r') as f:
+            self.options = json.load(f)
+
+    def calculate_modifier(self, score):
+        return math.floor((score - 10) / 2)
+
+    def calculate_ac(self, armor_name, dex_modifier):
+        armor = ARMOR_TABLE.get(armor_name.lower(), ARMOR_TABLE["none"])
+        if armor["type"] == "none": return 10 + dex_modifier
+        if armor["type"] == "light": return armor["base_ac"] + dex_modifier
+        if armor["type"] == "medium": return armor["base_ac"] + min(dex_modifier, 2)
+        if armor["type"] == "heavy": return armor["base_ac"]
+        return 10 + dex_modifier
+
+    def ac_label(self, armor_name, dex_modifier):
+        armor = ARMOR_TABLE.get(armor_name.lower(), ARMOR_TABLE["none"])
+        if armor["type"] == "none": return f"10 + DEX {dex_modifier:+d} unarmored"
+        if armor["type"] == "light": return f"{armor['base_ac']} + DEX {dex_modifier:+d} light armor"
+        if armor["type"] == "medium": return f"{armor['base_ac']} + DEX {min(dex_modifier, 2):+d} medium armor"
+        if armor["type"] == "heavy": return f"{armor['base_ac']} heavy armor, no DEX"
+        return "unknown formula"
+
+    def normalize_choice(self, user_input, options_list):
+        if not user_input: return None
+        clean = user_input.strip().lower()
+        for o in options_list:
+            if o.lower() == clean: return o
+        matches = get_close_matches(clean, [o.lower() for o in options_list], n=1, cutoff=0.6)
+        if matches:
+            for o in options_list:
+                if o.lower() == matches[0]: return o
+        return None
+
+    def build_character(self, name, char_class_in, species_in, background_in,
+                        weapon_name, user_id=None, age=None, appearance=None,
+                        deity=None, bond=None, secret=None,
+                        short_goal=None, long_goal=None, personality_type=None):
+        
+        # Normalize
+        final_class = self.normalize_choice(char_class_in, list(self.options.get('classes', {}).keys())) or "Rogue"
+        final_species = self.normalize_choice(species_in, list(self.options.get('species', {}).keys())) or "Human"
+        final_bg = self.normalize_choice(background_in, list(self.options.get('backgrounds', {}).keys())) or "Criminal"
+
+        # STEP 1: Ability Scores (Standard Array)
+        priority = self.options.get('classes', {}).get(final_class, {}).get('stat_priority', ['Strength', 'Constitution', 'Dexterity', 'Wisdom', 'Charisma', 'Intelligence'])
+        stat_array = [15, 14, 13, 12, 10, 8]
+        scores = {stat: stat_array[i] for i, stat in enumerate(priority)}
+        modifiers = {stat: self.calculate_modifier(score) for stat, score in scores.items()}
+
+        # STEP 2: Saving Throws
+        proficiency = 2
+        prof_saves = SAVE_PROFICIENCIES.get(final_class, [])
+        saves = {stat: modifiers[stat] + (proficiency if stat in prof_saves else 0) 
+                 for stat in ["Strength", "Dexterity", "Constitution", "Intelligence", "Wisdom", "Charisma"]}
+
+        # STEP 3: Skills
+        skills = {skill: modifiers[ability] for skill, ability in ALL_SKILLS.items()}
+        proficient_skills = set()
+        
+        # Class proficiencies
+        for s in self.options.get('classes', {}).get(final_class, {}).get('skill_options', []):
+            ability = ALL_SKILLS.get(s, "Wisdom")
+            skills[s] = modifiers[ability] + proficiency
+            proficient_skills.add(s)
+        
+        # Background proficiencies
+        bg_data = self.options.get('backgrounds', {}).get(final_bg, {})
+        bg_primary = bg_data.get('skill')
+        if bg_primary:
+            ability = ALL_SKILLS.get(bg_primary, "Wisdom")
+            skills[bg_primary] = modifiers[ability] + proficiency
+            proficient_skills.add(bg_primary)
+        
+        bg_bonus = BACKGROUND_BONUS_SKILLS.get(final_bg)
+        if bg_bonus:
+            ability = ALL_SKILLS.get(bg_bonus, "Wisdom")
+            skills[bg_bonus] = modifiers[ability] + proficiency
+            proficient_skills.add(bg_bonus)
+
+        passive_perception = 10 + skills["Perception"]
+        passive_insight = 10 + skills["Insight"]
+        passive_investigation = 10 + skills["Investigation"]
+
+        # STEP 4: Combat Stats
+        hit_die_val = CLASS_HIT_DIE.get(final_class, 8)
+        max_hp = hit_die_val + modifiers['Constitution']
+        armor_name = self.options.get('classes', {}).get(final_class, {}).get('armor', 'none')
+        ac = self.calculate_ac(armor_name, modifiers['Dexterity'])
+        speed = self.options.get('species', {}).get(final_species, {}).get('speed', 30)
+        initiative = modifiers['Dexterity']
+
+        # STEP 7: Attacks
+        class_weapons = self.options.get('weapon_options', {}).get(final_class, [])
+        weapon_data = next((w for w in class_weapons if w['name'].lower() == weapon_name.lower()), None)
+        if not weapon_data and class_weapons:
+            weapon_data = class_weapons[0]
+        if not weapon_data:
+            weapon_data = {"name": "Unarmed", "type": "melee", "damage": "1d4", "ability_used": "Strength", "attack_bonus_modifier": 0, "damage_bonus_modifier": 0, "range": "5ft"}
+
+        stat_used = weapon_data.get('ability_used', 'Strength')
+        atk_mod = weapon_data.get('attack_bonus_modifier', 0)
+        dmg_mod = weapon_data.get('damage_bonus_modifier', 0)
+        
+        attack_bonus = proficiency + modifiers.get(stat_used, 0) + atk_mod
+        total_dmg_mod = modifiers.get(stat_used, 0) + dmg_mod
+        
+        attacks = [{
+            "name": weapon_data.get('name', 'Unarmed'),
+            "type": weapon_data.get('type', 'melee'),
+            "attack_bonus": attack_bonus,
+            "damage": f"{weapon_data.get('damage', '1d4')}{total_dmg_mod:+d}",
+            "ability_used": stat_used,
+            "range": weapon_data.get('range', '5ft'),
+            "attack_bonus_modifier": atk_mod,
+            "damage_bonus_modifier": dmg_mod,
+        }]
+
+        # STEP 10: Inventory
+        inventory = {
+            "equipped_weapon": weapon_data.get('name'),
+            "equipped_armor": armor_name,
+            "shield_equipped": False,
+            "loot_bag": {
+                "weapons": [weapon_data.get('name')],
+                "armor": [armor_name] if armor_name != 'none' else [],
+                "items": self.options.get('classes', {}).get(final_class, {}).get('default_items', []),
+                "gold": 10,
+            },
+            "carrying_capacity": {
+                "max_pounds": scores['Strength'] * 15,
+                "current_load": 0,
+                "encumbered": False,
+            },
+        }
+
+        # STEP 8: Spellcasting
+        spellcasting = None
+        if final_class in SPELLCASTING_ABILITY:
+            ability = SPELLCASTING_ABILITY[final_class]
+            sp_mod = modifiers[ability]
+            num_slots = SPELL_SLOTS_LV1.get(final_class, 2)
+            spellcasting = {
+                "spellcasting_ability": ability,
+                "spell_save_dc": 8 + proficiency + sp_mod,
+                "spell_attack_bonus": proficiency + sp_mod,
+                "spell_slots": {1: {"total": num_slots, "remaining": num_slots}},
+                "cantrips": STARTING_CANTRIPS.get(final_class, []),
+                "prepared_spells": STARTING_SPELLS.get(final_class, []),
+                "concentration": None,
+            }
+
+        # STEP 9: Features
+        class_feat = CLASS_FEATURES.get(final_class, ("None", ""))
+        species_trait = SPECIES_TRAITS.get(final_species, ("None", ""))
+        bg_feat = BACKGROUND_FEATURES.get(final_bg, ("None", ""))
+
+        # STEP 6: Languages
+        langs = list(dict.fromkeys(SPECIES_LANGUAGES.get(final_species, ["Common"]) + BACKGROUND_LANGUAGES.get(final_bg, [])))
+
+        # STEP 11: Roleplay Profile
+        alignment = {"Criminal": "Chaotic Neutral", "Noble": "Lawful Neutral", "Acolyte": "Lawful Good", 
+                     "Soldier": "Lawful Neutral", "Scholar": "True Neutral", "Outlander": "Chaotic Neutral"}.get(final_bg, "True Neutral")
+        
+        # Simplified dynamic generation based on class+bg
+        rp_traits = ["resourceful"] # Should be expanded in Step 11 logic
+        backstory = f"A {final_class} with a {final_bg} background."
+
+        # STEP 14: Unified Entity
+        char_id = f"char_{name.replace(' ', '_').lower()}"
+        entity_id = f"ent_{uuid.uuid4().hex[:8]}"
+        agent_id = f"jarvis_{char_id}"
+        uid = user_id or f"user_{name.replace(' ', '_').lower()}"
+
+        character = {
+            "entity_id": entity_id,
+            "user_id": uid,
+            "character_id": char_id,
+            "agent_id": agent_id,
+            "identity": {
+                "name": name, "species": final_species, "class": final_class,
+                "background": final_bg, "alignment": alignment, "level": 1, "xp": 0,
+            },
+            "roleplay_profile": {
+                "personality_type": personality_type or "Balanced",
+                "personality_traits": rp_traits,
+                "ideal": "Survival", "bond": bond or "Protects a loved one",
+                "flaw": "Distrustful", "motivation": "Discovery", "fear": "Failure",
+                "backstory": backstory,
+            },
+            "personal": {
+                "age": age, "appearance": appearance, "homeland": HOMELAND_DEFAULTS.get(final_bg, "Unknown"),
+                "deity": deity, "contact": BACKGROUND_CONTACTS.get(final_bg, "Unknown"),
+                "goals": {"short_term": short_goal, "long_term": long_goal}, "secret": secret,
+            },
+            "gameplay_profile": {
+                "proficiency_bonus": proficiency,
+                "ability_scores": scores,
+                "ability_modifiers": modifiers,
+                "saving_throws": saves,
+                "proficient_saves": prof_saves,
+                "skills": skills,
+                "proficient_skills": list(proficient_skills),
+                "passive_scores": {
+                    "passive_perception": passive_perception,
+                    "passive_insight": passive_insight,
+                    "passive_investigation": passive_investigation,
+                },
+                "proficiencies": {
+                    "armor": self.options.get('classes', {}).get(final_class, {}).get('armor_profs', []),
+                    "weapons": self.options.get('classes', {}).get(final_class, {}).get('weapon_profs', []),
+                    "tools": BACKGROUND_TOOLS.get(final_bg, []),
+                    "languages": langs,
+                },
+                "combat": {
+                    "max_hp": max_hp,
+                    "armor_class": ac,
+                    "armor_class_formula": self.ac_label(armor_name, modifiers["Dexterity"]),
+                    "speed": speed,
+                    "initiative": initiative,
+                    "hit_die": f"d{hit_die_val}",
+                },
+                "attacks": attacks,
+                "spellcasting": spellcasting,
+                "features": {
+                    "class_feature": class_feat,
+                    "species_trait": species_trait,
+                    "background_feature": bg_feat,
+                }
+            },
+            "jarvis_persona": {
+                "tactical_weights": JARVIS_WEIGHTS.get(final_class, JARVIS_WEIGHTS["Rogue"]),
+            },
+            "gateway_payloads": {
+                "spawn": {
+                    "user_id": uid, "action": "spawn_character", "entity_id": entity_id,
+                    "entity_type": "player", "name": name, "class": final_class,
+                    "species": final_species, "background": final_bg, "position": [0, 0]
+                },
+                "stat": {
+                    "user_id": uid, "action": "set_character_stats", "entity_id": entity_id,
+                    "max_hp": max_hp, "current_hp": max_hp, "armor_class": ac, "speed": speed,
+                    "initiative": initiative, "passive_perception": passive_perception,
+                    "ability_scores": scores, "ability_modifiers": modifiers,
+                    "saving_throws": [saves[s] for s in ["Strength", "Dexterity", "Constitution", "Intelligence", "Wisdom", "Charisma"]],
+                    "skills": skills, "proficiencies": {
+                        "armor": self.options.get('classes', {}).get(final_class, {}).get('armor_profs', []),
+                        "weapons": self.options.get('classes', {}).get(final_class, {}).get('weapon_profs', []),
+                        "tools": BACKGROUND_TOOLS.get(final_bg, []),
+                        "languages": langs,
+                    },
+                    "inventory": inventory, "features": {
+                        "class_feature": class_feat[0], "species_trait": species_trait[0], "background_feature": bg_feat[0]
+                    },
+                    "attacks": attacks, "spellcasting": spellcasting
+                }
+            }
+        }
+
+        # Step 16: Validation
+        validation = self.validate_character(character)
+        character["validation"] = validation
+
+        return character
+
+    def validate_character(self, char):
+        gp = char["gameplay_profile"]
+        combat = gp["combat"]
+        scores = gp["ability_scores"]
+        mods = gp["ability_modifiers"]
+        
+        issues = []
+        # HP: Hit Die + Con Mod
+        expected_hp = CLASS_HIT_DIE.get(char["identity"]["class"], 8) + mods["Constitution"]
+        if combat["max_hp"] != expected_hp: issues.append(f"HP mismatch: expected {expected_hp}")
+        
+        # Initiative: Dex Mod
+        if combat["initiative"] != mods["Dexterity"]: issues.append("Initiative mismatch")
+        
+        # Passive Perception: 10 + Perception Bonus
+        if gp["passive_scores"]["passive_perception"] != 10 + gp["skills"]["Perception"]:
+            issues.append("Passive Perception mismatch")
+            
+        return "PASSED" if not issues else f"ISSUES: {', '.join(issues)}"
+
+    def get_perception_package(self, character, state):
+        """Returns a flat merged dict for the AI agent."""
+        return {**character["gameplay_profile"], **state}

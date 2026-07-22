@@ -1,0 +1,13 @@
+[project]
+name = "hermes-rpg-api"
+version = "0.1.0"
+description = "FastAPI wrapper for the Hermes RPG Character and Jarvis Agents"
+dependencies = [
+    "fastapi",
+    "uvicorn",
+    "pydantic",
+    "requests",
+    "websockets",
+    "flask",
+    "flask-cors",
+]

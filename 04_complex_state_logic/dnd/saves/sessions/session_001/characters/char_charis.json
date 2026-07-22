@@ -1,0 +1,319 @@
+{
+  "entity_id": "ent_6e5d9bad",
+  "user_id": "user_charis",
+  "character_id": "char_charis",
+  "agent_id": "jarvis_char_charis",
+  "identity": {
+    "name": "charis",
+    "species": "Tiefling",
+    "class": "Wizard",
+    "background": "Criminal",
+    "alignment": "Chaotic Neutral",
+    "level": 1,
+    "xp": 0
+  },
+  "roleplay_profile": {
+    "personality_type": "Balanced",
+    "personality_traits": [
+      "resourceful"
+    ],
+    "ideal": "Survival",
+    "bond": "[Generated] The honor of my family name.",
+    "flaw": "Distrustful",
+    "motivation": "Discovery",
+    "fear": "Failure",
+    "backstory": "A Wizard with a Criminal background."
+  },
+  "personal": {
+    "age": "18",
+    "appearance": null,
+    "homeland": "a crowded port city",
+    "deity": "[Generated] The God of Order and Justice",
+    "contact": "a criminal fence or gang contact",
+    "goals": {
+      "short_term": null,
+      "long_term": null
+    },
+    "secret": "[Generated] You aren't the true heir to your family name."
+  },
+  "gameplay_profile": {
+    "proficiency_bonus": 2,
+    "ability_scores": {
+      "Strength": 15,
+      "Constitution": 14,
+      "Dexterity": 13,
+      "Wisdom": 12,
+      "Charisma": 10,
+      "Intelligence": 8
+    },
+    "ability_modifiers": {
+      "Strength": 2,
+      "Constitution": 2,
+      "Dexterity": 1,
+      "Wisdom": 1,
+      "Charisma": 0,
+      "Intelligence": -1
+    },
+    "saving_throws": {
+      "Strength": 2,
+      "Dexterity": 1,
+      "Constitution": 2,
+      "Intelligence": 1,
+      "Wisdom": 3,
+      "Charisma": 0
+    },
+    "proficient_saves": [
+      "Intelligence",
+      "Wisdom"
+    ],
+    "skills": {
+      "Acrobatics": 1,
+      "Animal Handling": 1,
+      "Arcana": -1,
+      "Athletics": 2,
+      "Deception": 2,
+      "History": -1,
+      "Insight": 1,
+      "Intimidation": 0,
+      "Investigation": -1,
+      "Medicine": 1,
+      "Nature": -1,
+      "Perception": 1,
+      "Performance": 0,
+      "Persuasion": 0,
+      "Religion": -1,
+      "Sleight of Hand": 1,
+      "Stealth": 1,
+      "Survival": 1
+    },
+    "proficient_skills": [
+      "Deception"
+    ],
+    "passive_scores": {
+      "passive_perception": 11,
+      "passive_insight": 11,
+      "passive_investigation": 9
+    },
+    "proficiencies": {
+      "armor": [],
+      "weapons": [],
+      "tools": [
+        "Thieves Tools",
+        "Gaming Set"
+      ],
+      "languages": [
+        "Common",
+        "Infernal",
+        "Thieves Cant"
+      ]
+    },
+    "combat": {
+      "max_hp": 8,
+      "armor_class": 11,
+      "armor_class_formula": "10 + DEX +1 unarmored",
+      "speed": 30,
+      "initiative": 1,
+      "hit_die": "d6"
+    },
+    "attacks": [
+      {
+        "name": "Unarmed",
+        "type": "melee",
+        "attack_bonus": 4,
+        "damage": "1d4+2",
+        "ability_used": "Strength",
+        "range": "5ft",
+        "attack_bonus_modifier": 0,
+        "damage_bonus_modifier": 0
+      }
+    ],
+    "spellcasting": {
+      "spellcasting_ability": "Intelligence",
+      "spell_save_dc": 9,
+      "spell_attack_bonus": 1,
+      "spell_slots": {
+        "1": {
+          "total": 2,
+          "remaining": 2
+        }
+      },
+      "cantrips": [
+        "Fire Bolt",
+        "Prestidigitation",
+        "Mage Hand"
+      ],
+      "prepared_spells": [
+        "Magic Missile",
+        "Shield",
+        "Sleep",
+        "Detect Magic"
+      ],
+      "concentration": null
+    },
+    "features": {
+      "class_feature": [
+        "Arcane Recovery",
+        "Once per long rest on a short rest, recover spell slots equal to half Wizard level rounded up."
+      ],
+      "species_trait": [
+        "Darkvision 60ft",
+        "Fire Resistance. Know Thaumaturgy cantrip."
+      ],
+      "background_feature": [
+        "Criminal Contact",
+        "You have a reliable criminal contact network."
+      ]
+    }
+  },
+  "jarvis_persona": {
+    "tactical_weights": {
+      "aggression": 0.5,
+      "caution": 0.6,
+      "support": 0.5,
+      "social": 0.2
+    }
+  },
+  "gateway_payloads": {
+    "spawn": {
+      "user_id": "user_charis",
+      "action": "spawn_character",
+      "entity_id": "ent_6e5d9bad",
+      "entity_type": "player",
+      "name": "charis",
+      "class": "Wizard",
+      "species": "Tiefling",
+      "background": "Criminal",
+      "position": [
+        0,
+        0
+      ]
+    },
+    "stat": {
+      "user_id": "user_charis",
+      "action": "set_character_stats",
+      "entity_id": "ent_6e5d9bad",
+      "max_hp": 8,
+      "current_hp": 8,
+      "armor_class": 11,
+      "speed": 30,
+      "initiative": 1,
+      "passive_perception": 11,
+      "ability_scores": {
+        "Strength": 15,
+        "Constitution": 14,
+        "Dexterity": 13,
+        "Wisdom": 12,
+        "Charisma": 10,
+        "Intelligence": 8
+      },
+      "ability_modifiers": {
+        "Strength": 2,
+        "Constitution": 2,
+        "Dexterity": 1,
+        "Wisdom": 1,
+        "Charisma": 0,
+        "Intelligence": -1
+      },
+      "saving_throws": [
+        2,
+        1,
+        2,
+        1,
+        3,
+        0
+      ],
+      "skills": {
+        "Acrobatics": 1,
+        "Animal Handling": 1,
+        "Arcana": -1,
+        "Athletics": 2,
+        "Deception": 2,
+        "History": -1,
+        "Insight": 1,
+        "Intimidation": 0,
+        "Investigation": -1,
+        "Medicine": 1,
+        "Nature": -1,
+        "Perception": 1,
+        "Performance": 0,
+        "Persuasion": 0,
+        "Religion": -1,
+        "Sleight of Hand": 1,
+        "Stealth": 1,
+        "Survival": 1
+      },
+      "proficiencies": {
+        "armor": [],
+        "weapons": [],
+        "tools": [
+          "Thieves Tools",
+          "Gaming Set"
+        ],
+        "languages": [
+          "Common",
+          "Infernal",
+          "Thieves Cant"
+        ]
+      },
+      "inventory": {
+        "equipped_weapon": "Unarmed",
+        "equipped_armor": "none",
+        "shield_equipped": false,
+        "loot_bag": {
+          "weapons": [
+            "Unarmed"
+          ],
+          "armor": [],
+          "items": [],
+          "gold": 10
+        },
+        "carrying_capacity": {
+          "max_pounds": 225,
+          "current_load": 0,
+          "encumbered": false
+        }
+      },
+      "features": {
+        "class_feature": "Arcane Recovery",
+        "species_trait": "Darkvision 60ft",
+        "background_feature": "Criminal Contact"
+      },
+      "attacks": [
+        {
+          "name": "Unarmed",
+          "type": "melee",
+          "attack_bonus": 4,
+          "damage": "1d4+2",
+          "ability_used": "Strength",
+          "range": "5ft",
+          "attack_bonus_modifier": 0,
+          "damage_bonus_modifier": 0
+        }
+      ],
+      "spellcasting": {
+        "spellcasting_ability": "Intelligence",
+        "spell_save_dc": 9,
+        "spell_attack_bonus": 1,
+        "spell_slots": {
+          "1": {
+            "total": 2,
+            "remaining": 2
+          }
+        },
+        "cantrips": [
+          "Fire Bolt",
+          "Prestidigitation",
+          "Mage Hand"
+        ],
+        "prepared_spells": [
+          "Magic Missile",
+          "Shield",
+          "Sleep",
+          "Detect Magic"
+        ],
+        "concentration": null
+      }
+    }
+  },
+  "validation": "PASSED"
+}

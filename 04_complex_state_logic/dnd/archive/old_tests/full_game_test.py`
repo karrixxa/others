@@ -1,0 +1,141 @@
+import sqlite3
+import json
+import uuid
+import os
+import math
+
+DB_PATH = "/home/cxiong/hermes_rpg/hermes_rpg.db"
+OPTIONS_PATH = "/home/cxiong/hermes_rpg/character_options.json"
+
+class DBHandler:
+    def __init__(self, db_path=DB_PATH):
+        self.db_path = db_path
+
+    def query(self, sql, params=(), commit=False):
+        conn = sqlite3.connect(self.db_path)
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        cursor.execute(sql, params)
+        result = cursor.fetchall()
+        if commit: conn.commit()
+        conn.close()
+        return result
+
+    def execute(self, sql, params=()):
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+        cursor.execute(sql, params)
+        conn.commit()
+        conn.close()
+
+class UnifiedEntityBuilder:
+    def __init__(self, db_handler=None, options_path=OPTIONS_PATH):
+        self.db = db_handler or DBHandler()
+        with open(options_path, 'r') as f:
+            self.options = json.load(f)
+
+    def calculate_modifier(self, score):
+        return math.floor((score - 10) / 2)
+
+    def build_unified_entity(self, name, char_class, species, background, weapon_name, user_id=None):
+        char_id = f"char_{name.replace(' ','_').lower()}_{uuid.uuid4().hex[:4]}"
+        entity_id = f"ent_{uuid.uuid4().hex[:8]}"
+        agent_id = f"jarvis_{uuid.uuid4().hex[:8]}"
+        uid = user_id or f"user_{name.replace(' ','_').lower()}"
+
+        priority = self.options['classes'][char_class]['stat_priority']
+        stat_array = sorted(self.options['stat_array'], reverse=True)
+        scores = {s: stat_array[i] for i, s in enumerate(priority)}
+        
+        self.db.execute('INSERT INTO characters (character_id, entity_id, user_id, name, class_id, species_id, background, alignment) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', 
+                        (char_id, entity_id, uid, name, char_class, species, background, "True Neutral"))
+
+        self.db.execute('INSERT INTO character_stats (character_id, strength, dexterity, constitution, intelligence, wisdom, charisma) VALUES (?, ?, ?, ?, ?, ?, ?)', 
+                        (char_id, scores['Strength'], scores['Dexterity'], scores['Constitution'], scores['Intelligence'], scores['Wisdom'], scores['Charisma']))
+
+        weights = {"Fighter": {"aggression": 0.8, "caution": 0.2}, "Rogue": {"aggression": 0.4, "caution": 0.8}, "Wizard": {"aggression": 0.3, "caution": 0.6}}.get(char_class, {"aggression": 0.5, "caution": 0.5})
+        self.db.execute('INSERT INTO agent_personas (agent_id, entity_id, persona_name, tactical_weights, interaction_style, tone) VALUES (?, ?, ?, ?, ?, ?)', 
+                        (agent_id, entity_id, f"Jarvis-{name}", json.dumps(weights), "Collaborative C2", "Strategic and Concise"))
+
+        item_query = self.db.query("SELECT item_id FROM registry_items WHERE name = ?", (weapon_name,))
+        weapon_id = item_query[0]['item_id'] if item_query else None
+        if weapon_id:
+            self.db.execute('INSERT INTO inventory (character_id, item_id, is_equipped) VALUES (?, ?, 1)', (char_id, weapon_id))
+
+        hit_die = self.options['classes'][char_class].get('hit_die', 8)
+        max_hp = hit_die + self.calculate_modifier(scores['Constitution'])
+        self.db.execute('INSERT INTO game_state (character_id, current_hp, active_weapon_id, turn_status) VALUES (?, ?, ?, 'ready')', (char_id, max_hp, weapon_id))
+        self.db.execute('INSERT INTO lobby_state (entity_id, user_id, agent_id, is_ready) VALUES (?, ?, ?, 1)', (entity_id, uid, agent_id))
+        self.db.execute('INSERT INTO plan_buffer (entity_id, draft_plan, status) VALUES (?, ?, 'DRAFT')', (entity_id, json.dumps([])))
+
+        return entity_id
+
+class GameplayAgent:
+    def __init__(self, entity_id, db_handler=None):
+        self.entity_id = entity_id
+        self.db = db_handler or DBHandler()
+        res = self.db.query("SELECT * FROM agent_personas WHERE entity_id = ?", (self.entity_id,))
+        self.persona = dict(res[0]) if res else None
+
+    def get_perception_feed(self):
+        sql = 'SELECT gs.current_hp, gs.turn_status, cs.strength, cs.dexterity, cs.constitution, ri.name as active_weapon, 20 as lighting_level, \"10m\" as visibility_range, +2 as stealth_modifier FROM game_state gs JOIN characters c ON gs.character_id = c.character_id JOIN character_stats cs ON c.character_id = cs.character_id LEFT JOIN inventory inv ON c.character_id = inv.character_id AND inv.is_equipped = 1 LEFT JOIN registry_items ri ON inv.item_id = ri.item_id WHERE c.entity_id = ?'
+        res = self.db.query(sql, (self.entity_id,))
+        return dict(res[0]) if res else None
+
+    def propose_action(self):
+        feed = self.get_perception_feed()
+        weights = json.loads(self.persona['tactical_weights']) if self.persona else {}
+        if feed['current_hp'] < 5:
+            suggestion, action = "CRITICAL: HP low. Retreat now!", {"type": "MOVE", "target": "Cover"}
+        elif weights.get('aggression', 0.5) > 0.7:
+            suggestion, action = "Tactical Advantage. Push forward!", {"type": "ATTACK", "target": "Enemy"}
+        else:
+            suggestion, action = "Maintaining perimeter.", {"type": "WAIT", "target": None}
+        self.db.execute("INSERT OR REPLACE INTO plan_buffer (entity_id, draft_plan, status) VALUES (?, ?, 'DRAFT')", (self.entity_id, json.dumps([action])))
+        return suggestion, action
+
+    def commit_plan(self):
+        res = self.db.query("SELECT draft_plan FROM plan_buffer WHERE entity_id = ?", (self.entity_id,))
+        if not res: return None
+        plan = res[0]['draft_plan']
+        self.db.execute("UPDATE plan_buffer SET status = 'COMMITTED' WHERE entity_id = ?", (self.entity_id,))
+        return plan
+
+def main():
+    db = DBHandler()
+    print("--- Phase 1: Character Creation ---")
+    name = input("Name: ")
+    char_class = input("Class (Fighter/Rogue/Wizard): ")
+    species = input("Species (Human/Elf/Dwarf): ")
+    bg = input("Background (Soldier/Criminal/Scholar): ")
+    weapon = input("Starting Weapon (Longsword/Dagger/Staff): ")
+    
+    builder = UnifiedEntityBuilder(db)
+    eid = builder.build_unified_entity(name, char_class, species, bg, weapon)
+    print(f"\\n✅ Unified Entity Created: {eid}")
+    print("✅ Lobby State: READY")
+
+    print(f"\\n--- Phase 2: Jarvis Tactical Session ---")
+    jarvis = GameplayAgent(eid, db)
+    
+    while True:
+        cmd = input("\\nUser > ").strip().lower()
+        if cmd == "quit": break
+        if cmd == "status":
+            print(f"🤖 JARVIS: {json.dumps(jarvis.get_perception_feed(), indent=2)}")
+        elif cmd == "help":
+            s, a = jarvis.propose_action()
+            print(f"🤖 JARVIS: {s}\\n📝 PLAN: {a}")
+        elif cmd == "commit":
+            print(f"🚀 ENGINE: Executing {jarvis.commit_plan()}")
+        elif cmd.startswith("damage"):
+            try:
+                amt = int(cmd.split()[1])
+                cid = db.query("SELECT character_id FROM characters WHERE entity_id = ?", (eid,))[0]['character_id']
+                curr = db.query("SELECT current_hp FROM game_state WHERE character_id = ?", (cid,))[0]['current_hp']
+                db.execute("UPDATE game_state SET current_hp = ? WHERE character_id = ?", (curr - amt, cid))
+                print(f"💥 {name} took {amt} damage!")
+            except: print("Use: damage 10")
+
+if __name__ == \"__main__\":
+    main()

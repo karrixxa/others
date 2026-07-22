@@ -1,0 +1,32 @@
+{
+  "stat_array": [15, 14, 13, 12, 10, 8],
+  "classes": {
+    "Rogue": {
+      "primary_stat": "Dexterity",
+      "stat_priority": ["Dexterity", "Constitution", "Charisma", "Wisdom", "Intelligence", "Strength"],
+      "hit_die": 8,
+      "base_ac": 14,
+      "feature": "Sneak Attack",
+      "skill_options": ["Stealth", "Acrobatics", "Investigation", "Persuasion"]
+    }
+  },
+  "species": {
+    "Elf": {
+      "trait": "Darkvision",
+      "speed": 30
+    }
+  },
+  "backgrounds": {
+    "Criminal": {
+      "skill": "Stealth",
+      "theme": "Underworld contacts"
+    }
+  },
+  "skills": {
+    "Stealth": "Dexterity",
+    "Acrobatics": "Dexterity",
+    "Investigation": "Intelligence",
+    "Perception": "Wisdom",
+    "Persuasion": "Charisma"
+  }
+}

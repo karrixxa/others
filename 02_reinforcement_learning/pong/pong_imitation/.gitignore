@@ -1,0 +1,8 @@
+# Ignore large data files and virtual environments
+venv/
+__pycache__/
+*.npz
+*.pth
+*.zip
+.ipynb_checkpoints/
+.env
