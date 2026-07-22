@@ -1,0 +1,478 @@
+HERMES AGENT INSTRUCTIONS
+Biologically Plausible Free-Energy Competitive Neural Architecture
+Based on the handwritten board notes and meeting transcript
+
+PURPOSE
+The goal is to build a small, event-driven neural fabric that can self-organize, discover recurring spatial patterns, and form symbolic representations without labels, backpropagation, or an external training controller. The first experiment should remain simple enough to inspect completely: a noisy 3x3 sensory grid containing horizontal, vertical, diagonal, corner, and related line patterns.
+
+This is not meant to become a standard artificial neural network with biological terminology added on top. The implementation must preserve local spiking dynamics, local synaptic learning, excitation and inhibition, finite learning resources, competition, and continuous inference/learning.
+
+============================================================
+1. CORE PRINCIPLES / NON-NEGOTIABLE TENETS
+============================================================
+
+1. FIRING IS CAUSAL
+A spike is an event that says the neuron participated in the current structure. A neuron that does not fire is non-causal for that event and must not be treated as representing an explicit binary zero.
+
+Consequences:
+- Process spikes/events, not dense vectors of ones and zeros.
+- Preserve the spatial and temporal location of every input spike.
+- Do not update a neuron merely because an input was absent.
+- A pattern is represented by the structure of neurons that actually fired.
+
+2. NEURONS THAT FIRE TOGETHER WIRE TOGETHER
+Learning is Hebbian and local. When a postsynaptic neuron fires, the excitatory synapses that were causally active shortly before that spike may strengthen.
+
+Consequences:
+- No labels.
+- No externally computed classification loss.
+- No backpropagation.
+- No global optimizer deciding which weights should change.
+- Inactive synapses must not be strengthened during that event.
+
+3. EVERY NEURON CONTROLS ITS OWN LEARNING
+Each neuron must determine, using only local state, when it can learn, when it should stop learning, and how strongly it should update.
+
+The neuron may use:
+- Its membrane potential.
+- Its recent spike history.
+- Its excitatory and inhibitory conductances.
+- Its refractory state.
+- Its remaining free energy.
+- Locally available pre- and postsynaptic timing.
+
+There must be no external oracle that looks across the network and directly assigns a neuron to a pattern.
+
+4. ONLY EXCITATORY AND INHIBITORY CONNECTIONS
+The primitive connection types are excitatory and inhibitory.
+
+Interpretation:
+- Excitatory synapses add inward drive and help charge the membrane.
+- Inhibitory synapses remove or oppose drive and can suppress firing.
+- Synaptic weights should be interpreted as effective ion-channel conductances, not arbitrary ANN coefficients.
+- Connectivity is part of the computation. Which neurons are connected matters as much as the numerical values of the weights.
+
+The transcript suggests using more excitatory than inhibitory elements, with a possible modeling ratio such as 2:1. Treat the exact ratio as an experimental choice, not as a fixed biological fact.
+
+5. REFRACTORY PERIODS ARE REAL DYNAMICS
+After firing, a neuron enters a refractory period in which it cannot immediately win again.
+
+The refractory period:
+- Limits the neuron's maximum firing rate.
+- Prevents one early winner from firing continuously.
+- Gives competing neurons time to recover and possibly represent additional patterns.
+- Must be implemented as a dynamical state, not as a post-processing rule.
+
+6. ONE LOCAL SYMBOL SHOULD HAVE ONE PRIMARY NEURAL REPRESENTATIVE
+Within a local competitive group, the target is for one neuron to become the clearest representative of one recurring pattern.
+
+This does not mean the entire brain uses one neuron for every concept. It means that within the current small experiment, a neuron's firing should have an interpretable meaning. A neuron that strongly represents several unrelated patterns becomes ambiguous and violates the symbolic goal.
+
+7. LEARNING AND INFERENCE ARE CONTINUOUS
+The network must not have separate artificial "training mode" and "inference mode" algorithms. The same fabric should always process events. Learning occurs whenever the local biological conditions for learning are satisfied.
+
+8. THE FABRIC IS PREDICTIVE
+Prediction is not an optional add-on. It is a central purpose of the architecture.
+
+The system should:
+- Build a compact symbolic representation of recurring input structure.
+- Use learned structure to predict expected lower-level activity.
+- Reduce unnecessary activity or energy when the input is well predicted.
+- Leave unpredicted residual spikes when the current input is not understood.
+- Use those residual events to guide learning and attention.
+
+============================================================
+2. BASIC NEURON MODEL
+============================================================
+
+Use a true leaky integrate-and-fire neuron, not a perceptron disguised as one.
+
+For neuron i:
+
+Membrane dynamics:
+    V_i(t+1) = alpha * V_i(t)
+               + excitatory_input_i(t)
+               - inhibitory_input_i(t)
+
+Where:
+    excitatory_input_i(t) = sum_j wE_ij * spike_j(t)
+    inhibitory_input_i(t) = sum_k wI_ik * spike_k(t)
+
+A spike occurs only when:
+    V_i(t) >= threshold_i
+    AND neuron i is not refractory
+
+After firing:
+    spike_i(t) = 1
+    V_i is reset
+    refractory_counter_i is started
+
+Important:
+- Input must accumulate over time.
+- Charge must leak over time.
+- Timing must affect whether the threshold is reached.
+- Do not replace this with sum(weights * inputs) > threshold evaluated once per sample.
+- The weights represent conductance/channel strength that changes how quickly the membrane charges.
+
+============================================================
+3. FREE ENERGY: CONCEPTUAL MEANING
+============================================================
+
+Free energy is the neuron's remaining capacity to change its synapses and commit itself to a pattern.
+
+At the beginning:
+- The neuron has weak, relatively uncommitted connections.
+- It has high free energy and can learn substantially.
+
+As it repeatedly fires for a pattern:
+- Causally active excitatory channels strengthen.
+- The neuron reaches threshold faster for that pattern.
+- More of its available synaptic capacity becomes committed.
+- Its free energy decreases.
+
+When it is strongly tuned:
+- It should have little free energy left.
+- It should fire reliably for its learned pattern.
+- It should not keep absorbing unrelated patterns.
+- Learning should become very small or stop.
+
+Free energy is local to each neuron. It is not a single global network budget.
+
+The exact free-energy equation was not finalized in the discussion. The transcript explicitly leaves open whether it should be based on:
+- Excitatory strength relative to a maximum.
+- Excitatory strength relative to firing threshold.
+- A relationship between excitation and inhibition.
+- A mixture of these quantities.
+
+Do not present one equation as biologically proven. Implement the equation as a replaceable strategy so alternatives can be tested.
+
+============================================================
+4. PROVISIONAL FREE-ENERGY FORMULATION FOR THE FIRST SIMULATION
+============================================================
+
+A practical first version may define a normalized learning budget:
+
+    committed_i = clip(sum_j wE_ij / W_budget_i, 0, 1)
+
+    free_energy_i = 1 - committed_i
+
+Then scale local learning by:
+
+    effective_learning_rate_i = base_learning_rate * free_energy_i
+
+Only apply the update when the neuron fires:
+
+    if spike_i(t) == 1:
+        for each excitatory synapse j active in the causal window:
+            wE_ij += effective_learning_rate_i * local_trace_j
+
+This produces the required behavior:
+- Early learning is strong.
+- Learning slows as the neuron commits.
+- A fully committed neuron cannot continue learning every pattern.
+- The neuron determines its learning capacity from its own weights.
+
+The "cancellation" of excitation and inhibition belongs in the membrane drive:
+
+    net_drive_i(t) =
+        sum_j wE_ij * spikeE_j(t)
+        - sum_k wI_ik * spikeI_k(t)
+
+Inhibition cancels part of the excitatory current before thresholding. Do not automatically subtract inhibitory weights from the free-energy budget unless that specific hypothesis is being tested.
+
+Possible later alternative:
+
+    free_energy_i =
+        clip((threshold_i - effective_committed_drive_i)
+             / threshold_i, 0, 1)
+
+Keep all free-energy formulas modular and log their values so the team can compare them.
+
+============================================================
+5. COMPETITIVE LEARNING / THE RACE
+============================================================
+
+A group of candidate neurons receives overlapping input from the same 3x3 sensory field. They race to threshold.
+
+Expected sequence:
+1. A spatial-temporal input pattern arrives.
+2. Several neurons integrate the pattern.
+3. The neuron whose current weights best match the input reaches threshold first.
+4. That neuron fires.
+5. Its spike recruits inhibition onto nearby competitors.
+6. Competitors are delayed or suppressed.
+7. The winner strengthens only the causally active excitatory synapses.
+8. The winner enters refractory state.
+9. Other neurons may later recover and fire if sufficient unexplained structure remains.
+
+Do not make competition so absolute that only one neuron ever fires and all others are permanently disconnected. The transcript emphasizes that firing helps neurons build meaningful connectivity to the outside world. A neuron that never fires can never learn under the causal-learning rule.
+
+The desired behavior is competitive specialization, not permanent starvation.
+
+============================================================
+6. WINNERS, RUNNERS-UP, AND NOISY WEIGHTS
+============================================================
+
+A runner-up may partially strengthen several patterns before it becomes specialized. This can create a "jack of all trades, master of none" neuron with noisy weights.
+
+The system therefore needs a slow cleanup mechanism.
+
+Possible local decay rule:
+- Recently and repeatedly reinforced weights remain strong.
+- Weak, unsupported, or rarely causal weights decay slowly.
+- Decay occurs over a much longer timescale than spike integration.
+- Decay must not instantly erase useful connectivity.
+- A fully trained neuron can gradually become plastic again if its pattern disappears for a long time.
+
+One provisional form:
+
+    wE_ij <- wE_ij
+             - decay_rate * inactivity_factor_ij
+             + Hebbian_increment_ij
+
+Where inactivity_factor is large only when the synapse has not recently contributed to postsynaptic spikes.
+
+The transcript also considers inhibition as a possible biological signal that closes or weakens unused gates. If tested, this must remain local: inhibitory activity may modulate decay or plasticity, but it should not directly impose an externally selected target weight.
+
+============================================================
+7. HANDLING OLD KNOWLEDGE AND NEW PATTERNS
+============================================================
+
+A highly trained neuron should resist learning unrelated patterns. This is intentional: a stable symbolic representation should not be overwritten immediately.
+
+When a new pattern appears:
+- An unused or less committed neuron should ideally learn it.
+- A previously tuned neuron may respond weakly if the pattern overlaps.
+- Long-term decay can eventually release capacity if the old pattern stops occurring.
+- The system should preserve old knowledge unless there is sustained evidence that it is no longer useful.
+
+This is similar to belief stability: learning is easy before commitment and harder afterward.
+
+============================================================
+8. PREDICTION AND ENERGY REDUCTION
+============================================================
+
+A learned representation should reduce the amount of low-level activity required to process familiar input.
+
+Conceptual flow:
+- Feedforward spikes build increasingly abstract symbols.
+- Higher-level symbols send predictions back toward lower levels.
+- Predicted input is cancelled, inhibited, or otherwise explained.
+- Residual activity represents prediction error or novelty.
+- Large residual activity means the system does not understand the input well.
+- Small residual activity means the learned model explains the input.
+
+A simple measurable prediction-error signal can be:
+
+    residual_activity =
+        observed_input_spikes - predicted_input_spikes
+
+For a strictly event-based implementation, represent residuals using actual unpredicted spikes rather than dense signed vectors whenever possible.
+
+Prediction should produce local, immediate learning signals. The architecture should not wait for a distant final reward when a mismatch is already visible in the current layer.
+
+============================================================
+9. SYMBOL FORMATION AND HIERARCHICAL COMPOSITION
+============================================================
+
+The first layer learns local primitives such as:
+- Horizontal strokes.
+- Vertical strokes.
+- Diagonals.
+- Corners.
+- Intersections.
+- Other frequently recurring 3x3 structures.
+
+A later layer can compose already learned primitives into larger symbols and shapes.
+
+Example:
+- One lower-level population represents a vertical line.
+- Another represents a horizontal line.
+- A higher-level neuron learns their joint temporal/spatial occurrence as a cross.
+
+The system should reuse existing learned primitives instead of relearning all raw pixels for every new object. This is how composition can reduce learning energy and support scale.
+
+The one-neuron/one-symbol rule applies to the primary interpretation at the relevant local layer. The detailed lower-level structure remains available through the population of contributing neurons.
+
+============================================================
+10. INITIAL 3x3 EXPERIMENT
+============================================================
+
+Input:
+- Nine spatial receptor positions arranged in a 3x3 grid.
+- Inputs arrive as spikes with spatial and temporal identity.
+- Patterns include horizontal, vertical, diagonal, corner, cross, and noisy or incomplete variants.
+
+Network:
+- A small competitive population of excitatory feature neurons.
+- One or more inhibitory neurons, or local cross-inhibitory connections.
+- Every feature neuron initially receives weak excitatory connections from the nine inputs.
+- Weights begin similar but include small random differences to break symmetry.
+- No class labels are supplied during learning.
+
+Desired result:
+- Different neurons specialize in different recurring patterns.
+- A neuron fires earlier and more reliably for its learned pattern.
+- Synaptic heatmaps become visually interpretable.
+- Noise does not cause every neuron to learn everything.
+- Prediction of familiar patterns reduces residual activity.
+- Novel patterns produce larger residual activity and recruit remaining plastic neurons.
+
+============================================================
+11. REQUIRED VISUALIZATIONS AND LOGS
+============================================================
+
+The simulation must be inspectable. Record both individual-neuron and population-level behavior.
+
+For every neuron, log:
+- Membrane potential over time.
+- Spike times.
+- Refractory state.
+- Excitatory and inhibitory input current.
+- All synaptic weights.
+- Free energy.
+- Effective learning rate.
+- Which presynaptic events were considered causal.
+- Weight growth and decay.
+- Competition rank or firing latency for each pattern.
+
+Population views:
+- Spike raster plot.
+- Winner and runner-up for each input presentation.
+- Heatmap of each neuron's 3x3 excitatory receptive field.
+- Inhibitory connectivity diagram.
+- Pattern-to-neuron response matrix.
+- Firing latency by pattern.
+- Free-energy trajectories.
+- Residual/prediction-error activity.
+- Number of neurons specialized, unused, ambiguous, or starved.
+
+Heatmap convention:
+- Higher excitatory weight should appear darker.
+- Display the nine weights in their actual 3x3 spatial arrangement.
+- Do not flatten the weights into an uninterpretable bar chart only.
+
+============================================================
+12. TESTS THE IMPLEMENTATION MUST PASS
+============================================================
+
+Causality test:
+- A synapse that did not spike in the causal window must not receive Hebbian strengthening.
+
+No-oracle test:
+- Removing labels and external assignments must not change the learning mechanism because labels are never used.
+
+Timing test:
+- The same set of input spikes with different timing should be capable of producing a different membrane response.
+
+Leak test:
+- Slowly separated weak events should leak away and fail to trigger a spike.
+
+Free-energy test:
+- A neuron with high free energy learns faster than the same neuron near full commitment.
+
+Saturation test:
+- A strongly tuned neuron shows little learning for unrelated patterns.
+
+Competition test:
+- A better-matched neuron fires earlier and inhibits competitors.
+
+Refractory test:
+- The recent winner cannot instantly win again during its refractory period.
+
+Specialization test:
+- After repeated mixed-pattern exposure, different neurons develop distinguishable receptive-field heatmaps.
+
+Decay test:
+- Weak, unsupported weights decline slowly while frequently reinforced weights remain stable.
+
+Prediction test:
+- Familiar patterns create less residual activity than novel or corrupted patterns.
+
+Continuous-learning test:
+- There is no separate offline training algorithm. The same event loop handles learning and inference.
+
+============================================================
+13. IMPLEMENTATION WARNINGS
+============================================================
+
+Do not:
+- Convert the neuron into a static perceptron.
+- Use argmax to assign a class and then directly train the chosen neuron.
+- Update weights for neurons that did not fire.
+- Strengthen synapses that were inactive.
+- Treat absence of a spike as an explicit causal zero.
+- Use a global loss function to tune all weights.
+- Normalize all neurons with a global operation that violates local learning.
+- Let one winner permanently suppress all competitors.
+- Hide unstable dynamics by reporting only final accuracy.
+- Call an arbitrary scalar "free energy" without showing how it changes plasticity.
+- allow a neuron to keep learning unrelated patterns after it is supposedly committed.
+
+============================================================
+14. OPEN RESEARCH QUESTIONS TO KEEP EXPLICIT
+============================================================
+
+The following points were not finalized and should remain configurable:
+
+- The exact free-energy equation.
+- Whether inhibitory activity contributes directly to free-energy accounting.
+- The number and topology of inhibitory neurons.
+- The excitatory-to-inhibitory ratio.
+- Whether losers may fire later in the same presentation.
+- The precise causal timing window for Hebbian learning.
+- The timescale and mechanism of synaptic decay.
+- How prediction suppresses or cancels expected input.
+- How much overlap is acceptable before a neuron is considered ambiguous.
+- How a fully committed neuron regains plasticity.
+- When hierarchical composition should begin.
+
+Do not silently choose one answer and present it as settled. Expose these as parameters and compare alternatives experimentally.
+
+============================================================
+15. MINIMUM DEVELOPMENT ORDER
+============================================================
+
+Phase 1: Correct event-driven LIF dynamics
+- Spikes, leak, threshold, reset, and refractory period.
+
+Phase 2: Local causal Hebbian learning
+- Update only active synapses when the postsynaptic neuron fires.
+
+Phase 3: Local free-energy control
+- Learning rate decreases as the neuron commits.
+
+Phase 4: Competition and inhibition
+- First-spike race with biologically interpretable inhibitory suppression.
+
+Phase 5: 3x3 pattern specialization
+- Train on mixed noisy lines and inspect receptive-field heatmaps.
+
+Phase 6: Slow decay and recovery
+- Clean noisy weights and permit eventual relearning.
+
+Phase 7: Prediction
+- Generate expected lower-layer activity and measure residual events.
+
+Phase 8: Hierarchical composition
+- Compose learned line primitives into larger shapes and symbols.
+
+============================================================
+FINAL DESIGN STANDARD
+============================================================
+
+A valid implementation should show that:
+
+- Events, not binary states, drive computation.
+- Spikes are causal.
+- Learning happens only through local firing relationships.
+- Each neuron regulates its own plasticity through finite free energy.
+- Excitation, inhibition, leak, threshold, reset, and refractory dynamics remain explicit.
+- Competition produces specialization without starving the entire population.
+- Learned neurons become stable symbolic representatives.
+- Weak and unused associations can decay.
+- Prediction reduces unexplained activity.
+- Learning and inference occur continuously in the same neural fabric.
+- Every important internal process can be visualized and tested.
+
+The first success criterion is not high classification accuracy. It is a transparent, self-organizing system whose dynamics visibly follow these principles and whose learned 3x3 receptive fields can be interpreted.

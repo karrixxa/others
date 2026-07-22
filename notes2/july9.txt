@@ -1,0 +1,767 @@
+Detailed Summary: LPS Inhibitory Layers, Raster Plot, and Continuous vs. Discrete Fixes
+
+This summary is based on the uploaded transcript and notes. The main point is that the system is supposed to behave like a real coupled excitatory/inhibitory neural circuit, not like a software classifier that secretly chooses a winner.
+
+The biggest themes are:
+
+1. Neurons must use local information only.
+2. Inhibitory neurons are activity modulators, not shape classifiers.
+3. The first-layer inhibitory neurons should help suppress the input stream, especially shared/common inputs.
+4. The raster plot should prove whether the topology is actually working.
+5. A charge heatmap is needed because the raster only shows spikes, not subthreshold charge.
+6. The current discrete-time simulation can create fake simultaneous firing.
+7. There are two main proposed fixes for the continuous-vs-discrete problem: event ordering by overshoot, or synaptic charge flow over time.
+
+
+============================================================
+1. Core idea: local learning only
+============================================================
+
+The system is supposed to be biologically grounded. That means a neuron should only use information that physically comes into it.
+
+A neuron should not know:
+
+- which other neuron has the highest voltage,
+- which neuron is globally the “best match,”
+- which neuron should be the winner,
+- which pattern is being shown as a label,
+- or what the whole network is doing.
+
+The neuron only has access to its own local incoming spikes, synaptic weights, charge, inhibition, refractory state, and local dynamics.
+
+This matters because agents or code assistants often try to “help” by adding global software logic. For example, they may write code that checks all excitatory neurons and chooses the one with the largest charge. That might make the demo look cleaner, but it violates the goal of the project.
+
+The winner should emerge from physical dynamics:
+
+sensory input -> excitatory charging -> excitatory spikes -> inhibitory accumulation -> inhibition suppresses competitors -> one neuron remains dominant.
+
+The inhibitory circuit should cause the selection, not a hidden software rule.
+
+
+============================================================
+2. Excitatory vs. inhibitory neurons
+============================================================
+
+The system has excitatory and inhibitory nodes.
+
+Excitatory neurons add charge. They carry information coming from the sensory pattern.
+
+Inhibitory neurons subtract charge, reduce charge, slow input, or suppress activity. They are modulatory. They help control the network so that too many neurons do not fire at once.
+
+Inhibitory neurons are not learning the shape in the same way the excitatory representative neuron learns the shape. They are learning how to control activity.
+
+So the simplified meaning is:
+
+Excitatory = “this information is present.”
+
+Inhibitory = “quiet down / reduce activity / sharpen the competition.”
+
+The inhibitory side is essential for winner-take-all behavior.
+
+
+============================================================
+3. Layer 2 inhibition: the main winner selector
+============================================================
+
+Layer 2 is the competitive excitatory layer.
+
+At the start, the E neurons have random or weakly structured weights. When a pattern is shown, all relevant E neurons should receive input and begin accumulating charge.
+
+Early in training, multiple E neurons may fire. This is expected because the system has not learned clean competition yet.
+
+The expected sequence is:
+
+1. A sensory pattern fires.
+2. All connected E neurons receive input.
+3. Several E neurons begin charging.
+4. One E neuron may spike first.
+5. That E spike sends charge into the inhibitory neuron.
+6. One E spike may not be enough to make the inhibitory neuron fire.
+7. More E spikes arrive.
+8. The inhibitory neuron accumulates charge.
+9. When the inhibitory neuron crosses threshold, it fires.
+10. That inhibitory spike suppresses the other E neurons.
+11. The competition becomes cleaner over training.
+
+Important: the first E neuron to spike is not automatically the official winner unless its spike causes the inhibitory system to select it. The inhibitory circuit is what closes the competition.
+
+The Layer 2 inhibitory neuron, I1, should not be cosmetic. It should be the physical mechanism that quiets down the competing E neurons.
+
+A healthy final behavior for one pattern is:
+
+pattern appears -> one E neuron fires reliably -> I1 fires quickly -> competitors are suppressed -> same E neuron represents that pattern.
+
+For a different pattern, a different E neuron should win.
+
+
+============================================================
+4. The tyrant neuron problem
+============================================================
+
+A major reason inhibition matters is the “tyrant neuron” problem.
+
+Suppose one neuron learns a horizontal pattern very well. It may develop a very strong weight for the center sensory input. But the center input is shared by many patterns, such as vertical and diagonal patterns.
+
+If the old horizontal winner has a huge center weight, it might fire first for a new vertical pattern just because the vertical pattern also uses the center. Then it could trigger inhibition and suppress the neurons that should have represented the vertical pattern.
+
+That would make one neuron win too many patterns.
+
+That is bad because one neuron representing everything means the network has not learned useful information.
+
+The goal is not:
+
+one neuron wins every pattern.
+
+The goal is:
+
+one pattern -> one representative neuron,
+different pattern -> different representative neuron.
+
+The system needs mechanisms that prevent a strong old winner from becoming a tyrant. First-layer inhibition is one of those mechanisms.
+
+
+============================================================
+5. First-layer inhibitory neurons: what they do
+============================================================
+
+The first-layer inhibitory neurons are the big thing to pay attention to.
+
+They are located near the sensory/input layer. They are not supposed to be a second classifier. They are activity modulators for the input stream.
+
+Their job is to suppress or slow down sensory/input activity, especially shared/common inputs that could let an old winner dominate again.
+
+Layer 2 inhibition quiets the competing E neurons.
+
+Layer 1 inhibition quiets or slows the sensory/input channels feeding the competition.
+
+This matters because if one input is common to multiple patterns, like the center pixel, the first-layer inhibitory circuit can reduce the firing rate or impact of that common input. Then the system has a better chance to let the pattern-specific inputs decide the winner.
+
+So first-layer inhibition helps with:
+
+- input-rate control,
+- suppression of shared/common inputs,
+- preventing tyrant neurons,
+- breaking symmetry,
+- improving specialization,
+- making the competition less jumbled.
+
+The first-layer inhibitory neurons are not there to say “this is horizontal” or “this is vertical.” They are there to regulate how strongly the input pattern continues to drive the competition.
+
+
+============================================================
+6. When should first-layer inhibitory neurons fire?
+============================================================
+
+The first-layer inhibitory neurons do not necessarily need to fire constantly during raw sensory input.
+
+They should become visible when the upper-layer competition/inhibition engages. In the transcript, the idea is that when the Layer 2 inhibitory circuit fires, the Layer 1 inhibitory nodes should also fire or become active because they are connected into the same coupled dynamic system.
+
+So in the raster, you should expect Layer 1 inhibitory activity around or shortly after the Layer 2 inhibitory event, depending on delays.
+
+Expected sequence:
+
+sensory spikes
+-> L2 excitatory neurons charge
+-> one or more L2 E neurons spike
+-> I1 accumulates charge
+-> I1 fires
+-> L1 inhibitory neurons fire or become active
+-> input firing rate slows or common input is suppressed
+-> L2 competitors fall behind
+
+If the first-layer inhibitory rows are always empty, that is suspicious.
+
+It could mean:
+
+- the L1 inhibitory neurons are not connected,
+- they are connected but never receive enough charge,
+- their threshold is too high,
+- their incoming weights are too low,
+- they are firing but not being logged,
+- they are logged but not being plotted,
+- the raster is filtering them out,
+- or the implementation still treats them as prediction-only visuals rather than active circuit nodes.
+
+The UI should make this obvious.
+
+
+============================================================
+7. Raster plot: what it is supposed to show
+============================================================
+
+The raster plot shows spikes over time.
+
+The x-axis is time.
+
+The y-axis is every node in the network.
+
+Each dot or mark means that node fired at that time.
+
+The raster should be grouped by layer and node type. A useful layout would be:
+
+Sensory/Input rows
+Layer 1 inhibitory rows
+Layer 2 excitatory rows
+Layer 2 inhibitory/I1 row
+
+Excitatory and inhibitory spikes should look visually different. The professor mentioned red for excitatory and green for inhibitory, but the exact colors are less important than clarity.
+
+The raster is supposed to answer:
+
+- Which nodes fired?
+- When did they fire?
+- Did inhibition fire after E activity?
+- Did E competitors stop or slow down after inhibition?
+- Did Layer 1 inhibition appear when it should?
+- Did the same winner keep firing?
+- Did one old winner become a tyrant?
+- Are multiple E neurons being treated as winners at the same time?
+
+The raster should not just show a pretty animation. It should be a debugging tool.
+
+
+============================================================
+8. Expected raster early in training
+============================================================
+
+Early in training, the raster may look messy.
+
+That is normal because the weights are not specialized yet.
+
+You may see:
+
+- repeated sensory spikes,
+- several E neurons firing,
+- weak or delayed inhibition,
+- I1 taking multiple E spikes before firing,
+- multiple E neurons spiking close together,
+- unclear winners.
+
+A rough early-training raster story:
+
+Input rows:
+repeated pattern spikes.
+
+L2 E rows:
+several E neurons begin firing because they are all trying to represent the pattern.
+
+I1 row:
+fires later, after enough E spikes accumulate.
+
+L1 inhibitory rows:
+should appear around/after the inhibitory event if the L1 inhibition is implemented.
+
+L2 E competitors:
+should begin getting delayed or suppressed after inhibition.
+
+This messy early phase is acceptable only if the system gradually becomes cleaner with training.
+
+
+============================================================
+9. Expected raster after learning
+============================================================
+
+After learning improves, the raster should become cleaner.
+
+For one pattern, you should see something like:
+
+Input pattern fires.
+One E neuron spikes reliably.
+I1 fires quickly.
+Layer 1 inhibition may activate to slow/suppress input.
+Other E neurons stop firing or become delayed.
+The same E neuron remains the representative for that pattern.
+
+For another pattern, a different E neuron should become the representative.
+
+The final raster should show specialization.
+
+Good sign:
+
+Pattern A -> E2 wins.
+Pattern B -> E5 wins.
+Pattern C -> E1 wins.
+Pattern D -> E7 wins.
+
+Bad sign:
+
+Pattern A -> E2 wins.
+Pattern B -> E2 wins.
+Pattern C -> E2 wins.
+Pattern D -> E2 wins.
+
+That bad case means tyrant behavior.
+
+
+============================================================
+10. What the Layer 1 inhibitory rows should look like in the raster
+============================================================
+
+The Layer 1 inhibitory rows should not be empty forever.
+
+They should show activity when the circuit sends inhibition back toward the input layer.
+
+Around the time I1 fires, the raster should show something like:
+
+L2 E neuron spikes.
+Maybe another L2 E neuron spikes.
+I1 accumulates and fires.
+Layer 1 inhibitory nodes fire or activate.
+The input stream slows or shared input becomes less dominant.
+Other L2 E competitors stop firing or become spaced out.
+
+If the bottom inhibition plot is empty, that is a major debugging clue.
+
+It may mean the code is not actually activating first-layer inhibition, or it may mean the visualization is not logging/plotting those spikes.
+
+The UI should have an explicit check like:
+
+L1 inhibitory events this trial: 0 / nonzero
+L1 inhibitory spikes plotted: yes / no
+L1 inhibition connected to sensory inputs: yes / no
+L1 inhibition received events from L2/I1: yes / no
+
+This would make the issue easier to diagnose.
+
+
+============================================================
+11. Charge heatmap: why it is needed
+============================================================
+
+The raster only shows spikes.
+
+But it does not show subthreshold charge.
+
+A neuron can be close to firing without appearing in the raster. That is why a charge heatmap is needed.
+
+The charge heatmap should use the same axes:
+
+x-axis = time
+y-axis = nodes
+
+But instead of showing only spike marks, every node gets a color at every time step based on accumulated charge.
+
+Low charge = cool color, such as blue.
+High charge = hot color, such as yellow/orange/red.
+
+The heatmap should ideally normalize each node’s charge by its own threshold. That way, different node types can be compared fairly.
+
+Useful value:
+
+normalized charge = accumulated charge / threshold
+
+Then:
+
+0.0 = cold / no charge
+0.5 = halfway to threshold
+1.0 = at threshold
+above 1.0 = overshoot or above threshold, if overshoot exists in the discrete sim
+
+The heatmap should show:
+
+- E neurons warming up as they charge,
+- I1 warming up as E spikes arrive,
+- competitors cooling down after inhibition,
+- Layer 1 input channels cooling/slowing after L1 inhibition,
+- whether inhibition actually changes charge.
+
+This is important because a raster can show that an inhibitory neuron fired, but only the heatmap can show whether that inhibition actually reduced competitor charge.
+
+
+============================================================
+12. Raster and heatmap should agree
+============================================================
+
+The raster and heatmap should tell the same story.
+
+If the raster shows I1 firing, the heatmap should show competitor E neurons cooling down afterward.
+
+If the raster shows Layer 1 inhibition firing, the heatmap should show changes in input/sensory charge or input-rate effects.
+
+If the raster shows no Layer 1 inhibitory spikes, but the model claims Layer 1 inhibition is working, then something is wrong or hidden.
+
+If the heatmap shows E competitors staying hot after I1 fires, then I1 is not actually suppressing them.
+
+Debugging principle:
+
+Activity should match topology.
+
+If the topology says E connects to I1, then E spikes should charge I1.
+
+If the topology says I1 suppresses E competitors, then E competitors should cool down or stop firing after I1.
+
+If the topology says L2 inhibition activates L1 inhibition, then the raster should show L1 inhibitory activity and the heatmap should show input-level effects.
+
+
+============================================================
+13. Weight learning and local adaptation
+============================================================
+
+The notes also emphasize that learning must be local and should stop/slacken as a weight gets large.
+
+The key idea is that the weight update has a saturation term:
+
+(1 - w / w_max)^2
+
+This means that as the weight approaches its maximum, learning slows down.
+
+This is biologically useful because it prevents weights from growing forever. It also means a neuron that has already strongly learned a pattern becomes more stable.
+
+For excitatory learning:
+
+Active sensory synapses that helped a neuron fire should strengthen.
+
+Synapses that were connected but did not fire should depress.
+
+But they should not be depressed all the way to true zero, because that would permanently disconnect the synapse. There should be a lower floor or clamp so the synapse can remain biologically available.
+
+This helps a neuron become tuned to a pattern:
+
+strong weights for inputs in the pattern,
+weak/depressed weights for inputs not in the pattern.
+
+The professor also notes that inhibitory learning is different from excitatory learning. Inhibitory weights are modulatory and may train immediately based on activity/charge relationships.
+
+
+============================================================
+14. Why the continuous vs. discrete problem matters
+============================================================
+
+This is one of the biggest implementation problems.
+
+Real neurons are continuous-time systems.
+
+A spike does not instantly dump all charge into the neuron. A spike opens channels, and charge flows in over time.
+
+But many simulations use discrete time steps and instant charge updates:
+
+charge += input * weight
+
+That means charge is dumped into the neuron all at once.
+
+This creates fake simultaneous firing.
+
+Example:
+
+Neuron A is at 99% of threshold.
+Neuron B is at 50% of threshold.
+
+The next input arrives.
+
+Neuron A jumps to 180% of threshold.
+Neuron B jumps to 101% of threshold.
+
+In a real continuous system, Neuron A would have crossed threshold first and fired earlier.
+
+But in the discrete simulation, both are evaluated at the same time step, so both appear to fire at the same time.
+
+That breaks the competition.
+
+Winner-take-all depends on precise timing. If two or three neurons fire at the same discrete time, the system may treat all of them as winners, strengthen all of them, and fail to specialize cleanly.
+
+
+============================================================
+15. Why smaller time steps alone do not fully fix it
+============================================================
+
+A natural idea is:
+
+just make the timestep smaller.
+
+That helps somewhat, but it does not fully solve the problem if the model still uses instant charge injection.
+
+As learning increases weights, charge jumps get larger. So a neuron can still jump from below threshold to far above threshold in one update.
+
+The deeper problem is not only the timestep size.
+
+The deeper problem is instantaneous charge dumping.
+
+The biological version should have charge flow over time.
+
+This is why the notes say the discrete system is “binning” events. It groups events into artificial time buckets and makes it hard to tell which neuron would have fired first.
+
+
+============================================================
+16. Two ways to fix the continuous/discrete issue
+============================================================
+
+There are two main proposed fixes.
+
+Neither should be treated as fully final yet. They are approaches to test.
+
+
+------------------------------------------------------------
+Fix 1: Overshoot/event-order approximation
+------------------------------------------------------------
+
+This is the easier computational approximation.
+
+At each timestep:
+
+1. Find all neurons that are above threshold.
+2. Instead of firing them all simultaneously, choose the one with the largest normalized overshoot.
+3. Process that spike first.
+4. Send its effect into the inhibitory system.
+5. Apply any resulting inhibition.
+6. Re-check the other neurons.
+7. Only let remaining neurons fire if they are still above threshold after inhibition.
+8. Repeat until no more valid spikes remain.
+
+Normalized overshoot could be:
+
+(charge - threshold) / threshold
+
+The intuition is:
+
+The neuron that overshot the threshold the most probably would have crossed threshold earliest in a continuous-time system.
+
+Example:
+
+E7 charge = 1.80 threshold
+E4 charge = 1.05 threshold
+
+In plain discrete mode, both fire together.
+
+In overshoot-order mode, E7 fires first. Its spike may trigger inhibition, which may suppress E4 before E4 gets to fire. That creates a cleaner competition sequence.
+
+Pros:
+
+- Easier to implement.
+- Useful for debugging.
+- Helps reduce fake simultaneous winners.
+- May make the raster much clearer.
+
+Cons:
+
+- It is a simulation scheduler.
+- It uses global information about which neuron has the largest overshoot.
+- It is not perfectly local/biological.
+- It should be labeled as an approximation, not the biological mechanism itself.
+
+Good label in UI:
+
+continuous approximation: overshoot ordering
+
+
+------------------------------------------------------------
+Fix 2: Synaptic flow-rate approximation
+------------------------------------------------------------
+
+This is the more biologically realistic fix.
+
+Instead of instantly adding input * weight to charge, a spike should create a temporary synaptic current or conductance. Charge then flows into the neuron gradually over small internal time steps.
+
+Instead of:
+
+charge += input * weight
+
+use the idea:
+
+spike arrives
+-> synaptic conductance opens
+-> charge/current flows in gradually
+-> membrane voltage updates over time
+-> threshold is checked continuously or in microsteps
+-> neuron fires as soon as threshold is crossed
+
+This better matches real neurons because ion channels do not dump all charge instantly.
+
+A simple version could be:
+
+For each main timestep:
+    collect incoming spike events
+    convert each event into a synaptic current
+    run several microsteps
+    during each microstep:
+        decay old current
+        add partial current to membrane
+        apply leak
+        check threshold immediately
+        if threshold is crossed, emit spike immediately
+        propagate resulting inhibition/events
+
+Pros:
+
+- More biologically faithful.
+- Reduces artificial simultaneous firing.
+- Makes timing more realistic.
+- Better supports the story of continuous-time neural hardware.
+
+Cons:
+
+- More computationally expensive.
+- More complex to implement.
+- Requires tuning flow rates, decay constants, and microstep size.
+
+Good label in UI:
+
+continuous approximation: synaptic flow rate
+
+
+============================================================
+17. Difference between the two fixes
+============================================================
+
+Fix 1 asks:
+
+Given that several neurons crossed threshold in the same timestep, which one probably crossed first?
+
+Fix 2 asks:
+
+How do we avoid the fake simultaneous crossing by making charge enter over time?
+
+Fix 1 is easier and more like a scheduler.
+
+Fix 2 is more biologically faithful and closer to the real mechanism.
+
+Best implementation path:
+
+Start with Fix 1 as a debug mode because it is easier.
+Then add Fix 2 as the biologically preferred mode.
+
+The UI could compare:
+
+Mode 1: Discrete instant charge
+Mode 2: Overshoot/event-order approximation
+Mode 3: Synaptic flow-rate approximation
+
+This would let you demonstrate exactly why the plain discrete version fails and why the continuous approximation improves the race.
+
+
+============================================================
+18. Important implementation warning
+============================================================
+
+Do not fix the problem by secretly choosing a software winner.
+
+Bad fix:
+
+At the end of the trial, pick the neuron with the highest charge and call it the winner.
+
+Better fix:
+
+Let spike timing, inhibition, and local dynamics physically create the winner.
+
+Acceptable simulation approximation:
+
+Use overshoot ordering only as a way to approximate which threshold crossing would have happened first in continuous time, and label it clearly as a simulation approximation.
+
+Best biological direction:
+
+Use synaptic flow over time so threshold crossings happen during charge flow, not after instant charge dumping.
+
+
+============================================================
+19. What needs to be checked in the current project
+============================================================
+
+The biggest checks are:
+
+1. Are all E neurons receiving input at the same time when the sensory pattern fires?
+
+If only one E neuron moves or receives input, then the connectivity may be wrong. All E neurons should be connected to the sensory pattern unless there is an intentional receptive-field restriction.
+
+2. Does I1 accumulate charge from E spikes?
+
+One E spike should often be subthreshold. Multiple E spikes should be able to accumulate and eventually make I1 fire.
+
+3. Does I1 suppress E competitors?
+
+After I1 fires, the raster should show competitor E spikes becoming delayed or disappearing. The heatmap should show competitor charges cooling down.
+
+4. Do Layer 1 inhibitory neurons fire?
+
+If L1 inhibitory rows stay empty, check connection, threshold, event logging, and plotting.
+
+5. Does L1 inhibition reduce input rate or common-input dominance?
+
+After L1 inhibition, shared/common inputs should become less able to make an old winner dominate.
+
+6. Is the system creating fake simultaneous E winners?
+
+If multiple E neurons fire in the same timestep because they all overshot threshold, that may be a discrete-time artifact.
+
+7. Are learning updates happening for too many neurons?
+
+If every simultaneously firing E neuron learns as if it won, the network may fail to specialize.
+
+8. Is one neuron becoming a tyrant?
+
+If the same neuron wins every pattern, the system needs better inhibition, input suppression, weight balance, geometry/distance bias, or continuous-time handling.
+
+
+============================================================
+20. What the UI should show
+============================================================
+
+The UI should include:
+
+Raster + Charges tab:
+- full raster across time,
+- every node grouped by layer/type,
+- visible sensory rows,
+- visible Layer 1 inhibitory rows,
+- visible Layer 2 E rows,
+- visible I1 row,
+- clear colors/markers for excitatory vs inhibitory spikes,
+- trial boundary markers,
+- zoom and horizontal scroll,
+- exportable plot.
+
+Charge heatmap:
+- same x-axis and y-axis as raster,
+- normalized charge by threshold,
+- cool color for low charge,
+- hot color for near-threshold charge,
+- visible charge drops after inhibition.
+
+Causal story panel:
+- pattern shown,
+- earliest E response set,
+- physical first spiker,
+- I1 threshold source,
+- I1 spike time,
+- L1 inhibitory spike time,
+- inhibition delivered time,
+- winner,
+- whether multiple E neurons tied,
+- whether learning was ambiguous.
+
+Layer 1 inhibition diagnostics:
+- L1 inhibitory spikes this trial,
+- L1 inhibitory incoming events,
+- L1 inhibitory threshold,
+- L1 inhibitory max charge,
+- input channels suppressed,
+- common input suppression amount.
+
+Continuous/discrete diagnostics:
+- number of simultaneous E spikes,
+- overshoot amount for each E spike,
+- whether overshoot ordering changed the winner,
+- whether synaptic flow mode is active,
+- microsteps per timestep,
+- fake tie warnings.
+
+
+============================================================
+21. Short version to tell Claude/Hermes
+============================================================
+
+We need the simulation and UI to show the actual inhibitory dynamics, especially the first-layer inhibitory neurons. The L1 inhibitory neurons are not classifiers. They are input-level activity modulators. When the L2 inhibitory circuit fires, L1 inhibition should also become active and slow/suppress the input stream, especially shared/common inputs like the center pixel. This helps prevent a previously trained winner from becoming a tyrant just because it has a strong common input weight.
+
+The raster plot must show every node grouped by layer and type: sensory/input nodes, L1 inhibitory nodes, L2 excitatory neurons, and I1. It should show sensory spikes first, then L2 E charging/spiking, then I1 accumulating/firing, then L1 inhibitory activity, and then competitor E neurons becoming delayed or suppressed. If the L1 inhibitory rows are empty forever, either the mechanism is not connected, not reaching threshold, not logged, or not plotted.
+
+Add a charge heatmap with the same time/node axes as the raster. Raster shows spikes only; heatmap shows accumulated charge. Charge should be normalized by threshold. Low charge should be cool/blue and high charge should be hot/yellow/orange/red. After I1 fires, competitor E neurons should drop to cooler colors. This proves inhibition is physically changing membrane charge.
+
+The continuous/discrete issue must be handled directly. Instant charge dumping makes multiple neurons cross threshold in the same timestep, even though one would have fired earlier in continuous time. This breaks winner-take-all credit assignment.
+
+Implement two experimental fixes:
+
+1. Overshoot/event-order approximation:
+When multiple neurons are above threshold in one timestep, process the neuron with the largest normalized overshoot first, propagate its inhibition, then re-check the others. This approximates continuous-time threshold crossing but is a scheduler approximation and should be labeled that way.
+
+2. Synaptic flow-rate approximation:
+Do not instantly add input * weight. A spike should create a synaptic current/conductance that flows charge into the neuron over microsteps/delta-time. Check threshold during the flow so the neuron fires as soon as it crosses threshold. This is more biologically realistic but more computationally expensive.
+
+Do not solve this by secretly picking a software winner. The raster and heatmap must prove that topology, inhibition, timing, and local dynamics are causing the winner-take-all behavior.

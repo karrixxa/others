@@ -1,0 +1,418 @@
+Lecture Transcript Summary (14:55–15:10)
+
+This section focuses on why the current winner-take-all architecture is failing and explores possible solutions.
+
+1. Pre-training may be needed before learning real patterns so the network starts in a stable state.
+
+2. Learning compresses neuron weights, making neurons too similar. As variation disappears, multiple neurons fire together and winner-take-all fails.
+
+3. Continuous-time simulations revealed that a clear winner exists initially, but after learning several neurons begin firing simultaneously.
+
+4. Simply removing previous winners is not enough because the remaining neurons have also become too similar.
+
+5. The current architecture uses one global inhibitory neuron. The instructor believes this is too simplistic because every winner shares the same inhibitory gate.
+
+6. A possible redesign is one inhibitory neuron per excitatory neuron. This would provide localized inhibition, although gate saturation may still be a problem.
+
+7. The cortical-column abstraction is probably too simple. Future models may require multiple neurons and outputs instead of one output neuron.
+
+8. The retina already performs edge detection, suggesting higher layers may receive preprocessed edge information instead of learning it from scratch.
+
+9. Another proposal is an always-active preprocessing layer followed by learning layers.
+
+10. Pre-training creates a chicken-and-egg problem because every trained layer depends on another.
+
+11. The instructor questions whether synaptic weights are the best abstraction and suggests moving toward membrane potential and ion-channel models.
+
+12. Future models may include sodium flow, potassium pumps, membrane voltage, and more realistic biological dynamics.
+
+13. Inhibition may dynamically increase a neuron's leak rate instead of acting as an instantaneous gate.
+
+14. The refractory period may depend on biological recovery mechanisms rather than being a fixed time.
+
+Key Takeaways:
+- Pre-training may stabilize learning.
+- Preserving variation between neurons is essential.
+- Global inhibition is likely insufficient.
+- More biologically realistic neuron models may solve current limitations.
+
+
+FSCI / ISM - WHAT THE NEW LECTURE ADDS AND WHAT MATTERS NOW
+Date: July 17, 2026
+
+Sources reviewed
+----------------
+- Pasted text(14).txt: lecture transcript from approximately 15:19-16:36.
+- LPS (10).pdf: handwritten diagram and notes about saturation, pretraining,
+  the cortical-column loop, the local AND/coincidence neuron, inhibition,
+  feedback, and leak.
+- Current FSCI/ISM experiment history through the centered-encoder and
+  paired-inhibition audits.
+
+
+1. THE MAIN GOAL
+----------------
+
+The goal is not merely to classify four patterns. The desired circuit must:
+
+1. Receive one of four center-crossing 3x3 patterns.
+2. Produce one stable L2E representative for each pattern.
+3. Preserve unused neurons for future patterns.
+4. Send feedback from the representative to the correct Layer-1 columns.
+5. Use a local prediction/coincidence neuron and paired inhibitory neuron to
+   suppress only the sensory activity explained by the prediction.
+6. Leave unexplained activity as the prediction-error/free-energy proxy.
+7. Eventually recognize a learned pattern rapidly, without requiring a long
+   integration period at every level of a hierarchy.
+
+The intended local Layer-1 column is:
+
+    sensory/input E_i
+           |
+           +---- local sensory evidence ----+
+                                           v
+    L2E winner feedback -------------> prediction/coincidence E_i
+                                           |
+                                           v
+                                  paired inhibitory I_i
+                                           |
+                                           v
+                              inhibits the paired sensory/output E_i
+
+This is the "two E plus one I" interpretation. The second E is not another
+global classifier. It detects the local conjunction of present sensory
+evidence and top-down feedback.
+
+
+2. WHAT THE NEW LECTURE ADDS
+----------------------------
+
+A. Weight saturation can destroy competition even when the center problem
+   is improved.
+
+The update contains a saturating term such as:
+
+    (1 - w / w_max)^2
+
+This is useful for making a learned winner stable. However, if many competing
+neurons are pushed into the same nonlinear/asymptotic region, their natural
+differences become compressed. Their weights become more similar, they fire
+at similar times, and winner-take-all becomes harder.
+
+Important distinction:
+
+- The true owner may enter the nonlinear stable region.
+- Losing or unused neurons should not all be pushed there with it.
+
+This adds a second causal hypothesis beyond the universal center pixel:
+
+    common center dominance + population-wide weight compression
+
+may jointly produce collisions, ties, and dead capacity.
+
+B. A learned representation must eventually respond quickly.
+
+The lecture argues that long integration delays would multiply across a deep
+hierarchy. Therefore, final success is not only stable ownership. After a
+pattern is learned, its representative should fire with much lower latency,
+ideally from one appropriately timed volley rather than many repeated input
+pulses.
+
+Latency after learning must become an explicit outcome measure.
+
+C. Prediction must be local coincidence, not a global feedback broadcast.
+
+The lecture confirms why the earlier all-nine prediction behavior was wrong.
+If feedback alone eventually drives every Layer-1 inhibitory column, every
+learned pattern suppresses all nine inputs.
+
+For column i, learning and prediction must depend on both:
+
+1. The paired sensory/input E_i actually fired or locally depolarized the
+   prediction neuron.
+2. A real L2E representative sent feedback to that prediction neuron.
+
+Only their local temporal coincidence should strengthen the decoder synapse
+or make the prediction neuron fire.
+
+D. Leak is necessary for the coincidence motif, not only for pattern-switch
+   cleanup.
+
+Suppose sensory evidence alone supplies half the prediction neuron's
+threshold, or feedback alone supplies half. Without leak, repeated isolated
+half-inputs accumulate. The neuron eventually fires even though the two
+required inputs were never coincident. The intended AND-like motif becomes
+an OR-over-time.
+
+Therefore the prediction neuron needs biological membrane decay or an
+equivalent ion-pump process satisfying:
+
+- sensory alone does not eventually cause a prediction spike;
+- feedback alone does not eventually cause a prediction spike during the
+  immature/coincidence-learning state;
+- appropriately timed sensory plus feedback can cause a spike;
+- residual charge from an old pattern decays naturally;
+- no artificial pattern-boundary clearing is used.
+
+This makes the leak experiment more important than previously stated. It is
+both a switching test and a temporal-coincidence correctness test.
+
+E. The decoder has a genuine cold-start problem.
+
+If decoder learning requires the prediction neuron to spike, but the decoder
+weights are initially too weak to make it spike, learning stalls. This is
+consistent with the earlier realistic decoder plateau.
+
+The next candidate should test local subthreshold coincidence learning:
+
+    delta d_ji = eta_d * z_j^R * u_i^S
+                 * (1 - d_ji / d_max)^2
+
+where:
+
+- z_j^R is a short trace from a real L2E/R_j spike;
+- u_i^S is local sensory-caused depolarization or eligibility at prediction
+  neuron i;
+- no label, pattern name, owner lock, or global reconstruction error is used;
+- a prediction-neuron somatic spike is not required for early potentiation;
+- actual inhibition still requires a physical prediction-neuron spike.
+
+F. Pretraining is a hypothesis, not permission to use arbitrary balanced
+   initialization.
+
+The lecture suggests that a biological circuit may be partially configured
+before pattern learning, so weights may begin in a moderate rather than tiny
+range. But it also states that this process is uncertain and must respect
+geometry and coupled dependencies.
+
+Therefore:
+
+- Do not simply assign convenient equal or random mid-range weights.
+- Do not use balanced initialization as the ownership solution.
+- If pretraining is tested, it needs its own biological mechanism and
+  geometry-proportional consequences.
+- Pretraining must not remove all free energy or eliminate plasticity before
+  real patterns arrive.
+
+G. The conceptual "half frequency" target is not enough to prove correct
+   prediction.
+
+The lecture uses suppression toward half-frequency as the conceptual point
+where explained input contributes little or no free energy. But previous
+experiments found that firing frequency alone did not distinguish correct
+from incorrect prediction.
+
+Therefore half-frequency may be an observed consequence, but it must not be
+the sole correctness test or learning-stop gate. Correctness must also use
+local pixel selectivity, causal timing, and residual activity.
+
+
+3. WHAT THE EXPERIMENTS HAVE ACTUALLY TAUGHT US
+-----------------------------------------------
+
+Phase 27 - causal ownership audit
+
+- In every persistent ownership collision studied, the eventual tyrant first
+  developed a permanent advantage on the universal center input.
+- The crossing event was split between self-spike potentiation and loser
+  depression; neither mechanism alone explained every failure.
+- Geometry/topology seed did not determine the outcome in that configuration.
+
+Meaning: the center feature is a real causal amplifier, and simply removing
+loser depression cannot guarantee correct ownership.
+
+Phase 28A - common-input activity gate
+
+- A continuous activity trace helped interleaved patterns.
+- It failed on long holds because it could not distinguish "common across
+  several patterns" from "active for a long time in one pattern."
+- No tested condition passed the preregistered cross-schedule gate.
+
+Meaning: do not implement or keep sweeping this exact gate. Its negative
+result saved us from promoting a schedule-dependent mechanism.
+
+Phase 29 - centered/covariance encoder
+
+- The center/peripheral weight ratio fell by about 78 percent on the
+  interleaved schedule.
+- Same-step ambiguity decreased.
+- Mean distinct ownership improved modestly.
+- Persistent interleaved collisions did not disappear and became slightly
+  more common by the binary collision metric.
+- More neurons never fired.
+
+Meaning: centered learning fixes the specific universal-feature overweighting
+problem, but it does not solve recruitment or one-neuron-per-pattern
+ownership by itself.
+
+Paired versus global inhibition audit
+
+- Paired first-responder collisions: 42/90 (0.4667).
+- Global first-responder collisions: 62/90 (0.6889).
+- Paired causal-winner collisions: 39/90 (0.4333).
+- Global causal-winner collisions: 86/90 (0.9556).
+- The causal-winner identities are not directly comparable because global
+  uses one shared L2I while the paired experiment uses source-indexed L2I_j.
+
+Meaning: paired inhibition substantially improves competitive breadth, but
+it still does not prove stable pattern ownership. It is evidence for a useful
+circuit direction, not a finished solution.
+
+
+4. WHAT IS PROVEN, PARTIAL, AND STILL OPEN
+------------------------------------------
+
+Proven or strongly supported
+
+- The universal center feature causally precedes multi-pattern capture.
+- Loser depression can worsen the failure but is not its only cause.
+- Centered learning strongly reduces center dominance.
+- Per-column prediction and paired inhibition are more selective than a
+  global all-nine broadcast.
+- A plain continuous commonness trace is not robust across presentation
+  schedules.
+- Previous spike-only decoder training does not mature realistic decoder
+  weights sufficiently.
+
+Partial
+
+- Paired inhibition reduces collision rates but does not create clean stable
+  ownership in every run.
+- Centered learning improves the intended weight pathology but can reduce
+  recruitment.
+- Local prediction selectivity works in held patterns, but switching
+  carryover and realistic decoder maturation remain unresolved.
+
+Still open
+
+- Whether non-owner weights are being compressed into the nonlinear region.
+- Whether a local subthreshold coincidence rule can solve decoder cold start.
+- Whether leak creates a true temporal AND rather than delayed accumulation.
+- Whether the active prediction loop improves later ownership or instead
+  suppresses evidence needed for recruitment.
+- Whether familiar-pattern latency becomes short enough after learning.
+- How learning should stop locally without relying on firing frequency alone.
+- Whether biologically justified pretraining is needed at all.
+
+
+5. THE SMALLEST USEFUL NEXT EXPERIMENTS
+---------------------------------------
+
+Do not immediately run another enormous combined grid. Use sequential gates.
+
+Gate 1 - saturation/compression audit
+
+Measurement only. For winners, losing competitors, and never-fired neurons,
+measure over time:
+
+- fraction of weights in the linear versus nonlinear part of the saturation
+  curve;
+- variance and pairwise distance among competing weight vectors;
+- first-response latency and tie rate;
+- whether weight-vector compression precedes persistent collisions;
+- whether loser depression or self-spike learning pushes non-owners into the
+  compressed region.
+
+This directly tests the new lecture hypothesis. Do not alter equations.
+
+Gate 2 - decoder cold-start test
+
+Compare the existing spike-gated decoder with the local subthreshold
+coincidence rule. Require:
+
+- no learning without an L2E feedback event;
+- no learning without paired local sensory eligibility;
+- bounded potentiation when both occur;
+- inactive columns unchanged;
+- realistic weights reach functional prediction without manual maturation.
+
+If this fails, stop before the full-loop grid.
+
+Gate 3 - temporal AND/leak test
+
+Use one preregistered leak constant, not a parameter search. Test:
+
+- repeated sensory-only inputs;
+- repeated feedback-only inputs;
+- correctly timed sensory plus feedback;
+- mistimed sensory and feedback;
+- continuous switches between patterns.
+
+Success requires only the coincident condition to produce the intended
+prediction response during the immature state, with old charge decaying
+naturally.
+
+Gate 4 - active local suppression test
+
+Compare prediction shadow versus active prediction-to-paired-I_i. Measure:
+
+- real L2E spike time;
+- feedback delivery;
+- prediction-neuron voltage and spike;
+- paired I_i voltage and spike;
+- inhibition delivery to the paired sensory/output E_i;
+- residual activity before and after suppression;
+- incorrect or inactive-column suppression.
+
+Only after Gates 1-4 give interpretable results should the full 30-seed,
+multi-condition integration grid run.
+
+
+6. FINAL SUCCESS CRITERIA
+-------------------------
+
+The model is not finished until it demonstrates all of the following in the
+same causal circuit:
+
+- Four patterns produce four stable first-responder L2E owners.
+- Spare L2E neurons remain available.
+- The owner is established through physical temporal competition, not argmax.
+- The learned owner eventually responds with short latency.
+- Feedback reaches only the correct local prediction columns through learned
+  weights.
+- Prediction depends on local sensory-feedback coincidence while learning.
+- Repeated single-source half-inputs do not accumulate into false prediction.
+- A physical prediction spike drives the paired I_i.
+- Only explained active sensory columns are suppressed.
+- Novel or changed features remain active as prediction error.
+- Pattern switching does not retain false prediction from the old pattern.
+- Learning remains local and bounded.
+- No labels, pattern names, owner locks, normalization, backpropagation,
+  global reconstruction loss, hard-coded center exception, or arbitrary
+  balanced initialization are used.
+
+
+7. PRACTICAL COORDINATION
+-------------------------
+
+Several Claude/Codex sessions are running. They must not independently edit
+the same backend branch.
+
+- Use exactly one backend writer.
+- Other sessions should run read-only audits or isolated offline harnesses.
+- Label every session and artifact directory clearly.
+- Record starting commit, branch, configuration, seeds, and final verdict.
+- Do not infer decoder success from ownership telemetry or ownership success
+  from paired-inhibition telemetry.
+- Negative results should stop their corresponding mechanism rather than
+  trigger post-hoc parameter tuning.
+
+
+BOTTOM LINE
+-----------
+
+The new lecture does not replace the experiments already completed. It
+clarifies why they are incomplete.
+
+We have attacked the universal-center problem and learned that centered
+learning helps but does not finish ownership. The new material says the next
+missing mechanisms are likely:
+
+1. preventing non-owner weight compression near saturation;
+2. learning the decoder from local subthreshold sensory-feedback
+   coincidence;
+3. using leak to preserve true temporal coincidence and remove stale charge;
+4. verifying selective paired inhibition and short post-learning latency.
+
+These are the important next questions. More large parameter sweeps should
+wait until these smaller causal gates pass.

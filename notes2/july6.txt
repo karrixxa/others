@@ -1,0 +1,1584 @@
+LPS PAGES 1 AND 2 - HIGH-DETAILED SUMMARY OF THE DISCUSSION
+
+Purpose of this document
+------------------------
+This document combines the two discussions that correspond to the two pages of
+LPS (7):
+
+1. Page 1: the larger conceptual argument about hierarchical composition,
+   interaction, stability, persistence through time, and why the brain's way of
+   forming symbols is being treated as a continuation of the same compositional
+   process seen in physics and biology.
+
+2. Page 2: the proposed neural architecture that turns lower-level patterns
+   into higher-level symbols through local excitation, learned inhibition,
+   refractory periods, feedback, and a hard winner-take-all race.
+
+The most important technical additions are included in detail, especially:
+
+- why a single clear winner is required;
+- why two excitatory neurons firing at the same time is not always a failure;
+- the specific case in which two simultaneous firings do become a problem;
+- how physical distance and conduction delay can break symmetry;
+- why the inhibitory event is broadcast to the full competitive pool;
+- why the winning neuron's inhibitory synapse should not be trained while the
+  winner is refractory;
+- the inhibitory weight update in which only the current weight w is replaced by w^2;
+- how prediction feedback, residual activity, and free energy fit into the
+  architecture;
+- what is already decided, what is only an analogy, and what still needs to be
+  tested in the simulation.
+
+==========================================================================
+PART I. PAGE 1 - HIERARCHICAL COMPOSITION AS THE CENTRAL PRINCIPLE
+==========================================================================
+
+1. The main claim: complexity is built by composition
+-----------------------------------------------------
+The first page is not yet describing the detailed neuron algorithm. It is
+explaining the larger principle that motivates the architecture.
+
+The central idea is:
+
+    simple things interact and combine into stable larger things;
+    those larger things become the building blocks for the next level;
+    this repeats across a hierarchy.
+
+The lecture follows this process from the earliest physical structures to the
+human brain:
+
+    subatomic particles
+        -> protons, neutrons, and electrons
+        -> elements
+        -> molecules
+        -> single-cell organisms
+        -> multicellular organisms
+        -> nervous systems and brains
+        -> symbols, knowledge, language, societies, and possibly AI systems
+
+The point is not that every transition is simple. Each transition may require
+many intermediate mechanisms. The point is that no new level appears from
+nothing. Each level is composed from structures that already exist at the
+lower level.
+
+This is why the notes compare an alphabet with matter:
+
+- English has 26 letters that can be composed into many words.
+- Ordinary matter can be described, at the simplified level used in the
+  lecture, as being composed from protons, neutrons, and electrons.
+- A small basic alphabet can generate an enormous space of higher-level
+  combinations.
+
+The LPS/SIP architecture is intended to reuse this idea computationally. A
+lower-level pattern becomes a stable symbolic unit, and those symbolic units
+can be combined again at the next level.
+
+2. Interaction is required for composition
+------------------------------------------
+The notes state that "interacting" is equivalent to "connecting" in the
+computational analogy.
+
+Two components cannot form a larger composition if they never affect each
+other. In physics, particles must interact. In biology, cells must exchange
+signals and resources. In the neural system, neurons must be connected by
+synapses and must exchange spike events.
+
+Therefore, connection is not just an implementation detail. Connection is the
+mechanism that makes composition possible.
+
+For the neural architecture, this means:
+
+- lower-level modules emit spike events;
+- higher-level neurons receive combinations of those events;
+- repeated causal co-activity changes the connected synapses;
+- a higher-level neuron eventually becomes a stable representation of that
+  combination.
+
+3. Time is treated as a persistence filter
+------------------------------------------
+A major conceptual claim on page 1 is that time functions like an evolutionary
+filter or cost function.
+
+Time itself does not plan which structures should survive. Instead:
+
+- unstable structures break apart;
+- stable structures remain available;
+- structures that persist can participate in later compositions;
+- structures that fail to persist cannot become reliable building blocks for
+  the next level.
+
+The simplified rule is:
+
+    only things that persist remain available to be composed further.
+
+This is why stability matters. Complexity alone is not enough. A complex
+structure that immediately disappears cannot support a continuing hierarchy.
+The hierarchy grows from stable complexity.
+
+The same idea is meant to apply to neural learning:
+
+- a random transient firing event should not immediately become a permanent
+  symbol;
+- a learned representation should become stable only after it repeatedly wins
+  for the same structure;
+- a stable representation can then act as a dependable input to the next
+  layer;
+- unstable or incorrect representations should weaken, be corrected, or fail
+  to propagate.
+
+4. Composition plus time, not a prewritten blueprint
+----------------------------------------------------
+The lecture emphasizes that there does not need to be a complete top-down
+blueprint specifying the final complex object in advance.
+
+The proposed process is:
+
+    local interaction + variation + environmental constraints + time
+        -> persistent combinations
+        -> increasingly complex stable structures
+
+This is important for the LPS project because the system is not supposed to
+receive a global label telling every neuron what it should represent. Instead,
+local competitive dynamics should allow representations to emerge and remain
+only if they are repeatedly supported by the incoming events.
+
+5. The brain converts physical events into neural events
+--------------------------------------------------------
+The brain receives physical activity from the world and converts it into
+spatiotemporal neural activity.
+
+For vision, a simplified chain is:
+
+    photons in the physical world
+        -> retinal events
+        -> lower-level neural events
+        -> edges or local structures
+        -> combinations of structures
+        -> shapes, objects, and more abstract symbols
+
+The brain is therefore described as performing hierarchical composition on
+spatiotemporal events.
+
+The architecture is not meant to store a symbol as a detached software label.
+A symbol is represented physically by a particular neuron or local module
+firing in a particular location in the neural fabric.
+
+6. The brain's compositional freedom is a double-edged sword
+------------------------------------------------------------
+Physical composition is heavily constrained. Atoms cannot form every possible
+molecule. Chemical bonds require compatible physical conditions. Biological
+organisms must satisfy many constraints to remain alive.
+
+The brain can compose symbols much faster and with fewer direct physical
+constraints. A person can learn letters, words, fictional objects, incorrect
+beliefs, or abstract ideas without waiting for a new physical object to evolve.
+
+This freedom has two sides:
+
+Positive side:
+- symbols can be created quickly;
+- knowledge can be reorganized rapidly;
+- the same lower-level representations can be reused in many combinations;
+- learning is not limited to combinations that exist as stable physical
+  objects.
+
+Negative side:
+- a brain can learn false relationships;
+- a representation may be internally stable without matching the outside
+  world;
+- rapid symbol creation can create unstable, incorrect, or misleading higher-
+  level compositions.
+
+Therefore, the neural architecture needs mechanisms for correction,
+prediction error, competition, and continued updating. Stability alone is not
+enough; the stable symbol should also continue to account for incoming events.
+
+7. Language is an example of hierarchical composition
+------------------------------------------------------
+The discussion references the idea that language depends on composition.
+Letters form words, words form phrases, and phrases form larger meanings.
+
+The example "C-A-T" is important because the letters may be perceived one at a
+time, but the brain must bind them into one higher-level representation. This
+requires more than basic feature extraction. It requires mechanisms such as:
+
+- temporary maintenance of earlier symbols;
+- phase or timing coordination;
+- attention;
+- binding several distributed representations;
+- making the relevant lower-level symbols active together long enough for a
+  higher-level unit to learn their composition.
+
+The current LPS circuit is intended to establish the lower-level information
+extraction and symbol formation needed before these cognition mechanisms are
+added.
+
+8. What is scientific motivation and what is speculation
+--------------------------------------------------------
+The page 1 discussion includes a speculative extension:
+
+- humans compose into societies;
+- societies create science and technology;
+- AI may become another level of composition;
+- increasingly capable systems may improve the ability of life to persist
+  through time and handle threats in space.
+
+This is a motivating philosophical trajectory, not a completed mechanism in
+the current model. It should not be treated as an implemented feature or a
+proven biological law.
+
+The useful engineering takeaway is narrower:
+
+    use repeated local compositional modules so that stable lower-level
+    representations become the inputs from which higher-level representations
+    can self-organize.
+
+==========================================================================
+PART II. THE BRIDGE FROM PAGE 1 TO PAGE 2
+==========================================================================
+
+Page 1 gives the principle. Page 2 gives the proposed mechanism.
+
+The bridge is:
+
+1. A lower-level module observes a local spatiotemporal pattern.
+2. Competition causes one neuron to become the clear representative.
+3. The location of that firing neuron becomes a symbol.
+4. The module emits one sparse output rather than forwarding all internal
+   activity.
+5. Multiple lower-level symbols become inputs to a higher-level module.
+6. The same competition and learning process repeats.
+7. Feedback allows the learned higher-level model to predict and suppress the
+   lower-level activity it already explains.
+8. Remaining activity indicates unresolved information and can drive more
+   learning.
+
+This is hierarchical composition implemented as a repeated spiking circuit.
+
+==========================================================================
+PART III. PAGE 2 - THE PROPOSED L1-TO-L2 ARCHITECTURE
+==========================================================================
+
+9. Layer 1 is represented as nine cortical-like modules
+-------------------------------------------------------
+The diagram treats the first processing stage as nine local units arranged in
+a spatial layout. Each unit is described as being like a cortical column.
+
+Important abstraction:
+
+- each local unit may contain internal excitatory and inhibitory circuitry;
+- the higher level does not need every internal cell from that unit;
+- the unit emits one abstract output meaning approximately:
+
+      "A learned structure is present at this spatial location."
+
+This is a compression step. Many internal events are reduced to one meaningful
+output event.
+
+10. Nine lower-level outputs connect to eight higher-level candidates
+--------------------------------------------------------------------
+The page 2 diagram shows nine Layer-1 outputs connecting to eight candidate
+excitatory neurons in Layer 2.
+
+The connection count is:
+
+    9 lower-level outputs x 8 higher-level candidates = 72 synapses
+
+Seventy-two is still a substantial number, but it is far smaller than
+connecting every internal neuron in every Layer-1 cortical module to every
+internal neuron in Layer 2.
+
+This is the proposed scaling advantage:
+
+    compress locally first, then connect abstractions upward.
+
+The architecture still grows with the number of modules and candidate neurons,
+so scaling is not free. However, modular compression reduces the connection
+explosion compared with forwarding every microscopic state.
+
+11. The Layer-2 excitatory candidates begin nearly symmetric
+------------------------------------------------------------
+At the beginning of learning:
+
+- the higher-level neurons are untrained;
+- their sensory/input synapses are small;
+- their initial weights differ only slightly;
+- several candidates receive nearly the same active pattern;
+- their membrane potentials rise in close lockstep;
+- the competition is initially weak and noisy.
+
+If three of the nine Layer-1 outputs are active, all eight Layer-2 candidates
+receive those three events through their current weights. Because all eight
+candidates are initially similar, several may approach threshold at nearly the
+same time.
+
+The architecture is intended to resolve this near-symmetry through real neural
+dynamics, not by calling argmax() after the trial.
+
+12. The central inhibitory neuron is the competition selector
+-------------------------------------------------------------
+The eight Layer-2 excitatory candidates project to a central inhibitory neuron.
+The central inhibitory neuron accumulates excitatory charge from their spikes.
+
+The sequence is:
+
+1. Several Layer-2 excitatory neurons integrate the current input.
+2. One excitatory neuron crosses threshold and spikes.
+3. Its spike travels to the central inhibitory neuron.
+4. The inhibitory neuron integrates that event; it may not fire immediately.
+5. Other excitatory candidates may continue integrating and may also spike
+   during this delay.
+6. When the inhibitory neuron reaches threshold, it broadcasts an inhibitory
+   event to the competitive pool.
+7. The inhibitory event suppresses the remaining competitors.
+
+The first excitatory spike begins the selection process, but the inhibitory
+spike physically closes the competition.
+
+This is why the discussion says the inhibitory neuron is the true selector.
+The system should not declare a winner only because one cell was first by a
+single simulation step. The winner should be the cell whose causal activity
+results in the inhibitory circuit suppressing the rest of the pool.
+
+13. Why this is a hard winner-take-all mechanism
+------------------------------------------------
+A soft winner-take-all system would allow many neurons to keep firing and call
+the highest-rate neuron the winner. That would require a downstream decoder to
+compare rates.
+
+The intended hard winner-take-all outcome is:
+
+- one neuron emits the meaningful symbol;
+- the inhibitory circuit suppresses the other candidates;
+- the local pool becomes quiet after selection;
+- a downstream module receives one unambiguous spatial output;
+- no software process has to inspect a histogram to determine which unit won.
+
+This is essential for hierarchical symbolic composition. A single firing
+location can be treated as a stable input symbol by the next layer.
+
+==========================================================================
+PART IV. EXACTLY WHAT HAPPENS WHEN TWO NEURONS FIRE
+==========================================================================
+
+14. Two excitatory neurons firing before inhibition is not automatically wrong
+----------------------------------------------------------------------------
+The discussion explicitly states that two excitatory neurons may fire at the
+same time or within the same short pre-inhibitory window, especially at the
+beginning of learning.
+
+This is not automatically a failure.
+
+Before the inhibitory neuron has fired, the excitatory candidates are all
+trying to charge it. If two excitatory neurons spike, their events both enter
+the inhibitory neuron. In the simplest case, this just gives the inhibitory
+neuron more charge and causes it to reach threshold sooner.
+
+Therefore:
+
+    multiple preliminary E spikes can be part of the transient race.
+
+The system does not have to prevent every early co-spike. It has to ensure that
+the circuit eventually resolves the activity into one durable representative.
+
+15. The dangerous case: two neurons jointly and indistinguishably trigger I
+-------------------------------------------------------------------------
+The real problem occurs when two excitatory spikes arrive so nearly
+simultaneously that both are equally responsible for making the inhibitory
+neuron cross threshold.
+
+Then the circuit cannot clearly answer:
+
+    Which excitatory neuron caused the inhibitory selection event?
+
+This creates an ambiguous co-winner. Both candidates could claim the same
+pattern, both could receive winner-like plasticity, or the result could depend
+only on arbitrary code ordering.
+
+This distinction is central:
+
+Case A - acceptable transient:
+- E1 spikes.
+- E2 spikes shortly afterward.
+- I is still below threshold after E1.
+- E2's later event pushes I across threshold.
+- E2 is the direct threshold-crossing cause, although E1 contributed stored
+  charge.
+
+Case B - ambiguous:
+- E1 and E2 events have exactly the same arrival time.
+- the simulation sums them together in one batch;
+- I crosses threshold only after the combined batch;
+- neither event has a unique causal ordering.
+
+The second case requires an explicit policy or a more detailed physical timing
+model. It should not be silently decided by the order of E neurons in an array.
+
+16. Distance can break the symmetry
+-----------------------------------
+The physical system is not perfectly symmetric because neurons and synapses
+occupy different positions in space.
+
+Even when two E neurons appear to spike at the same displayed timestep:
+
+- one may be slightly closer to the inhibitory neuron;
+- one axon may have a shorter conduction path;
+- one synapse may have a slightly smaller delay;
+- one event may reach the inhibitory neuron a fraction of a timestep earlier;
+- that event can alter I's state before the second event arrives.
+
+Therefore, distance can break an otherwise exact tie.
+
+A useful implementation is:
+
+    arrival_time(E_i -> I)
+        = spike_time(E_i) + base_delay + distance(E_i, I) / conduction_speed
+
+The simulation does not need a perfect biological geometry, but it should
+avoid exact symmetry if the design relies on physical races.
+
+Important warning:
+
+If the simulator processes all spikes in one discrete batch, distance cannot
+break the tie unless sub-timestep delays or a deterministic event queue are
+actually represented. Drawing neurons at different positions in the interface
+is not enough. The positions must affect event arrival times.
+
+17. Other possible symmetry breakers
+------------------------------------
+Other small differences can also break the tie:
+
+- slight random variation in initial weights;
+- membrane noise;
+- different leak histories;
+- different refractory histories;
+- different synaptic delays;
+- different resting potentials;
+- different target-specific inhibitory weights.
+
+The transcript mentions that reducing the learning rate or increasing initial
+weight variation might reduce simultaneous wins, but neither guarantees a
+biologically meaningful selection. Large random weight differences can simply
+preassign winners before learning.
+
+Distance and event timing are attractive because they preserve the idea of a
+physical causal race.
+
+==========================================================================
+PART V. GLOBAL INHIBITION, THE WINNER, AND REFRACTORY STATE
+==========================================================================
+
+18. The current simplified inhibitory broadcast is global within the pool
+-------------------------------------------------------------------------
+In the current Layer-2 abstraction, the central inhibitory neuron sends an
+inhibitory event to every excitatory candidate in the local competitive pool.
+It is not limited only to spatially close competitors.
+
+At the topology level:
+
+    I broadcasts to all eight Layer-2 excitatory candidates.
+
+The initial event can therefore be described as equal/global inhibition.
+However, three separate ideas must not be confused:
+
+1. Broadcast topology
+   Every candidate receives an inhibitory event.
+
+2. Effective state change
+   The same event can have different effects because the targets have different
+   membrane potentials, refractory states, and inhibitory synaptic weights.
+
+3. Plasticity
+   Each I-to-E synapse can update according to the local state of its own
+   target neuron.
+
+Thus, "I inhibits everyone equally" means that the event is broadcast across
+the entire pool under the simplified rule. It does not require every target's
+voltage change or learned synaptic update to remain numerically identical.
+
+19. Why the winner is effectively spared
+----------------------------------------
+The excitatory neuron whose spike helped trigger the inhibitory response has
+already fired and entered its refractory period.
+
+During refractory state:
+
+- its spike has already been sent downstream;
+- its membrane potential has reset or is being held near reset;
+- it cannot immediately fire again;
+- an incoming inhibitory event cannot pull it away from an imminent spike in
+  the same way it can pull down a still-competing neuron;
+- its silence is caused by refractory physiology, not by successful inhibition.
+
+Therefore, the winner is effectively spared by timing. The inhibitory event
+may still be broadcast to its location, but it should not be interpreted as a
+normal competitive inhibition event on that target.
+
+20. The winner's inhibitory synapse should not train during refractory
+------------------------------------------------------------------------
+The current proposed inhibitory learning rule is:
+
+    train an I-to-E synapse when the inhibitory event arrives,
+    provided the target E neuron is not refractory.
+
+For the winning neuron:
+
+- it is already refractory;
+- its current low membrane potential does not reveal how strongly inhibition
+  was needed;
+- updating its inhibitory synapse would incorrectly teach the circuit to
+  inhibit the winner that just created the selection event.
+
+Therefore:
+
+    if target_E.refractory is true:
+        do not apply the normal inhibitory plasticity update to that target.
+
+This is the precise meaning of the statement that inhibition affects everyone
+except the winner. The shared event is global, but the winner's refractory
+state prevents the usual effective penalty and prevents its inhibitory synapse
+from being trained from that event.
+
+21. Why refractory awareness is necessary
+-----------------------------------------
+Silence has several possible causes:
+
+- insufficient excitatory evidence;
+- successful inhibition;
+- leak;
+- no active input;
+- a recent spike followed by refractory state.
+
+These causes are not equivalent. A learning rule must not infer that every
+silent neuron was correctly inhibited.
+
+The simulation should always log refractory state at the exact moment an
+inhibitory event arrives.
+
+==========================================================================
+PART VI. CORRECTION: ONLY THE WEIGHT TERM W CHANGES TO W^2
+==========================================================================
+
+22. Exact meaning of the w^2 update
+-----------------------------------
+The update discussed on the second page was not a proposal to square the
+entire learning equation or the complete normalized ratio. It was a targeted
+replacement of the current inhibitory weight term:
+
+    w_I_i  ->  w_I_i^2
+
+Starting from the linear form:
+
+    delta_w_I_i = eta_I * p_i * (1 - (w_I_i / w_I_max))
+
+the corrected form is:
+
+    delta_w_I_i = eta_I * p_i * (1 - (w_I_i^2 / w_I_max))
+
+Only w_I_i is squared. The denominator w_I_max is not squared, and the full
+parenthetical expression is not squared.
+
+Therefore, this is NOT:
+
+    delta_w_I_i = eta_I * p_i * (1 - (w_I_i / w_I_max)^2)
+
+because that version squares the entire ratio and is equivalent to dividing
+w_I_i^2 by w_I_max^2.
+
+The exact intended edit is:
+
+    original weight term:  w_I_i / w_I_max
+    updated weight term:   w_I_i^2 / w_I_max
+
+Every other factor, including eta_I, p_i, the subtraction from 1, event
+timing, refractory exclusion, and existing clipping rules, remains unchanged.
+
+23. What must remain unchanged
+------------------------------
+When implementing this correction, preserve:
+
+- the same learning-rate term;
+- the same local membrane/pressure or eligibility term;
+- the same sign of the update;
+- the same event timing;
+- the same refractory exclusion rule;
+- the same clipping or physical bounds already used by the model;
+- every other factor in the original equation.
+
+Do not derive a different saturation equation merely because w is now
+squared. The exact effect of w^2 depends on where w already appeared in the
+original rule. For example, replacing w with w^2 inside a subtractive term is
+not the same as squaring a complete parenthetical expression.
+
+24. Implementation instruction
+------------------------------
+In code, locate the exact variable representing the current synaptic weight
+inside the existing update. Change only that occurrence from w to w*w (or
+w**2), while leaving the surrounding equation intact.
+
+Conceptual pseudocode:
+
+    old_weight_term = w
+    new_weight_term = w ** 2
+
+    delta_w = SAME_EXISTING_UPDATE_AS_BEFORE,
+              but using new_weight_term where old_weight_term appeared
+
+This should be treated as a targeted equation edit, not as a redesign of the
+plasticity law.
+
+25. Exact inhibitory-learning event order
+-----------------------------------------
+For each inhibitory arrival at target E_i:
+
+1. Save the target's state immediately before inhibition.
+2. Check whether target E_i is refractory.
+3. If E_i is refractory:
+   - exclude that target from the normal inhibitory plasticity update;
+   - record that the inhibitory event arrived but was refractory-excluded;
+   - do not interpret its reset voltage as evidence that it was a weak
+     competitor.
+4. If E_i is not refractory:
+   - evaluate the same previously chosen local learning factors;
+   - evaluate the existing update with only w replaced by w^2;
+   - apply the resulting weight change;
+   - enforce the model's existing physical weight bounds.
+5. Log the old weight, w^2 term, resulting delta_w, refractory state, and new
+   weight so the modification can be verified directly.
+
+The central correction is:
+
+    square w only; do not square the equation.
+
+==========================================================================
+PART VII. HOW THE WINNER BECOMES STABLE
+==========================================================================
+
+29. Positive feedback through repeated wins
+-------------------------------------------
+Once one excitatory neuron wins for a pattern:
+
+- the active causal feedforward synapses into that neuron strengthen;
+- the same pattern drives it more efficiently on the next presentation;
+- it reaches threshold sooner;
+- it activates the inhibitory selector sooner;
+- competitors receive inhibition earlier;
+- the winner becomes increasingly likely to win again.
+
+This creates specialization.
+
+The desired progression is:
+
+    tiny initial asymmetry
+        -> one causal win
+        -> local weight strengthening
+        -> earlier future spike
+        -> earlier inhibition
+        -> cleaner hard WTA
+        -> stable pattern ownership
+
+30. Why the inhibition must dominate small weight variation
+-----------------------------------------------------------
+The transcript notes that if the inhibitory effect is stronger than the small
+initial differences among competitors, the selected neuron gains a durable
+advantage.
+
+This does not mean inhibition should be infinitely strong. It means it should
+be strong enough to stop near-threshold competitors after selection.
+
+Too weak:
+- several neurons keep firing;
+- the system remains soft WTA;
+- downstream symbols are ambiguous.
+
+Too strong too early:
+- one accidental early winner may silence every other neuron permanently;
+- unused neurons may never learn other patterns;
+- the network can collapse into one dominant unit.
+
+The useful regime is learned, bounded inhibition that becomes strong enough to
+resolve close races while preserving capacity for different neurons to win
+other patterns.
+
+31. The losing-neuron contamination problem
+-------------------------------------------
+Before a stable winner exists, several candidate neurons may receive and
+partially learn the same active inputs. After one neuron finally owns the
+pattern, the losers may still retain relatively high weights for that pattern.
+
+This can cause:
+
+- duplicate representations;
+- repeated close races;
+- interference with future patterns;
+- many neurons becoming partially tuned to the same structure.
+
+The discussion recognizes that the losers need a mechanism to avoid retaining
+all of those partial weights.
+
+However, indiscriminately weakening every neuron that did not fire is unsafe.
+A non-firing neuron may be:
+
+- refractory;
+- inhibited after being a legitimate close competitor;
+- reserved for another pattern;
+- weak only because it has not yet received enough evidence.
+
+Possible mechanisms must remain distinct:
+
+A. Winner Hebbian learning
+- strengthen active inputs that causally contributed to the winner's spike.
+
+B. Winner inactive-input depression
+- weaken inputs on the winner that were not part of the represented pattern.
+
+C. Targeted competitor depression
+- weaken only losing neurons that were demonstrably close competitors in the
+  same causal window.
+
+D. Passive LTD
+- slowly decay unused unspecialized weights over long periods.
+
+E. Synaptic normalization/homeostasis
+- preserve a weight budget and prevent all weights from growing together.
+
+These mechanisms should not be merged into one generic "anti-Hebbian" rule.
+
+32. Concern: all weights could collapse toward zero
+---------------------------------------------------
+The transcript raises the possibility that a tuning/depression algorithm could
+reduce many weights until they are all similarly tiny.
+
+If all candidate neurons have very low, nearly equal weights:
+
+- no neuron has a meaningful match advantage;
+- the race becomes dominated by noise or arbitrary ordering;
+- learning may stall;
+- the inhibitory selector may choose random winners without useful structure.
+
+The implementation should track:
+
+- total weight norm per neuron;
+- minimum and maximum synaptic weight;
+- variance across each neuron's receptive field;
+- variance across competing neurons;
+- number of neurons that become effectively silent.
+
+Homeostatic gain or minimum excitability may be needed, but it should be tested
+rather than inserted as an unexplained global correction.
+
+==========================================================================
+PART VIII. PREDICTIVE FEEDBACK, RESIDUAL ACTIVITY, AND FREE ENERGY
+==========================================================================
+
+33. The architecture is not only feedforward
+--------------------------------------------
+A key purpose of the feedback path is to let a learned higher-level
+representation affect the lower-level input that produced it.
+
+The winner's model says approximately:
+
+    "Based on the symbol I recognized, these lower-level events are expected."
+
+The feedback suppresses or cancels the expected components.
+
+This gives the system a way to distinguish:
+
+- activity already explained by a learned model;
+- activity that remains unexplained;
+- uncertainty or novelty that still requires attention and learning.
+
+34. Residual activity as the current free-energy proxy
+------------------------------------------------------
+The discussion describes high remaining firing as free energy or unresolved
+information.
+
+For implementation, the safer language is:
+
+    residual sensory or lower-layer activity is a practical proxy for
+    prediction error/free energy.
+
+Conceptually:
+
+    incoming activity
+        - predicted/suppressed activity
+        = residual unexplained activity
+
+High residual:
+- the current model does not fully explain the input;
+- the input may be novel, noisy, composite, or incorrectly represented;
+- learning or attention should continue.
+
+Low residual:
+- the specialist predicts the active lower-level structure well;
+- less activity remains to be explained;
+- the learning rate can decrease.
+
+Threshold margin and free energy must remain separate:
+
+    theta - weighted input
+
+is a neuron's distance from firing threshold. It is a useful diagnostic but is
+not the same as network-level unexplained sensory activity.
+
+35. Learning should diminish when the pattern is fully represented
+------------------------------------------------------------------
+As a neuron becomes a stable specialist:
+
+- active pattern weights approach their preferred strengths;
+- irrelevant weights are reduced;
+- prediction feedback becomes more accurate;
+- residual activity falls;
+- learning should slow or stop for the already explained pattern.
+
+If a new persistent component appears with the familiar pattern, residual
+activity should remain. That residual may allow an unused neuron or a higher
+level to learn the additional structure.
+
+This is continuous learning through unresolved activity rather than a fixed
+train-then-test division.
+
+36. Timing matters for feedback and free energy
+-----------------------------------------------
+Prediction and inhibition arrive after delays. Early residual spikes before
+feedback arrives are real activity and may represent an energy/timing cost.
+However, a delayed correct prediction should not necessarily be classified as
+completely wrong.
+
+Track at least two measures:
+
+1. Raw residual activity
+   Counts all unexplained activity over time, including the cost of delay.
+
+2. Lag-corrected residual
+   Accepts a prediction/inhibitory response within a defined causal window.
+
+Do not force E and I events to occur on the exact same timestep.
+
+==========================================================================
+PART IX. CLARIFYING THE MEANING OF "LAYER"
+==========================================================================
+
+37. Hierarchical stages versus biological cortical laminae
+----------------------------------------------------------
+The discussion identifies an important terminology problem.
+
+In the diagram:
+
+- L1 and L2 refer to successive hierarchical processing stages, approximately
+  like moving from an earlier visual representation toward a later one.
+
+In biological cortex:
+
+- each cortical area or column contains multiple anatomical layers/laminae;
+- those internal layers have different feedforward, feedback, and local roles.
+
+Therefore, these are not the same use of the word "layer."
+
+A safer naming convention for code and diagrams is:
+
+- Hierarchy Stage H1, H2, H3 for repeated abstraction levels;
+- Cortical lamina 1-6 only when discussing biological internal circuitry.
+
+The current simplified model abstracts the internal six-layer cortical
+complexity into a smaller E/I module. It should not claim to reproduce every
+laminar circuit.
+
+38. Current scope versus future cognition
+-----------------------------------------
+The current circuit is an information extraction and self-organizing
+representation system.
+
+It does not yet implement full cognition, including:
+
+- working memory;
+- attention routing;
+- deliberate synchronization of separated symbols;
+- sequential binding;
+- what-versus-where integration;
+- prefrontal control;
+- reasoning over a large fabric.
+
+The future "flashlight" or train-of-thought idea would bias selected regions so
+that they are easier to fire, allowing activation to move through a
+spatial/topological knowledge fabric. That remains a future extension.
+
+==========================================================================
+PART X. REQUIRED SIMULATION LOGIC
+==========================================================================
+
+39. Do not use a software argmax to choose the winner
+-----------------------------------------------------
+The winner must emerge from spike timing, membrane integration, inhibition,
+and refractory dynamics.
+
+The simulator may analyze the result afterward, but the result should not be
+created by:
+
+    winner = argmax(firing_rate)
+
+or:
+
+    winner = argmax(final_voltage)
+
+Those are diagnostics, not the causal mechanism.
+
+40. Recommended event-driven timestep order
+-------------------------------------------
+A useful implementation order is:
+
+A. Deliver previously queued events
+- deliver feedforward spikes whose delay has expired;
+- deliver E-to-I events whose delay has expired;
+- deliver I-to-E events whose delay has expired;
+- deliver predictive feedback whose delay has expired.
+
+B. Save pre-event local states
+- membrane potential;
+- refractory status;
+- synaptic weight;
+- target charge ratio.
+
+C. Update neuron dynamics
+- leak;
+- membrane integration;
+- threshold crossing;
+- spike emission;
+- reset;
+- refractory countdown.
+
+D. Queue newly emitted events
+- use target-specific delay;
+- include source identity;
+- include exact or sub-timestep arrival time;
+- include event type and sign.
+
+E. Apply local plasticity
+- Hebbian learning only for causal active inputs to firing neurons;
+- inhibitory learning from inhibitory arrival plus target pre-inhibition
+  charge;
+- skip normal inhibitory plasticity for refractory targets;
+- apply bounded update and clipping;
+- keep passive LTD and normalization separate.
+
+41. Determining which E event caused I to cross threshold
+--------------------------------------------------------
+Each E-to-I event should preserve:
+
+- source E neuron;
+- E spike time;
+- path delay;
+- I arrival time;
+- charge added to I;
+- I voltage immediately before and after the event.
+
+If events arrive sequentially, the direct threshold-crossing event is the one
+for which:
+
+    I_voltage_before < theta_I
+    I_voltage_after >= theta_I
+
+That source is the most direct causal winner candidate.
+
+If several events share exactly the same arrival time and are summed as one
+batch, mark the event as an ambiguous causal set unless a finer physical delay
+model resolves it.
+
+Do not quietly choose the first source in an array.
+
+42. Recommended pseudocode for I-to-E learning
+----------------------------------------------
+
+    when I fires:
+        for every E_i in the local competitive pool:
+            queue inhibitory_event(I -> E_i, arrival_time_i)
+
+    when inhibitory_event arrives at E_i:
+        V_pre = E_i.V
+        was_refractory = E_i.refractory_timer > 0
+
+        if was_refractory:
+            delta_w = 0
+            mark event as refractory-excluded
+        else:
+            p_i = clamp((V_pre - V_rest) / (theta_E - V_rest), 0, 1)
+            capacity = 1 - (w_I_i / w_I_max)^2
+            delta_w = eta_I * p_i * capacity
+            w_I_i = clip(w_I_i + delta_w, 0, w_I_max)
+            E_i.V = E_i.V - inhibitory_effect(w_I_i)
+
+Important implementation choice:
+Decide whether the inhibitory effect uses the old weight or the newly updated
+weight. Log both values. A conservative causal order is often:
+
+1. measure pre-inhibition state;
+2. apply the current synaptic effect;
+3. update the synapse for future events.
+
+That prevents the current event from receiving the benefit of learning that
+was caused by itself. This choice should be explicit.
+
+==========================================================================
+PART XI. VISUALIZATION AND DIAGNOSTICS REQUIRED TO UNDERSTAND THE RACE
+==========================================================================
+
+43. Why a timestep slider is necessary
+--------------------------------------
+The final winner and final weights are not enough to validate this system.
+The important mechanism occurs in the timing between:
+
+- first E threshold crossing;
+- later E spikes;
+- E-to-I arrival;
+- I charge accumulation;
+- I threshold crossing;
+- I-to-E arrival;
+- refractory entry and recovery;
+- each inhibitory weight update.
+
+The interface should allow the user to inspect every point in the simulation.
+
+44. Minimum fields to log at every timestep
+-------------------------------------------
+For every excitatory neuron:
+
+- membrane potential before and after events;
+- threshold;
+- spike flag and exact spike time;
+- refractory timer;
+- active incoming feedforward events;
+- incoming inhibitory event;
+- inhibitory weight used;
+- pre-inhibition p_i;
+- delta_w_I;
+- whether inhibitory learning was skipped due to refractory state;
+- feedforward weight updates;
+- current specialization status.
+
+For the inhibitory neuron:
+
+- membrane potential before and after each E arrival;
+- threshold;
+- all source E events;
+- arrival order;
+- distance/delay per source;
+- exact event that crossed threshold;
+- ambiguous causal set flag;
+- spike time;
+- refractory state.
+
+For the network:
+
+- current input pattern;
+- active lower-level outputs;
+- raw residual activity;
+- lag-corrected residual;
+- winner identity;
+- winner margin;
+- number of E spikes before I fires;
+- number of E spikes after I fires;
+- number of distinct winners per trial;
+- total spike cost;
+- prediction error;
+- weight norms;
+- dead or underused neuron count.
+
+45. Specific tests that must be run
+-----------------------------------
+Test 1: One clear early E winner
+- one E spikes clearly before all others;
+- verify it triggers I;
+- verify competitors are suppressed;
+- verify the winner's refractory status excludes its I-to-E plasticity update.
+
+Test 2: Two E spikes before I threshold
+- verify both add charge to I;
+- verify this is not automatically labeled a failure;
+- verify the event that actually crosses I threshold is recorded.
+
+Test 3: Two E events at identical arrival time
+- verify the simulation identifies an ambiguous causal set;
+- add distance-based delays;
+- verify the symmetry is then broken physically.
+
+Test 4: Equal broadcast inhibition
+- verify every non-refractory E target receives the event;
+- verify local p_i values produce different weight updates when target charge
+  differs;
+- verify equal topology is not confused with equal plasticity.
+
+Test 5: Refractory winner
+- verify the winner receives no normal inhibitory weight update;
+- verify refractory silence is not treated as successful inhibition.
+
+Test 6: Linear versus squared saturation
+Compare:
+
+    delta_w = eta_I * p_i
+
+    delta_w = eta_I * p_i * (1 - w / w_max)
+
+    delta_w = eta_I * p_i * (1 - (w / w_max)^2)
+
+Measure:
+
+- time to clean WTA;
+- overshoot;
+- final inhibitory strengths;
+- duplicate spikes;
+- dead-neuron rate;
+- sensitivity to eta_I;
+- stability across random seeds.
+
+Test 7: Distance sensitivity
+- vary E-to-I distances slightly;
+- verify small delays can break ties;
+- verify the same geometric neuron does not win every pattern solely because it
+  is always closest to I.
+
+Test 8: Loser-weight contamination
+- measure how much of the winning pattern remains in losing neurons;
+- compare no depression, targeted competitor depression, passive LTD, and
+  normalization.
+
+Test 9: Prediction gating
+- keep predictive feedback off before specialization;
+- enable it only after stable pattern ownership;
+- verify familiar patterns reduce residual activity;
+- verify novel components remain active.
+
+==========================================================================
+PART XII. MAIN BIOLOGICAL AND COMPUTATIONAL CONCERNS
+==========================================================================
+
+46. Discrete timestep ordering can create a fake winner
+-------------------------------------------------------
+If code loops through E0, E1, E2 in that order, E0 may always be processed first
+and may appear to cause I's spike even when E0 and E1 are physically tied.
+
+Required protection:
+
+- use an arrival-time event queue;
+- randomize only for a documented experiment, not as a hidden fix;
+- record sub-timestep times;
+- mark unresolved ties instead of inventing causal certainty.
+
+47. Distance can solve one symmetry problem and create a permanent bias
+------------------------------------------------------------------------
+If the same E neuron is physically closest to I for every pattern, it may have
+a persistent timing advantage unrelated to pattern match.
+
+Possible protections:
+
+- symmetric geometry with small pattern-dependent path differences;
+- learned E-to-I delays or weights;
+- multiple/local inhibitory cells rather than one central cell;
+- homeostatic competition;
+- testing winner distribution across patterns and random seeds.
+
+Distance should break exact ties, not replace learning as the main selection
+mechanism.
+
+48. The winner's refractory exemption can create monopoly
+---------------------------------------------------------
+Exempting the winner from inhibition is required for the current causal rule,
+but repeated wins can create a strong positive-feedback loop.
+
+Potential failure:
+
+- one neuron wins accidentally;
+- it strengthens;
+- it always reaches threshold first;
+- it is always refractory when inhibition arrives;
+- it never learns inhibitory restraint;
+- it takes every pattern.
+
+The system must measure pattern specificity and neuron utilization. Possible
+counterbalances include pattern-specific receptive fields, normalization,
+homeostatic penalty, or recruitment rules, but these should remain separate
+from the core refractory logic.
+
+49. Equal inhibition versus target-specific learned inhibition is unresolved
+---------------------------------------------------------------------------
+The transcript states that the inhibitory neuron currently inhibits everyone
+equally. The charge-gradient rule allows individual I-to-E weights to diverge.
+
+These are two distinct variants:
+
+Variant A - truly equal global inhibition
+- one fixed I-to-E magnitude is broadcast to all non-refractory candidates;
+- target membrane state creates different voltage consequences;
+- no target-specific inhibitory weights.
+
+Variant B - global broadcast with locally learned target synapses
+- all candidates receive an event;
+- each I-to-E synapse has its own weight;
+- each weight learns from its target's p_i;
+- close competitors may develop stronger inhibitory synapses.
+
+The code and experiment report must name which variant is running.
+
+50. The w-squared rule may grow faster than expected in the middle range
+------------------------------------------------------------------------
+Because 1 - r^2 is larger than 1 - r for 0 < r < 1, the squared-ratio update can
+strengthen inhibition faster than the linear saturation rule through much of
+the range.
+
+Do not assume that adding the square automatically prevents over-inhibition.
+The full combination of eta_I, p_i distribution, event frequency, and w_I_max
+controls stability.
+
+51. Prediction must not erase an unlearned input
+------------------------------------------------
+If a newly winning but unstable neuron immediately sends strong predictive
+feedback, it can suppress the input before the circuit has learned it
+correctly.
+
+Prediction should therefore be gated by evidence of specialization, such as:
+
+- repeated wins for the same pattern;
+- low template mismatch;
+- stable receptive-field weights;
+- a minimum confidence or stability count.
+
+52. Free energy must not be collapsed into every local diagnostic
+------------------------------------------------------------------
+Keep separate:
+
+- E threshold margin;
+- I threshold margin;
+- target pre-inhibition pressure p_i;
+- raw residual spikes;
+- lag-corrected residual;
+- total spike/energy cost;
+- template prediction error;
+- inhibitory delay.
+
+They describe different mechanisms. Combining them into one number too early
+can hide why a trial succeeded or failed.
+
+==========================================================================
+PART XIII. WHAT IS CURRENTLY SETTLED VERSUS STILL OPEN
+==========================================================================
+
+53. Relatively settled design principles
+----------------------------------------
+The following points are central to the current design:
+
+- learning is continuous and local;
+- neurons integrate charge through time rather than acting as static
+  perceptrons;
+- one local winner should become one clear output symbol;
+- hard WTA is required for scalable downstream interpretation;
+- the inhibitory circuit physically resolves the race;
+- preliminary multiple E spikes can occur before selection;
+- the problematic case is an unresolved shared causal trigger of the I spike;
+- physical distance and delays can help break exact symmetry;
+- the current inhibitory topology broadcasts across the full local pool;
+- the winner is refractory when the inhibitory response returns;
+- normal inhibitory plasticity should be skipped for refractory targets;
+- inhibitory learning should use the target's pre-inhibition charge;
+- inhibitory weights must be bounded and nonlinear;
+- the squared normalized-weight form is a current proposed update;
+- higher-level predictions should feed back to suppress explained activity;
+- residual activity should remain available for novelty and further learning;
+- lower-level modules should emit compressed symbols upward.
+
+54. Open questions that require experiments
+-------------------------------------------
+The following are not fully resolved:
+
+- Is the first E spike the temporary winner, or only the E event that makes I
+  cross threshold?
+- How should credit be divided if several E events jointly charge I?
+- What sub-timestep resolution is enough to resolve realistic ties?
+- Should distance be fixed, learned, or only a small perturbation?
+- Should I-to-E weights remain equal or learn individually?
+- Should inhibition use the pre-update or post-update inhibitory weight on the
+  current event?
+- What are stable values for eta_I and w_I_max?
+- Is the squared-ratio capacity rule better than the linear rule?
+- How should losing candidate weights be cleaned without erasing useful future
+  capacity?
+- When exactly should a neuron be declared specialized?
+- When should predictive feedback turn on?
+- How should raw residual energy and lag-corrected prediction accuracy be
+  reported together?
+- How can one prevent an early winner from monopolizing every pattern?
+- Does one central inhibitory neuron scale, or will later versions require
+  local/paired inhibitory circuitry?
+
+==========================================================================
+PART XIV. COMPLETE END-TO-END INTERPRETATION
+==========================================================================
+
+55. The full story in one sequence
+----------------------------------
+A spatial pattern activates a subset of the nine lower-level modules. Each
+lower-level module has already compressed its internal local activity into one
+output symbol. Those nine possible symbols project through 72 synapses to
+eight higher-level excitatory candidates.
+
+At first, the candidates are nearly symmetric. Several integrate the same
+active inputs and may spike close together. Their spikes travel to a central
+inhibitory selector. Multiple preliminary spikes are acceptable because they
+all contribute charge to the inhibitory neuron. The critical event is when the
+inhibitory neuron crosses threshold.
+
+Ideally, one E-to-I event has a slightly earlier physical arrival because of
+weight, state, noise, or distance. That event pushes the inhibitory neuron over
+threshold and establishes a causal winner. If two events are exactly tied and
+jointly trigger the inhibitory spike, the winner is ambiguous and the
+simulator must not hide the ambiguity through array order.
+
+Once I fires, it broadcasts inhibition to the entire local E pool. The winning
+E neuron has already fired and is refractory, so it is effectively spared and
+its I-to-E synapse is not trained from that event. The still-active competitors
+receive the inhibitory event. Each non-refractory target's pre-inhibition
+membrane charge is measured. A near-threshold competitor produces a high p_i
+and a large inhibitory update; a weak competitor produces a small update.
+
+The current nonlinear proposal is:# LPS-3 Competitive Spiking Architecture — Engineering & Diagnostics Report
+
+**Scope:** what the circuit does, every verified bug fixed, the current
+mechanistic baseline, and what remains unproven.
+**Deliverables:** `main.js`, `index.html`, `style.css` (unchanged interface),
+plus this report.
+**Status of learning:** feedforward S→E Hebbian, anti-Hebbian, and
+specialization remain **frozen** by design. The circuit is at the point where
+its *competition* is validated but its *credit assignment* is not yet
+re-enabled.
+
+---
+
+## 1. What this project is
+
+An event-driven, biologically-inspired spiking module — not a classifier with
+neural names bolted on. A 3×3 sensory grid drives eight excitatory (E) neurons
+through stateful leaky integrate-and-fire (LIF) dynamics; a shared inhibitory
+neuron (I1) implements winner-take-all competition; and (once re-enabled) each
+E neuron learns a receptive field through purely *local, causal* firing — no
+labels, no argmax, no software-selected winner, no backpropagation.
+
+The scientific question driving every change below is not "how accurate is it"
+but: **can the physical E→I1→E circuit produce a single causal representative
+(or an honest ambiguous set) through synaptic dynamics alone, without a
+software shortcut deciding the winner?**
+
+---
+
+## 2. The two issues you named, resolved
+
+### 2a. "When one neuron fires, the others can't gather charge"
+
+**Cause identified:** the legacy winner-take-all mechanism applies a flat
+`E[i].v -= 0.45` to every non-winner on every post-decision step. With a normal
+per-step voltage gain of roughly `0.06`, that subtraction (`0.06 − 0.45 → 0`,
+clamped) mathematically erases any competitor's accumulating charge for the
+rest of the trial. That is exactly the "dead neuron" appearance — and in
+*legacy* mode it is working as designed (it is a software WTA control).
+
+**Fix / status:** this behavior is now strictly confined to
+`competitionMode = "legacyClamp"`. In the mechanistic baseline
+(`mechanisticI1`), the `-0.45` subtraction never runs. Verified directly:
+after the first response, non-winner voltage reaches **0.99** (right up against
+the `1.0` threshold) and is observed *rising* on post-decision steps — proving
+competitors gather charge freely. The dead-neuron effect is absent wherever it
+should be absent.
+
+A related rendering bug that *made healthy neurons look dead* was also fixed:
+the visualizer previously (i) drew active sensory→E connections only for the
+winner and (ii) forced the winner to glow every frame regardless of whether it
+actually spiked. Both are corrected — every connection that delivers real
+current is now drawn (brightness ∝ contribution), and the spike-flash only
+fires on an actual spike.
+
+### 2b. "Two neurons fire and inhibit I together"
+
+**Cause identified:** under the old coupling `w_ei = 0.28` against
+`theta_I ≈ 0.333`, **one E event could not cross I1's threshold** (0.28 <
+0.333). I1 only fired once *several* events had accumulated — so the neuron
+that recruited inhibition was routinely a later source (or a co-firing pair),
+not the first responder. This is a *rapid event-accumulation* trigger, not the
+first-spike WTA the LPS notes describe.
+
+**Fix / status:** `w_ei` is recalibrated to **0.34** — the smallest value
+verified to let a *single* first-response event cross threshold from rest
+(overshoot `+0.0067`; `0.333` fails on floating-point, `0.34` succeeds under
+membrane noise). Consequences, measured over 500 seeded trials
+(`mechanisticI1 + directPSP + decayingIPSC + conductanceCarry`, learning
+frozen):
+
+| Metric | old `w_ei=0.28` | new `w_ei=0.34` |
+|---|---|---|
+| Lone first responder *is* the causal I1 trigger | 0.0% | **89.4%** |
+| Honest simultaneous ambiguous set | ~12% | **10.6%** |
+| Category-C entrants (join before I1 fires) / trial | 1.04 | **0.000** |
+| Unique E firers / trial | 2.86 | 2.72 |
+
+The "who is the winner" question is now answered **100%** of the time by the
+physics — 89.4% as a unique representative, 10.6% as an explicitly-reported
+simultaneous ambiguous set — with **zero** software selection.
+
+---
+
+## 3. The mechanistic baseline (current defaults)
+
+| Component | Setting | Meaning |
+|---|---|---|
+| E→I1 synapse | `directPSP` | instantaneous postsynaptic-potential event approximation |
+| I1→E synapse | `decayingIPSC` | persistent inhibitory conductance that decays over time |
+| Refractory policy | `conductanceCarry` | inhibition still delivered to a refractory target; weight learning skipped |
+| Competition | `mechanisticI1` | no `-0.45` clamp, no software winner |
+| E→I1 coupling | `w_ei = 0.34` | strict single-event first-spike trigger |
+| I1 threshold | `theta_I = theta_E / 3` | preserved from the LPS notes exactly |
+| Plasticity | `frozen` | all persistent learning off pending the credit-assignment gate |
+
+`directPSP` is a legitimate mechanistic abstraction, **not** a shortcut: it
+preserves spike source, conduction delay, membrane voltage, threshold, reset,
+refractory state, and the downstream inhibitory event. `decayingEPSC` (the
+temporal-accumulation / population-confirmation model) remains fully selectable
+as a named experimental variant.
+
+---
+
+## 4. Every verified bug — fixed and regression-guarded
+
+Each of these was found by an executed test, not by inspection, and each has a
+test that will catch it if it regresses.
+
+1. **Leaky competition (spike-gated suppression).** The old clamp only ran on
+   steps where *some* neuron spiked, leaving ~95% of post-decision steps
+   unsuppressed. Post-decision re-spike rate fell from **32.4% → ~1%** of
+   trials once suppression was made continuous.
+2. **Legacy-clamp contamination.** I1→E inhibition was affecting E voltage
+   under *every* mode, silently making the "pure legacy control" a hybrid.
+   Now gated: in `legacyClamp`, E-voltage trajectories are **bit-for-bit
+   identical** whether I1's dynamics run or are disabled. A separate,
+   explicitly-labeled `hybridVisualization` mode exists for when both are
+   wanted at once.
+3. **Event amount silently reconstructed.** `oneStepCurrent`/`decayingEPSC`
+   re-derived the delivered amount from the *live* weight instead of the
+   event's own stored `amt`, discarding any injected/calibrated value.
+   Fixed to thread each event's own amount through delivery. Guarded by
+   `regression_amt_preserved.js` (9 checks).
+4. **Array-order causal assignment.** Same-step E→I1 arrivals were processed
+   sequentially, attributing the crossing to whichever was applied last.
+   Now batched: a same-step batch that jointly crosses is reported as a full
+   `ambiguousCausalSet`, never resolved by array order.
+5. **Arrival timing inferred from post-reset voltage.** Under `directPSP` an
+   arrival can cross threshold and reset I1.v to 0 in the same step, so a
+   `i1V > 0` proxy mis-detected arrivals. Replaced with a direct internal
+   event flag (`ei1ArrivalThisStep`); per-trial latency identity
+   (`l1 + l2 + l3 = total`) now holds in **0/400** failures.
+6. **Source identity lost without jitter.** E→I1 events now always flow
+   through the source-preserving queue; jitter changes only arrival timing.
+7. **The squared inhibitory-weight equation.** Corrected to
+   `1 − w² / w_max` (the LPS-notes form), **not** `1 − (w/w_max)²` which
+   squares the denominator. Numerically identical only at `w_max = 1`;
+   `regression_inhibitory_eq.js` uses `w_max = 2` to prove the engine matches
+   the correct form and diverges from the wrong one, plus checks refractory
+   weight-freezing, pressure-scaling, and boundedness (6 checks).
+8. **`trialSubMargin` measured after reset** (a fired neuron wrongly showed
+   maximal sub-threshold margin). Now captured pre-reset — a firing neuron
+   contributes 0 margin.
+9. **`trialFEPost` window opened too early** (absolute step vs.
+   `decisionStep + delay`). Now anchored to the actual decision step.
+10. **Latent crash.** An E-drive loop referenced an index `i` that a
+    `for…of` form never defined; it would throw the moment a specialized
+    neuron met a non-matching pattern. Reproduced, then fixed.
+11. **Seeded RNG.** Added `setEngineSeed()` (call before `makeEngine()`, since
+    weights randomize at construction) covering noise, tie-breaks, weight
+    init, and shuffling. Same seed → identical trace; different seed →
+    different trace. This is what makes the paired A/B comparisons above
+    trustworthy.
+12. **`firstResponseSet`** is tracked as a distinct quantity (all E neurons
+    spiking at the earliest E-spike step) and never conflated with
+    `firstI1CausalSet` (the later I1-crossing source/batch).
+
+---
+
+## 5. What we learned about the first responder (the nuance that matters)
+
+Before the recalibration, in 93.6% of trials there *was* a lone first
+responder, but its single event never recruited I1 alone. A source-resolved
+contribution analysis (each E source's decayed contribution to I1.v, tracked to
+the moment of crossing) showed this was **not** "the first responder did
+nothing":
+
+- First responder **still causally necessary** (removing its residual
+  contribution would have prevented the crossing): **83.3%** of late trials.
+- Helpful but not strictly necessary: 16.7%.
+- Fully decayed / irrelevant by crossing: **0%**.
+- Average share of threshold voltage supplied by the first responder: **44%**.
+
+So the old model was genuinely *cooperative accumulation*, not a broken
+first-spike system — an honest distinction that changes how the architecture
+should be described. The recalibration to `w_ei = 0.34` is what converts it
+into the intended strict first-spike trigger.
+
+---
+
+## 6. What remains unproven / open
+
+This is the honest boundary of what has been established.
+
+- **Category-D residual.** With the strict trigger, ~0.95 competitors/trial
+  still first-spike in the window *after* I1 fires but *before* its inhibition
+  arrives (the `i1_delay` conduction gap), and ~0.67/trial first-spike after
+  arrival. Category-C is eliminated; the residual is now purely the return-path
+  delay, exactly as the earlier controlled `i1_delay` sweep predicted
+  (D scales monotonically 0.00 → 0.69 as delay goes 0 → 3). Whether `i1_delay`
+  should be reduced depends on a **timestep-to-milliseconds mapping that does
+  not yet exist** — the model is currently in dimensionless step units, and
+  `i1_delay = 0` (same-step feedback) is not obviously biologically
+  interpretable. This is a modeling decision, not something further simulation
+  settles.
+- **Credit assignment is undecided.** With a valid representative now
+  available, the design question — *does the earliest responder learn, or the
+  source that completes I1 recruitment* — is real and must be chosen
+  deliberately, not by accident, before S→E learning reconnects. For a
+  simultaneous ambiguous set the baseline rule is to **skip** winner-specific
+  learning that trial.
+- **Learning phases 6–12 are not implemented:** causal S→E Hebbian, targeted
+  anti-Hebbian, specialization/saturation, predictive feedback, residual/
+  free-energy validation, and continuous-stream operation all remain ahead.
+
+---
+
+## 7. Suggested next step
+
+Per the master development order, the immediate next phase is **inhibitory-only
+plasticity validation**: switch `mechanisticPlasticityMode` to `inhibitoryOnly`
+and confirm the exact `1 − w²/w_max` I1→E rule sharpens competition on seeded
+paired trials, while everything else stays frozen. Only after that gate should
+feedforward S→E Hebbian learning reconnect — and only for a *valid* causal
+representative, never the legacy software winner.
+
+---
+
+*All figures in this report come from executed, seeded, reproducible tests
+against the delivered `main.js`. Diagnostic results are reported as diagnostics,
+not as final biological conclusions.*
+
+    delta_w_I_i = eta_I * p_i * (1 - (w_I_i / w_I_max)^2)
+
+The updated inhibitory weight remains bounded by w_I_max. Repeated trials make
+inhibition better at suppressing close competitors, while Hebbian feedforward
+learning makes the pattern's specialist reach threshold earlier. The result
+should become a clean hard winner-take-all event: one neuron emits one symbol,
+and the rest of the local pool becomes quiet.
+
+The specialist then sends its abstraction upward and, once sufficiently
+stable, sends a prediction downward. Expected lower-level activity is
+suppressed. Activity that remains unexplained acts as a residual prediction-
+error/free-energy signal and continues to drive attention or learning.
+
+This realizes the page 1 compositional principle in the page 2 mechanism:
+
+    local events
+        -> stable lower-level symbol
+        -> sparse output
+        -> higher-level composition
+        -> predictive feedback
+        -> residual-driven continuous learning.

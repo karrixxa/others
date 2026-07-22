@@ -1,0 +1,1275 @@
+LPS LEARNING-RULE DISCUSSION - DETAILED SUMMARY
+Based on: LPS (8).pdf and Pasted text(113).txt
+
+PURPOSE OF THIS DISCUSSION
+
+The goal was to define a local, biologically inspired learning rule for the LPS spiking network. The rule should allow each neuron and each synapse to update using only information physically available at that neuron or synapse. It should not require a global optimizer, backpropagation, labels, or a central controller that examines the whole network.
+
+The main ideas were:
+
+1. Excitatory and inhibitory synapses must be treated separately.
+2. Excitatory synapses learn the causal pattern represented by a firing excitatory neuron.
+3. Inhibitory synapses learn how much charge they need to remove from a competing neuron.
+4. Free energy is the remaining mismatch or unused representational capacity that drives learning.
+5. Learning should naturally slow and stop when the neuron is already tuned to the pattern.
+6. Each synapse has a maximum strength, representing a physical ion-channel limit.
+7. Competitive winner-take-all, active decay, residual membrane charge, normalization, and common-pixel handling require staged testing.
+
+----------------------------------------------------------------------
+1. LOCAL LEARNING AND BIOLOGICAL CONSTRAINTS
+----------------------------------------------------------------------
+
+The algorithm should be local.
+
+A neuron should not need to know the complete state of the network. A synapse should update using quantities available locally, such as:
+
+- Whether its presynaptic input spiked
+- Its current synaptic weight
+- The postsynaptic neuron's charge
+- Whether the postsynaptic neuron fired
+- The neuron's threshold
+- A local learning rate
+- A local maximum allowed weight
+
+A global normalization operation was discussed, but it may be biologically implausible because a neuron would need to know all excitatory and inhibitory connections and redistribute weight across them. The preferred starting point is therefore a local free-energy rule rather than a global weight-budget calculation.
+
+The biological analogy is an ion channel:
+
+- A synaptic weight represents how large or effective an ion channel has become.
+- An excitatory event lets positive charge into the neuron.
+- An inhibitory event lets charge leave or subtracts charge.
+- Learning changes the channel size.
+- A channel cannot grow without limit, so each weight has a maximum.
+- Once the neuron is tuned to the pattern, little or no free energy remains and learning stops.
+
+----------------------------------------------------------------------
+2. EXCITATORY AND INHIBITORY CONNECTIONS ARE DIFFERENT
+----------------------------------------------------------------------
+
+There are two different sets of weights:
+
+A. Excitatory weights
+
+These are the causal or pattern-representing synapses. They describe which inputs belong to the symbol or receptive field learned by an excitatory neuron.
+
+Excitatory weights should generally be trained only when the excitatory neuron fires. The firing event means the neuron has claimed or represented the currently active input combination.
+
+B. Inhibitory weights
+
+These remove charge and control competition. They are not the causal symbol itself.
+
+Inhibitory synapses should be processed separately from excitatory synapses. The notes propose that an inhibitory synapse learns immediately when its inhibitory spike arrives, rather than waiting for the inhibited excitatory neuron to fire.
+
+This creates two different learning times:
+
+- Inhibitory learning: occurs when the inhibitory event is received.
+- Excitatory learning: occurs when the excitatory neuron reaches threshold and fires.
+
+The excitatory and inhibitory rules may use different learning rates and different maximum weights.
+
+----------------------------------------------------------------------
+3. INSTANTANEOUS CHARGE VERSUS RUNNING MEMBRANE CHARGE
+----------------------------------------------------------------------
+
+An important distinction was made between:
+
+1. Running accumulated charge
+
+This is the neuron's membrane state across time. It can accumulate, leak, receive inhibition, cross threshold, reset, and enter a refractory period.
+
+2. Instantaneous accumulated charge
+
+This is the amount of charge produced by the current input evaluation. It is calculated from the active inputs and their synaptic weights.
+
+Tentative definition:
+
+I_accQ = sum_i(w_i * input_i)
+
+Here:
+
+- w_i is the weight of synapse i.
+- input_i indicates how strongly the presynaptic input is active.
+- For a digital spike, input_i is usually 1 when a spike is present and 0 when absent.
+- If distance or graded input is later used, input_i could be a value such as 0.75 instead of only 0 or 1.
+
+If input_i = 0, that synapse contributes no instantaneous charge.
+
+If input_i = 1, the synapse contributes its full weight.
+
+Using multiplication rather than merely summing active weights keeps the equation compatible with graded or distance-based input later.
+
+----------------------------------------------------------------------
+4. EXCITATORY FREE ENERGY
+----------------------------------------------------------------------
+
+The discussion defines excitatory free energy as the amount of instantaneous charge still missing before the neuron would fire immediately from the current pattern.
+
+Tentative definition:
+
+FE = threshold - I_accQ
+
+Interpretation:
+
+- If I_accQ is far below threshold, FE is large.
+- A large FE means the current synaptic pattern is not yet strong enough to make the neuron fire immediately.
+- The neuron therefore still has substantial learning available.
+- As the active synaptic weights grow, I_accQ approaches threshold.
+- When I_accQ equals threshold, FE becomes zero.
+- When FE is zero, the current pattern already supplies exactly enough charge to fire the neuron, so learning should stop.
+
+This is the balancing mechanism:
+
+Large mismatch -> more learning
+Small mismatch -> less learning
+Pattern fully represented -> no learning
+
+The free energy here is not being used as a full thermodynamic or variational-free-energy derivation. It is a local residual or remaining charge requirement that controls how much learning remains.
+
+A normalized or ratio-based free-energy version was also mentioned. For example, a charge-to-threshold ratio could keep the value on a smaller scale. However, the main equation shown in the notes uses the unnormalized difference:
+
+FE = threshold - I_accQ
+
+The learning rate and threshold can be adjusted to control whether this linear free-energy term produces learning that is too fast or too slow.
+
+----------------------------------------------------------------------
+5. EXCITATORY WEIGHT UPDATE
+----------------------------------------------------------------------
+
+The notes propose an excitatory update with four components:
+
+1. Learning-rate term
+2. Free-energy term
+3. Synaptic saturation or ion-channel term
+4. Input-gating term
+
+As the handwritten equation appears in the PDF:
+
+delta_w_i = LR * FE * ((1 - (w_i / w_max))^2) * input_i
+
+Meaning of each term:
+
+delta_w_i
+The amount synapse i changes during this learning event.
+
+LR
+The excitatory learning rate. This is a scalar controlling how quickly the weights grow.
+
+FE
+The neuron's remaining excitatory free energy.
+
+(1 - (w_i / w_max))^2
+The nonlinear saturation term. It reduces learning as the individual synapse approaches its maximum allowed weight.
+
+input_i
+The presynaptic input value. An active input can strengthen its synapse. An inactive input contributes zero under the current 0/1 encoding.
+
+Tentative application:
+
+w_i <- w_i + delta_w_i
+
+This update is performed for the relevant excitatory synapses when the postsynaptic excitatory neuron fires.
+
+----------------------------------------------------------------------
+6. WHY THE SATURATION TERM IS INCLUDED
+----------------------------------------------------------------------
+
+The saturation term represents the physical limit of an ion channel.
+
+When w_i is small compared with w_max:
+
+- w_i / w_max is small.
+- Its square is even smaller.
+- 1 minus that value is close to 1.
+- The synapse can learn relatively quickly.
+
+As w_i approaches w_max:
+
+- The ratio approaches 1.
+- The squared ratio approaches 1.
+- The saturation factor approaches 0.
+- The weight change becomes smaller and eventually stops.
+
+This means a synapse initially grows quickly but slows as it approaches its maximum.
+
+Without this term, the simpler rule would be:
+
+delta_w_i = LR * FE * input_i
+
+In that simpler version, free energy would be the only limit on growth. The saturation term is included to make the rule more biologically constrained and to stop any one ion channel from growing indefinitely.
+
+The saturation term acts locally. Each synapse limits its own growth based on its own current weight.
+
+----------------------------------------------------------------------
+7. ROLE OF W_MAX
+----------------------------------------------------------------------
+
+w_max is not only a numerical cap. It also helps determine the minimum number of active synapses required to represent a pattern.
+
+Example:
+
+- threshold = 1000
+- w_max = 1000
+
+A single maximally strong synapse could theoretically provide enough charge to reach threshold.
+
+If:
+
+- threshold = 1000
+- w_max = 300
+
+Then one synapse cannot represent the full pattern by itself. Several active synapses are required to collectively approach threshold.
+
+Therefore:
+
+Larger w_max -> fewer synapses may be sufficient to represent a pattern.
+Smaller w_max -> the neuron must combine more inputs to represent a pattern.
+
+This parameter can control receptive-field size and prevent a neuron from becoming completely dependent on one input.
+
+Excitatory and inhibitory synapses may require different maximum values:
+
+- w_E_max for excitatory channels
+- w_I_max for inhibitory channels
+
+----------------------------------------------------------------------
+8. INHIBITORY LEARNING
+----------------------------------------------------------------------
+
+Inhibitory learning was described as structurally similar to excitatory learning but with a different free-energy definition and different timing.
+
+The inhibitory synapse learns when an inhibitory spike reaches an excitatory neuron.
+
+Tentative inhibitory update shown in the notes:
+
+delta_w_I_i = ILR * IFE * ((1 - (w_I_i / w_I_max))^2) * input_I_i
+
+Where:
+
+ILR
+The inhibitory learning rate.
+
+IFE
+The inhibitory free energy or remaining inhibition required.
+
+w_I_i
+The current weight of the inhibitory synapse.
+
+w_I_max
+The maximum inhibitory weight.
+
+input_I_i
+Whether or how strongly the inhibitory input fired.
+
+The notes show the tentative inhibitory free-energy relationship as:
+
+IFE = AccQ - w_I_i
+
+The intended interpretation appears to be:
+
+- The excitatory neuron currently has some accumulated charge.
+- The arriving inhibitory synapse removes some of that charge.
+- If the inhibitory weight is much smaller than the charge that must be removed, substantial inhibitory free energy remains.
+- The inhibitory synapse should strengthen.
+- If the inhibitory weight is already equal to the amount of charge it needs to cancel, the residual becomes zero and the synapse stops learning.
+
+The key conceptual rule is:
+
+The inhibitory weight should grow only as large as needed to remove the relevant charge.
+
+This makes inhibition adaptive rather than permanently using one fixed hammer strength.
+
+----------------------------------------------------------------------
+9. WHY CLOSE COMPETITORS RECEIVE STRONGER INHIBITORY LEARNING
+----------------------------------------------------------------------
+
+A neuron that is close to threshold contains more charge that must be removed to stop it from firing.
+
+Therefore, when inhibition reaches a close losing competitor:
+
+- The loser has a large accumulated charge.
+- The inhibitory mismatch or residual is large.
+- The inhibitory synapse receives a larger update.
+- Future inhibition of that close competitor becomes stronger.
+
+A neuron that was never close to firing needs less inhibition and should receive a smaller update.
+
+This supports competition:
+
+- The winner fires.
+- Inhibition is sent to competitors.
+- The closest losers learn stronger inhibitory suppression.
+- Future races should separate more cleanly.
+- The inhibitory connection should grow only enough to reduce the loser toward zero or safely below threshold.
+
+This may help break ties and create a clearer winner without globally suppressing every cell by the same learned amount.
+
+----------------------------------------------------------------------
+10. PROPOSED NODE-EVALUATION ORDER
+----------------------------------------------------------------------
+
+The page-2 notes outline a two-stage node process.
+
+A. When inhibitory spikes are received
+
+For each spiking inhibitory input:
+
+1. Determine the inhibitory charge delivered by that synapse.
+2. Decrease the excitatory neuron's accumulated charge.
+3. Compute the inhibitory residual or inhibitory free energy.
+4. Train the inhibitory synaptic weight immediately.
+5. Clamp the weight so it remains within its allowed minimum and maximum.
+
+B. Process excitatory input
+
+For each active excitatory input:
+
+1. Compute charge contribution:
+   charge_i = w_i * input_i
+
+2. Add that contribution to the neuron's accumulated charge.
+
+3. After excitatory and inhibitory effects have been processed, check:
+   accumulated_charge >= threshold
+
+4. If the neuron fires:
+   - Emit a spike.
+   - Enter the normal reset/refractory process.
+   - Train the excitatory synapses associated with the represented pattern.
+   - Use the free-energy term and saturation term to determine each update.
+
+Important timing distinction:
+
+- Inhibitory synapses update at inhibitory-spike arrival.
+- Excitatory synapses update at the postsynaptic excitatory firing event.
+
+----------------------------------------------------------------------
+11. TENTATIVE PSEUDOCODE
+----------------------------------------------------------------------
+
+For each simulation evaluation of excitatory neuron E:
+
+1. Process incoming inhibitory events first.
+
+   for each inhibitory synapse j that spiked:
+
+       inhibitory_charge = w_I[j] * inhibitory_input[j]
+
+       charge_before_inhibition = E.accumulated_charge
+
+       E.accumulated_charge =
+           E.accumulated_charge - inhibitory_charge
+
+       IFE_j =
+           charge_before_inhibition - inhibitory_charge
+           OR another locally defined inhibitory residual
+           [exact form still needs confirmation]
+
+       saturation_I =
+           (1 - (w_I[j] / w_I_max))^2
+
+       delta_w_I[j] =
+           ILR * IFE_j * saturation_I * inhibitory_input[j]
+
+       w_I[j] =
+           clamp(w_I[j] + delta_w_I[j], w_I_min, w_I_max)
+
+2. Process incoming excitatory events.
+
+   instant_charge = 0
+
+   for each excitatory synapse i:
+
+       contribution_i = w_E[i] * excitatory_input[i]
+       instant_charge += contribution_i
+       E.accumulated_charge += contribution_i
+
+3. Check whether the neuron fires.
+
+   if E.accumulated_charge >= threshold:
+
+       emit spike
+
+       FE = threshold - instant_charge
+
+       FE = max(FE, 0)
+       [This clamp avoids negative learning if the instantaneous input overshoots.]
+
+       for each excitatory synapse i:
+
+           saturation_E =
+               (1 - (w_E[i] / w_E_max))^2
+
+           delta_w_E[i] =
+               LR * FE * saturation_E * excitatory_input[i]
+
+           w_E[i] =
+               clamp(w_E[i] + delta_w_E[i], w_E_min, w_E_max)
+
+       reset or partially reset the membrane
+       begin refractory period
+
+This pseudocode is a faithful organization of the discussion, but the exact inhibitory residual and exact handling of overshoot still require confirmation.
+
+----------------------------------------------------------------------
+12. LEARNING STOPS AUTOMATICALLY
+----------------------------------------------------------------------
+
+The intended system has two natural brakes.
+
+A. Neuron-level brake: free energy
+
+As the complete active pattern becomes sufficient to reach threshold, FE approaches zero.
+
+B. Synapse-level brake: saturation
+
+As a particular synaptic weight approaches its maximum, its saturation factor approaches zero.
+
+Together they mean:
+
+- A poorly represented pattern learns quickly.
+- A nearly learned pattern changes slowly.
+- A fully represented pattern stops changing.
+- An already saturated synapse cannot continue absorbing unlimited learning.
+
+This is the proposed self-regulating mechanism that allows specialization without manually turning learning off.
+
+----------------------------------------------------------------------
+13. FIRING-TRIGGERED ACTIVE DECAY
+----------------------------------------------------------------------
+
+The signed +1/-1 value belongs to the learning update that occurs when an excitatory neuron fires.
+
+It is not the electrical spike value used to accumulate membrane charge.
+
+For physical charge:
+
+charge_input_i = 1 if input i spiked
+charge_input_i = 0 if input i did not spike
+
+For learning when the postsynaptic excitatory neuron fires:
+
+learn_signal_i = +1 if input i is present in the current pattern
+learn_signal_i = -1 if input i is absent from the current pattern
+
+Therefore, the firing neuron performs both operations in one update:
+
+- It strengthens synapses connected to the currently active pattern.
+- It decreases synapses connected to features that are not part of the current pattern.
+
+This is called active decay because weakening happens at a meaningful learning event: the postsynaptic neuron has fired and is updating what it represents.
+
+It does not mean that every missing spike causes continuous decay at every timestep.
+
+This distinction is essential:
+
+- No presynaptic spike contributes zero electrical charge.
+- A nonparticipating input receives a negative learning sign only when the postsynaptic neuron fires.
+- The -1 changes the direction of the synaptic update; it is not inhibitory current.
+
+Also, this update is not limited to the final winner. During early training, before inhibition has produced a clean winner-take-all response, several excitatory neurons may fire sequentially. Every excitatory neuron that fires performs its own local +1/-1 update. This is why early competitors can all partially learn the same pattern and develop noisy weights.
+
+The active decay mechanism is needed later to undo those irrelevant partial associations.
+
+A tunable version can use:
+
+learn_signal_i = +1 for a present input
+learn_signal_i = -beta for an absent input
+
+The conceptual default is beta = 1, matching the +1/-1 discussion. However, beta should remain adjustable because full-strength negative updates may drive small weights to their floor too quickly.
+
+----------------------------------------------------------------------
+14. WEIGHT FLOOR
+----------------------------------------------------------------------
+
+If negative input or decay is used, weights must not become negative or disconnect completely unless that behavior is intentionally allowed.
+
+A minimum-weight safeguard was proposed:
+
+w_i = max(w_min, w_i + delta_w_i)
+
+The transcript mentions keeping the floor at either 0 or 1, with 1 appearing to be the preferred example so every synapse retains a small physical connection.
+
+This still needs a final decision:
+
+- w_min = 0 permits a connection to disappear.
+- w_min = 1 preserves a weak baseline channel.
+- Another small positive value could also be used.
+
+----------------------------------------------------------------------
+15. RELATION TO HEBBIAN, ANTI-HEBBIAN, AND STDP
+----------------------------------------------------------------------
+
+The positive side of the rule is Hebbian:
+
+- A presynaptic feature is active.
+- The postsynaptic excitatory neuron fires.
+- That active synapse strengthens.
+
+The negative side is an event-triggered anti-Hebbian or active-decay operation:
+
+- The postsynaptic excitatory neuron fires.
+- An input feature is absent from the current pattern.
+- That nonparticipating synapse weakens.
+
+This is similar to STDP because synaptic plasticity is tied to a postsynaptic firing event. However, the proposed LPS rule is broader than a narrow pre/post timing rule.
+
+A simple STDP rule typically asks whether a presynaptic spike occurred shortly before or after the postsynaptic spike. The LPS rule instead evaluates the full input pattern associated with the firing event:
+
+- Present pattern features receive +1.
+- Absent pattern features receive -1.
+- The update magnitude is controlled by free energy.
+- The remaining ion-channel capacity limits how much each synapse can change.
+
+The intended local message from a firing neuron is:
+
+"These active inputs contributed to the pattern I am learning, while these inactive inputs should become less associated with me."
+
+This is especially useful in competitive learning. Before inhibition becomes strong enough to enforce one winner, several neurons may partially learn the same pattern. Later active decay allows those nonwinning neurons to erase irrelevant portions of that earlier learning and retune toward different patterns.
+
+For that reason, the rule is described in the discussion as similar to STDP but potentially better suited to this competitive free-energy architecture.
+
+----------------------------------------------------------------------
+16. NORMALIZATION DISCUSSION
+----------------------------------------------------------------------
+
+Weight normalization was considered as another way to maintain a fixed synaptic budget.
+
+Under normalization:
+
+- Strengthening selected weights would automatically pull down other weights.
+- Total incoming weight could remain fixed.
+
+Potential benefit:
+
+- Prevents all weights from growing together.
+- Creates direct competition among a neuron's inputs.
+
+Problems:
+
+1. It may require a global within-cell computation over every synapse.
+2. It may be less biologically local than the free-energy rule.
+3. It does not automatically solve the common-pixel problem.
+4. A feature shared by many patterns may repeatedly receive reinforcement and dominate.
+
+The current direction is to begin with local free-energy and saturation rules, then determine whether any normalization is necessary.
+
+----------------------------------------------------------------------
+17. COMMON-PIXEL AND OVERLAPPING-PATTERN PROBLEM
+----------------------------------------------------------------------
+
+The 3x3 pattern task contains inputs that are shared by multiple categories, especially the center pixel.
+
+A common pixel may be active in many patterns. If it is strengthened every time, it can become disproportionately large even though it is not discriminative.
+
+The group discussed reducing the common weight through predictive feedback or normalization.
+
+The difficulty is:
+
+- If feedback slows or suppresses the shared input globally, it may slow the input for every pattern.
+- The system needs to reduce the common feature's dominance without erasing its legitimate role in each pattern.
+- A fixed budget alone may still allow the common feature to win too much of the budget.
+
+This remains a competition-stage design problem and was intentionally postponed until the basic local learning rules are implemented and tested.
+
+----------------------------------------------------------------------
+18. PARAMETERS OR "KNOBS" TO TEST
+----------------------------------------------------------------------
+
+The proposed system has several parameters that can be adjusted:
+
+- Excitatory learning rate, LR
+- Inhibitory learning rate, ILR
+- Excitatory threshold
+- Excitatory maximum weight, w_E_max
+- Inhibitory maximum weight, w_I_max
+- Minimum weight, w_min
+- Input encoding: 0/1, -1/+1, or graded input
+- Free-energy scaling or normalization
+- Membrane leak
+- Reset behavior
+- Refractory duration
+- Timing of inhibitory arrival
+- Separate decay or anti-Hebbian rate
+
+Example values mentioned in the discussion:
+
+- LR approximately 5
+- Threshold approximately 1000
+- Initial random weights approximately 1 to 10
+
+These were examples rather than final calibrated values.
+
+If learning is too fast:
+
+- Reduce the learning rate.
+- Normalize the free-energy term.
+- Lower the saturation response.
+- Increase the duration over which the system is expected to learn.
+
+If learning is too slow:
+
+- Increase the learning rate.
+- Use an unnormalized residual.
+- Adjust the threshold or initial weights.
+- Allow more presentations or simulation steps.
+
+----------------------------------------------------------------------
+19. IMPLEMENTATION SAFEGUARDS
+----------------------------------------------------------------------
+
+The implementation should include:
+
+1. Weight clamping
+
+   w_min <= w_i <= w_max
+
+2. Free-energy clamping where appropriate
+
+   FE = max(0, threshold - instant_charge)
+
+This prevents a firing overshoot from turning the Hebbian update negative unless negative learning is intentionally desired.
+
+3. Separate excitatory and inhibitory arrays
+
+Do not combine the weights or learning rules.
+
+4. Separate learning rates and maxima
+
+Even if they begin with equal values, keep them independently adjustable.
+
+5. Explicit event timing
+
+Record:
+
+- Time excitatory input arrived
+- Time inhibitory input arrived
+- Charge before inhibition
+- Charge after inhibition
+- Time the neuron fired
+- Which synapses were updated
+- Weight before and after each update
+
+6. Diagnostic logging
+
+For each learning event, log:
+
+- instant_charge
+- membrane accumulated charge
+- FE or IFE
+- current weight
+- saturation factor
+- input value
+- delta weight
+- updated weight
+
+This will make it possible to determine whether learning stops for the intended reason.
+
+----------------------------------------------------------------------
+20. TESTS THAT SHOULD BE RUN FIRST
+----------------------------------------------------------------------
+
+Test 1: Single active excitatory input
+
+Confirm that an active synapse increases and an inactive synapse remains unchanged under 0/1 input.
+
+Test 2: Free-energy shutdown
+
+Repeatedly present the same pattern. Confirm that instantaneous charge approaches threshold and delta_w approaches zero.
+
+Test 3: Synaptic saturation
+
+Hold FE positive while increasing one weight. Confirm that learning slows as the weight approaches w_max.
+
+Test 4: Inhibitory cancellation
+
+Give a neuron known accumulated charge, apply one inhibitory event, and confirm that the inhibitory weight grows toward the amount needed to cancel that charge.
+
+Test 5: Close versus distant loser
+
+Compare two losing neurons:
+
+- One just below threshold
+- One far below threshold
+
+Confirm that the close loser receives the stronger inhibitory update.
+
+Test 6: Weight floor
+
+If decay or -1 input is enabled, confirm that a weight never drops below the chosen minimum.
+
+Test 7: Common pixel
+
+Train overlapping 3x3 patterns and monitor whether the shared center weight dominates all receptive fields.
+
+Test 8: Competition
+
+After the basic rule is stable, present the same pattern to multiple E neurons and verify whether one specialist emerges without permanently silencing the pool.
+
+----------------------------------------------------------------------
+21. CURRENTLY AGREED CORE IDEAS
+----------------------------------------------------------------------
+
+The strongest points of agreement are:
+
+- Learning should be local.
+- Excitatory and inhibitory learning must be separate.
+- Excitatory weights encode the causal pattern.
+- Inhibition controls firing and competition but does not itself define the symbol.
+- Excitatory learning occurs when the excitatory neuron fires.
+- Inhibitory learning occurs when an inhibitory event is received.
+- Free energy controls how much learning remains.
+- A maximum-weight term limits each ion channel.
+- Learning should naturally slow and stop when the pattern is already represented.
+- The system should expose learning rates, thresholds, and maximum weights as adjustable parameters during experimentation.
+
+----------------------------------------------------------------------
+22. CONFIRMED DESIGN DECISIONS AND CURRENT RECOMMENDATIONS
+----------------------------------------------------------------------
+
+1. Confirmed saturation equation
+
+The entire remaining-capacity term is squared:
+
+saturation_i = (1 - (w_i / w_max))^2
+
+Therefore, the excitatory update is:
+
+delta_w_i = LR * FE * (1 - (w_i / w_E_max))^2 * input_i
+
+The inhibitory update is:
+
+delta_w_I_i = ILR * IFE_i * (1 - (w_I_i / w_I_max))^2 * input_I_i
+
+This is different from:
+
+1 - (w_i / w_max)^2
+
+In the confirmed rule, the subtraction occurs first and the complete result is squared.
+
+Behavior of the confirmed term:
+
+- When w_i is small, the remaining-capacity term is near 1.
+- As w_i approaches w_max, the remaining capacity approaches 0.
+- Squaring the remaining capacity makes learning fall off nonlinearly.
+- At w_i = w_max, the factor is exactly 0 and that synapse stops growing.
+
+2. Confirmed inhibitory free energy
+
+The inhibitory free energy is:
+
+IFE_i = InstAccQ - w_I_i
+
+where InstAccQ is the instantaneous accumulated charge available at the moment the inhibitory synapse is evaluated.
+
+Interpretation:
+
+- InstAccQ is the current instantaneous excitatory charge that inhibition is trying to cancel.
+- w_I_i is the current strength of that inhibitory synapse.
+- If w_I_i is smaller than InstAccQ, positive inhibitory free energy remains and the inhibitory weight can grow.
+- When w_I_i equals InstAccQ, IFE_i becomes zero and that inhibitory synapse stops strengthening.
+- The inhibitory connection therefore learns only enough strength to match the charge it needs to remove.
+
+Recommended safety form:
+
+IFE_i = max(0, InstAccQ - w_I_i)
+
+This keeps inhibitory free energy as a nonnegative remaining requirement. Any intentional inhibitory weakening should be handled by a separate decay rule rather than by allowing negative IFE.
+
+3. Confirmed +1/-1 learning polarity at the postsynaptic firing event
+
+The +1/-1 value is assigned only when the excitatory neuron fires and performs its learning update.
+
+At that firing event:
+
+learn_signal_i = +1 if input synapse i participated in the firing pattern
+learn_signal_i = -1 if input synapse i did not participate in the firing pattern
+
+The -1 is not an electrical input and does not subtract charge from the membrane. A missing presynaptic spike still contributes zero physical charge:
+
+charge_input_i = 1 if a spike arrives
+charge_input_i = 0 if no spike arrives
+
+The -1 exists only inside the weight-update rule after the postsynaptic neuron fires.
+
+Therefore:
+
+- Inputs that helped cause the postsynaptic spike receive +1 and strengthen.
+- Inputs that did not help cause that spike receive -1 and weaken.
+- Nothing is weakened merely because it failed to spike during an ordinary simulation step.
+- The positive and negative updates occur when the firing neuron claims the current pattern.
+
+This is similar in purpose to STDP because the postsynaptic spike triggers synaptic plasticity, but it uses the complete claimed pattern rather than updating only synapses selected by a narrow pre/post timing relationship. In the intended LPS rule, the firing neuron says, in effect: "The inputs that participated are mine; the inputs that did not participate should become less associated with me."
+
+Recommended adjustable version:
+
+learn_signal_i = +1 for a participating input
+learn_signal_i = -beta for a nonparticipating input
+
+Start with:
+
+beta = 1.0
+
+Keep beta adjustable in case full -1 weakening is too aggressive, but the conceptual default from the discussion is -1.
+
+4. Recommended minimum synaptic weight
+
+Use:
+
+w_min = 1
+
+for the current numerical scale, where initial weights are approximately 1 to 10 and the threshold is approximately 1000.
+
+Reasoning:
+
+- It matches the discussion that a synapse should not disconnect completely.
+- It preserves a weak physical channel that could potentially participate again.
+- It prevents signed -1 updates from producing negative excitatory weights.
+- It is consistent with the biological analogy of shrinking a channel without deleting the anatomical connection.
+
+Apply:
+
+w_i = clamp(w_i + delta_w_i, 1, w_max)
+
+This should remain a configurable parameter. If the model is later rescaled to weights between 0 and 1, use a correspondingly small positive floor such as 0.001 rather than literally using 1.
+
+5. Recommended excitatory free-energy behavior above threshold
+
+Use a nonnegative excitatory free energy:
+
+FE = max(0, threshold - InstAccQ)
+
+Reasoning:
+
+- FE represents how much instantaneous charge is still missing.
+- A missing amount cannot be negative.
+- If InstAccQ equals threshold, the pattern already causes immediate firing and no learning remains.
+- If InstAccQ exceeds threshold, the pattern is also fully represented, so excitatory growth should remain off.
+- Negative FE would turn every active input into a weakening update and mix overshoot correction into the Hebbian rule.
+- Weakening is already supplied explicitly by the -1 inactive-input encoding.
+
+If overshoot becomes excessive, correct it by reducing LR, limiting the maximum update per event, or adding a separate homeostatic mechanism. Do not make FE negative in the core rule.
+
+6. Final recommended core equations
+
+Instantaneous accumulated charge:
+
+InstAccQ = sum_i(w_i * spike_i)
+
+For measuring charge, spike_i should represent actual incoming activity, normally 1 for a spike and 0 for no spike. The -1 value is a learning signal and should not be added as negative electrical charge to InstAccQ.
+
+Excitatory free energy:
+
+FE = max(0, threshold - InstAccQ)
+
+Excitatory learning signal:
+
+learn_signal_i =
+    +1, if input i spiked
+    -beta, if input i did not spike
+
+with beta initially set to 1.
+
+Excitatory update:
+
+delta_w_i =
+    LR
+    * FE
+    * (1 - (w_i / w_E_max))^2
+    * learn_signal_i
+
+Updated excitatory weight:
+
+w_i =
+    clamp(w_i + delta_w_i, w_E_min, w_E_max)
+
+with w_E_min initially set to 1.
+
+Inhibitory free energy:
+
+IFE_i = max(0, InstAccQ - w_I_i)
+
+Inhibitory update:
+
+delta_w_I_i =
+    ILR
+    * IFE_i
+    * (1 - (w_I_i / w_I_max))^2
+    * inhibitory_input_i
+
+For an arriving inhibitory spike, inhibitory_input_i is normally +1.
+
+Updated inhibitory weight:
+
+w_I_i =
+    clamp(w_I_i + delta_w_I_i, w_I_min, w_I_max)
+
+7. Important separation between physical charge and firing-triggered learning polarity
+
+The same variable must not be used for both membrane charge and plasticity.
+
+During ordinary charge integration:
+
+spike_i = 1 if a presynaptic spike arrives
+spike_i = 0 if no presynaptic spike arrives
+
+Only these 0/1 values contribute to InstAccQ.
+
+When the postsynaptic excitatory neuron fires, create a separate learning signal:
+
+learn_signal_i = +1 if synapse i participated in the firing pattern
+learn_signal_i = -beta if synapse i did not participate
+
+The -1 never enters InstAccQ and never acts as inhibitory current. It only changes the sign of delta_w during the learning event caused by the postsynaptic spike.
+
+This preserves the intended STDP-like event structure while allowing the neuron to strengthen its causal inputs and weaken unrelated inputs in one local update.
+
+8. Remaining experimental questions
+
+The core mathematical choices above are now specified. These later-stage questions still require testing rather than immediate architectural changes:
+
+- Whether beta = 1 weakens inactive inputs too quickly
+- Whether the common center pixel becomes dominant across overlapping patterns
+- Whether a separate normalization mechanism is still necessary
+- Whether inhibitory learning needs its own minimum weight or decay
+- Whether learning-rate scaling must change when threshold and weight ranges change
+- Whether close competitors receive enough targeted inhibition to create stable specialization
+- Whether update clipping is needed to prevent one unusually large learning step
+
+These are calibration and competition questions, not ambiguities in the current core equations.
+
+----------------------------------------------------------------------
+23. COMPETITIVE LEARNING FROM AN UNTRAINED STATE
+----------------------------------------------------------------------
+
+The whiteboard discussion describes a fully connected first-layer competition.
+
+At the beginning:
+
+- The excitatory neurons are untrained.
+- Their forward weights are random.
+- Inhibitory synapses are also untrained or too weak to enforce winner-take-all.
+- Every excitatory neuron can receive the same presented pattern because the layer is fully connected.
+
+Suppose a vertical-line pattern is presented.
+
+All excitatory neurons begin accumulating charge from that same pattern. Because their initial random weights, membrane states, and event timing are not exactly identical, one neuron may reach threshold first. A second neuron may also fire soon afterward because inhibition has not yet become strong enough to stop it.
+
+Whenever an excitatory neuron fires:
+
+1. It updates its excitatory weights.
+2. Weights corresponding to present pattern inputs increase.
+3. Weights corresponding to absent pattern inputs decrease through the -1 learning sign.
+4. It sends excitation to the shared inhibitory neuron.
+5. It enters its refractory period.
+
+Initially, several neurons can fire during the same race. Therefore, several neurons may temporarily strengthen weights toward the same input pattern.
+
+This is not yet clean specialization. It is the developmental period in which the inhibitory competition is still being learned.
+
+----------------------------------------------------------------------
+24. WHY EARLY COMPETITORS DEVELOP NOISY WEIGHTS
+----------------------------------------------------------------------
+
+Before winner-take-all inhibition is established, every excitatory neuron is allowed to run the race.
+
+Several cells may approach threshold, and several may eventually fire. Each firing cell performs a local learning update.
+
+As a result:
+
+- The eventual winner learns the pattern.
+- Near-winners may also partially learn the pattern.
+- Other cells may accumulate weights associated with a pattern they will not ultimately represent.
+- Their finite free-energy capacity is partly spent on irrelevant features.
+
+These partially trained weights are described as noisy weights.
+
+The problem is not merely that multiple neurons fired once. The deeper problem is that their synapses now contain memory of a pattern that another neuron may eventually own.
+
+Without a mechanism for decreasing weights, every cell would continue accumulating associations. The network would have difficulty dividing the pattern space among different specialists.
+
+----------------------------------------------------------------------
+25. ACTIVE DECAY RECLAIMS FREE ENERGY
+----------------------------------------------------------------------
+
+When a neuron decreases an irrelevant excitatory weight, its future instantaneous accumulated charge for that old feature becomes smaller.
+
+Because:
+
+FE = threshold - InstAccQ
+
+reducing irrelevant weights increases the amount of free energy available for future learning.
+
+This is the free-energy reclamation mechanism.
+
+Example:
+
+1. Several neurons partially learn a vertical pattern during the first untrained race.
+2. Inhibition eventually allows one of them to become the main vertical-pattern specialist.
+3. A different pattern is later presented.
+4. When another neuron fires for that new pattern, inputs present in the new pattern receive +1.
+5. Inputs absent from the new pattern receive -1.
+6. Old weights that are irrelevant to the new pattern decrease.
+7. Decreasing those weights restores free-energy capacity.
+8. The restored capacity can be used to strengthen synapses belonging to the new pattern.
+
+In conceptual terms, the neuron is not turning a decayed weight directly into a separate energy substance. Rather, lowering an irrelevant weight reduces the charge explained by the old pattern and increases the neuron's remaining capacity to retune.
+
+This is why decreasing weights is necessary for competitive continual learning. A neuron must be able to undo a temporary or losing association rather than permanently accumulating every pattern it has encountered.
+
+----------------------------------------------------------------------
+26. HOW THE SHARED INHIBITORY NEURON CREATES A WINNER
+----------------------------------------------------------------------
+
+The shared inhibitory neuron is the mechanism that converts a small early lead into winner-take-all behavior.
+
+The sequence is:
+
+1. All excitatory neurons race toward threshold.
+2. One excitatory neuron fires first because of small random differences in weights, charge, noise, distance, or event timing.
+3. That excitatory spike adds charge to the shared inhibitory neuron.
+4. After receiving enough excitatory drive, the inhibitory neuron fires.
+5. The inhibitory event is sent back to the excitatory pool.
+6. Competing excitatory neurons lose charge and are prevented from firing.
+7. The excitatory neuron that just fired is already refractory, so the immediate inhibitory feedback does not reverse its completed spike.
+
+The inhibitory neuron does not semantically inspect the pattern or use a software rule to select a winner. The first excitatory cell that causally pushes the inhibitory neuron over threshold becomes the effective winner.
+
+Because the initial differences are random, the first winner can also be random. This is desirable: identical untrained neurons can break symmetry without labels or a central controller.
+
+The shared inhibitory neuron therefore acts as the physical selector, but the selection emerges from causal timing rather than an explicit winner index.
+
+----------------------------------------------------------------------
+27. INHIBITORY LEARNING IN THE COMPETITIVE RACE
+----------------------------------------------------------------------
+
+When the inhibitory neuron fires, the competing excitatory cells may contain different amounts of instantaneous accumulated charge.
+
+A close competitor has a large InstAccQ because it was nearly ready to fire.
+
+Using:
+
+IFE_i = InstAccQ - w_I_i
+
+the close competitor has more remaining inhibitory free energy and can produce a larger inhibitory-weight update.
+
+Therefore:
+
+- A neuron far from threshold needs little learned inhibition.
+- A neuron close to threshold needs stronger learned inhibition.
+- The strongest inhibitory learning is directed toward the cells most likely to challenge the winner.
+- Over repeated races, inhibitory synapses grow until one firing neuron can silence its competitors.
+
+This progressively changes the network from:
+
+"Many neurons fire for the same pattern"
+
+to:
+
+"One neuron fires and the rest remain quiet."
+
+That transition creates sparsity and stable winner-take-all specialization.
+
+----------------------------------------------------------------------
+28. THE WINNER IS PROTECTED BY REFRACTORINESS
+----------------------------------------------------------------------
+
+The neuron that fires first enters a refractory state before the shared inhibitory feedback returns.
+
+This matters because:
+
+- Its spike has already occurred.
+- It cannot immediately fire again.
+- The returning inhibition mainly acts on the still-charged competitors.
+- The competitors' high charge provides the signal needed to strengthen their inhibitory suppression.
+
+The winner is not necessarily exempted by a special software rule. Its protection arises from event order and refractory dynamics.
+
+This preserves the mechanistic nature of the architecture:
+
+E fires -> E becomes refractory -> I fires -> I suppresses the remaining E pool.
+
+----------------------------------------------------------------------
+29. RESIDUAL MEMBRANE CHARGE BETWEEN PATTERN RACES
+----------------------------------------------------------------------
+
+A separate problem is the running accumulated membrane charge left after one race.
+
+Suppose a vertical pattern has just been processed. Losing excitatory neurons may still retain some membrane charge. If a new pattern is presented immediately, the new input can mix with the residual charge from the previous race.
+
+This can cause:
+
+- A neuron to fire partly because of the previous pattern.
+- The new race to begin from unequal and history-dependent membrane states.
+- Synaptic learning for the new pattern to be contaminated by old transient charge.
+
+This is different from synaptic memory.
+
+- Synaptic weights should preserve learned pattern structure.
+- Residual membrane charge is a short-term state that may need to leak away.
+
+The question is whether natural membrane leak is sufficient to remove this transient memory before it causes incorrect firing.
+
+----------------------------------------------------------------------
+30. DIAGNOSTIC RESET BEFORE ADDING LEAK
+----------------------------------------------------------------------
+
+The discussion recommends keeping the first implementation simple.
+
+Do not immediately add a complicated leak mechanism merely because residual charge might be a problem.
+
+Instead, run a diagnostic experiment:
+
+1. Complete one pattern race.
+2. Artificially clear the accumulated membrane charge of every neuron.
+3. Present the next pattern.
+4. Test whether competitive learning and specialization improve.
+
+This hard reset is not intended as the final biological mechanism. It is an experimental intervention used to isolate the cause of failure.
+
+Interpretation:
+
+- If clearing AccQ fixes the problem, residual membrane charge is likely contaminating later races.
+- Then a biologically plausible leak can be introduced and calibrated.
+- If clearing AccQ does not help, leakage is probably not the main failure.
+
+This follows a useful research strategy:
+
+Temporarily violate a biological constraint to diagnose the mechanism, then replace the diagnostic shortcut with a biologically plausible process.
+
+----------------------------------------------------------------------
+31. LEAK IN A CONTINUOUS ENVIRONMENT
+----------------------------------------------------------------------
+
+Real sensory input does not normally arrive as perfectly separated pattern trials. It changes continuously.
+
+Therefore, the final system should not depend permanently on a command that says:
+
+"Pattern ended; clear every neuron."
+
+A membrane leak would instead allow charge to decay gradually:
+
+running_AccQ <- leak_factor * running_AccQ
+
+with leak_factor below 1.
+
+The correct leak must balance two needs:
+
+- Charge should persist long enough for temporally distributed spikes to accumulate and cause firing.
+- Old charge should disappear quickly enough that a new pattern is not mixed with the previous race.
+
+The diagnostic hard reset should be tested first. Leak should be added only if the experiment shows that residual charge is a real problem.
+
+----------------------------------------------------------------------
+32. REVISED END-TO-END COMPETITIVE LEARNING SEQUENCE
+----------------------------------------------------------------------
+
+For one input pattern:
+
+1. Present the pattern as 0/1 physical sensory spikes.
+
+2. Every fully connected excitatory neuron receives the input and accumulates charge.
+
+3. Random initial weights, noise, distance, or timing create small differences between neurons.
+
+4. The first excitatory neuron reaches threshold and fires.
+
+5. At its firing event, it performs the excitatory update:
+
+   - Present inputs use learn_signal = +1.
+   - Absent inputs use learn_signal = -1.
+   - Free energy controls update magnitude.
+   - The squared remaining-capacity term limits each synapse.
+
+6. The firing excitatory neuron enters refractory.
+
+7. Its output adds charge to the shared inhibitory neuron.
+
+8. Before competition is fully trained, other excitatory neurons may also fire and perform their own updates.
+
+9. When the inhibitory neuron reaches threshold, it fires back into the excitatory pool.
+
+10. Competing excitatory neurons lose charge.
+
+11. Their inhibitory synapses learn according to their instantaneous accumulated charge:
+
+    IFE_i = InstAccQ_i - w_I_i
+
+12. Near-threshold competitors develop stronger inhibitory suppression than distant competitors.
+
+13. Across repeated presentations, the inhibitory pathway becomes strong enough that the first excitatory spike suppresses all later competitors.
+
+14. A sparse winner-take-all response emerges.
+
+15. When different patterns arrive later, firing-triggered -1 updates weaken irrelevant old associations and reclaim free energy for retuning.
+
+16. If residual running charge contaminates the next race, test a hard AccQ reset. Add membrane leak only if that diagnostic confirms the problem.
+
+----------------------------------------------------------------------
+33. NEW IMPLEMENTATION CHECKS
+----------------------------------------------------------------------
+
+A. Multiple-firer count
+
+During each race, record how many excitatory neurons fire before inhibition silences the pool.
+
+Expected development:
+
+- Early training: several firers
+- Later training: one firer
+
+B. Inhibitory selector trace
+
+Record which excitatory neuron supplied the event that pushed the shared inhibitory neuron over threshold.
+
+This identifies the causal winner without a software argmax.
+
+C. Refractory protection trace
+
+Confirm that the first excitatory neuron is refractory when inhibitory feedback returns.
+
+D. Active-decay trace
+
+Whenever an excitatory neuron fires, separately log:
+
+- Weights strengthened by +1
+- Weights weakened by -1
+- Total positive weight change
+- Total negative weight change
+- Free energy before and after the update
+
+E. Free-energy reclamation test
+
+Allow several neurons to partially learn pattern A. Then train pattern B.
+
+Confirm that synapses irrelevant to B decrease and that the neuron's available FE for B increases.
+
+F. Residual-charge ablation
+
+Compare:
+
+- Normal running AccQ
+- Hard reset after each race
+- Several leak strengths
+
+If only reset or leak improves performance, residual membrane charge is an identified failure mode.
+
+G. Specialization matrix
+
+Track which neuron wins for each input pattern over time.
+
+A successful result should show:
+
+- Stable winners for learned patterns
+- Different neurons dividing the pattern set
+- Fewer duplicate specialists
+- Declining multi-firer races
+
+H. Negative-update floor
+
+Confirm that active decay never pushes a weight below the chosen minimum. If too many weights rapidly hit the floor, reduce beta or use a smaller negative learning rate.
+
+----------------------------------------------------------------------
+ONE-PARAGRAPH SUMMARY
+----------------------------------------------------------------------
+
+The proposed LPS learning system treats each neuron as a local charge-balancing device inside a developing competitive circuit. Physical sensory spikes use 0/1 values to produce instantaneous charge, while the +1/-1 signs are used only when an excitatory neuron fires and performs plasticity. At that event, inputs present in the current pattern strengthen and absent inputs actively decay, allowing a neuron to reclaim free-energy capacity from patterns it partially learned but will not ultimately represent. Early in training, inhibition is weak, so several fully connected excitatory neurons may fire and acquire noisy versions of the same pattern. The first excitatory cell to push the shared inhibitory neuron over threshold becomes the causal winner; it is already refractory when inhibition returns, while close competitors receive stronger learned suppression because their instantaneous accumulated charge is high. Repeated races should therefore transform multi-neuron responses into sparse winner-take-all specialization. Residual membrane charge from one race may contaminate the next, so a hard AccQ reset should first be used as a diagnostic ablation; a biologically plausible leak should be added only if that test confirms the problem. The confirmed local equations retain FE = max(0, threshold - InstAccQ), IFE = max(0, InstAccQ - w_I), and the squared remaining-capacity factor (1 - w/w_max)^2, while the minimum weight, overshoot handling, decay strength, and leak rate remain parameters to test.

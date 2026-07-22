@@ -1,0 +1,2123 @@
+IMPLEMENTATION BRIEF FOR HERMES
+Project
+Biologically Plausible Free-Energy Competitive Neural Architecture
+
+
+Objective
+Implement a biologically grounded spiking neural microcircuit that models:
+
+
+     • Local synaptic learning only
+     • Continuous online learning
+     • Stateful leaky integrate-and-fire dynamics
+     • Temporal competition between excitatory neurons
+     • Shared lateral inhibition
+     • Refractory periods
+     • Neuronal specialization
+     • Predictive feedback
+     • Suppression of predicted sensory input
+     • Residual neural activity as prediction error
+     • Approximate free-energy minimization
+     • Automatic reduction and stopping of learning after specialization
+     • Recruitment of unused neurons for novel patterns
+
+Do not implement this as a standard artificial neural network, multilayer perceptron, or classifier with a
+separate training stage.
+
+
+The primary goal is biological and dynamical plausibility.
+
+
+1. High-Level Circuit
+Build a minimal cortical microcircuit containing:
+
+
+     • 3 sensory input neurons
+     • 5 excitatory neurons: E1–E5
+     • 1 shared inhibitory neuron: I1
+     • Pattern-specific predictive feedback pathways
+
+Basic competition architecture:
+
+
+               Sensory Inputs
+                  x1 x2 x3
+
+
+                   \ | /
+           -------------------
+           E1 E2 E3 E4 E5
+            \ \ | / /
+                I1
+               |
+        inhibition to E-pool
+
+
+Predictive feedback architecture:
+
+
+  Specialized E-neuron
+          |
+          v
+  Pattern-specific inhibitory feedback
+          |
+          v
+  Relevant sensory inputs
+
+
+The shared inhibitory neuron and predictive feedback serve two different functions:
+
+
+    1. Shared I1 creates competition among excitatory neurons.
+    2. Pattern-specific feedback suppresses sensory activity already explained by a learned
+       representation.
+
+Do not combine these mechanisms unless the implementation preserves their different targets and
+functions.
+
+
+2. Mandatory Biological Constraints
+2.1 Stateful Leaky Integrate-and-Fire Neurons
+All excitatory and inhibitory neurons must be implemented as stateful LIF neurons.
+
+
+Do not implement neurons as:
+
+
+  output = weighted_sum > threshold
+
+
+That would reduce the model to a perceptron.
+
+
+Each neuron must preserve state across simulation timesteps.
+
+
+Required persistent variables include:
+
+
+     • membrane_potential
+     • refractory_timer
+     • spiked
+     • last_spike_time
+     • neuron-specific decay parameters
+     • optional persistent synaptic-current variables
+
+Suggested membrane equation:
+
+                                              dV
+                                         τm      = −(V − Vrest ) + Isyn
+                                              dt
+Discrete approximation:
+
+                                                    Δt
+                            V (t + 1) = V (t) +        [−(V (t) − Vrest ) + Isyn (t)]
+                                                    τm
+When:
+
+
+                                                 V (t) ≥ Vthreshold
+
+the neuron must:
+
+
+    1. Emit a binary spike.
+    2. Reset its membrane potential.
+    3. Enter a refractory period.
+
+Required class structure:
+
+
+  class LIFNeuron:
+      def step(self, synaptic_current):
+          ...
+
+
+The neuron state must persist between step() calls.
+
+
+Do not use a stateless forward() pass.
+
+
+2.2 Binary Event-Driven Spikes
+Spikes must be represented as discrete events:
+
+
+  0 = no spike
+  1 = spike
+
+
+Do not represent neuron outputs as continuous activations such as:
+
+
+  0.35
+  0.71
+  0.92
+
+
+Membrane potential may be continuous, but emitted spikes must be event based.
+
+
+2.3 Refractory Periods
+Every excitatory and inhibitory neuron must have an explicit refractory timer.
+
+
+Example:
+
+
+  refractory_steps = 5
+
+
+Required behavior:
+
+
+  if refractory_timer > 0:
+      refractory_timer -= 1
+      neuron_cannot_spike = True
+
+
+During the refractory period:
+
+
+     • The neuron cannot emit another spike.
+     • Its membrane potential should remain at reset or follow the selected biological approximation.
+     • It must not be selected externally as a winner.
+
+The refractory period is part of the competition mechanism.
+
+
+Example temporal sequence:
+
+
+  E2 fires
+     ↓
+  E2 becomes refractory
+     ↓
+  E4 may continue integrating
+
+
+     ↓
+  I1 accumulates excitation
+     ↓
+  Competition continues over time
+
+
+Do not terminate the competition immediately after the first E-neuron spike.
+
+
+2.4 Separate Excitatory and Inhibitory Time Constants
+Excitatory and inhibitory neurons must not share one global decay parameter.
+
+
+Use separate values such as:
+
+
+  tau_e = 20.0
+  tau_i = 40.0
+
+
+Required relationship:
+
+
+                                                    τI > τE
+
+This allows inhibition to persist longer than excitation.
+
+
+The implementation should ideally separate:
+
+
+      • Excitatory membrane time constant
+      • Inhibitory membrane time constant
+      • Excitatory synaptic-current decay
+      • Inhibitory synaptic-current decay
+
+This asymmetry helps stabilize the winner and suppress competitors over a biologically meaningful period.
+
+
+3. Temporal Competition
+3.1 No argmax() Winner Selection
+Do not select the winning neuron using:
+
+
+  winner = np.argmax(activation)
+
+
+The winner must emerge through the simulation dynamics.
+
+
+Competition must follow:
+
+
+  Sensory spikes arrive
+          ↓
+  All E-neurons integrate over time
+          ↓
+  One E-neuron reaches threshold first
+            ↓
+  That E-neuron emits a spike
+          ↓
+  Its spike drives I1
+          ↓
+  I1 integrates over time
+          ↓
+  I1 eventually emits an inhibitory spike
+          ↓
+  Competing E-neurons are suppressed
+
+
+The winner is defined operationally as the first neuron to spike during a presentation or competition
+window.
+
+
+The code must record the first spike rather than calculate the largest instantaneous activation.
+
+
+3.2 Competition Continues After the First Spike
+The first spike does not immediately terminate the trial.
+
+
+Other E-neurons may fire before shared inhibition becomes strong enough.
+
+
+This behavior is expected during early learning.
+
+
+Example:
+
+
+  E2 fires first
+  E2 becomes refractory
+  E4 fires later
+  E5 approaches threshold
+  I1 reaches threshold
+  I1 suppresses remaining competitors
+
+
+Over repeated presentations, specialization should cause one neuron to:
+
+
+     • Fire earlier
+
+
+      • Fire more reliably
+      • Recruit inhibition sooner
+      • Reduce later competitor spikes
+
+This is emergent temporal winner-take-all behavior.
+
+
+4. Shared Lateral Inhibition
+All five E-neurons connect excitatorily to I1.
+
+
+Topology:
+
+
+  E1 ─┐
+  E2 ─┤
+  E3 ─┼──> I1
+  E4 ─┤
+  E5 ─┘
+
+
+Each E spike adds current to I1.
+
+
+Example:
+
+
+  E2 spikes → I1 potential increases
+  E4 spikes → I1 potential increases again
+  E2 spikes later → I1 reaches threshold
+  I1 fires
+
+
+I1 must not fire automatically after the first E spike unless its actual threshold is crossed.
+
+
+When I1 fires, it sends inhibitory current to the E-pool:
+
+
+                                                 VEi ← VEi − wIE
+
+or through a decaying inhibitory synaptic-current variable.
+
+
+The already-fired winner may be protected temporarily because it is refractory, but the implementation
+should not rely on an external condition that permanently exempts the winner.
+
+
+The network dynamics should determine which neurons are affected at each timestep.
+
+
+Purpose:
+
+
+      • Suppress late competitors
+      • Prevent several neurons from learning the same pattern
+      • Encourage sparse representation
+      • Produce winner-take-all competition through time
+
+
+5. Local Hebbian Learning
+Do not use:
+
+
+      • Backpropagation
+      • Gradient descent
+      • A global classification loss
+      • Batch optimization
+      • A train/test split
+      • Error signals calculated outside the local circuit
+
+A sensory-to-E synapse may update only using locally available information:
+
+
+      • Presynaptic sensory spike
+      • Postsynaptic E-neuron spike
+      • Current synaptic weight
+      • Local plasticity state
+
+Basic rule:
+
+
+                                                 Δwij = ηxj si
+
+where:
+
+
+      • xj = 1 when sensory neuron j spikes
+      • si = 1 when excitatory neuron i spikes
+
+Example:
+
+
+  if sensory_spikes[j] == 1 and excitatory_spikes[i] == 1:
+      weights[i, j] += learning_rate
+
+
+Mandatory rule:
+
+
+         A neuron that does not fire does not update its weights.
+
+
+Residual activity may drive an unused neuron toward threshold, but the neuron must actually fire before
+synaptic learning occurs.
+
+
+Correct sequence:
+
+
+  Residual sensory spikes
+          ↓
+  Unused E-neuron integrates
+          ↓
+  Unused E-neuron reaches threshold
+             ↓
+  Unused E-neuron fires
+          ↓
+  Its active local synapses strengthen
+
+
+Do not update all unused neurons simply because residual activity exists.
+
+
+6. Learning Saturation
+A neuron must not learn indefinitely.
+
+
+Synapses require a maximum capacity:
+
+
+                                                0 ≤ wij ≤ wmax
+
+Example:
+
+
+  weights = np.clip(weights, 0.0, w_max)
+
+
+Use at least one biologically motivated plasticity-reduction mechanism.
+
+
+Option A: Synaptic saturation
+
+                                         Δwij = ηxj si (1 −        )
+                                                               wij
+                                                              wmax
+
+As:
+
+
+                                                 wij → wmax
+
+the update approaches zero.
+
+
+Option B: Neuron-level plasticity budget
+Each neuron has a finite plasticity variable:
+
+
+  plasticity_remaining
+
+
+Each successful learning event reduces that budget.
+
+
+Option C: Specialization criterion
+A neuron becomes specialized when:
+
+
+      • Its preferred-pattern response latency is sufficiently low.
+      • Its preferred weights are near saturation.
+      • Its response is stable over repeated trials.
+      • Its pattern selectivity exceeds a defined threshold.
+
+After specialization:
+
+
+  learning_enabled = False
+
+
+or its learning rate becomes extremely small.
+
+
+Do not require every weight to equal w_max , because a specialized neuron may represent a sparse pattern
+in which inactive-input weights should remain weak.
+
+
+7. Pattern Exclusivity
+A specialized neuron must resist being overwritten by a different pattern.
+
+
+Example:
+
+
+  E2 specializes to Pattern A
+          ↓
+  Pattern B arrives
+          ↓
+  E2 may recognize an overlapping component
+          ↓
+  E2 must not rewrite its representation as Pattern B
+
+
+Mechanisms may include:
+
+
+      • Plasticity saturation
+      • Reduced learning rate
+      • Frozen learning after specialization
+
+
+      • A local novelty or residual condition
+      • Strong selectivity requirements
+
+Unused neurons should remain plastic so they can learn unexplained patterns.
+
+
+Expected result:
+
+
+  E2 → Pattern A
+  E4 → Pattern B
+  E1 → Pattern C
+
+
+rather than:
+
+
+  E2 repeatedly overwrites its weights for every pattern
+
+
+8. Predictive Feedback
+8.1 Feedforward Representation
+When an E-neuron recognizes a pattern and fires, it sends a feedforward spike representing that learned
+feature to the next layer.
+
+
+Example:
+
+
+  Sensory pattern: [1, 1, 1]
+          ↓
+  E3 fires
+          ↓
+  Feedforward meaning: “Pattern represented by E3 is present”
+
+
+This feedforward spike is a representation, not necessarily prediction error.
+
+
+8.2 Backward Prediction
+A specialized E-neuron must also generate a prediction of the sensory inputs associated with its learned
+pattern.
+
+
+If E3 learned:
+
+
+  [1, 1, 1]
+
+
+its feedback prediction should target those sensory inputs.
+
+
+If E3 learned:
+
+
+  [1, 0, 1]
+
+
+its feedback should target inputs 1 and 3, not input 2.
+
+
+Prediction must therefore be pattern-specific.
+
+
+The feedback mask can be derived from:
+
+
+      • Learned sensory weights
+      • A stored specialization template
+      • Local feedback weights strengthened during learning
+
+
+8.3 Predictive Cancellation Must Be Implemented as Inhibition
+Do not implement prediction only as an offline mathematical subtraction used for plotting.
+
+
+The circuit must contain an active inhibitory feedback mechanism.
+
+
+Conceptual flow:
+
+
+  Specialized E-neuron fires
+          ↓
+  Activates feedback inhibitory synapses
+          ↓
+  Relevant sensory neurons receive inhibitory current
+          ↓
+  Their membrane potential or spike probability decreases
+
+
+The feedback may be modeled as:
+
+
+      • Negative synaptic current
+      • Reduction in sensory membrane potential
+      • Increased sensory firing threshold
+      • Temporary inhibitory conductance
+
+The implementation should preserve temporal delay and duration.
+
+
+Avoid instantly replacing:
+
+
+  input = input - prediction
+
+
+unless this is explicitly marked as a temporary simplified approximation.
+
+
+The preferred implementation is event-driven inhibitory feedback.
+
+
+9. Distinguish the Two Inhibitory Mechanisms
+9.1 Shared lateral inhibition
+Path:
+
+
+  E-pool → I1 → E-pool
+
+
+Purpose:
+
+
+        • Competition
+        • Winner-take-all behavior
+        • Suppression of competing representations
+
+Target:
+
+
+        • Excitatory pool
+
+
+9.2 Predictive feedback inhibition
+Path:
+
+
+  Specialized E-neuron → feedback inhibition → sensory layer
+
+
+Purpose:
+
+
+        • Cancel predicted sensory activity
+        • Reveal unexplained residual activity
+        • Reduce redundant sensory processing
+
+Target:
+
+
+        • Specific sensory inputs associated with the learned pattern
+
+
+These pathways must be recorded and analyzed separately.
+
+
+A global shared inhibitory neuron must not suppress the full sensory field indiscriminately, because that
+would erase novel sensory components before unused neurons could learn them.
+
+
+10. Free-Energy Approximation
+Do not claim to implement the full mathematical Free Energy Principle involving:
+
+
+     • Variational Bayesian inference
+     • KL divergence
+     • Explicit probability distributions
+     • A complete probabilistic generative model
+
+Instead, implement a biologically inspired approximation based on predictive cancellation.
+
+
+Define:
+
+
+                                         rj (t) = max(0, xj (t) − x
+                                                                  ^j (t))
+
+where:
+
+
+     • xj (t) is sensory activity
+      ^j (t) is predicted inhibitory activity
+     •x
+     • rj (t) is residual unexplained sensory activity
+
+Define the free-energy proxy as:
+
+
+                                                FE(t) = ∑ rj (t)
+                                                              j
+
+Interpretation:
+
+
+     • High residual activity = high prediction error
+     • Low residual activity = low prediction error
+     • Zero residual activity = current learned representations explain the sensory input
+
+A preferred description is:
+
+
+         Residual sensory spikes act as a local neural proxy for prediction error and simplified free
+         energy.
+
+
+11. Separate Free Energy From Total Energy
+Do not use total network spike count as the only free-energy measure.
+
+
+The system may still require:
+
+
+     • A winner spike
+     • An inhibitory spike
+     • A feedforward representation spike
+
+even when sensory prediction is accurate.
+
+
+Track two separate metrics.
+
+
+11.1 Residual prediction-error metric
+                                    F Eresidual = Nunexplained sensory spikes
+
+This is the primary free-energy proxy.
+
+
+11.2 Total biological activity cost
+                       Etotal = Nsensory spikes + NE spikes + NI spikes + Nfeedback events
+
+This approximates the network’s overall energetic cost.
+
+
+A familiar pattern may produce:
+
+
+  Winner spikes:           1
+  I-neuron spikes:         1
+  Residual sensory spikes: 0
+
+
+This represents low prediction error even though the entire network is not silent.
+
+
+Do not treat every zero-spike timestep as proof of successful prediction.
+
+
+12. Residual-Driven Learning
+After predictive feedback suppresses the known portion of the input, any unexplained sensory spikes
+remain active.
+
+
+Example:
+
+
+Learned vertical component:
+
+
+  0 1 0
+  0 1 0
+  0 1 0
+
+
+New plus-sign input:
+
+
+  0 1 0
+  1 1 1
+  0 1 0
+
+
+After vertical prediction:
+
+
+  0 0 0
+  1 0 1
+  0 0 0
+
+
+The remaining horizontal spikes are the residual.
+
+
+Required process:
+
+
+  Known component is predicted
+          ↓
+  Known component is inhibited
+          ↓
+  Unexplained component remains active
+          ↓
+  Unused E-neurons integrate residual spikes
+          ↓
+  One unused neuron reaches threshold
+          ↓
+  That neuron fires
+          ↓
+  Its active local synapses strengthen
+          ↓
+  A new specialization emerges
+
+
+This is the anomaly-detection and continual-learning mechanism.
+
+
+13. Dynamic Equilibrium
+The goal is not permanent silence.
+
+
+The desired endpoint is a dynamic equilibrium in which:
+
+
+      • Familiar patterns are recognized quickly.
+      • One sparse representation neuron fires.
+      • Predicted sensory activity is suppressed.
+      • Residual prediction error is low.
+      • Competitors are inhibited.
+      • Weights no longer grow unnecessarily.
+      • Novel input still produces residual activity.
+      • Unused neurons remain available for learning.
+
+A learned pattern should produce lower residual sensory activity than an unlearned pattern.
+
+
+14. Input Representation
+Begin with simple binary patterns using three sensory inputs.
+
+
+Example patterns:
+
+
+  pattern_a = [1, 1, 1]
+  pattern_b = [1, 0, 1]
+  pattern_c = [0, 1, 1]
+
+
+These names should remain generic unless they truly correspond to spatial vertical, horizontal, or diagonal
+patterns.
+
+
+For real line orientations, use a 3×3 sensory field:
+
+
+  Vertical:
+  0 1 0
+  0 1 0
+  0 1 0
+
+  Horizontal:
+  0 0 0
+  1 1 1
+  0 0 0
+
+
+  Diagonal:
+  1 0 0
+  0 1 0
+  0 0 1
+
+
+Input may be generated using:
+
+
+     • Repeated deterministic timestep spikes
+     • Bernoulli spike trains
+     • Poisson spike trains
+
+Start with deterministic spikes for debugging, then add stochastic timing.
+
+
+15. Required Simulation Order Per Timestep
+Use a clearly defined causal update order.
+
+
+Recommended order:
+
+
+  1. Generate external sensory spikes.
+
+  2. Apply predictive inhibitory feedback from earlier timesteps.
+
+  3. Update sensory neuron states.
+
+  4. Compute residual sensory spikes.
+
+  5. Deliver residual sensory spikes to E-neurons.
+
+  6. Update E-neuron membrane potentials.
+
+  7. Detect E-neuron spikes.
+
+  8. Record the first E spike as the temporary winner.
+
+  9. Apply local Hebbian updates only for E-neurons that fired.
+
+  10. Deliver E spikes to I1.
+
+  11. Update I1 membrane potential.
+
+  12. Detect an I1 spike.
+
+  13. Deliver delayed inhibitory current from I1 to the E-pool.
+
+
+  14. Generate pattern-specific feedback events from specialized E-neurons.
+
+  15. Update refractory timers.
+
+
+  16. Record all states and metrics.
+
+
+Synaptic effects should ideally have at least a one-timestep delay so causality is explicit.
+
+
+Avoid allowing a spike to travel through every layer and return within the same timestep unless this is
+intentionally documented.
+
+
+16. Required Experiments
+Experiment 1: Single-pattern specialization
+Repeatedly present Pattern A.
+
+
+Measure:
+
+
+      • Winner identity per trial
+      • E-neuron spike latency
+      • Sensory-to-E weights
+      • Number of competing E spikes
+      • I1 spike timing
+      • Residual sensory activity
+
+Expected result:
+
+
+      • One E-neuron becomes the consistent earliest responder.
+      • Its preferred weights strengthen.
+      • Its latency decreases.
+      • Competitor spikes decrease.
+      • Residual activity decreases after predictive feedback develops.
+
+
+Experiment 2: Temporal competition
+Track all E- and I-neuron membrane potentials over time.
+
+
+Verify:
+
+
+      • No argmax() is used.
+      • The first winner emerges through threshold crossing.
+
+
+     • I1 integrates E spikes before firing.
+     • Inhibition occurs after a temporal delay.
+     • Refractory periods influence the race.
+
+
+Experiment 3: Inhibitory persistence
+Compare:
+
+
+                                                     τI > τE
+
+against:
+
+
+                                                     τI = τE
+
+Measure:
+
+
+     • Number of competitor spikes
+     • Duration of suppression
+     • Stability of the winner
+     • Time before the next competition can begin
+
+
+Experiment 4: Free-energy reduction
+Present the same pattern before and after learning.
+
+
+Track separately:
+
+
+     • Raw sensory spike count
+     • Predicted sensory inhibition
+     • Residual sensory spike count
+     • E-neuron spikes
+     • I-neuron spikes
+     • Total network spikes
+
+Expected result:
+
+
+                                      F Eresidual, after < F Eresidual, before
+
+Do not claim successful free-energy reduction based only on isolated zero-spike timesteps.
+
+
+Use trial averages or moving averages.
+
+
+Experiment 5: New-pattern recruitment
+After Pattern A has been learned, present Pattern B.
+
+
+Verify:
+
+
+      • The specialized Pattern A neuron does not overwrite its representation.
+      • Pattern A overlap may still be recognized and cancelled.
+      • Residual Pattern B activity remains.
+      • An unused E-neuron is recruited.
+      • The unused neuron fires before learning.
+      • The new neuron specializes to Pattern B.
+
+
+Experiment 6: Anomaly input
+Present:
+
+
+  Known Pattern A + novel component
+
+
+Verify:
+
+
+      • The known component is predicted and suppressed.
+      • Novel sensory activity remains.
+      • Residual free energy increases relative to the fully familiar pattern.
+      • The network can recruit a new representation.
+
+
+17. Required Plots
+Produce separate plots for:
+
+
+    1. Sensory spike raster
+    2. Residual sensory spike raster
+    3. E-neuron spike raster
+    4. I1 spike raster
+    5. E-neuron membrane potentials
+    6. I1 membrane potential
+    7. Winner identity per trial
+    8. Winner latency per trial
+    9. Sensory-to-E weights over time
+   10. Predictive feedback weights over time
+   11. Residual free energy per trial
+   12. Moving-average residual free energy
+
+
+   13. Total spike cost per trial
+   14. Number of competing E spikes per trial
+   15. Learning-enabled or plasticity state for each E-neuron
+
+The winner plot must not be blank.
+
+
+Record a winner ID whenever a valid E-neuron emits the first spike in a trial.
+
+
+Use NaN only when no neuron spikes.
+
+
+18. Validation Requirements
+The implementation is not considered successful unless all of the following are demonstrated.
+
+
+Neuron dynamics
+     • Membrane state persists across timesteps.
+     • Leak is visible.
+     • Threshold crossing creates a spike.
+     • Reset occurs.
+     • Refractory periods prevent immediate refiring.
+
+
+Competition
+     • No argmax() or external winner selection.
+     • E-neurons compete through spike timing.
+     • I1 integrates E-neuron spikes.
+     • I1 inhibition reduces competitor firing.
+
+
+Learning
+     • Only firing neurons update weights.
+     • Only active presynaptic synapses strengthen.
+     • Weights remain bounded.
+     • Plasticity decreases or stops after specialization.
+     • Specialized neurons resist overwriting.
+
+
+Prediction
+     • Specialized E-neurons generate pattern-specific feedback.
+     • Feedback inhibits only predicted sensory components.
+     • Novel components remain active.
+
+
+Free energy
+     • Residual sensory activity is recorded separately.
+     • Familiar patterns produce lower residual activity than novel patterns.
+     • Total spike cost and residual prediction error are not conflated.
+     • A zero-spike timestep is not treated by itself as proof of successful prediction.
+
+
+19. Prohibited Implementations
+Do not use:
+
+
+     • Backpropagation
+     • Gradient descent
+     • PyTorch training loops
+     • TensorFlow training loops
+     • Artificial perceptrons
+     • Static threshold-only neurons
+     • argmax() winner selection
+     • Batch learning
+     • Train/test phases
+     • Global classification loss
+     • Global weight normalization requiring knowledge of the full network
+     • Weight updates for neurons that did not fire
+     • Instantaneous global inhibition
+     • Indiscriminate cancellation of the entire sensory field
+     • Claims that this is the exact mathematical Free Energy Principle
+
+
+20. Minimum Deliverable
+Provide a functioning Python simulation containing:
+
+
+     • 3 sensory input neurons
+     • 5 excitatory LIF neurons
+     • 1 shared inhibitory LIF neuron
+     • Persistent membrane-potential state
+     • Refractory timers
+     • Separate excitatory and inhibitory time constants
+     • Temporal competition
+     • Emergent winner selection
+     • Shared lateral inhibition
+     • Local Hebbian learning
+     • Bounded synaptic weights
+     • Learning saturation
+
+
+     • Pattern exclusivity
+     • Pattern-specific predictive feedback
+     • Residual sensory-spike calculation
+     • Residual free-energy history
+     • Total spike-cost history
+     • Winner history
+     • Spike-latency history
+     • Membrane-potential traces
+     • Weight traces
+     • At least two sequentially learned patterns
+     • An anomaly or composite-pattern experiment
+
+
+21. Required Code Organization
+Recommended classes:
+
+
+  class LIFNeuron:
+      ...
+
+  class SensoryNeuron(LIFNeuron):
+      ...
+
+  class ExcitatoryNeuron(LIFNeuron):
+      ...
+
+  class InhibitoryNeuron(LIFNeuron):
+      ...
+
+  class PlasticSynapse:
+      ...
+
+  class PredictiveFeedbackSynapse:
+      ...
+
+  class CorticalMicrocircuit:
+      ...
+
+  class ExperimentRunner:
+      ...
+
+
+Each neuron should own its biological state.
+
+
+Each synapse should own:
+
+
+     • Weight
+     • Delay
+     • Sign
+     • Plasticity rule
+     • Maximum capacity
+
+The microcircuit should coordinate spike delivery without calculating a global winner.
+
+
+22. Required Reporting Language
+Use the following description:
+
+
+       This architecture is a biologically inspired spiking approximation of predictive coding and
+       free-energy minimization. Learned excitatory representations generate pattern-specific
+       inhibitory predictions, while residual sensory spikes serve as a local proxy for prediction error.
+
+
+Do not state:
+
+
+       This is an exact implementation of Karl Friston’s Free Energy Principle.
+
+
+Also do not equate complete network silence with successful prediction.
+
+
+The desired result is sparse, efficient, dynamically balanced activity—not permanent silence.
+
+
+23. Full Intended Process
+
+  1. A sensory pattern produces spikes.
+
+  2. All five excitatory LIF neurons integrate the spikes over time.
+
+  3. One E-neuron reaches threshold first and fires.
+
+  4. The first firing neuron becomes the temporary winner.
+
+  5. The winner enters its refractory period.
+
+  6. Its spike travels to the shared inhibitory LIF neuron.
+
+  7. I1 integrates excitation rather than firing instantly.
+
+
+8. Other E-neurons may continue competing during the delay.
+
+9. Once I1 reaches threshold, it emits an inhibitory spike.
+
+10. Longer-lasting inhibition suppresses competing E-neurons.
+
+
+11. Only E-neurons that actually fired update active sensory synapses.
+
+12. Repeated exposure causes one E-neuron to respond earlier and more reliably.
+
+
+13. The neuron’s preferred synapses approach saturation.
+
+14. Its plasticity gradually decreases or stops.
+
+15. The specialized neuron sends a sparse representation forward.
+
+16. It also generates pattern-specific inhibitory feedback.
+
+17. Predicted sensory activity is reduced.
+
+18. Unexplained sensory spikes remain as residual prediction error.
+
+19. Unused E-neurons integrate the residual activity.
+
+20. If an unused E-neuron fires, it begins learning the unexplained component.
+
+21. Familiar patterns produce progressively less residual activity.
+
+22. Novel patterns continue producing residual spikes.
+
+23. The network reaches a dynamic equilibrium in which known information is
+represented sparsely, unnecessary sensory activity is suppressed, and unused
+capacity remains available for new learning.\
+
+3D CORTICAL-COLUMN CAUSAL TRACER AND SCIENTIFIC VALIDATION
+
+Yes. You can turn the current tracer into a 3D cortical-column visualization, but the 3D view should remain separate from the simulation logic. Your current page is a 2D canvas that receives frames from the /simulate backend and displays residual spikes, E-neuron voltages, I-neuron activity, weights, and the energy trace.
+
+A good approach is to use Three.js for the neural scene. A Three.js Scene can hold the neuron meshes, connections, and lights, while OrbitControls provides rotation, zooming, and panning. Keep Chart.js for the diagnostic time-series graphs because line charts are well suited for showing trends across trials.
+
+Give Hermes the following instructions:
+
+HERMES IMPLEMENTATION INSTRUCTIONS
+3D Cortical-Column Causal Tracer and Scientific Validation
+
+Main Goal
+
+Upgrade the existing 2D Neuromorphic Causal Tracer into a 3D visualization of the cortical-column-inspired microcircuit while preserving the biological simulation and adding the measurements needed to determine whether the model is behaving correctly.
+
+The 3D display is a visualization layer only.
+
+Do not alter, simplify, or fabricate the neural dynamics merely to make the animation look convincing.
+
+The backend remains the source of truth.
+
+1. Preserve the Existing Model
+
+The simulation must continue to contain:
+
+- A 3×3 sensory receptive field
+- Five stateful excitatory LIF neurons
+- One shared inhibitory LIF neuron
+- Persistent membrane potentials
+- Refractory periods
+- Delayed E → I → E lateral inhibition
+- Local Hebbian learning
+- Learning saturation
+- Pattern-specific predictive feedback
+- Residual sensory activity
+- Separate residual-free-energy and total-spike metrics
+
+Do not replace these processes with visual approximations.
+
+Do not select winners using argmax().
+
+Do not calculate artificial energy values merely for display.
+
+2. Architectural Separation
+
+Separate the program into three components:
+
+Neural simulation backend
+        ↓
+Frame/state JSON
+        ↓
+3D renderer and diagnostic dashboard
+
+The backend computes all biological states.
+
+The frontend only renders the states returned by the backend.
+
+Recommended structure:
+
+backend/
+    neurons.py
+    synapses.py
+    microcircuit.py
+    experiments.py
+    api.py
+
+frontend/
+    index.html
+    scene3d.js
+    diagnostics.js
+    controls.js
+
+The 3D renderer must not determine:
+
+- Which neuron wins
+- Whether a neuron spikes
+- How weights change
+- Whether free energy decreases
+- Whether feedback succeeds
+
+It only displays values calculated by the backend.
+
+3. Use Three.js for the 3D View
+
+Replace or supplement the current 2D neural canvas with a Three.js scene.
+
+Use:
+
+- THREE.Scene
+- THREE.PerspectiveCamera
+- THREE.WebGLRenderer
+- OrbitControls
+- Meshes for neurons
+- Lines or tubes for synapses
+- Animated particles or pulses for spike events
+
+Keep the current Chart.js graphs in a side panel.
+
+Provide a toggle:
+
+2D Diagnostic View | 3D Cortical View
+
+Do not remove the 2D view because it remains useful for debugging.
+
+4. Recommended 3D Layout
+
+Arrange the circuit spatially so its causal flow is clear.
+
+Sensory plane
+
+Place the nine sensory neurons in a flat 3×3 plane:
+
+S1  S2  S3
+S4  S5  S6
+S7  S8  S9
+
+Place this plane toward the front or bottom of the scene.
+
+Excitatory population
+
+Place E1–E5 vertically or in a shallow arc above the sensory field.
+
+This should visually resemble a simplified cortical column:
+
+             E1
+             E2
+Sensory →    E3
+             E4
+             E5
+
+Shared inhibitory neuron
+
+Place I1 beside or behind the E-pool so the following pathways are visible:
+
+E-pool → I1
+I1 → E-pool
+
+Feedforward output
+
+Add an optional output node or upper-layer marker above the E-pool.
+
+This shows that a winning E-neuron sends a learned representation to the next layer.
+
+Predictive feedback
+
+Draw separate backward connections from each E-neuron toward the sensory field.
+
+These connections must be visually different from shared lateral inhibition.
+
+5. Use Distinct Visual Meanings
+
+Use consistent visual semantics.
+
+Suggested mapping:
+
+Blue       = raw or residual sensory activity
+Yellow     = excitatory neuron spike
+Red        = shared inhibitory spike
+Purple     = predictive feedback inhibition
+White      = feedforward representation
+Gray       = inactive connection
+
+Visualize membrane potential using one of the following:
+
+- Neuron brightness
+- Neuron radius
+- Inner glow
+- Vertical fill level
+
+Visualize synaptic weight using:
+
+- Connection thickness
+- Connection opacity
+
+Visualize refractory state using:
+
+- Darkened neuron
+- Ring around the neuron
+- Small “REF” label
+- Countdown indicator
+
+Do not use the same color for shared inhibition and predictive cancellation because they perform different functions.
+
+6. Animate Causal Events
+
+Spikes should visibly travel through the circuit rather than appearing everywhere simultaneously.
+
+Required sequence:
+
+Sensory spike
+    ↓ after synaptic delay
+E-neuron integration and spike
+    ↓ after synaptic delay
+I1 integration and spike
+    ↓ after synaptic delay
+Inhibition reaches E-pool
+
+Predictive feedback should also visibly travel backward:
+
+Specialized E-neuron fires
+    ↓
+Purple feedback pulse travels toward selected sensory neurons
+    ↓
+Predicted sensory activity decreases
+
+Use the backend event timestamps to control animation timing.
+
+Do not invent event order in the frontend.
+
+7. Expand the Backend Frame Format
+
+Each returned frame should contain enough information to independently verify the model.
+
+Recommended frame structure:
+
+{
+  "time": 0,
+  "trial": 0,
+
+  "raw_sensory_spikes": [0,0,0,0,0,0,0,0,0],
+  "predicted_inhibition": [0,0,0,0,0,0,0,0,0],
+  "residual_spikes": [0,0,0,0,0,0,0,0,0],
+
+  "e_voltages": [0,0,0,0,0],
+  "e_spikes": [0,0,0,0,0],
+  "e_refractory": [0,0,0,0,0],
+  "e_learning_enabled": [true,true,true,true,true],
+
+  "i_voltage": 0,
+  "i_spiked": 0,
+  "i_refractory": 0,
+
+  "sensory_to_e_weights": [],
+  "feedback_weights": [],
+
+  "temporary_winner": null,
+  "first_spike_latency": null,
+
+  "residual_free_energy": 0,
+  "total_spike_cost": 0,
+
+  "events": []
+}
+
+Do not provide only a single final_energy number.
+
+The frontend must be able to compare:
+
+Raw sensory activity
+Prediction
+Residual sensory activity
+
+8. Show Raw Input, Prediction, and Residual Separately
+
+Add three small 3×3 displays:
+
+RAW INPUT       PREDICTION       RESIDUAL
+
+Example:
+
+Raw input:          Prediction:         Residual:
+
+0 1 0               0 1 0               0 0 0
+0 1 0       −       0 1 0       =       0 0 0
+0 1 0               0 1 0               0 0 0
+
+This comparison is essential.
+
+A low residual is meaningful only when:
+
+1. Raw sensory input was actually present.
+2. A learned neuron generated feedback.
+3. Feedback targeted the correct sensory locations.
+4. Residual activity decreased after feedback.
+
+Do not treat silence alone as evidence of correct prediction.
+
+9. Use Two Separate Energy Metrics
+
+Residual free-energy proxy
+
+Calculate:
+
+FE_residual = sum of residual activity
+
+where residual activity is unexplained sensory activity after predictive feedback.
+
+This is the primary prediction-error metric.
+
+Total biological activity cost
+
+Calculate:
+
+E_total =
+N_sensory spikes
++
+N_E spikes
++
+N_I spikes
++
+N_feedback events
+
+This measures the overall activity cost.
+
+Display these as separate graphs:
+
+Residual Prediction Error
+Total Network Activity
+
+Do not call total spike count alone “free energy.”
+
+A correct prediction may still require:
+
+- One representation spike
+- One inhibitory spike
+- One feedback event
+
+Therefore, zero residual prediction error does not require complete network silence.
+
+10. Required User Controls
+
+Add controls for:
+
+- Play
+- Pause
+- Single timestep
+- Restart trial
+- Reset all learning
+- Animation speed
+- Camera reset
+- Show/hide sensory-to-E connections
+- Show/hide E-to-I connections
+- Show/hide I-to-E inhibition
+- Show/hide predictive feedback
+- Toggle raw sensory view
+- Toggle prediction view
+- Toggle residual view
+- Toggle 2D/3D mode
+
+Add an interactive 3×3 input editor.
+
+The user should be able to click grid locations to create a custom pattern and submit it.
+
+Keep the preset buttons:
+
+- Diagonal
+- Top row
+- Left column
+- X-shape
+- Center dot
+- Frame
+
+11. Add a Neuron Inspection Panel
+
+When the user clicks a neuron in the 3D scene, show:
+
+For an excitatory neuron
+
+- Neuron ID
+- Current membrane potential
+- Threshold
+- Refractory timer
+- Last spike time
+- First-spike latency
+- Number of wins
+- Learning enabled or disabled
+- Plasticity remaining
+- Sensory weight heatmap
+- Predictive feedback heatmap
+- Preferred pattern
+- Specialization confidence
+
+For I1
+
+- Current membrane potential
+- Threshold
+- Refractory timer
+- Last spike time
+- E-to-I input current
+- Inhibitory synaptic-current duration
+- Number of inhibitory spikes
+
+This allows the interface to function as a research and debugging tool rather than only an animation.
+
+12. Required Scientific Validation Tests
+
+Test A: LIF statefulness
+
+Give an E-neuron weak repeated input.
+
+Verify:
+
+Membrane potential rises
+No input causes leakage
+Closely timed spikes accumulate
+Threshold crossing causes a spike
+Voltage resets
+Refractory period prevents immediate refiring
+
+Failure condition:
+
+The neuron responds only through an instantaneous weighted sum.
+
+Test B: Temporal winner-take-all
+
+Verify:
+
+Sensory input occurs
+An E-neuron reaches threshold first
+That neuron spikes
+I1 begins integrating
+I1 spikes later
+Competing E-neuron voltages decrease
+
+Record exact timestamps.
+
+Failure conditions:
+
+- Winner selected with argmax()
+- I1 fires without integrating
+- Inhibition happens in the same instant as the first sensory spike
+
+Test C: Repeated-pattern specialization
+
+Present the same pattern over many trials.
+
+Expected:
+
+- One E-neuron wins increasingly often.
+- Its first-spike latency decreases.
+- Matching sensory weights strengthen.
+- Nonmatching sensory weights remain weak.
+- Competitor spikes decrease.
+- Plasticity eventually decreases or stops.
+
+Show:
+
+Winner identity by trial
+First-spike latency by trial
+Weight heatmaps
+Number of competing spikes
+
+Test D: Predictive cancellation
+
+After specialization, present the learned pattern.
+
+Verify:
+
+Raw sensory input remains present
+Specialized E-neuron fires
+Pattern-specific feedback activates
+Correct sensory locations are inhibited
+Residual activity decreases
+
+The feedback mask must resemble the neuron’s learned receptive field.
+
+Test E: Novel or composite input
+
+After learning a diagonal, present an X-shape.
+
+Expected:
+
+Known diagonal component is inhibited
+Unexplained opposite diagonal remains active
+Residual free energy is greater than for the familiar diagonal
+An unused neuron begins responding to the residual
+
+This is the main test of anomaly detection and continual learning.
+
+13. Required Control Experiments
+
+Disable predictive feedback
+
+Expected:
+
+- Recognition may still occur.
+- Residual sensory activity should remain high.
+- The familiar-pattern energy reduction should disappear.
+
+Disable shared inhibition
+
+Expected:
+
+- More E-neurons fire.
+- Multiple E-neurons may learn the same pattern.
+- Winner-take-all specialization becomes weaker.
+
+Shuffle feedback connections
+
+Expected:
+
+- The prediction targets incorrect sensory locations.
+- Residual mismatch remains high.
+- Cancellation quality becomes worse.
+
+Disable refractory periods
+
+Expected:
+
+- Frequent winners may repeatedly spike.
+- Temporal competition changes.
+- One neuron may dominate excessively.
+
+Set inhibitory delay to zero
+
+Expected:
+
+- Competition becomes unrealistically instantaneous.
+- Other neurons may never get a chance to integrate.
+
+These controls demonstrate that the observed behavior is caused by the intended biological mechanisms.
+
+14. Acceptance Criteria
+
+The implementation is considered successful only when the following are shown.
+
+Familiar pattern
+
+- One neuron becomes selective.
+- It fires earlier after learning.
+- Its learned weight heatmap matches the pattern.
+- It generates matching predictive feedback.
+- Residual sensory activity decreases.
+
+Novel pattern
+
+- Familiar components are suppressed.
+- Novel components remain active.
+- Residual activity is greater than for the familiar pattern.
+- An unused neuron can learn the residual.
+
+Competition
+
+- Winner emerges through spike timing.
+- I1 fires after E-neuron input.
+- Lateral inhibition reduces competitor spikes.
+- No external winner-selection function is used.
+
+Energy
+
+- Residual prediction error and total activity are reported separately.
+- Energy reduction is averaged over trials or windows.
+- Individual zero-spike timesteps are not treated as proof of success.
+
+Biological state
+
+- Membrane potentials persist.
+- Leakage occurs.
+- Resets occur.
+- Refractory timers work.
+- Synaptic delays are visible.
+- Inhibitory effects persist longer than excitatory effects.
+
+15. Do Not Overclaim the Result
+
+Use this description:
+
+This system is a cortical-column-inspired spiking microcircuit that approximates predictive coding and free-energy minimization through pattern-specific inhibitory cancellation.
+
+Do not state:
+
+This is an exact implementation of Karl Friston’s Free Energy Principle.
+
+Do not state:
+
+The network became silent, therefore prediction is proven correct.
+
+The correct evidence is:
+
+Input was present
+        ↓
+A learned representation fired
+        ↓
+Correct feedback was generated
+        ↓
+Predicted input was selectively suppressed
+        ↓
+Unexplained residual activity decreased
+
+16. Recommended Development Order
+
+Phase 1: Instrument the backend
+
+Before adding 3D, return:
+
+- Raw sensory spikes
+- Prediction
+- Residual spikes
+- Refractory states
+- Winner latency
+- Feedback weights
+- Residual free energy
+- Total activity
+
+Confirm these values numerically.
+
+Phase 2: Add the 3D renderer
+
+Build the Three.js scene and animate existing backend events.
+
+Do not modify model behavior during this phase.
+
+Phase 3: Add scientific controls
+
+Implement:
+
+- Disable feedback
+- Disable inhibition
+- Disable refractory period
+- Shuffle feedback
+- Adjustable delays
+
+Phase 4: Add interactive experiments
+
+Implement:
+
+- Draw-your-own 3×3 pattern
+- Save learned state
+- Reset learning
+- Pattern sequence editor
+- Familiar versus novel comparison
+
+Phase 5: Add hierarchical columns later
+
+Only after the single-column circuit is validated, add a second level:
+
+Multiple lower columns
+        ↓
+Higher-level E-pool
+        ↓
+Combination-pattern learning
+
+Do not add more layers before the single-column cancellation and competition mechanisms have been verified.
+
+My strongest recommendation is to keep both the 2D diagnostic view and the new 3D view. The 3D version will make the architecture easier to understand and present, but the raw-input, prediction, residual, voltage, latency, and energy plots are what will tell you whether the model is truly correct.
+
+
+PATTERN BUTTONS
+
+Yes. The current page already uses sendPattern([...]), so you can keep adding buttons with different 3×3 binary patterns.
+
+I would organize them into basic lines, single features, and combined shapes so the panel does not become confusing.
+
+Replace the current pattern-button section with this:
+
+<h2>Basic Lines</h2>
+<div class="btn-group">
+    <button onclick="sendPattern([
+        1,0,0,
+        0,1,0,
+        0,0,1
+    ])">Diagonal ↘</button>
+
+    <button onclick="sendPattern([
+        0,0,1,
+        0,1,0,
+        1,0,0
+    ])">Diagonal ↙</button>
+
+    <button onclick="sendPattern([
+        1,1,1,
+        0,0,0,
+        0,0,0
+    ])">Top Row</button>
+
+    <button onclick="sendPattern([
+        0,0,0,
+        1,1,1,
+        0,0,0
+    ])">Middle Row</button>
+
+    <button onclick="sendPattern([
+        0,0,0,
+        0,0,0,
+        1,1,1
+    ])">Bottom Row</button>
+
+    <button onclick="sendPattern([
+        1,0,0,
+        1,0,0,
+        1,0,0
+    ])">Left Column</button>
+
+    <button onclick="sendPattern([
+        0,1,0,
+        0,1,0,
+        0,1,0
+    ])">Middle Column</button>
+
+    <button onclick="sendPattern([
+        0,0,1,
+        0,0,1,
+        0,0,1
+    ])">Right Column</button>
+</div>
+
+<h2>Dots and Corners</h2>
+<div class="btn-group">
+    <button onclick="sendPattern([
+        1,0,0,
+        0,0,0,
+        0,0,0
+    ])">Top-Left Dot</button>
+
+    <button onclick="sendPattern([
+        0,0,1,
+        0,0,0,
+        0,0,0
+    ])">Top-Right Dot</button>
+
+    <button onclick="sendPattern([
+        0,0,0,
+        0,1,0,
+        0,0,0
+    ])">Center Dot</button>
+
+    <button onclick="sendPattern([
+        0,0,0,
+        0,0,0,
+        1,0,0
+    ])">Bottom-Left Dot</button>
+
+    <button onclick="sendPattern([
+        0,0,0,
+        0,0,0,
+        0,0,1
+    ])">Bottom-Right Dot</button>
+
+    <button onclick="sendPattern([
+        1,1,0,
+        1,0,0,
+        0,0,0
+    ])">Top-Left Corner</button>
+
+    <button onclick="sendPattern([
+        0,1,1,
+        0,0,1,
+        0,0,0
+    ])">Top-Right Corner</button>
+
+    <button onclick="sendPattern([
+        0,0,0,
+        1,0,0,
+        1,1,0
+    ])">Bottom-Left Corner</button>
+
+    <button onclick="sendPattern([
+        0,0,0,
+        0,0,1,
+        0,1,1
+    ])">Bottom-Right Corner</button>
+</div>
+
+<h2>Combined Shapes</h2>
+<div class="btn-group">
+    <button onclick="sendPattern([
+        0,1,0,
+        1,1,1,
+        0,1,0
+    ])">Plus Shape</button>
+
+    <button onclick="sendPattern([
+        1,0,1,
+        0,1,0,
+        1,0,1
+    ])">X Shape</button>
+
+    <button onclick="sendPattern([
+        1,1,1,
+        0,1,0,
+        0,1,0
+    ])">T Shape</button>
+
+    <button onclick="sendPattern([
+        0,1,0,
+        0,1,0,
+        1,1,1
+    ])">Upside-Down T</button>
+
+    <button onclick="sendPattern([
+        1,0,0,
+        1,0,0,
+        1,1,1
+    ])">L Shape</button>
+
+    <button onclick="sendPattern([
+        0,0,1,
+        0,0,1,
+        1,1,1
+    ])">Reverse L</button>
+
+    <button onclick="sendPattern([
+        1,1,1,
+        1,0,1,
+        1,1,1
+    ])">Frame</button>
+
+    <button onclick="sendPattern([
+        1,1,1,
+        1,1,1,
+        1,1,1
+    ])">Full Grid</button>
+</div>
+
+<h2>Control Patterns</h2>
+<div class="btn-group">
+    <button onclick="sendPattern([
+        0,0,0,
+        0,0,0,
+        0,0,0
+    ])">Blank Input</button>
+
+    <button onclick="sendPattern([
+        1,0,1,
+        0,0,0,
+        1,0,1
+    ])">Four Corners</button>
+</div>
+
+For the actual experiments, start by training only a few clearly different patterns:
+
+Diagonal ↘
+Diagonal ↙
+Middle Row
+Middle Column
+
+Then test overlapping or combined patterns such as the X shape and plus shape. That will help show whether the system cancels the familiar component while leaving the unfamiliar component active.

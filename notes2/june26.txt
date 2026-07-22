@@ -1,0 +1,823 @@
+NEURAL FREE ENERGY MODEL — MASTER RESEARCH NOTES
+Date: 6/26
+Topic: Free Energy, Predictive Coding, Self-Organizing Neural Architecture, Competitive Learning
+
+====================================================================
+SECTION 1 — OVERALL RESEARCH GOAL
+====================================================================
+
+The objective is to design a biologically inspired neural architecture where:
+
+- Each neuron learns independently
+- Learning happens continuously
+- Prediction happens continuously
+- The network self-organizes automatically
+- Learning is local to each neuron
+- The network minimizes free energy
+- The network detects anomalies naturally
+- No separate training and inference phases exist
+
+Unlike standard machine learning:
+
+Traditional AI:
+
+Train model
+↓
+Freeze weights
+↓
+Inference only
+
+Proposed architecture:
+
+Continuous operation
+↓
+Continuous learning
+↓
+Continuous adaptation forever
+
+The network should learn while operating.
+
+====================================================================
+SECTION 2 — CORE FREE ENERGY PRINCIPLE
+====================================================================
+
+Central idea:
+
+The system attempts to minimize free energy.
+
+Interpretation:
+
+Free energy = unexplained activity remaining in the system.
+
+Possible equation:
+
+FE = Input Energy - Predicted Energy
+
+or
+
+FE = Residual Unexplained Activity
+
+Case 1:
+
+Prediction = Input
+
+Then:
+
+FE = 0
+
+Meaning:
+
+- System fully understands input
+- No further learning needed
+
+Case 2:
+
+Prediction ≠ Input
+
+Then:
+
+Residual unexplained activity remains.
+
+Meaning:
+
+- Novel information exists
+- Learning should continue
+
+General rule:
+
+Lower free energy = better internal representation.
+
+====================================================================
+SECTION 3 — BIOLOGICAL ASSUMPTIONS
+====================================================================
+
+The system should mimic real neurons.
+
+Requirements:
+
+- Same learning algorithm for all neurons
+- Excitatory neurons increase activation
+- Inhibitory neurons suppress activation
+
+Important note:
+
+Inhibitory action potentials differ from excitatory ones.
+
+Inhibitory signals:
+
+- Last longer
+- Affect timing differently
+- Change equilibrium state
+
+The algorithm must remain simple.
+
+Reason:
+
+Real neurons are small biological units.
+
+Complex global computation should not exist.
+
+====================================================================
+SECTION 4 — LEARNING ONLY HAPPENS WHEN FIRING
+====================================================================
+
+Fundamental assumption:
+
+A neuron should only learn when it fires.
+
+Reason:
+
+If neuron does not fire:
+
+- It did not contribute causally
+- No meaningful information exists
+
+Rule:
+
+No firing → No learning
+
+Professor repeatedly emphasized:
+
+Never learn from things that do not fire.
+
+Formal rule:
+
+if neuron fires:
+      update weights
+
+else:
+      do nothing
+
+Reason:
+
+Non-firing neurons are non-causal.
+
+====================================================================
+SECTION 5 — HEBBIAN LEARNING PRINCIPLE
+====================================================================
+
+Donald Hebb principle:
+
+Neurons that fire together wire together.
+
+Interpretation:
+
+When neuron fires:
+
+- Increase affinity for the inputs that caused firing
+
+This applies to:
+
+- Excitatory input
+- Inhibitory input
+
+Meaning:
+
+The neuron strengthens connections responsible for activation.
+
+====================================================================
+SECTION 6 — ION CHANNEL MODEL
+====================================================================
+
+Physical interpretation of learning.
+
+Imagine neuron as balloon with ion channels.
+
+Initial state:
+
+- Ion channels small
+- Weak conductivity
+- Hard to reach threshold
+
+Learning process:
+
+Repeated firing
+↓
+Ion channels expand
+↓
+More ion flow possible
+↓
+Threshold reached faster
+↓
+Neuron fires more easily
+
+Equivalent interpretation:
+
+Larger ion channel = stronger synaptic weight
+
+Eventually:
+
+Single pattern causes immediate firing.
+
+Neuron becomes specialized.
+
+====================================================================
+SECTION 7 — THRESHOLD AND LEARNING SATURATION
+====================================================================
+
+Neuron has firing threshold.
+
+Equation idea:
+
+V = Σw - threshold
+
+When:
+
+Total signal ≥ threshold
+
+Neuron fires.
+
+As weights increase:
+
+Neuron fires immediately.
+
+Eventually:
+
+No additional learning possible.
+
+Learning stops automatically.
+
+Reason:
+
+Physical biological limits exist.
+
+Neurons cannot strengthen forever.
+
+Condition:
+
+Once neuron reaches stable representation
+
+Learning rate approaches zero.
+
+====================================================================
+SECTION 8 — PREDICTIVE PROCESSING FRAMEWORK
+====================================================================
+
+System continuously predicts incoming information.
+
+Hierarchy:
+
+Lower layers process signals
+↓
+Send information upward
+↓
+Higher layers build prediction
+↓
+Predictions sent back downward immediately
+
+Continuous loop:
+
+Observe
+Predict
+Compare
+Update
+
+System constantly adjusts internal state.
+
+====================================================================
+SECTION 9 — REPRESENTATION REDUCES ENERGY
+====================================================================
+
+Major principle.
+
+When neuron successfully learns pattern:
+
+Energy required to represent pattern decreases.
+
+Example:
+
+Input = Vertical bar
+
+Before learning:
+
+- Input neurons firing heavily
+- High energy usage
+
+After learning:
+
+Neuron recognizes pattern
+↓
+Neuron sends prediction backward
+↓
+Prediction suppresses known input
+
+Result:
+
+Input neurons fire less frequently
+
+Professor statement:
+
+“The system now is using half the energy that it did before.”
+
+Meaning:
+
+Energy_after < Energy_before
+
+Learning increases efficiency.
+
+====================================================================
+SECTION 10 — FEEDBACK IS PREDICTION
+====================================================================
+
+Backward signal is not arbitrary feedback.
+
+It specifically predicts the pattern that caused activation.
+
+Process:
+
+Input pattern arrives
+↓
+Neuron learns pattern
+↓
+Neuron activates
+↓
+Neuron sends feedforward signal upward
+↓
+Neuron sends backward prediction
+↓
+Prediction suppresses known input
+
+Interpretation:
+
+“I know what caused me to fire.”
+
+====================================================================
+SECTION 11 — COMPETITIVE NETWORK ARCHITECTURE
+====================================================================
+
+Architecture:
+
+Input spikes
+↓
+Multiple excitatory neurons compete
+↓
+Winner neuron fires
+↓
+Feedforward to next layer
+↓
+Feedback prediction
+↓
+Inhibitory neurons suppress competitors
+
+Each cortical column contains:
+
+- Excitatory neurons
+- Inhibitory neurons
+- Local learning rules
+- Feedforward output
+- Feedback prediction pathways
+
+Inspired by cortical columns in biology.
+
+====================================================================
+SECTION 12 — COMPETITION BETWEEN EXCITATORY NEURONS
+====================================================================
+
+Several excitatory neurons receive same input.
+
+Initially:
+
+- Random weights
+- No specialization
+
+One neuron fires first.
+
+Reason:
+
+- Slightly stronger random weights
+- Closer to threshold
+
+That neuron begins learning pattern.
+
+Over repeated exposure:
+
+Same neuron repeatedly wins.
+
+That neuron specializes for pattern.
+
+====================================================================
+SECTION 13 — WINNER TAKE ALL DYNAMICS
+====================================================================
+
+Once neuron starts winning:
+
+Winner neuron fires
+↓
+Activates inhibitory neuron
+↓
+Inhibitory neuron accumulates charge
+↓
+Inhibitory neuron fires
+↓
+Suppresses competing neurons
+
+Result:
+
+Only one neuron communicates.
+
+Goal:
+
+One neuron represents pattern.
+
+Professor:
+
+“Winner take all kind of situation.”
+
+====================================================================
+SECTION 14 — INHIBITORY LEARNING PROCESS
+====================================================================
+
+When excitatory neuron fires:
+
+It also activates inhibitory neuron.
+
+Over time:
+
+Inhibitory neuron learns as well.
+
+Purpose:
+
+Prevent competing neurons from firing.
+
+Mechanism:
+
+Winner fires
+↓
+Inhibition suppresses all competitors
+↓
+Only strongest representation survives
+
+Expected behavior:
+
+The winner continues communicating.
+
+Others stop firing.
+
+====================================================================
+SECTION 15 — MAJOR LOGIC FLAW DISCOVERED
+====================================================================
+
+Professor discovered problem during lecture.
+
+Suppose neuron learned:
+
+Vertical line
+
+It activates inhibitory neurons.
+
+Problem:
+
+Those inhibitory neurons connect broadly.
+
+So when they fire:
+
+ALL inputs become suppressed.
+
+Not only learned pattern.
+
+Example:
+
+Learned pattern = Vertical line
+
+New input = Horizontal line
+
+Bad result:
+
+Old inhibitory neuron suppresses horizontal pattern too.
+
+Meaning:
+
+Network blocks learning of new patterns.
+
+Professor realization:
+
+“I’ve got a logic flaw.”
+
+====================================================================
+SECTION 16 — PROPOSED FIX
+====================================================================
+
+Apply causal learning principle to inhibitory synapses.
+
+Rule:
+
+If excitatory neuron inactive:
+
+Do NOT strengthen inhibitory synapse.
+
+Pseudo rule:
+
+if excitatory_fired:
+      strengthen_inhibitory_weight()
+
+else:
+      no_learning()
+
+Reason:
+
+Only causal signals should modify network.
+
+Non-firing neurons contain no causal information.
+
+====================================================================
+SECTION 17 — SPARSE CODING PRINCIPLE
+====================================================================
+
+Only neurons that fire matter.
+
+Non-firing neurons:
+
+- No causal contribution
+- Should not learn
+
+Rule:
+
+No firing → No learning
+
+Sparse firing provides:
+
+- Lower computation
+- Lower energy consumption
+- Better specialization
+
+Professor statement:
+
+“Sparsity is important.”
+
+====================================================================
+SECTION 18 — ANOMALY DETECTION
+====================================================================
+
+Central property of architecture.
+
+Example:
+
+Neuron learned:
+
+Vertical line
+
+New input:
+
+Vertical + Horizontal
+
+Process:
+
+Neuron recognizes vertical
+↓
+Backward prediction suppresses vertical component
+↓
+Horizontal component remains active
+
+Result:
+
+Residual unexplained activity remains.
+
+Meaning:
+
+Something new is happening.
+
+Then:
+
+New neuron learns horizontal component.
+
+Anomaly detection happens naturally.
+
+====================================================================
+SECTION 19 — CONTINUOUS LEARNING WITHOUT STATISTICAL BIAS
+====================================================================
+
+Criticism of standard neural networks.
+
+Current neural networks:
+
+- See same pattern repeatedly
+- Continue updating weights forever
+
+Problem:
+
+Bias accumulation.
+
+Example:
+
+MNIST dataset imbalance
+
+10000 zeros
+50000 non-zero digits
+
+Classifier becomes biased toward non-zero.
+
+Proposed system:
+
+Once neuron fully learns pattern:
+
+Weights stop changing.
+
+Repeated exposure:
+
+Neuron fires
+No additional learning
+
+Benefits:
+
+- No statistical drift
+- No accumulated bias
+
+====================================================================
+SECTION 20 — COMPARISON TO CURRENT AI
+====================================================================
+
+Current AI:
+
+- Forward propagation only
+- Static training datasets
+- Statistical learning
+- Poor anomaly detection
+- No uncertainty awareness
+- Retraining requires large compute
+
+This architecture:
+
+- Forward propagation
+- Backward prediction
+- Residual error detection
+- Continuous learning
+- No retraining
+- Continuous adaptation
+
+Professor criticism:
+
+Current AI confidently predicts normal behavior even when encountering anomalies.
+
+This is dangerous.
+
+====================================================================
+SECTION 21 — MATHEMATICAL FRAMEWORK
+====================================================================
+
+Neuron activation:
+
+V = Σ(w_e * x_e) - Σ(w_i * x_i)
+
+Prediction error:
+
+Error = Input - Prediction
+
+Free energy:
+
+FE = Σ |Error|
+
+Learning:
+
+Only if neuron fires.
+
+if V > threshold
+
+Excitatory update:
+
+w_e = w_e + ηx
+
+Inhibitory update:
+
+w_i = w_i + ηx
+
+Only if presynaptic neuron fired.
+
+Stop learning condition:
+
+FE → 0
+
+Meaning:
+
+Representation fully learned.
+
+====================================================================
+SECTION 22 — OBJECT ORIENTED IMPLEMENTATION
+====================================================================
+
+Possible architecture.
+
+class Synapse:
+
+    weight
+    type      # excitatory or inhibitory
+
+
+class Neuron:
+
+    excitatory_inputs = []
+    inhibitory_inputs = []
+
+    threshold
+    membrane_potential
+
+    receive_spikes()
+    fire()
+    update_weights()
+    send_prediction()
+
+
+class InhibitoryNeuron(Neuron):
+
+    suppress()
+
+
+class CorticalColumn:
+
+    excitatory_neurons = []
+    inhibitory_neurons = []
+
+    competition()
+    winner_take_all()
+
+
+class Layer:
+
+    cortical_columns = []
+
+====================================================================
+SECTION 23 — COMPLETE LEARNING LOOP
+====================================================================
+
+Observe pattern
+↓
+Neurons compete
+↓
+Winner neuron fires
+↓
+Winner learns pattern
+↓
+Winner predicts pattern backward
+↓
+Prediction suppresses known input
+↓
+Residual unexplained activity remains
+↓
+Other neurons learn residual
+↓
+Free energy decreases
+↓
+Learning stops when nothing unexplained remains
+
+====================================================================
+SECTION 24 — OPEN PROBLEMS
+====================================================================
+
+Need to solve:
+
+1. Exact free energy equation
+
+2. Selective inhibition problem
+
+3. Stable winner-take-all competition
+
+4. Exact backward prediction algorithm
+
+5. Learning saturation mechanism
+
+6. Multilayer cortical column scaling
+
+7. Interaction between excitatory and inhibitory neurons
+
+====================================================================
+SECTION 25 — MINIMAL SIMULATION TO BUILD FIRST
+====================================================================
+
+First prototype should contain:
+
+3 input neurons
+
+3 excitatory neurons
+
+1 inhibitory neuron
+
+Competition between excitatory neurons
+
+Winner take all competition
+
+Local Hebbian learning
+
+Backward prediction mechanism
+
+Feedback inhibition
+
+Measure free energy reduction over time
+
+====================================================================
+SECTION 26 — CORE PHILOSOPHY
+====================================================================
+
+Only neurons that fire can learn.
+
+Prediction suppresses known patterns.
+
+Residual unexplained activity drives learning.
+
+Learning is entirely local.
+
+Network self-organizes automatically.
+
+The goal is minimizing free energy while remaining adaptable.
+
+Overall principle:
+
+Build a biologically plausible alternative to backpropagation.

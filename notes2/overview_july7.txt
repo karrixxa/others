@@ -1,0 +1,979 @@
+LPS 4.pdf — Detailed Page-by-Page Summary
+
+This is an interpretive page-by-page summary of LPS 4.pdf. Some handwriting is difficult to read, so the focus is on the intended ideas rather than a word-for-word transcription. The later pages contain the most concrete architecture and learning rules, so those sections are more detailed.
+
+PAGES 1–7: WHY A DIFFERENT COMPUTING PARADIGM IS NEEDED
+
+Page 1 — Cover page
+
+This is simply the opening page of the notes.
+
+Page 2 — Conventional computers versus the brain
+
+The page begins with the standard computer architecture:
+
+- Data are stored in memory.
+- Instructions are stored separately.
+- Both must be moved into an arithmetic and logic unit, or ALU.
+- The ALU performs the actual operation.
+- The result is moved back into memory.
+
+The central criticism is that computation and memory are separated. A conventional computer repeatedly moves information between storage and processing, which consumes energy.
+
+The brain is presented as fundamentally different:
+
+- It has a very large number of distributed processing units.
+- Memory and computation are not cleanly separated.
+- The physical connections between neurons partly contain the memory.
+- A neuron processes information at the same place where the learned connection exists.
+- The brain does not need to translate everything into explicit binary symbols before acting.
+
+The page also begins asking how a physical sensory pathway becomes knowledge. A human does not consciously convert an object into an array, pass the array through an ALU, and then read out a symbol. Recognition emerges from activity in a network.
+
+Page 3 — Event-based computing and the neocortex
+
+This page develops the CPU-versus-brain comparison.
+
+A CPU represents information using fixed binary states and predetermined word sizes such as 8-bit, 16-bit, or 32-bit values. The state remains stored even when nothing is happening. Large amounts of information may be processed densely even when most of it is irrelevant.
+
+The brain instead operates with events:
+
+- A spike means that something changed.
+- No spike means that nothing needed to be communicated at that moment.
+- Computation is sparse.
+- Many neurons operate in parallel.
+- Time and location are part of the information.
+- The same physical network processes a continuous stream rather than isolated static arrays.
+
+The notes emphasize that simply simulating spikes on a normal CPU does not automatically provide the brain’s efficiency. The architecture and learning rules themselves must use sparsity, locality, and causal events.
+
+Page 4 — A common architecture for different senses
+
+The page asks how vision, sound, touch, and other senses can all be processed by the neocortex even though their raw inputs are different.
+
+The proposed answer is that sensory organs convert different physical signals into a common event language:
+
+- Light is converted into neural activity by photoreceptors and retinal circuits.
+- Sound is converted into neural activity by auditory receptors.
+- Other senses perform similar transformations.
+- Once converted into spikes, the cortex can process them with a broadly shared architecture.
+
+The notes describe the neocortex as hierarchical, parallel, and column-like. Different sensory inputs may enter different areas, but the fundamental event-processing principle is similar.
+
+A spike is treated as a causal event rather than merely the binary number one. Its timing and source carry meaning.
+
+Page 5 — Brain and CPU recap
+
+This page summarizes the contrast.
+
+The CPU is characterized by:
+
+- Predetermined word sizes
+- Centralized processing
+- Binary representations
+- Strong arithmetic and logical operations
+- Dense data movement
+- A separation between storage and execution
+
+The brain is characterized by:
+
+- Distributed computation
+- Event-driven processing
+- Spatial and temporal information
+- Processing near the stored connection
+- Sparse activation
+- Only updating parts of the network that are currently involved
+
+The page uses edge detection as an example. Rather than processing every pixel equally, a biological system can respond mainly where something changes, such as an edge or motion boundary. This reduces energy usage and preserves information that matters.
+
+Page 6 — Problems with rigid symbolic processing
+
+This page criticizes systems that begin with predefined symbols and rules.
+
+Traditional symbolic systems can combine:
+
+- Letters into words
+- Words into sentences
+- Entries through a dictionary or rule system
+
+However, the symbols and meanings are usually designed beforehand. The system is not necessarily discovering them from raw experience.
+
+The desired system should instead:
+
+- Learn continuously
+- Discover recurring patterns
+- Form its own internal representations
+- Construct higher-level ideas by combining lower-level patterns
+- Operate locally rather than through a central learning algorithm
+- Allow behavior to emerge from the architecture
+
+The page is moving toward the idea that symbols should be the result of repeated causal patterns, not objects manually assigned by a programmer.
+
+Page 7 — Historical AI approaches
+
+This page briefly outlines the progression of conventional AI:
+
+- Perceptrons
+- Multilayer perceptrons
+- Convolutional neural networks
+- Gradient-based learning
+- Backpropagation
+- Deep learning and larger models
+
+The point is not that these methods are useless. It is that they generally rely on:
+
+- A predefined objective
+- A known output
+- Global error information
+- Training phases separated from normal operation
+
+The LPS project is trying to build a system that learns through local physical interactions instead.
+
+PAGES 8–14: MOVING FROM SYMBOLS TOWARD A SPIKING COMPETITIVE FABRIC
+
+Page 8 — Building higher concepts from lower events
+
+A walking-versus-not-walking example is used to show a hierarchy.
+
+Lower layers may detect simple motion or spatial changes. Higher layers combine those events into a more meaningful concept such as “walking.”
+
+The major questions are:
+
+- How does the network form that higher concept without a manually assigned label?
+- How does it revise a learned belief when reality changes?
+- How can it remain responsive rather than locking permanently into its first interpretation?
+
+The notes recognize that hierarchy provides abstraction, but it can also make an incorrect belief difficult to undo.
+
+Page 9 — Prediction in a changing environment
+
+This page asks how a brain-like system operates in dynamic reality without being given the correct output.
+
+The network cannot wait for a teacher to tell it what every pattern means. It needs to:
+
+- Detect what is changing
+- Learn repeated causes
+- Anticipate familiar events
+- Respond strongly to unexpected events
+- Adapt its internal model continuously
+
+A small excitatory-inhibitory circuit is drawn. Multiple sensory events converge on an excitatory neuron, while inhibition controls its activity.
+
+The page also introduces a firing-time idea:
+
+- A strongly matched or familiar pattern may produce a faster response.
+- A weak or uncertain pattern may require more accumulation.
+- Novelty may remain active because it has not yet been predicted away.
+
+Page 10 — Familiar patterns, prediction, and residual activity
+
+This page continues the predictive-processing idea.
+
+When a pattern repeatedly activates the same pathway:
+
+- The pathway becomes more responsive.
+- The neuron can recognize the pattern with less additional input.
+- A feedback pathway can suppress the part of the input that has already been explained.
+- Remaining activity represents what the model did not predict.
+
+The small curve appears to represent activity increasing and then falling after the system recognizes or suppresses the input.
+
+The essential idea is that learning should not only increase forward recognition. It should also create a backward prediction that reduces repeated sensory activity.
+
+Page 11 — LIF neurons, closed loops, and equilibrium
+
+The page compares a leaky integrate-and-fire neuron with a simple perceptron.
+
+A perceptron usually computes a static weighted sum. A true LIF neuron instead:
+
+- Receives events over time
+- Accumulates membrane charge
+- Leaks charge between events
+- Fires after reaching a threshold
+- Resets or enters a refractory state afterward
+
+Multiple input neurons feed an excitatory unit, which interacts with inhibition. The resulting loop is supposed to regulate itself and eventually reach an equilibrium.
+
+The notes also discuss synchronization and binding. Events that repeatedly occur together can be joined into a shared representation.
+
+The long-term goal is not simply to produce one output symbol. The system should create increasingly meaningful internal structures while remaining dynamically stable.
+
+Page 12 — What should not be used
+
+This page lists shortcuts that would make the system less biologically grounded.
+
+The notes reject or question:
+
+- A global maximum function that chooses the winner
+- Global gradient descent
+- Manually deciding which input is important
+- Perfectly balanced training classes
+- Assuming all examples are drawn from a fixed dataset such as MNIST
+- A separate training procedure that knows the correct answer
+
+The real environment can be unbalanced and may contain anomalies. Therefore, the system must discover structure from the stream it actually receives.
+
+Page 13 — The 3×3 receptive-field challenge
+
+This page applies the ideas to the small pattern-classification fabric.
+
+A 3×3 grid can contain:
+
+- Horizontal lines
+- Vertical lines
+- Diagonals
+- Intersections
+- Shared central pixels
+
+The difficulty is that many patterns overlap. The center pixel may appear in several patterns, so it cannot by itself determine the class.
+
+Candidate excitatory neurons begin with different random weights. A neuron that responds best to a pattern begins strengthening the corresponding receptive field.
+
+The page raises an important concern: random initialization can accidentally give one neuron an unfair advantage. The architecture needs competition and inhibition so that random initial differences break symmetry without permanently determining every result.
+
+Page 14 — Pattern-specific competition and residual energy
+
+This page continues the receptive-field discussion.
+
+The notes consider:
+
+- Different neurons representing different patterns
+- Central or surrounding inhibition
+- Frequency as a possible signal of confidence
+- Stronger or faster firing for better-matched patterns
+- Different residual energy for different inputs
+
+The system should suppress the part of the sensory activity that a learned neuron predicts. It should not suppress every input indiscriminately.
+
+A new or mismatched pattern should leave more unexplained activity than a familiar one.
+
+PAGES 15–22: HIERARCHY, NEURON DYNAMICS, COMPETITION, AND FEEDBACK
+
+Page 15 — Emergent hierarchy and symbolic composition
+
+This page contains a diagram called “Knowledge Construction Via Iterated Binding of Relationships.”
+
+The proposed hierarchy is approximately:
+
+1. Physical light or photons activate photoreceptors.
+2. Early circuits detect edges.
+3. Edges combine into visual forms.
+4. Visual information combines with other sensory information.
+5. Multimodal forms become symbols.
+6. Symbols can be grouped into categories such as digits, shapes, letters, animals, or plants.
+7. Higher relationships such as odd versus even can then be learned.
+
+The important principle is that higher symbols are compositions of lower symbols. A “3” is not stored as an isolated arbitrary label; it is assembled from relationships among lower-level features.
+
+This is the intended route from raw physical events to abstract knowledge.
+
+Page 16 — Action-potential dynamics
+
+The page reviews the biological action potential:
+
+- Resting state
+- Incoming stimulus
+- Depolarization
+- Threshold crossing
+- Rapid spike
+- Repolarization
+- Hyperpolarization
+- Return to rest
+
+The notes emphasize that a neuron does not fire for every input. Subthreshold events can produce failed initiations.
+
+After firing, the neuron temporarily becomes less able or unable to fire. This refractory and hyperpolarized period is important because it:
+
+- Prevents immediate repeated firing
+- Creates a natural timing structure
+- Gives inhibition time to act
+- Stops the same neuron from winning continuously without interruption
+
+This page supports implementing actual membrane dynamics rather than treating the neuron as a static weighted-sum threshold.
+
+Page 17 — Why competition is needed
+
+The main question is what happens without lateral or shared inhibition.
+
+Without sufficient competition:
+
+- Several neurons may fire for the same pattern.
+- All of them may strengthen similar input weights.
+- Multiple neurons may become redundant copies.
+- The network may fail to divide the pattern space among specialists.
+
+However, excessively strong inhibition can create the opposite problem: the earliest neuron always wins and unused neurons never receive enough activity to learn.
+
+The desired result is controlled competition:
+
+- The best-matched neuron wins the current event.
+- Other neurons are suppressed for that event.
+- Losing neurons remain available for different patterns later.
+
+The page also notes that a shared center pixel cannot simply be removed or assigned zero weight, because it may be meaningful in several composite patterns.
+
+Page 18 — Learning excitation and inhibition
+
+This is an important transition toward the later architecture.
+
+The upper diagram shows excitatory neurons with inhibitory partners. The notes suggest that as an excitatory pathway becomes stronger, the associated inhibitory mechanism must also adapt. Otherwise excitation can grow without a corresponding stabilizing force.
+
+The lower diagram presents a competitive pool:
+
+1. A winner is determined by who reaches the firing condition first.
+2. Neurons begin with some ability to strengthen input weights.
+3. Similar learning principles should operate between multiple layers.
+4. Inhibitory connections regulate the competition.
+
+Dale’s law is also noted: biological neurons generally maintain an excitatory or inhibitory role rather than changing sign freely.
+
+The page begins asking how inhibitory synapses should learn, rather than treating inhibition as a permanently fixed constant.
+
+Page 19 — Random weights and recruitment
+
+The page considers a pool in which all nine sensory inputs can potentially reach several excitatory neurons.
+
+The neurons begin with random weights. One unit, such as E4 in the drawing, may initially fire more strongly simply because its initial weights happen to match the pattern better.
+
+That initial difference can be useful as a symmetry breaker, but it must not allow one neuron to capture every pattern.
+
+The notes suggest:
+
+- Strengthening the current winner
+- Allowing other neurons to remain available
+- Potentially adding or recruiting another neuron when existing neurons do not explain a pattern
+- Using different winners for different recurring patterns
+
+The network therefore needs both specialization and spare capacity.
+
+Page 20 — A cortical-column competitive pool
+
+This page redraws the architecture as a compact cortical column.
+
+Several excitatory neurons and inhibitory neurons interact inside a shared region. Feedforward sensory activity enters the column, while excitatory outputs can continue to a higher layer.
+
+The intended behavior is:
+
+- Inputs enter several candidate neurons.
+- Each candidate integrates them.
+- A competition develops.
+- One candidate reaches the finish line first.
+- Inhibition suppresses the remaining candidates.
+- The winner strengthens the connections that caused it to fire.
+- The same general mechanism can be reused at higher levels.
+
+The notes are trying to avoid giving the network a separate, artificial winner-selection module.
+
+Page 21 — Predictive feedback between layers
+
+This page gives feedback a larger role.
+
+Layer 1 discovers lower-level features. Layer 2 combines them into a higher-level pattern. Once Layer 2 learns that pattern, it sends a prediction back toward Layer 1.
+
+The feedback is expected to:
+
+- Suppress lower-level activity that has already been explained
+- Reduce repeated processing of familiar patterns
+- Lower the energy required for recognition
+- Allow unexplained activity to remain visible
+- Help detect anomalies
+
+As forward weights grow, familiar input may require fewer pulses to activate the correct neuron. The backward pathway also becomes faster or stronger.
+
+A familiar pattern therefore produces a closed loop:
+
+1. The pattern activates lower-level units.
+2. A higher-level unit recognizes the combination.
+3. It sends a prediction backward.
+4. Predicted lower-level activity is inhibited.
+5. Only residual or surprising activity remains.
+
+Page 22 — Transition to free energy
+
+This page is primarily a photograph of the board with a small activity sketch. It appears to connect the feedback architecture to a quantitative measure of remaining or unexplained activity.
+
+The major transition is:
+
+- Prediction should reduce activity.
+- The remaining distance, charge, or residual becomes the system’s free-energy-like signal.
+- That local residual may determine whether additional learning is required.
+
+The detailed equations are developed later.
+
+PAGES 23–32: CONCRETE DESIGN PRINCIPLES AND LOCAL LEARNING RULES
+
+Page 23 — Proposed standards for the architecture
+
+This page lists the central requirements that the system should obey.
+
+1. Firing must be causal
+
+A spike should occur because physical input events caused a neuron to reach its firing condition.
+
+A non-firing neuron is not treated as though it secretly participated in the event. This prevents the implementation from updating units based on information they never locally received.
+
+2. “Firing together wires together”
+
+This is the Hebbian principle.
+
+When a presynaptic input contributes to a postsynaptic firing event, that connection should strengthen. The system should identify which active inputs actually contributed to the firing.
+
+3. Each neuron controls its own learning
+
+A central trainer should not announce when a neuron is finished learning.
+
+Each neuron should determine this from local conditions such as:
+
+- Its accumulated charge
+- Its firing
+- Its prediction error
+- Its inhibitory state
+- Whether meaningful residual energy remains
+
+Once a neuron strongly explains a pattern, learning should naturally slow or stop for that pattern.
+
+4. Excitatory and inhibitory connections must both be considered
+
+The neuron receives both positive and negative contributions. The notes ask:
+
+- How should inhibitory weights change?
+- How should excitation and inhibition balance?
+- Can inhibition learn without inspecting the entire network?
+
+This becomes one of the main questions on pages 27–31.
+
+5. Refractory periods
+
+A refractory period is listed as a required mechanism, although the exact duration and rule remain open.
+
+It should prevent a winning neuron from immediately firing again and dominating continuously.
+
+6. Representation
+
+The page questions how neural activity becomes a stable representation. A symbol should correspond to a repeatable learned firing pattern rather than an arbitrary software label.
+
+7. Continuous learning
+
+Learning should remain active during operation rather than occurring only during a separate training phase.
+
+8. Prediction
+
+A learned representation should predict its lower-level causes and reduce activity associated with those causes.
+
+Prediction is what prevents the system from repeatedly relearning a familiar pattern.
+
+Page 24 — Layer-to-layer competition and the simultaneous-winner problem
+
+This page draws Layer 1 columns feeding a Layer 2 competitive pool with approximately eight candidate pattern neurons.
+
+Several major design problems are raised.
+
+Feedforward connectivity
+
+The page considers whether:
+
+- Every Layer 1 excitatory neuron should connect to every Layer 2 candidate
+- Only selected columns should connect
+- Inhibitory neurons should also project between layers
+- Layer 2 should have one output channel per learned pattern
+
+All-to-all connectivity provides flexibility, but it also creates more competition, more synapses, and more opportunities for arbitrary dominance.
+
+Can two neurons fire at the same time?
+
+This is a central problem.
+
+A software implementation could calculate every candidate and choose the maximum. That would be easy, but it would introduce a global controller.
+
+The desired physical solution is that tiny differences break the symmetry:
+
+- Initial weight differences
+- Membrane charge
+- Input timing
+- Axonal or synaptic delay
+- Physical distance to the inhibitory neuron
+- Threshold overshoot
+
+One neuron therefore reaches the firing condition slightly earlier.
+
+The winner should not be selected retrospectively
+
+The system should not wait until the entire trial is finished and then inspect all neurons. The winner should emerge during the event.
+
+Once one candidate fires:
+
+1. Its spike begins propagating.
+2. It activates inhibition.
+3. The inhibition reaches the remaining candidates.
+4. Candidates that have not yet fired are pushed away from threshold.
+
+If two neurons truly fire before inhibition arrives, the system may temporarily have two winners. The architecture must tolerate or resolve that without a global maximum function.
+
+Representation quality
+
+The notes also warn that if every candidate contributes equally, the representation becomes blurred. Competition is needed so that individual neurons become identifiable specialists.
+
+Page 25 — Distance as a physical symmetry breaker
+
+This page references a competitive-learning paper and focuses on physical topology.
+
+The notes suggest that Euclidean distance or another distance-dependent attenuation could affect:
+
+- Signal arrival time
+- Effective synaptic strength
+- Inhibitory delay
+- Which neuron reaches threshold first
+
+Distance therefore provides a physically meaningful way to break an otherwise perfect tie.
+
+The page also identifies implementation tools that would be helpful:
+
+- A topology generator
+- A GUI for creating and inspecting connections
+- A way to connect the topology to the SNN simulator
+- Convergence checks
+- Recording and replaying network evolution
+- Visualizing how weights changed over time
+
+The important point is that topology is part of the computation. A network should not be treated as though every connection were instantaneous and physically identical.
+
+Page 26 — Composition learning and the first free-energy equation
+
+This page returns to the Layer 1–Layer 2 architecture.
+
+Layer 1 contains feature-detecting columns. Layer 2 contains a radial pool of candidate neurons that can learn combinations of those Layer 1 outputs.
+
+The notes compare several possible arrangements:
+
+- All Layer 1 excitatory neurons feeding all Layer 2 candidates
+- Paired local inhibitory neurons
+- A shared central inhibitory mechanism
+- Candidates with or without separate inhibitory partners
+
+The diagram is labeled around composition learning. Layer 2 is not merely classifying a flat input; it is learning a combination of already learned lower-level events.
+
+The page writes a basic free-energy-like expression:
+
+FE = T - Σ(w × spike)
+
+In words:
+
+- T is the firing threshold.
+- Each active input spike is multiplied by its synaptic weight.
+- The weighted contributions are summed.
+- Free energy is treated as the amount still missing before reaching the threshold.
+
+Conceptually:
+
+- A strongly matching input gives a large weighted sum and a small remaining gap.
+- A weak match leaves a larger gap.
+- A learned prediction should reduce the remaining unexplained activity.
+
+This expression is still preliminary. Later pages question exactly when FE should be measured and how inhibition should be included.
+
+Page 27 — Locality, causal timing, and the physical origin of weight change
+
+This is one of the most important conceptual pages.
+
+Do not use a global stopwatch
+
+The notes reject a system that records every neuron’s firing time and then compares them globally.
+
+Timing matters, but only through physical consequences:
+
+- A presynaptic spike arrives.
+- It changes the postsynaptic membrane.
+- A postsynaptic spike may occur afterward.
+- Inhibition propagates and changes other neurons.
+
+A synapse does not need to know that its neuron was “2.7 milliseconds faster than every other neuron.” It only needs access to its own local pre- and postsynaptic events.
+
+Only causal events should affect learning
+
+The page draws pre- and postsynaptic waveforms.
+
+A synapse should change when there is a causal relationship between:
+
+- An incoming event
+- Local charge
+- A later postsynaptic response
+
+This resembles spike-timing-dependent or eligibility-based learning, but the notes are trying to express it through the system’s own event mechanics rather than importing a full external rule.
+
+Soft competition rather than an artificial global winner
+
+The page questions a strict software winner-take-all operation.
+
+The physical network may behave more like a soft winner-take-all system:
+
+- One neuron usually fires first.
+- Nearby competitors may still have partial activation.
+- Inhibition strongly reduces their chance of firing.
+- Occasionally, near-simultaneous firing may occur.
+- Repeated experience gradually creates clearer specialization.
+
+Ion channels as the intuition for synaptic learning
+
+The notes use an ion-channel or pressure-gradient analogy.
+
+A synapse is treated like a channel:
+
+- Input opens or activates the channel.
+- Charge flows.
+- The local voltage or concentration difference determines the effect.
+- Repeated useful flow changes the channel’s conductance.
+- As the channel becomes strong, there is less remaining capacity for further increase.
+
+This motivates a nonlinear saturation term rather than unbounded linear weight growth.
+
+Excitation and inhibition may require different rules
+
+An excitatory connection helps produce the response. An inhibitory connection helps control or cancel it. Therefore, they should not necessarily use identical update signals.
+
+The page explicitly asks how the inhibitory synapse learns:
+
+- Does it learn from excess excitation?
+- Does it learn when the excitatory neuron fires?
+- Does it learn from the difference between internal charge and a target?
+- How can this be done without global knowledge?
+
+These questions lead directly to the formulas on page 31.
+
+Page 28 — Hierarchical composition, stability, and persistence
+
+This page steps back from the neuron-level equations and discusses the larger theory.
+
+The system is supposed to learn spatial-temporal compositions such as a sequence like “A-B-C.” The events occur across both space and time.
+
+Composition is described as a double-edged sword:
+
+- It allows complex symbols to form quickly.
+- It also increases the number of possible structures.
+- Without stability, higher layers could produce endless unstable combinations.
+
+The page proposes that only stable, persistent structures should survive into higher levels.
+
+It uses an analogy from physical and biological hierarchy:
+
+- Subatomic particles combine into protons, neutrons, and electrons.
+- These combine into elements.
+- Elements combine into molecules.
+- Molecules participate in life.
+- Molecules form cells.
+- Cells combine into multicellular organisms.
+- Nervous systems and brains emerge at still higher levels.
+
+At each stage, the compositions that persist are the ones that are physically stable enough to continue existing.
+
+The same idea is applied to learning:
+
+- Repeated stable event relationships become symbols.
+- Unstable accidental combinations disappear.
+- Higher-level knowledge is built from lower-level structures that have reached some equilibrium.
+
+Page 29 — Inhibition regulates competition; it should not decide the answer
+
+The central inhibitory neuron is drawn again with several outgoing branches.
+
+A major clarification is written beside it:
+
+The inhibitory neuron does not decide the winner.
+
+The winner is determined by excitatory dynamics:
+
+- Which neuron receives the best-matching input
+- Which has accumulated the most useful charge
+- Which crosses threshold first
+
+The inhibitory neuron acts afterward to enforce the competition.
+
+This distinction is critical. If the inhibitory neuron selects the winner, it becomes a hidden global controller. Instead:
+
+1. An excitatory neuron wins locally.
+2. Its firing activates inhibition.
+3. Inhibition suppresses neurons that have not yet fired.
+
+The page also suggests that inhibitory outgoing connections may have different weights. That would allow the network to learn how strongly each competing neuron should be suppressed.
+
+The unresolved issue is how those inhibitory weights should learn without giving the inhibitory unit knowledge of the entire network.
+
+A useful functional division emerges:
+
+- Excitatory weights learn what pattern a neuron recognizes.
+- Inhibitory weights learn how the pool regulates competition.
+
+Page 30 — The local learning algorithm and equilibrium
+
+This is another major implementation page.
+
+All information must arrive through connections
+
+The learning algorithm must be local. A node should not directly inspect:
+
+- Every neuron in the layer
+- The global winner
+- Total network free energy
+- A software class label
+- The complete weight matrix
+
+It may only know:
+
+- Its membrane or accumulated charge
+- Its own threshold
+- Events arriving at its synapses
+- Its own firing
+- Local inhibitory events
+- Possibly locally stored eligibility or recent activity
+
+Global normalization is questioned
+
+A conventional algorithm might normalize a neuron’s complete weight vector. But biological plausibility becomes questionable if every synapse must know the sum of all the other synapses.
+
+The page therefore searches for local saturation rules that naturally prevent weights from growing indefinitely.
+
+Excitatory and inhibitory learning should be separate
+
+The notes suggest two related but distinct processes:
+
+- Excitatory learning increases recognition of causal patterns.
+- Inhibitory learning controls excessive or competing activity.
+
+The inhibitory update might be driven by excess excitation: if a neuron has more charge than needed, inhibition learns to counteract that excess.
+
+Familiar patterns should stop producing learning pressure
+
+The lower note states that when the network turns toward a familiar pattern, there should be little or no free energy left to drive additional learning.
+
+The intended equilibrium is:
+
+1. Excitatory weights recognize the pattern.
+2. The correct neuron fires.
+3. Prediction and inhibition explain or suppress the known activity.
+4. Residual energy falls.
+5. Weight changes approach zero.
+
+This provides an automatic stopping condition. There is no external command saying, “This neuron has finished training.”
+
+What inhibition is learning still needs specification
+
+The page explicitly asks what the inhibitory neuron is supposed to learn.
+
+A useful interpretation is:
+
+- It should not learn the sensory pattern in the same way as the excitatory neuron.
+- It should learn how much regulation is required after that pattern activates the pool.
+- It should prevent uncontrolled excitation while preserving the winner’s causal response.
+
+Page 31 — Event-processing pseudocode and weight-update equations
+
+This is the most concrete mathematical page.
+
+Processing inhibitory spikes
+
+The left side proposes a node-level process.
+
+For each arriving inhibitory spike:
+
+1. Decrease the accumulated charge, AccQ.
+2. Potentially update the relevant inhibitory synapse.
+
+The inhibitory event acts on the same membrane state as the excitatory events. It is not processed in a completely separate global calculation.
+
+Processing excitatory spikes
+
+For each excitatory spike:
+
+1. Increase AccQ using the active synaptic weight.
+2. Check whether AccQ crossed the threshold.
+3. If the neuron fires, update the excitatory synapses that contributed.
+
+A simple conceptual form is:
+
+AccQ = AccQ + w_i × input_i
+
+and over all active inputs:
+
+AccQ = Σ(w_i × input_i)
+
+Only synapses receiving an active input should normally receive the Hebbian update. This preserves locality and causality.
+
+Excitatory free energy
+
+The page writes the excitatory free-energy signal approximately as:
+
+FE = Threshold - AccQ
+
+or equivalently:
+
+FE = Threshold - Σ(w_i × input_i)
+
+This represents the remaining distance between the accumulated weighted input and the firing threshold.
+
+There is still a sign and sampling question that must be resolved in implementation:
+
+- Is FE measured immediately before firing?
+- Is the magnitude used after threshold crossing?
+- Is negative FE treated as overshoot?
+- Is prediction error calculated separately from membrane threshold distance?
+
+The page provides the conceptual direction, but these details are not completely finalized.
+
+Excitatory weight update
+
+The page writes an update of approximately:
+
+Δw_E = LR × FE × (1 - (w_E / w_E,max)^2) × input
+
+The components mean:
+
+- LR is the excitatory learning rate.
+- FE is the local learning or residual-energy signal.
+- input ensures that only an active synapse changes.
+- w_E,max is the maximum excitatory weight.
+- The saturation term slows learning as the weight approaches its cap.
+
+Most importantly, the square applies to the normalized weight inside the saturation term:
+
+1 - (w_E / w_E,max)^2
+
+It does not mean that the entire learning equation is squared.
+
+This provides a soft, nonlinear limit:
+
+- Small weights have substantial room to grow.
+- Large weights change more slowly.
+- A weight near its maximum receives almost no further increase.
+
+Inhibitory weight update
+
+A parallel inhibitory rule is written:
+
+Δw_I = I_LR × IFE × (1 - (w_I / w_I,max)^2) × input
+
+Here:
+
+- I_LR is a separate inhibitory learning rate.
+- IFE is an inhibitory learning signal.
+- w_I,max is the inhibitory weight cap.
+- Only the active inhibitory connection should update.
+
+The handwritten definition of IFE appears to represent excess accumulated excitation relative to a target or threshold. The exact expression needs to be made explicit in the implementation.
+
+Conceptually:
+
+- Excitatory FE asks how much evidence is still missing.
+- Inhibitory FE should ask how much excess activity needs to be controlled.
+
+Separate parameters for excitation and inhibition
+
+The page intentionally gives excitation and inhibition:
+
+- Different learning rates
+- Different maximum weights
+- Potentially different learning signals
+- Different biological functions
+
+This avoids treating inhibition as merely a negative excitatory connection.
+
+Open questions recorded on the page
+
+Several implementation questions remain:
+
+- Should a synapse change when its input did not spike?
+- Should inactive synapses decay?
+- How should learning behave after a neuron fires?
+- How should the system handle threshold overshoot?
+- What experimental values should be used for learning rate and threshold?
+- How should random initial weights be scaled?
+
+Values such as random weights from roughly 1–10 and a large test threshold are written as rough experimentation values rather than final biological constants.
+
+Page 32 — Final competitive-learning architecture
+
+The final page combines the ideas into the proposed architecture.
+
+Input and Layer 1
+
+Sensory or lower-level events enter several Layer 1 units. Excitatory neurons have nearby inhibitory support.
+
+Each neuron begins with slightly different random weights. Those differences are important because otherwise perfectly identical neurons would cross threshold at exactly the same time.
+
+Central competitive column
+
+Layer 1 activity reaches a central pool containing:
+
+- Several excitatory candidates
+- Shared or local inhibitory mechanisms
+- Feedforward outputs toward the next layer
+
+At the beginning, none of the candidates is explicitly assigned to a pattern.
+
+How a winner emerges
+
+For a presented pattern:
+
+1. The pattern sends spikes through the input weights.
+2. Each candidate accumulates charge independently.
+3. Random weight differences, timing, and topology create a slight lead.
+4. One excitatory neuron fires first.
+5. Its firing activates inhibition.
+6. Other candidates are suppressed.
+7. The winning neuron strengthens the active causal inputs.
+8. Repetition makes it increasingly specialized for that pattern.
+
+The inhibitory neuron does not calculate which neuron should win. It simply reacts to the first excitatory firing.
+
+Learning multiple patterns
+
+When the same pattern returns, the specialist should respond faster because its relevant weights are stronger.
+
+When a substantially different pattern arrives:
+
+- The existing specialist may not accumulate enough matching evidence.
+- Another less-specialized neuron can win.
+- That neuron begins learning the new pattern.
+
+This produces distributed specialization without assigning labels.
+
+Leak versus learned memory
+
+The final note raises a concern that membrane leak might remove memory of previous patterns.
+
+The important distinction is:
+
+- Membrane charge is temporary state and should leak or reset between events.
+- Synaptic weights are the learned long-term memory and should remain.
+
+Leak prevents leftover charge from one trial from unfairly influencing the next trial. It should not erase the learned receptive field.
+
+WHAT THE LATER PAGES COLLECTIVELY ESTABLISH
+
+Pages 23–32 narrow the project toward the following architecture:
+
+1. Every computation must be local.
+A neuron uses its own charge, incoming spikes, threshold, firing, and local inhibition.
+
+2. The winner emerges through time.
+No software maximum function should choose the winner.
+
+3. Excitation recognizes; inhibition regulates.
+The shared inhibitory neuron should not determine the pattern identity.
+
+4. Only causal active synapses learn.
+An input that contributed to a firing event receives the strongest Hebbian change.
+
+5. Weights require nonlinear saturation.
+The term
+
+1 - (w / w_max)^2
+
+allows growth while naturally slowing near the maximum.
+
+6. Excitatory and inhibitory learning require different signals.
+Excitatory learning represents useful evidence, while inhibitory learning controls excess or competing excitation.
+
+7. Prediction creates an automatic stopping condition.
+Once a familiar input is explained and suppressed, residual free energy approaches zero and additional learning fades.
+
+8. Leak clears transient state, not knowledge.
+Learned patterns remain in synaptic weights while membrane voltage resets for the next event.

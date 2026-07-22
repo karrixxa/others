@@ -1,0 +1,304 @@
+SUMMARY: FREE ENERGY UPDATE, SIMULATION VALIDATION, AND EXPECTED NETWORK DYNAMICS
+
+1. Main conceptual change
+
+The central update is that excitatory-neuron free energy should no longer be based on the neuron’s instantaneous accumulated charge for the current input pattern.
+
+Old idea:
+FE = threshold - instantaneous accumulated charge
+
+Because instantaneous accumulated charge depends on which sensory inputs are active, this makes free energy pattern-dependent. A neuron can have nearly zero free energy for the pattern it already learned, but then suddenly regain a large amount of free energy when a different pattern is shown. That allows the same already-specialized neuron to begin learning another pattern and potentially become a “tyrant” that wins for multiple inputs.
+
+The intended new idea is:
+FE = threshold - sum of the neuron’s excitatory input weights
+
+More safely in implementation, this would normally be bounded so that free energy cannot become negative:
+FE = max(0, threshold - sum of excitatory weights)
+
+The sum is taken over the neuron’s positive excitatory sensory weights. The active input pattern is not multiplied into this free-energy calculation.
+
+This makes free energy a property of the neuron’s total learned synaptic commitment rather than a property of the current stimulus.
+
+2. Why the old equation creates a problem
+
+Suppose one excitatory neuron learns a pattern using three strong sensory weights. When that learned pattern appears, the active weights produce enough immediate charge to approach threshold, so the old equation reports little or no free energy.
+
+However, when another pattern appears, perhaps only one strong weight overlaps with it and the other active weights are still small. The current accumulated charge is then much lower. Under the old equation:
+
+FE = threshold - current accumulated charge
+
+the neuron suddenly appears to have a large amount of free energy again. It can therefore strengthen the small weights associated with the new pattern and compete to learn a second pattern.
+
+That behavior is undesirable because a neuron that has already committed most of its learning capacity to one pattern should not immediately regain full plasticity simply because a different pattern is presented.
+
+3. What the new equation is intended to accomplish
+
+The revised free-energy term is intended to act like an individual weight budget or learning-capacity budget.
+
+As a neuron’s excitatory synapses become larger, its remaining free energy decreases. Once the total excitatory weight approaches the neuron’s allowed budget, learning becomes very small.
+
+Therefore:
+
+- An unspecialized neuron has high free energy and can learn rapidly.
+- A partially specialized neuron has less free energy and changes more slowly.
+- A strongly specialized neuron has very little remaining free energy.
+- A different input pattern does not reset that neuron’s learning capacity.
+- Other unspecialized neurons are given a better chance to learn new patterns.
+
+The goal is not necessarily to freeze a neuron permanently. The existing bounded weight-update rule can still permit very slow change, depression, or reorganization. The neuron should become difficult to retrain rather than mathematically incapable of ever changing.
+
+4. Relationship to the weight-update rule
+
+The revised free energy is a learning gate, not a replacement for the local synaptic update.
+
+The active excitatory learning rule can still use:
+
+delta_w_E = LR * FE * (1 - w / w_max)^2 * learn_signal
+
+Here:
+
+- LR is the excitatory learning rate.
+- FE is the neuron-level remaining learning capacity.
+- (1 - w / w_max)^2 slows growth as an individual synapse approaches its maximum.
+- learn_signal determines whether the local synapse strengthens or weakens.
+
+These two controls serve different purposes:
+
+- FE limits the neuron’s total remaining capacity across all excitatory synapses.
+- The squared remaining-capacity term limits each individual synapse near w_max.
+
+The exact scaling of sum(weights) relative to threshold will need tuning. If nine weights are summed directly while the firing threshold is near 1.0, the total may exceed threshold too quickly. A practical implementation may need a dedicated excitatory weight budget, a normalization factor, or a free-energy target that is distinct from the membrane firing threshold. The important conceptual requirement is that the value be based on stored excitatory weights, not the currently active pattern.
+
+5. Biological interpretation proposed in the discussion
+
+The proposed interpretation is that when the neuron fires, charge can leave through all sufficiently developed membrane or synaptic pathways, not only through the channels associated with the currently active inputs.
+
+Under this interpretation, large learned pathways still contribute to the cell’s overall specialization and ability to discharge, even when those exact inputs are not active in the present pattern.
+
+Therefore the neuron’s remaining capacity should depend on the physical synaptic structure it has developed, not only on the current stimulus-driven charge.
+
+This is still a modeling hypothesis and should be treated as a mechanistic proposal to test, not as a settled biological fact.
+
+6. Inhibitory-neuron learning
+
+The shared inhibitory neuron is not being treated as a pattern specialist in the same way as the excitatory neurons.
+
+Its purpose is modulatory and competitive:
+
+- It receives activity from the excitatory population.
+- It accumulates charge from excitatory events.
+- When it crosses threshold, it suppresses the excitatory population.
+- It helps organize winner-take-all behavior.
+- It reduces unnecessary network activity and energy use.
+
+The discussion suggests that the inhibitory synapse can be updated from the charge it receives and the current inhibitory weight, without using the same excitatory free-energy budget.
+
+In simple terms, the inhibitory connection grows toward the level of charge it is expected to control and slows or stops when its weight is already large enough relative to that accumulated charge.
+
+The inhibitory neuron therefore should not automatically reuse the new excitatory free-energy equation unless a separate, justified inhibitory rule is designed.
+
+7. Do not immediately replace the old behavior before validating it
+
+The recommended workflow is:
+
+First, validate the current simulation using the old free-energy equation.
+
+The old equation is known to create undesirable pattern-dependent learning and possible tyrant behavior, but that failure is useful as a diagnostic. The current engine should visibly reproduce the expected failure before the equation is changed.
+
+Then replace the old free-energy term with the weight-based version and compare the plots again.
+
+This gives an explicit before-and-after experiment:
+
+Before:
+- A previous winner may regain free energy on a new pattern.
+- The same neuron may begin winning multiple patterns.
+- Specialization may be unstable.
+
+After:
+- Learned neurons retain low free energy across patterns.
+- Uncommitted neurons should be recruited for new patterns.
+- Winner ownership should become more stable and distributed.
+
+8. Ground truth for the simulation
+
+The equations alone are not enough. The practical ground truth is the dynamical behavior produced by the engine.
+
+The two required diagnostic views are:
+
+- A spike raster showing when each unit physically fires.
+- An accumulated-charge or membrane-charge plot showing how each unit approaches threshold and resets.
+
+The weight display is also important because it reveals whether neurons are specializing and whether the new free-energy budget is being consumed as intended.
+
+Different users may have different interfaces or extra visualizations, but the underlying engine should implement the same equations and produce the same essential behaviors.
+
+9. Expected raster behavior
+
+At the start of learning, multiple excitatory neurons may spike for the same pattern. That is expected before competition becomes organized.
+
+In a discrete-time simulator, several excitatory neurons may appear to spike on exactly the same timestep even when their accumulated charges are different.
+
+The raster should therefore be interpreted alongside the charge plot.
+
+A correct diagnostic signature of the discrete-time problem is:
+
+- Several excitatory neurons spike on the same raster column.
+- Their charge values immediately before the spike are not identical.
+- One neuron actually overshot threshold more strongly than the others.
+- In continuous time, that neuron would likely have crossed first.
+- Because the simulator updates in coarse steps, the ordering is lost.
+
+If all simultaneously firing neurons also have exactly the same charge, the problem may instead be insufficient variation. Possible causes include identical starting weights, too narrow a random initialization range, an overly large timestep, an excessively large input pulse, or learning parameters that force lockstep behavior.
+
+10. Expected accumulated-charge behavior
+
+For every neuron:
+
+- Charge should gradually accumulate from incoming events.
+- The displayed value should approach the firing threshold.
+- When the neuron fires, its charge should reset or sharply fall according to the selected membrane-reset rule.
+- The heatmap should visually return toward its low-charge color after a spike.
+
+The discussion described this as moving from low-charge blue toward the threshold color, firing, and then returning toward blue.
+
+The charge plot must preserve the underlying numerical differences even when multiple neurons fire in the same discrete step.
+
+11. Expected inhibitory behavior across the layers
+
+When multiple excitatory neurons fire, their events should reach the shared layer-two inhibitory neuron.
+
+The inhibitory neuron should not fire from an arbitrary software winner declaration. It should fire only after physically accumulating enough excitatory charge to cross its threshold.
+
+When that shared inhibitory neuron fires:
+
+- Its inhibition should be delivered back to the excitatory population.
+- The corresponding first-layer sensory inhibitory units should also respond according to the defined architecture.
+- If all nine first-layer inhibitory units receive the same unscaled inhibitory event, they should fire together or show the same charge response.
+- These events should be visible in both the raster and the charge display.
+
+If the shared inhibitory neuron spikes but the nine first-layer inhibitory units remain visually empty, then the simulation, event logging, or rendering path is incomplete.
+
+12. Continuous-time versus discrete-time issue
+
+The current simulator advances through discrete timesteps, while biological neurons evolve continuously.
+
+A large instantaneous input can push several excitatory neurons over threshold in the same software step. The raster then records an artificial tie.
+
+In a continuous system, their voltages would not usually cross threshold at exactly the same physical instant. Small differences in weight, distance, conduction delay, membrane state, or noise would create an ordering.
+
+The charge plot is therefore essential. It can show that the neurons that share a raster timestep did not have equal physical states.
+
+Possible later corrections include:
+
+- Smaller integration timesteps or sub-step threshold interpolation.
+- Event-driven simulation with fractional arrival times.
+- Distance- or path-dependent conduction delays.
+- Threshold-overshoot ordering inside a timestep.
+- Carefully controlled noise or initial-weight variation.
+
+However, before adding a tie-breaking mechanism, the existing discrete-time artifact should first be demonstrated clearly in the plots.
+
+13. Parameters that may need separate controls
+
+The interface and engine should expose independent parameters where the biology or learning rules differ.
+
+At minimum, consider separate controls for:
+
+- Excitatory learning rate.
+- Inhibitory learning rate.
+- Excitatory firing threshold.
+- Inhibitory firing threshold.
+- Excitatory weight maximum.
+- Neuron-level excitatory weight budget or free-energy target.
+- Initial random-weight range.
+- Simulation timestep.
+- E-to-I1 event size.
+- I1-to-E inhibitory event size.
+- Axonal or path delays.
+- Membrane and synaptic time constants.
+
+A shared learning-rate slider is not sufficient if excitatory specialization and inhibitory control need different timescales.
+
+14. Recommended implementation sequence
+
+Phase 1: Preserve and validate the current engine
+
+- Keep the current old free-energy equation temporarily.
+- Confirm that the raster records only real spikes.
+- Confirm that charge accumulates and resets correctly.
+- Confirm that multiple E spikes can recruit I1.
+- Confirm that I1 inhibition reaches the E population.
+- Confirm that the first-layer inhibitory units receive and display the event.
+- Reproduce the expected tyrant or cross-pattern relearning problem.
+
+Phase 2: Add diagnostics
+
+For every trial, record:
+
+- Input pattern.
+- Each E neuron’s total excitatory weight.
+- Old pattern-dependent free energy.
+- Proposed weight-based free energy.
+- Instantaneous charge before firing.
+- Threshold overshoot.
+- Spike timestep.
+- I1 arrival times and contributions.
+- I1 crossing time.
+- Inhibitory delivery time.
+- Winner or owner for the pattern.
+
+Plot old and new free energy side by side before changing the actual learning gate.
+
+Phase 3: Switch the excitatory learning gate
+
+Replace the pattern-dependent term with a bounded weight-based budget.
+
+A practical form to test is:
+
+FE_E = max(0, FE_budget_E - sum_j(w_Ej))
+
+Do not automatically assume that FE_budget_E must equal the membrane firing threshold. Treat the budget as a tunable parameter unless the units and scaling make them directly comparable.
+
+Use FE_E in the existing local update:
+
+delta_w_Ej = LR_E * FE_E * (1 - w_Ej / w_E_max)^2 * learn_signal_j
+
+Phase 4: Compare behavior
+
+Run the same patterns and seeds before and after the change.
+
+Check whether:
+
+- A neuron’s FE stays nearly constant across input patterns at a fixed weight state.
+- A specialized neuron stops rapidly learning unrelated patterns.
+- Previously silent or weakly committed neurons begin winning new patterns.
+- Pattern ownership becomes more stable.
+- No neuron becomes permanently dominant across all patterns.
+- Plasticity is reduced but not completely destroyed.
+- Inhibitory timing remains causal and physically driven.
+
+15. Important cautions
+
+Do not silently freeze a neuron using a software flag merely because it has won a pattern. The goal is for low remaining free energy and bounded local plasticity to make relearning naturally difficult.
+
+Do not mix membrane threshold, instantaneous charge, and total synaptic weight without checking their units and scaling.
+
+Do not use the input mask inside the revised neuron-level free-energy sum. That would make the value pattern-dependent again.
+
+Do not change the inhibitory learning rule merely because the excitatory free-energy rule changed.
+
+Do not judge simultaneous raster spikes without checking their charge values.
+
+Do not treat the interface as the source of truth. The event dynamics and numerical traces are the source of truth, while the interface is a tool for observing them.
+
+16. Main conclusion
+
+The new proposal changes free energy from “how far this neuron is from firing for the current pattern” into “how much total excitatory learning capacity this neuron has left.”
+
+That distinction is essential.
+
+The old instantaneous-charge definition is useful for describing current membrane state or latency, but it is not a reliable neuron-wide specialization budget because it changes with the active input pattern.
+
+The revised weight-based quantity is intended to remain stable across patterns and to prevent an already-specialized neuron from repeatedly reclaiming high plasticity.
+
+The next step is not only to insert the new equation. The correct process is to validate the old failure, add side-by-side diagnostics, implement a properly scaled neuron-level weight budget, and confirm the behavioral change in the raster, charge, inhibitory, and weight plots.

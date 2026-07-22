@@ -1,0 +1,1288 @@
+DETAILED EXPLANATION OF THE E-I NEURON, FREE ENERGY, TIMING, REFRACTORY PERIODS,
+HEBBIAN/ANTI-HEBBIAN LEARNING, AND WHAT THE NOTES ARE TRYING TO SAY
+
+Based on:
+- the handwritten notes in notes.jpg,
+- the LPS board-notes PDF,
+- and the class transcript discussing excitatory neurons, inhibitory neurons,
+  self-organization, predictive feedback, and free energy.
+
+===============================================================================
+1. THE MAIN IDEA IN ONE PARAGRAPH
+===============================================================================
+
+A sensory pattern sends spikes into a group of excitatory (E) neurons. Each E
+neuron receives the same input pattern, but through different learned weights,
+so each one accumulates a different amount of membrane voltage. The E neuron
+whose weights best match the pattern reaches threshold first and becomes the
+winner. Its spike then reaches an inhibitory (I) neuron after a small delay.
+The I neuron integrates that E spike, fires, and sends inhibition back to the E
+population so that the losing E neurons do not also fire. Predictive feedback
+can additionally suppress sensory spikes that the system already expects. The
+activity left after prediction/inhibition is the unexplained residual. In this
+project, that residual is the quantity that is closest to what is being called
+"free energy." By contrast, threshold minus weighted input is better described
+as a neuron's distance to threshold, not the entire system's free energy.
+
+The difficult part is timing. The E neuron normally fires first, resets, and
+enters a refractory period. The I neuron fires later because it must receive and
+integrate the E spike. Therefore, E and I should not be evaluated as if they
+occur simultaneously. The simulation should track their membrane voltages,
+spikes, delays, refractory states, and residual sensory activity across a time
+window.
+
+===============================================================================
+2. WHAT IS DRAWN IN THE HANDWRITTEN NOTES
+===============================================================================
+
+The main drawing appears to contain:
+
+1. One excitatory neuron receiving several sensory inputs.
+   Each incoming line has a synaptic weight.
+
+2. A threshold T for the excitatory neuron.
+   The weighted inputs build up the neuron's voltage until it reaches T.
+
+3. An inhibitory neuron connected to the excitatory neuron or E population.
+   The inhibitory neuron does not necessarily fire at the same instant as the
+   E neuron. It responds after the E spike reaches it.
+
+4. Two proposed equations:
+
+       FE_E = T - sum(E_input_weight * input)
+
+       FE_I = T - sum(I_input_weight * input)
+
+5. A note saying approximately "threshold - sum weights input" and asking how
+   close the neuron is to firing threshold.
+
+6. A 3 x 3 comparison between what the brain expects and the actual sensory
+   pattern. Predictive inhibition is supposed to remove the expected activity.
+   Any sensory spikes that remain are unexplained.
+
+7. Notes such as "residual sensory spikes," "high free energy," and "many
+   spiking." This strongly suggests that free energy is being used as a measure
+   of residual or unexplained activity, not only as a threshold calculation.
+
+These are two related but different concepts:
+
+A. NEURON-LEVEL THRESHOLD DEFICIT
+   How much more voltage does this particular neuron need before it spikes?
+
+B. NETWORK-LEVEL PREDICTION RESIDUAL
+   How much sensory activity remains after the network's prediction and
+   inhibition have tried to explain or cancel it?
+
+The handwritten equation is useful for A. The residual sensory-spike idea is
+closer to B.
+
+===============================================================================
+3. THE FIRST IMPORTANT CORRECTION: WEIGHTS SHOULD NOT BE COUNTED TWICE
+===============================================================================
+
+You wrote something similar to:
+
+    threshold - sum of weights of E * input weights
+
+The standard weighted input is:
+
+    weighted_drive = sum_i(w_i * x_i)
+
+where:
+
+    x_i = the input value or input spike from sensory channel i
+    w_i = the synaptic weight from input i to the neuron
+
+The input itself is not normally another weight. If the input is a binary spike,
+then x_i is usually 0 or 1:
+
+    x_i = 1 means the input fired
+    x_i = 0 means the input did not fire
+
+Example:
+
+    inputs  = [1, 1, 0]
+    weights = [0.4, 0.5, 0.2]
+
+    weighted_drive
+      = 0.4(1) + 0.5(1) + 0.2(0)
+      = 0.9
+
+If the threshold is 1.0, the neuron is 0.1 below threshold.
+
+    threshold_gap = 1.0 - 0.9 = 0.1
+
+If the input values are analog rather than binary, they may be values such as
+0.2, 0.7, and 0.0. The same equation still applies:
+
+    sum_i(w_i * x_i)
+
+Do not multiply "weight times input weight" unless your model truly has two
+separate weighting stages.
+
+===============================================================================
+4. WHAT T - SUM(W * X) ACTUALLY MEANS
+===============================================================================
+
+For a simple neuron with no leak, no history, no inhibition, and no delay:
+
+    D_E = T_E - sum_i(w_Ei * x_i)
+
+This can be interpreted as the excitatory neuron's signed distance to
+threshold.
+
+- D_E > 0:
+  The neuron is still below threshold by D_E.
+
+- D_E = 0:
+  The neuron is exactly at threshold.
+
+- D_E < 0:
+  The weighted input exceeded threshold. The neuron should spike, assuming it
+  is not refractory.
+
+For a nonnegative "remaining distance" measure, use:
+
+    remaining_E = max(0, T_E - V_E)
+
+where V_E is the actual membrane potential.
+
+That last phrase is important: for a leaky integrate-and-fire neuron, it is
+usually better to use the current membrane potential V_E rather than only the
+current input sum.
+
+The membrane potential contains the effects of:
+
+- previous input spikes,
+- membrane leak,
+- current excitatory input,
+- current or delayed inhibitory input,
+- reset after a spike,
+- and sometimes adaptation.
+
+Therefore:
+
+    D_E(t) = T_E - V_E(t)
+
+is more accurate than:
+
+    D_E(t) = T_E - sum_i(w_Ei * x_i(t))
+
+unless your model intentionally has no temporal integration.
+
+This threshold gap is a useful diagnostic. It tells us which neurons are close
+to winning. However, by itself it does not tell us whether the network's
+prediction explained the sensory pattern.
+
+===============================================================================
+5. A STATEFUL EXCITATORY NEURON EQUATION
+===============================================================================
+
+A simplified discrete-time leaky integrate-and-fire E neuron can be written as:
+
+    V_E,n(t+1)
+      = alpha_E * V_E,n(t)
+      + sum_i(w_E,n,i * x_i(t))
+      - g_IE * s_I,n(t - d_IE)
+
+where:
+
+    V_E,n(t)       = membrane voltage of E neuron n at time t
+    alpha_E        = leak factor, usually between 0 and 1
+    w_E,n,i        = sensory-to-E weight
+    x_i(t)         = sensory spike/event
+    g_IE           = strength of inhibitory effect on E
+    s_I,n(t-d_IE)  = delayed inhibitory spike
+    d_IE           = I-to-E transmission delay
+
+The E neuron spikes when:
+
+    V_E,n(t) >= T_E
+
+and it is not in its refractory period.
+
+After a spike:
+
+    s_E,n(t) = 1
+    V_E,n(t) is reset
+    refractory_E,n is started
+
+A useful threshold-distance diagnostic is:
+
+    D_E,n(t) = max(0, T_E - V_E,n(t))
+
+A useful signed margin is:
+
+    M_E,n(t) = V_E,n(t) - T_E
+
+- Positive M_E means it is above threshold.
+- Negative M_E means it is below threshold.
+
+===============================================================================
+6. THE INHIBITORY NEURON SHOULD ALSO BE STATEFUL
+===============================================================================
+
+The I neuron can be modeled similarly, but its input usually comes from E spikes
+rather than directly from the raw sensory pixels.
+
+A simplified I-neuron equation is:
+
+    V_I,k(t+1)
+      = alpha_I * V_I,k(t)
+      + sum_n(w_EI,k,n * s_E,n(t - d_EI))
+
+where:
+
+    V_I,k(t)       = membrane voltage of I neuron k
+    alpha_I        = inhibitory membrane leak
+    w_EI,k,n       = E-to-I synaptic weight
+    s_E,n          = excitatory spike
+    d_EI           = E-to-I delay
+
+It spikes when:
+
+    V_I,k(t) >= T_I
+
+and it is not refractory.
+
+Its distance to threshold is:
+
+    D_I,k(t) = max(0, T_I - V_I,k(t))
+
+So, yes, you can calculate a threshold gap for the I neuron too. But this is not
+necessarily a second independent free-energy quantity. It is a measure of how
+close the inhibitory mechanism is to activating.
+
+The I neuron matters because of what it does after it fires:
+
+    I spike -> suppress competitors, cancel predicted activity, or reset the pool
+
+The network-level residual should be evaluated after allowing that delayed
+inhibitory response to occur.
+
+===============================================================================
+7. WHY THE I NEURON IS HARDER TO QUANTIFY
+===============================================================================
+
+Your concern is correct: the I neuron is harder to treat with a single static
+formula because it is delayed.
+
+The causal sequence is normally:
+
+    sensory input
+        -> E neurons integrate
+        -> one E neuron reaches threshold
+        -> winner E neuron spikes
+        -> E neuron resets and becomes refractory
+        -> E spike travels to I neuron
+        -> I neuron integrates the E spike
+        -> I neuron reaches threshold
+        -> I neuron spikes
+        -> inhibition reaches E neurons
+        -> competitors are suppressed
+
+The E and I voltages are therefore at different stages of the cycle.
+
+At the instant the winner E spikes:
+
+- the winner E may immediately reset to zero,
+- the I neuron may still be below threshold,
+- the losing E neurons may still be accumulating voltage,
+- and inhibition has not arrived yet.
+
+If you look only at that instant, the system may appear to have high residual
+activity even though inhibition is about to clean it up.
+
+This is why free energy should usually be evaluated over a response window, not
+at only one timestep.
+
+===============================================================================
+8. USE A TEMPORAL WINDOW INSTEAD OF DEMANDING SIMULTANEITY
+===============================================================================
+
+Suppose a pattern begins at time t0.
+
+A useful evaluation window might be:
+
+    t0 to t0 + W
+
+Within that window, record:
+
+- when each E neuron first spikes,
+- which E neuron wins,
+- when the paired or shared I neuron spikes,
+- how many losing E neurons spike before inhibition arrives,
+- how many spike after inhibition should have arrived,
+- what sensory residual remains after feedback,
+- and whether inhibition erased valid activity too aggressively.
+
+The network should not be judged at exactly the winner's spike time. It should
+be judged after a biologically/architecturally reasonable settling period.
+
+For example:
+
+    t = 0: sensory spikes arrive
+    t = 1: E neurons integrate
+    t = 2: winner E spikes and resets
+    t = 3: I neuron receives the winner spike
+    t = 4: I neuron spikes
+    t = 5: inhibitory effect suppresses competitors
+    t = 6: evaluate post-inhibition residual
+
+The exact numbers depend on the simulation, but the ordering is the important
+part.
+
+===============================================================================
+9. REFRACTORY PERIODS DO NOT MEAN THE ERROR DISAPPEARED
+===============================================================================
+
+After an E neuron spikes, its membrane voltage resets and it becomes refractory.
+This prevents it from firing again immediately.
+
+However, a reset voltage should not be interpreted as:
+
+    "the pattern is fully explained"
+
+The voltage is zero because the neuron fired and reset, not because sensory
+prediction error is necessarily zero.
+
+Therefore, keep separate variables for:
+
+1. membrane voltage,
+2. refractory state,
+3. spike output,
+4. predicted sensory activity,
+5. actual sensory activity,
+6. residual sensory activity.
+
+Otherwise, resetting the neuron can artificially make the energy plot look low.
+
+A particularly important rule is:
+
+    Do not use only the current E membrane voltage as the entire free-energy
+    signal after the E neuron has reset.
+
+The residual/prediction-error state should survive long enough to be evaluated
+after inhibition and feedback have acted.
+
+===============================================================================
+10. THE BEST INTERPRETATION OF "FREE ENERGY" IN THIS IMPLEMENTATION
+===============================================================================
+
+The transcript repeatedly connects free energy to:
+
+- uncertainty,
+- residual activity,
+- things the network does not know,
+- learning only when something remains unexplained,
+- and predictive feedback reducing energy.
+
+That means the project's practical free-energy signal is probably intended to
+behave like prediction error or unexplained sensory activity.
+
+A simple binary residual is:
+
+    r_i(t) = max(0, x_i(t) - p_i(t))
+
+where:
+
+    x_i(t) = actual sensory spike
+    p_i(t) = predicted/suppressive signal
+
+Then:
+
+    F_residual(t) = sum_i r_i(t)
+
+This only counts unexpected actual spikes.
+
+If false predictions should also be penalized, use absolute mismatch:
+
+    r_i(t) = abs(x_i(t) - p_i(t))
+
+    F_residual(t) = sum_i abs(x_i(t) - p_i(t))
+
+This counts both:
+
+- actual activity that was not predicted, and
+- predicted activity that did not actually occur.
+
+For graded signals, a squared residual can be used:
+
+    F_residual(t) = sum_i (x_i(t) - p_i(t))^2
+
+For a response window:
+
+    F_window = sum_(t=t0 to t0+W) beta(t) * F_residual(t)
+
+where beta(t) can place more importance on the post-inhibition part of the
+window.
+
+This is not necessarily the formal mathematical variational free energy used in
+some theoretical-neuroscience papers. It is an engineering residual or
+prediction-error proxy. Calling it "residual energy" or "implementation free
+energy" can avoid confusion.
+
+===============================================================================
+11. HOW THE THRESHOLD GAP AND RESIDUAL FREE ENERGY FIT TOGETHER
+===============================================================================
+
+The threshold gap answers:
+
+    "How close is this neuron to firing?"
+
+The residual free energy answers:
+
+    "How much of the sensory event remains unexplained after prediction and
+    inhibition?"
+
+They interact as follows:
+
+1. A pattern arrives.
+2. E threshold gaps shrink as E neurons integrate evidence.
+3. One E neuron reaches threshold and spikes.
+4. Its representation makes a prediction or recruits inhibition.
+5. The I threshold gap shrinks after the E spike arrives.
+6. The I neuron spikes.
+7. Predicted/competitive activity is suppressed.
+8. The remaining sensory mismatch becomes the residual free energy.
+9. Learning is enabled in proportion to that residual.
+
+Thus, threshold distance is part of the mechanism that creates a prediction.
+Residual mismatch is the quantity that says whether the prediction succeeded.
+
+===============================================================================
+12. A FULL 3 X 3 WORKED EXAMPLE
+===============================================================================
+
+Assume the input is a middle horizontal line:
+
+    0 0 0
+    1 1 1
+    0 0 0
+
+Flatten it as:
+
+    x = [0,0,0, 1,1,1, 0,0,0]
+
+Assume E neuron A has learned weights that prefer the middle row:
+
+    w_A = [0.05,0.05,0.05,
+           0.40,0.35,0.30,
+           0.05,0.05,0.05]
+
+Its weighted sensory drive is:
+
+    drive_A = 0.40 + 0.35 + 0.30 = 1.05
+
+Assume:
+
+    T_E = 1.00
+
+Then:
+
+    signed threshold deficit_A = T_E - drive_A
+                               = 1.00 - 1.05
+                               = -0.05
+
+It has crossed threshold, so it spikes.
+
+Now assume E neuron B only weakly matches this line:
+
+    middle-row weights for B = [0.25, 0.25, 0.20]
+
+    drive_B = 0.70
+
+    threshold deficit_B = 1.00 - 0.70 = 0.30
+
+B does not yet spike.
+
+Now consider the paired I neuron for A.
+
+Assume:
+
+    E-to-I weight = 0.80
+    I threshold T_I = 0.75
+
+At the moment A spikes, that spike has not necessarily reached I yet.
+
+At t = winner spike:
+
+    s_E,A(t) = 1
+    V_I(t) may still be 0 because of transmission delay
+
+At the next relevant timestep:
+
+    V_I = 0.80
+
+Then:
+
+    T_I - V_I = 0.75 - 0.80 = -0.05
+
+The I neuron crosses threshold and spikes.
+
+Its inhibitory spike suppresses B and the other competitors before they can
+cross threshold.
+
+Now suppose A's learned feedback predicts the same middle horizontal line:
+
+    prediction =
+    0 0 0
+    1 1 1
+    0 0 0
+
+The actual input and prediction match perfectly:
+
+    actual - prediction = all zeros
+
+So the post-feedback residual is:
+
+    F_residual = 0
+
+Interpretation:
+
+- A recognized the pattern.
+- I enforced the winner-take-all decision.
+- Feedback explained the sensory spikes.
+- There is little or no need for additional learning on this presentation.
+
+Now suppose the actual input contains an unexpected extra spike:
+
+    1 0 0
+    1 1 1
+    0 0 0
+
+but the prediction is still only the middle row.
+
+The middle-row spikes are explained, but the top-left spike remains:
+
+    residual =
+    1 0 0
+    0 0 0
+    0 0 0
+
+Then:
+
+    F_residual = 1
+
+That one remaining event is where the system should focus learning.
+
+===============================================================================
+13. WHY PRE-INHIBITION ENERGY AND POST-INHIBITION ENERGY ARE DIFFERENT
+===============================================================================
+
+At the start of a pattern, several E neurons may be partially activated. The
+pre-inhibition network can look energetic because all candidates are processing
+the evidence.
+
+That is not necessarily a failure.
+
+Useful separate measurements are:
+
+    F_pre  = residual before the prediction/inhibition response
+    F_post = residual after the response has had time to arrive
+
+Then define energy reduction:
+
+    delta_F = F_pre - F_post
+
+A successful prediction cycle should often show:
+
+    F_pre high or moderate
+    F_post low
+    delta_F positive
+
+If F_post remains high, the network failed to explain the pattern.
+
+If F_post is always zero even for unfamiliar patterns, inhibition may be
+silencing everything rather than making a correct prediction. That is the
+"overkill" problem.
+
+===============================================================================
+14. INHIBITION CAN REDUCE SPIKES WITHOUT ACTUALLY BEING CORRECT
+===============================================================================
+
+A major danger is measuring success only by "few spikes remained."
+
+Very strong nonspecific inhibition can make every pattern quiet. That would
+produce low activity but poor representation.
+
+Therefore, distinguish:
+
+1. CORRECT EXPLANATION
+   The winner predicted the active sensory channels, and those expected events
+   were canceled.
+
+2. BLIND SILENCING
+   A strong I signal suppressed everything, including unexplained or valid
+   sensory events.
+
+A useful system should have low residual because its prediction matched, not
+only because inhibition was strong.
+
+Possible over-inhibition diagnostic:
+
+    F_false_suppression = sum_i max(0, p_i - x_i)
+
+This penalizes prediction/inhibition at locations where no actual event
+occurred.
+
+A combined engineering diagnostic could be:
+
+    J = F_unexplained
+        + lambda_false * F_false_suppression
+        + lambda_late * late_competitor_spikes
+
+This J is a useful training/debugging objective, but it should be called a
+combined diagnostic or loss unless the project explicitly defines it as free
+energy.
+
+===============================================================================
+15. WHAT SHOULD BE LEARNED ON THE E SIDE?
+===============================================================================
+
+For a winning E neuron, a Hebbian-style rule can strengthen sensory synapses
+that were active shortly before the E spike.
+
+Conceptually:
+
+    active input before winner spike
+        + winner E spike
+        -> strengthen that sensory-to-E weight
+
+A simple form is:
+
+    delta_w_E,n,i = eta_E * eligibility_i * winner_n * learning_gate
+
+where:
+
+    eligibility_i = recent presynaptic activity trace
+    winner_n      = 1 if E neuron n won
+    learning_gate = based on residual/free energy
+
+The learning gate matters. The transcript says that when a pattern has no free
+energy left to learn, the established neuron should not continue changing and
+taking over every new pattern.
+
+A reasonable gate is:
+
+    learning_gate = 1 if F_post > epsilon
+                    0 otherwise
+
+or a graded gate:
+
+    learning_gate = min(1, F_post / F_scale)
+
+This means:
+
+- unfamiliar or poorly predicted pattern -> stronger learning
+- familiar, well-predicted pattern -> little learning
+
+===============================================================================
+16. WHAT DOES ANTI-HEBBIAN FOR "NEURONS THAT DO NOT FIRE" MEAN?
+===============================================================================
+
+This needs care.
+
+It is usually unsafe to weaken every synapse of every neuron that did not fire.
+A neuron may be silent simply because its preferred pattern was absent.
+
+A more targeted anti-Hebbian rule is:
+
+    presynaptic input was active
+    but this postsynaptic neuron was a losing competitor
+    -> slightly weaken the active synapses for that losing neuron
+
+Conceptually:
+
+    active input + losing E neuron -> depression
+
+but:
+
+    inactive input + silent E neuron -> usually no change
+
+This encourages specialization:
+
+- the winner becomes more responsive to this pattern,
+- losers become less responsive to this particular pattern,
+- but their unrelated synapses remain available for other patterns.
+
+A simple competitive update is:
+
+For winner n*:
+
+    delta_w_E,n*,i = +eta_plus * x_trace_i * learning_gate
+
+For losing candidate n:
+
+    delta_w_E,n,i = -eta_minus * x_trace_i * candidate_activity_n
+                    * learning_gate
+
+The candidate_activity term prevents completely unrelated neurons from being
+punished.
+
+The anti-Hebbian rule should also be bounded or normalized so weights do not
+collapse to zero.
+
+===============================================================================
+17. HOW TO LEARN THE E-TO-I CONNECTION
+===============================================================================
+
+The E-to-I synapse determines whether the winner can reliably recruit its
+inhibitory response.
+
+Desired behavior:
+
+    winner E spike
+        -> short delay
+        -> I spike
+
+A timing-based learning rule can use an eligibility trace.
+
+When E spikes:
+
+    e_EI(t) is increased
+
+The trace decays over time:
+
+    e_EI(t+1) = rho * e_EI(t) + s_E(t)
+
+When I spikes shortly afterward:
+
+    delta_w_EI = +eta_EI * e_EI(t)
+
+This strengthens E-to-I connections that causally precede the I response.
+
+If E fires but I repeatedly fails to fire within the allowed response window,
+then the system may also strengthen w_EI.
+
+If I fires too easily from weak/nonwinner activity, w_EI may need to be weakened
+or the I threshold raised.
+
+Important quantities to record are:
+
+    latency_E_to_I = time(I spike) - time(winner E spike)
+
+    I_success = 1 if I fired within desired window
+                0 otherwise
+
+===============================================================================
+18. HOW TO LEARN THE I-TO-E CONNECTION
+===============================================================================
+
+The I-to-E connection determines how effectively competitors are suppressed.
+
+Possible learning logic:
+
+A. If losing E neurons continue to spike after the I response should have
+   arrived:
+
+       inhibition was too weak
+       -> strengthen I-to-E weights to those competitors
+
+B. If all E neurons are silenced before any valid winner can emerge:
+
+       inhibition was too strong or too early
+       -> weaken I-to-E weights or increase delay/threshold
+
+C. If one winner spikes and competitors remain below threshold afterward:
+
+       inhibition worked
+       -> little or no change
+
+This turns inhibition into a learned control process rather than a fixed global
+hammer.
+
+===============================================================================
+19. WHY ELIGIBILITY TRACES HELP WITH THE TIMING GAP
+===============================================================================
+
+The learning problem is that cause and effect are separated in time.
+
+- Sensory input happens first.
+- E spike happens later.
+- I spike happens later still.
+- Residual energy is evaluated after that.
+
+If learning only compares events at the same timestep, it may miss the causal
+relationship.
+
+An eligibility trace stores a fading memory of recent activity.
+
+For sensory input i:
+
+    e_x,i(t+1) = rho_x * e_x,i(t) + x_i(t)
+
+For E spikes:
+
+    e_E,n(t+1) = rho_E * e_E,n(t) + s_E,n(t)
+
+When a later event occurs, the trace says which earlier inputs were probably
+responsible.
+
+Examples:
+
+- E spikes now -> update sensory weights using recent input traces.
+- I spikes now -> update E-to-I weights using recent E-spike traces.
+- residual remains after settling -> gate all updates using the amount of
+  remaining residual.
+
+This is closer to STDP-like causal learning than a same-step multiplication.
+
+===============================================================================
+20. A RECOMMENDED CYCLE FOR THE SIMULATION
+===============================================================================
+
+For each pattern presentation:
+
+PHASE 1: PRESENT SENSORY EVENTS
+
+    Put the 3 x 3 pattern into the sensory input channels.
+    Update sensory eligibility traces.
+
+PHASE 2: E INTEGRATION
+
+    For each E neuron that is not refractory:
+        apply membrane leak
+        add weighted sensory input
+        subtract any inhibition that has arrived
+        check threshold
+
+PHASE 3: SELECT OR OBSERVE THE WINNER
+
+    The first E neuron to cross threshold is the winner.
+    Record its spike time.
+    Reset it and begin its refractory period.
+
+PHASE 4: RECRUIT THE I NEURON
+
+    Send the winner E spike through the delayed E-to-I synapse.
+    Let I integrate.
+    Record whether and when I reaches threshold.
+
+PHASE 5: APPLY INHIBITION
+
+    When I spikes, send delayed inhibition to the E population.
+    Suppress the losers or reset their accumulated voltage according to the
+    architecture.
+
+PHASE 6: APPLY PREDICTIVE FEEDBACK
+
+    The winner's learned representation predicts which sensory channels should
+    be active.
+    Apply suppressive feedback to those predicted events.
+
+PHASE 7: MEASURE RESIDUAL
+
+    After the response window:
+        compare actual sensory activity with predicted activity
+        compute unexplained residual
+        compute false suppression
+        count competitor spikes
+        measure E-to-I latency
+
+PHASE 8: UPDATE WEIGHTS
+
+    Use residual energy as a learning gate.
+
+    - strengthen active sensory inputs to the winner,
+    - selectively weaken active inputs to strong losing competitors,
+    - update E-to-I based on whether I followed the winner correctly,
+    - update I-to-E based on whether competitors escaped or inhibition overkilled.
+
+PHASE 9: CLEAR TEMPORARY STATE
+
+    End the pattern window.
+    Allow refractory timers and traces to evolve naturally.
+    Do not erase long-term weights.
+
+===============================================================================
+21. RECOMMENDED VARIABLES TO TRACK
+===============================================================================
+
+For each E neuron:
+
+    V_E[n]
+    threshold_E[n]
+    refractory_E[n]
+    last_E_spike_time[n]
+    sensory_weights_E[n][i]
+    incoming_inhibition[n]
+    threshold_gap_E[n]
+    winner_status[n]
+
+For each I neuron:
+
+    V_I[k]
+    threshold_I[k]
+    refractory_I[k]
+    last_I_spike_time[k]
+    E_to_I_weights[k][n]
+    threshold_gap_I[k]
+
+For each sensory channel:
+
+    actual_spike[i]
+    predicted_spike[i]
+    residual_spike[i]
+    sensory_trace[i]
+
+For each presentation:
+
+    winner_id
+    winner_time
+    I_spike_time
+    E_to_I_latency
+    number_of_E_spikes_before_I
+    number_of_E_spikes_after_I
+    F_pre
+    F_post
+    false_suppression
+    WTA_success
+    learning_gate
+
+===============================================================================
+22. RECOMMENDED PLOTS FOR DEBUGGING
+===============================================================================
+
+1. E MEMBRANE VOLTAGE TRACES
+
+   Plot V_E for every E neuron with the threshold line.
+   This shows who was close to winning and whether competitors were suppressed.
+
+2. I MEMBRANE VOLTAGE TRACE
+
+   Plot V_I with its threshold.
+   Mark the winner E spike and I spike.
+   This makes the delay visible.
+
+3. SPIKE RASTER
+
+   Rows: sensory channels, E neurons, I neurons.
+   Columns: time.
+   This makes the causal order visible.
+
+4. REFRACTORY STATE
+
+   Mark when each neuron is refractory.
+   This prevents confusion between "not firing because inhibited" and "not
+   firing because refractory."
+
+5. RESIDUAL ENERGY TRACE
+
+   Plot:
+       raw sensory activity,
+       predicted activity,
+       residual activity,
+       F_pre,
+       F_post.
+
+6. E-TO-I LATENCY
+
+   Track the average and distribution of:
+
+       t_I - t_E_winner
+
+7. COMPETITOR ESCAPES
+
+   Count losing E spikes that happen after the winner and after the expected
+   arrival of inhibition.
+
+8. OVER-INHIBITION
+
+   Count valid actual events that were suppressed without being represented by
+   a correct prediction.
+
+===============================================================================
+23. HOW TO KNOW WHETHER THE I MECHANISM IS WORKING
+===============================================================================
+
+A good I mechanism should show all of the following:
+
+- one clear E winner for a familiar pattern,
+- an I spike shortly after the winner,
+- few or no competitor spikes after I arrives,
+- no suppression before a winner has had a fair chance to emerge,
+- lower post-inhibition residual for familiar patterns,
+- nonzero residual for unfamiliar or corrupted patterns,
+- and stable timing as the system learns.
+
+Bad case 1: I NEVER FIRES
+
+- competitors keep accumulating voltage,
+- multiple E neurons spike,
+- WTA fails,
+- E-to-I weight may be too low,
+- I threshold may be too high,
+- or the delay/window may be implemented incorrectly.
+
+Bad case 2: I FIRES TOO LATE
+
+- the correct winner fires,
+- but several losers also fire before inhibition arrives,
+- latency penalty is high,
+- E-to-I transmission or I integration may be too slow.
+
+Bad case 3: I FIRES TOO EARLY OR TOO STRONGLY
+
+- no E neuron can specialize,
+- all activity is suppressed,
+- residual may look artificially low,
+- I threshold may be too low,
+- I weights may be too large,
+- or feedback is being applied before a stable winner exists.
+
+Bad case 4: I FIRES FROM ANY TINY E ACTIVITY
+
+- the E-to-I connection is not selective enough,
+- all E-to-I weights may have been initialized at threshold strength,
+- noise recruits inhibition,
+- and the system can freeze before competition resolves.
+
+===============================================================================
+24. ANSWER TO THE QUESTION ABOUT ALL I WEIGHTS BEING EQUAL TO THRESHOLD
+===============================================================================
+
+The transcript asks whether, if the I neuron should fire whenever any E neuron
+fires, every E-to-I weight must individually equal the I threshold.
+
+That is one possible design, but it is not the only design and may be too
+aggressive.
+
+OPTION A: ONE E SPIKE GUARANTEES I SPIKE
+
+    w_EI >= T_I
+
+Then any single E spike immediately provides enough voltage to trigger I.
+This creates fast winner-triggered inhibition.
+
+Risk:
+
+- even a noise spike or nonwinner spike triggers full inhibition,
+- all E-to-I connections may become equally strong,
+- timing and selectivity become difficult to learn.
+
+OPTION B: ONE STRONG/LEARNED E SPIKE USUALLY TRIGGERS I
+
+    w_EI is near, but not necessarily equal to, T_I
+
+The I neuron's existing voltage, membrane history, and multiple inputs can help
+it cross threshold.
+
+OPTION C: MULTIPLE E EVENTS ARE REQUIRED
+
+    each w_EI < T_I
+
+The I neuron requires accumulated E evidence. This is slower and can permit
+several competitors to fire, but it may be more noise-resistant.
+
+For paired E-I winner control, a practical approach is often:
+
+- initialize E-to-I strong enough that the winner can recruit I reliably,
+- but not so strong that a tiny accidental event always causes overkill,
+- then allow timing-based learning to adjust it.
+
+===============================================================================
+25. SHOULD FE_E AND FE_I BE ADDED TOGETHER?
+===============================================================================
+
+Not automatically.
+
+The two threshold deficits:
+
+    D_E = T_E - V_E
+    D_I = T_I - V_I
+
+have different meanings and occur at different points in the cycle.
+
+D_E tells us how close an E neuron is to representing the input.
+D_I tells us how close the inhibitory control neuron is to responding.
+
+Simply adding them can be misleading:
+
+    D_E + D_I
+
+because:
+
+- one may be measured before a spike and the other after,
+- E resets can abruptly change D_E,
+- I delay shifts D_I in time,
+- and a large I deficit early in the cycle is normal.
+
+It is better to keep them as separate traces.
+
+If a single diagnostic score is desired, construct it intentionally after the
+settling window, for example:
+
+    total_diagnostic
+      = residual_prediction_error
+      + lambda_competition * late_competitor_spikes
+      + lambda_overkill * false_suppression
+      + lambda_latency * latency_penalty
+
+This is a network-performance score, not just a sum of threshold gaps.
+
+===============================================================================
+26. A BETTER SET OF NAMES TO PREVENT CONFUSION
+===============================================================================
+
+Instead of calling every quantity free energy, use:
+
+    E_THRESHOLD_GAP
+        = max(0, T_E - V_E)
+
+    I_THRESHOLD_GAP
+        = max(0, T_I - V_I)
+
+    PREDICTION_RESIDUAL
+        = mismatch between actual and predicted sensory activity
+
+    POST_INHIBITION_FREE_ENERGY_PROXY
+        = summed residual after settling
+
+    COMPETITION_ERROR
+        = losing E spikes after a winner should have suppressed them
+
+    OVER_INHIBITION_ERROR
+        = valid/unpredicted sensory information erased by inhibition
+
+This makes plots and code much easier to interpret.
+
+===============================================================================
+27. HOW THIS RELATES TO THE LAYERED CORTICAL-COLUMN IDEA
+===============================================================================
+
+The transcript describes repeated cortical-column-like units in a hierarchy.
+A lower unit keeps detailed local variation, but it can project a simpler
+abstraction upward: essentially, "something in this column fired."
+
+At the next layer:
+
+- several lower-layer outputs become the sensory inputs,
+- multiple E neurons compete to represent patterns among those outputs,
+- I neurons enforce competition,
+- the winner projects an abstraction upward,
+- and feedback can reduce predictable lower-level activity.
+
+The same local E-I mechanism can therefore be repeated across width and depth.
+This is the scalability argument in the transcript.
+
+The free-energy/prediction-residual signal is what allows learning to focus on
+what is not yet represented. Familiar structure is predicted and suppressed;
+unexplained structure remains available for a new neuron or column to learn.
+
+===============================================================================
+28. THE MOST IMPORTANT IMPLEMENTATION RECOMMENDATION
+===============================================================================
+
+Yes, the inhibitory-neuron behavior should be figured out explicitly. However,
+do not solve it by forcing FE_I to be the same static equation as FE_E at the
+same moment.
+
+Use this approach instead:
+
+1. Track V_E and V_I separately over time.
+2. Give E-to-I and I-to-E connections explicit delays.
+3. Track refractory states separately.
+4. Calculate E_THRESHOLD_GAP(t) and I_THRESHOLD_GAP(t) as diagnostics.
+5. Evaluate prediction residual after a complete response window.
+6. Use eligibility traces to connect earlier E/input events with later I and
+   residual events.
+7. Gate Hebbian and anti-Hebbian changes using the post-response residual.
+8. Track over-inhibition so a silent network is not mistaken for a correct
+   predictive network.
+
+===============================================================================
+29. SIMPLE PSEUDOCODE
+===============================================================================
+
+for each pattern:
+
+    initialize pattern-window measurements
+
+    for each timestep in response_window:
+
+        deliver scheduled sensory spikes
+        update sensory traces
+
+        for each E neuron:
+            if not refractory:
+                V_E = alpha_E * V_E
+                V_E += weighted sensory input
+                V_E -= inhibition arriving now
+
+                if V_E >= T_E:
+                    emit E spike
+                    record E spike time
+                    if no winner yet:
+                        winner = this E neuron
+                    schedule E spike to I
+                    reset V_E
+                    start E refractory period
+            else:
+                decrement refractory timer
+
+        for each I neuron:
+            if not refractory:
+                V_I = alpha_I * V_I
+                V_I += E spikes arriving now
+
+                if V_I >= T_I:
+                    emit I spike
+                    record I spike time
+                    schedule inhibition to E neurons
+                    reset V_I
+                    start I refractory period
+            else:
+                decrement refractory timer
+
+        update predictive feedback from current winner/representation
+        update actual-minus-predicted residual trace
+
+    after response_window:
+
+        F_post = sum of residual sensory activity
+        false_suppression = predicted activity where actual activity was absent
+        late_competitor_spikes = loser spikes after inhibition arrival
+        latency = I_spike_time - winner_spike_time
+
+        learning_gate = function(F_post)
+
+        update winner sensory weights with Hebbian rule
+        update strong losing competitors with targeted anti-Hebbian rule
+        update E-to-I timing/reliability
+        update I-to-E strength based on competitor escape or overkill
+
+===============================================================================
+30. FINAL ANSWER TO YOUR MAIN QUESTION
+===============================================================================
+
+Your equation is not useless or "wrong." It is useful if you rename it as the
+neuron's threshold gap:
+
+    E threshold gap = T_E - V_E
+    I threshold gap = T_I - V_I
+
+For a very simple one-step model, V can be approximated with sum(w * input).
+For the actual timed spiking model, V should include leak, prior state, delayed
+inhibition, reset, and refractory behavior.
+
+The network's free energy should probably not be only this threshold gap.
+According to the notes and transcript, the more faithful implementation is:
+
+    free-energy proxy
+      = sensory/pattern activity that remains unexplained
+        after the winner, prediction, and delayed inhibition have had time to act
+
+The I neuron should absolutely be modeled, but primarily as a delayed control
+mechanism that changes the final residual. Its own threshold gap can be plotted
+and learned from, but it does not have to be called a separate free energy.
+
+The clean conceptual separation is:
+
+    E gap:       Is an E representation about to fire?
+    I gap:       Is inhibition about to activate?
+    residual:    After the full E-I cycle, what information is still unexplained?
+    learning:    Change weights mainly where residual remains.
+
+That separation should make the implementation, visualizations, and biological
+story much more consistent.

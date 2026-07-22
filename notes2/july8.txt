@@ -1,0 +1,437 @@
+LPS / Spiking Network Debugging Summary + Implementation Prompt
+Based on the July 8 transcript and LPS (9) notes
+
+MAIN POINT
+The next implementation goal is not only to change the learning equations. The bigger goal is to make the simulation observable enough that we can tell whether the winner-take-all behavior is actually happening for the right physical reasons.
+
+The transcript says to build two required debugging plots:
+
+1. Raster plot
+   - Shows every spike from every neuron over time.
+   - Y-axis: every node/neuron in the network.
+   - X-axis: simulation time steps.
+   - A mark/dot/tick appears whenever a node spikes.
+   - This is the first debugging tool because it shows whether the network activity pattern matches the expected winner-take-all story.
+
+2. Accumulated charge / ACCQ heatmap over time
+   - This is the “other plot” discussed in the transcript.
+   - It is similar to a raster in shape: nodes vertically, time steps horizontally.
+   - Instead of only marking spikes, each cell is colored by the neuron’s internal accumulated charge / voltage / ACCQ at that time step.
+   - Cold/blue means low charge.
+   - Hot/yellow/red means close to threshold.
+   - After a spike, the value should drop/reset to cold.
+   - After inhibition arrives, connected E neurons should drop to colder values.
+   - This plot shows what the raster cannot show: how each neuron is building charge, getting inhibited, resetting, or staying stuck.
+
+The transcript also mentions that a weight heatmap can be useful later, but the two required plots right now are the raster plot and the ACCQ/sum heatmap.
+
+
+EXPECTED NETWORK BEHAVIOR TO CHECK
+When the simulation is brand new:
+
+1. The input/sensory pattern should fire first.
+   Example: if the pattern has three active sensory cells, those three sensory nodes should spike.
+
+2. E neurons should integrate charge over multiple steps.
+   They should not all instantly fire unless the input layer has been forced/maxed so strongly that it drives them immediately.
+
+3. At first, before inhibition has learned/settled, E firing may look like “popcorn.”
+   Several E neurons may fire close together because their initial random weights are similar and nothing has suppressed the pool yet.
+
+4. Eventually I1 should fire after enough E activity reaches it.
+   I1 may appear on the same step as an E spike if the simulator evaluates layers in the same step, but conceptually it is caused by prior/current E activity.
+
+5. After I1 fires, connected E neurons should quiet down.
+   In the raster, fewer E neurons should spike after inhibition.
+   In the ACCQ heatmap, connected E neurons should get colder / lose accumulated charge after inhibition.
+
+6. If I1 fires but E accumulated charges do not drop, that likely means the topology or connection logic is wrong.
+   The visualization may show a connection, but the actual network may not have that physical edge.
+
+7. If a neuron gets hot/yellow and stays hot without spiking or resetting, that is a problem.
+   It may mean threshold crossing/reset logic is wrong.
+
+8. If a neuron stays cold/blue forever, that is also a clue.
+   It may mean the neuron is disconnected, receiving no input, always inhibited, or prevented from integrating.
+
+
+IMPORTANT TOPOLOGY WARNING
+The topology visualization must match the actual physical network.
+
+Do not let the UI draw a pretty diagram that is separate from the real network object.
+The transcript warns that an agent might make a topology viewer that looks correct visually but does not represent the real adjacency/connectivity used by the simulation.
+
+Implementation rule:
+- The same network topology / graph object should drive both simulation and visualization.
+- If the network changes, the visualization should update from the network data.
+- Do not hard-code visual edges separately from real synapses.
+
+Suggested topology data structure:
+
+nodes = [
+  {id: "S0", type: "sensory", layer: "input"},
+  {id: "E0", type: "excitatory", layer: "layer1"},
+  {id: "I1", type: "inhibitory", layer: "inhibition"}
+]
+
+edges = [
+  {from: "S0", to: "E0", type: "excitatory", weight: 0.42, plastic: true},
+  {from: "E0", to: "I1", type: "excitatory", weight: 0.30, plastic: false},
+  {from: "I1", to: "E1", type: "inhibitory", weight: 0.70, plastic: true}
+]
+
+The simulation and topology viewer should both read from this same structure.
+
+
+WHAT TO LOG EACH TIME STEP
+Add a simulation logger/instrumentation layer. The plots should be generated from logs, not from guessed UI state.
+
+For every time step and every node, log:
+
+- time step
+- node id
+- node type: sensory, excitatory, inhibitory
+- layer name
+- input received this step
+- accumulated charge / voltage before update, if available
+- instantaneous accumulated charge / IAccQ from current input
+- accumulated charge / voltage after input integration
+- whether the node spiked: +1 if it spiked, 0 or false if not
+- whether the model uses -1 for “no spike” in the learning signal
+- refractory remaining
+- inhibition received this step
+- feedback received this step
+- free energy value used for learning
+- whether learning occurred
+- weight delta, if a synapse updated
+- causal event notes, especially E spike -> I1 arrival -> I1 threshold crossing -> I1 inhibition arrival at E pool
+
+For debugging, it is useful to store both pre-reset and post-reset voltage/ACCQ:
+
+accq_pre_update
+accq_after_input
+accq_before_spike_reset
+accq_after_reset_or_inhibition
+
+This avoids confusion about whether the heatmap shows charge before or after a spike reset.
+
+The transcript says it is not too important whether ACCQ is recorded at the beginning or end of a time step as long as it is consistent for everyone. For debugging, the safest implementation is to record both.
+
+
+RASTER PLOT IMPLEMENTATION
+Goal: show every spike from every node.
+
+Data needed:
+- node order: stable list of node ids
+- spike events: {time, node_id, node_type}
+
+Basic pseudocode:
+
+for each time step t:
+    run simulation update
+    for each node:
+        if node.spiked:
+            spike_events.append({time: t, node_id: node.id, type: node.type})
+
+Plot:
+- x = time
+- y = node index / node id
+- mark a dot, tick, or small square when spike occurs
+- optionally use different colors/shapes for sensory, E, and I nodes
+- include all nodes, not only winners
+
+What to inspect:
+- Do active sensory nodes spike when a pattern is presented?
+- Do E neurons take time to integrate before firing?
+- Does I1 fire after E activity?
+- After I1 fires, do other E neurons stop/quiet down?
+- Are there unexpected neurons firing that should not fire?
+- Are there missing spikes from nodes that should be active?
+
+
+ACCQ / SUM HEATMAP IMPLEMENTATION
+Goal: show what is happening inside each node over time.
+
+Data needed:
+- charge_matrix[node_index][time] = accumulated charge / voltage / ACCQ
+- optional spike overlay
+- optional inhibition-event overlay
+
+Basic pseudocode:
+
+for each time step t:
+    run simulation update
+    for each node index i, node in nodes:
+        charge_matrix[i][t] = node.accq_or_voltage_value_at_consistent_stage
+        spike_matrix[i][t] = 1 if node.spiked else 0
+        inhibition_matrix[i][t] = amount_of_inhibition_received
+
+Plot:
+- x = time steps
+- y = node ids
+- color = accumulated charge / threshold-normalized charge
+- cold color = low charge
+- hot color = near threshold
+- after spike/reset = should drop cold
+- after inhibition = should drop colder
+
+Recommended normalization:
+- normalized_charge = node.accq / node.threshold
+- threshold is around 1.0 if that is your base setting
+- values above 1.0 mean the neuron crossed threshold
+- allow negative values if inhibition can hyperpolarize below rest
+- do not clamp at zero if the newer model allows hyperpolarization
+
+Useful overlays:
+- small dot or black marker when spike happens
+- vertical line or marker when I1 fires
+- markers for inhibition arrival
+- trial boundary markers
+
+What to inspect:
+- Do E neurons gradually warm up before spiking?
+- Does the winner hit threshold first?
+- Do losing E neurons cool down after I1 inhibition?
+- Is any neuron staying hot without firing/resetting?
+- Is any neuron staying cold even though topology says it should receive input?
+
+
+OPTIONAL WEIGHT HEATMAP
+The transcript says that after raster and ACCQ heatmap, a weight heatmap may also help.
+
+Possible plots:
+- S -> E weights as a 3x3 heatmap for each E neuron
+- I1 -> E weights as a bar chart over E neurons
+- E -> I1 weights as a bar chart over E neurons
+- weight change over trials for each synapse group
+
+Use this after the spike/charge plots are in place, because weights alone cannot prove the temporal behavior is correct.
+
+
+FREE ENERGY / CHARGE MATH FROM THE TRANSCRIPT
+The transcript explains free energy as threshold minus instantaneous accumulated charge.
+
+Plain version:
+FE = threshold - IAccQ
+IAccQ = sum(weight_i * input_i)
+
+Meaning:
+- IAccQ is the charge received from the current input event(s).
+- If IAccQ reaches or exceeds threshold, the neuron can fire immediately.
+- If IAccQ is below threshold, the remaining gap is free energy / unexplained amount.
+- When the gap is small, the neuron is close to firing.
+- When the gap is large, the neuron still needs more charge.
+
+Important implementation detail:
+- Use the node’s threshold, even if all nodes currently share the same threshold from the base node class.
+- The transcript says this is “both” global and individual: each node has its own threshold variable, but right now the same base threshold may be used for all pyramidal/excitatory neurons.
+
+Possible code:
+
+IAccQ = sum(edge.weight * source.output_signal for edge in incoming_edges)
+FE = node.threshold - IAccQ
+
+if IAccQ >= node.threshold:
+    node.spike()
+
+
+LEARNING EQUATION STATUS
+Do not let the implementation silently choose the wrong equation. Ask for confirmation.
+
+From the board/transcript, the update form appears to use:
+- learning rate
+- free energy term
+- saturation term that slows learning near max weight
+- input/spike signal, where +1 means spike and -1 means no spike / decay case
+
+Candidate form from the board:
+Delta w = LR * FE * (1 - (w / w_max)^2) * input_signal
+
+Previous notes/conversations may also reference this similar but different form:
+Delta w = LR * FE * (1 - w / w_max)^2 * learn_signal
+
+These are not the same. They behave differently near high weights.
+The current transcript/whiteboard seems to emphasize the w-ratio squared inside the term: 1 - (w / w_max)^2. But this should be asked/confirmed before implementing as final.
+
+Also ask whether potentiation and depression should use the same learning rate.
+The transcript says the current equation assumes weights increase and decrease at the same rate, but biology may have slower decay/depression than learning/potentiation. So the implementation should support separate rates even if defaults are equal.
+
+Suggested flexible implementation:
+
+if input_signal == +1:
+    lr = LR_plus
+else if input_signal == -1:
+    lr = LR_minus
+else:
+    lr = 0
+
+sat = 1 - (w / w_max)^2      # if confirmed
+# alternative: sat = (1 - w / w_max)^2
+
+delta_w = lr * FE * sat * input_signal
+w = clamp(w + delta_w, w_min, w_max)
+
+
+PRETRAINED / MAXED SENSORY WEIGHTS QUESTION
+This is one of the biggest unclear points in the transcript.
+
+What the transcript says:
+- One idea was to start the input/sensory-to-next-layer weights at max so the presented pattern immediately drives the next layer.
+- The reason for doing that was to force the pattern into the second layer so the model can focus on downstream competition.
+- But there is a concern: if these input weights are maxed, the receiving neurons start with very high charge.
+- Then inhibitory learning can happen too strongly/too quickly, possibly in one shot.
+- That can mess up competition because everything may quickly start representing everything.
+- A more natural approach may be to start low/random and give the system more time steps so it learns layer by layer.
+
+Implementation recommendation:
+Do not hard-code one answer yet. Implement this as a switchable initialization mode:
+
+input_init_mode = "max_pass_through" or "random_learned"
+freeze_input_layer = true or false
+inhibition_learning_warmup = number of trials before I1 plasticity starts
+
+Modes to test:
+
+Mode A: max_pass_through
+- S/receptor/input weights start near w_max.
+- This makes the sensory pattern immediately visible downstream.
+- Risk: may cause fast inhibitory overlearning.
+
+Mode B: random_learned
+- S/receptor/input weights start random/low.
+- Network gets more time steps/trials to self-organize.
+- More biologically natural, but slower.
+
+Mode C: staged training
+- First allow sensory/input layer to become reliable.
+- Then turn on stronger inhibitory plasticity.
+- This may avoid one-shot inhibitory saturation.
+
+The raster and ACCQ heatmap should be used to compare these modes.
+
+
+QUESTIONS TO ASK THE TEAM / MENTOR / AGENT
+Use these questions directly.
+
+1. For the sensory/receptor/input layer, are the incoming weights supposed to be pretrained/maxed so patterns immediately propagate, or should they start random/low and learn naturally over time?
+
+2. If the sensory/input weights start maxed, should they be frozen, or should they remain plastic and able to decrease/reconfigure?
+
+3. If maxed input weights cause inhibitory learning to saturate too fast, should we delay inhibitory learning with a warmup period or lower the initial inhibitory learning rate?
+
+4. Should we implement both initialization modes as toggles so the raster and ACCQ heatmap can show which behavior is more stable?
+
+5. What is the exact final weight update equation: Delta w = LR * FE * (1 - (w / w_max)^2) * input_signal, or Delta w = LR * FE * (1 - w / w_max)^2 * input_signal?
+
+6. For inhibitory learning, what exactly is IFE? The board appears to distinguish FE and IFE, but the code needs a precise definition.
+
+7. Should potentiation and depression use the same learning rate, or should no-spike / negative-one decay use a smaller learning rate?
+
+8. Should no-spike be represented as -1 for learning while raster plotting only treats +1 as a spike?
+
+9. Should zero / high-Z state mean no learning, while -1 means explicit depression? Or are we using -1 for every non-spike in the current simplified simulation?
+
+10. Should accumulated charge be recorded at the beginning of the time step, after input integration, before spike reset, or after reset/inhibition? Can we record both pre-reset and post-reset for debugging?
+
+11. Are we currently using a perfect integrator with no leak, as mentioned in the transcript, or should LIF leak/decay already be active in our implementation?
+
+12. Do all excitatory/pyramidal neurons share the same threshold, or should thresholds be stored per node even if currently equal?
+
+13. Should the raster include sensory nodes, all E nodes, I1, paired inhibitory nodes if present, and feedback/prediction nodes, or only the core layer?
+
+14. Should the topology viewer be rebuilt so it is generated directly from the actual network graph, instead of being a separate hard-coded visualization?
+
+15. What specific pattern should we use as the first validation case: top row, diagonal, other diagonal, middle column, or a standard rotating set?
+
+16. What should count as correct winner-take-all in the raster: only one E spike total, or one E winner followed by I1 suppression while allowing brief early “popcorn” spikes before inhibition has learned?
+
+17. If two E neurons spike close together before I1 fires, is that acceptable early behavior, and only a problem if they jointly/ambiguously trigger I1?
+
+18. Should the winner be defined as first E spike, recognition owner, learning winner, or the E neuron whose event causally pushes I1 over threshold?
+
+
+COPY-PASTE PROMPT FOR HERMES / CLAUDE
+Please update the LPS/spiking simulation and UI using the transcript and project files as ground truth. The immediate goal is not only to add equations, but to make the simulation debuggable with full visibility into spikes and internal charge.
+
+Implement two required plots:
+
+1. Raster plot:
+- Include every node in the network: sensory/input nodes, all E neurons, I1/inhibitory nodes, and any feedback or paired inhibition nodes currently active.
+- X-axis = time steps.
+- Y-axis = node id.
+- Plot a mark whenever node.spiked == true or output_signal == +1.
+- The raster must be generated from actual simulation logs, not guessed UI state.
+- It should let us check whether sensory input fires first, E neurons integrate and spike, I1 fires after E activity, and I1 suppresses later E firing.
+
+2. ACCQ / accumulated charge heatmap:
+- Same axes as raster: nodes vertically, time steps horizontally.
+- Color = accumulated charge / voltage / ACCQ for each node at each time step.
+- Normalize by each node’s threshold if helpful.
+- Show cold values when charge is low, hot values near threshold.
+- After spike/reset, the node should drop cold.
+- After inhibition, connected E neurons should get colder.
+- Allow negative values if the current model supports hyperpolarization; do not reintroduce a zero floor.
+- Prefer logging both pre-reset and post-reset ACCQ so we can debug timing ambiguity.
+
+Add a simulation logger that records, for every node at every time step:
+- time step
+- node id
+- node type/layer
+- input received
+- accumulated charge before update
+- instantaneous accumulated charge / IAccQ
+- accumulated charge after input
+- spike boolean / +1 output signal
+- refractory remaining
+- inhibition received
+- feedback received
+- free energy used for learning
+- learning occurred or not
+- weight deltas if synapses update
+- causal event notes such as E spike, E event arrival at I1, I1 threshold crossing, and I1 inhibition arrival at E pool
+
+Make sure the topology viewer matches the real physical network. Ideally, the same nodes/edges object should drive both the simulation and the visualization. Do not hard-code visual edges that are not real synapses. If I1 is connected to E neurons, the ACCQ heatmap should show those E charges drop after I1 inhibition arrives. If the diagram says connected but charges do not drop, that is a bug.
+
+Add switchable initialization for sensory/input weights because the transcript is uncertain:
+
+input_init_mode options:
+- max_pass_through: initialize sensory/input weights near w_max so patterns immediately propagate downstream.
+- random_learned: initialize sensory/input weights low/random and let the network learn naturally over more time steps.
+- staged_training: allow input layer to stabilize first, then turn on stronger inhibitory plasticity.
+
+Also expose:
+- freeze_input_layer true/false
+- inhibitory_learning_warmup trials/steps
+- LR_plus and LR_minus separately for potentiation and depression
+
+Reason: the transcript says maxed/pretrained input weights may make the downstream neurons start with too much charge, causing inhibitory learning to happen too strongly or in one shot. That may make all neurons represent everything and ruin competition. A more natural approach may be random/learned input weights with more time steps.
+
+For free energy, implement the current working definition as:
+FE = threshold - IAccQ
+IAccQ = sum(weight_i * input_i)
+
+Use each node’s own threshold variable, even if all excitatory neurons currently share the same base threshold.
+
+Do not silently choose the final saturation equation. Add a clearly labeled config option or comment because the transcript/project notes need confirmation between:
+A. Delta w = LR * FE * (1 - (w / w_max)^2) * input_signal
+B. Delta w = LR * FE * (1 - w / w_max)^2 * input_signal
+
+The transcript/whiteboard seems to point toward A, where the weight ratio is squared inside the 1-minus term, but please keep this explicit and easy to change until confirmed.
+
+Use +1 for actual spike output in the raster. If the learning rule uses -1 for no-spike/depression, keep that separate from plotting. Raster should only show real spikes, not every -1 no-spike state.
+
+Validation behavior to test:
+- In a new simulation, active sensory nodes spike according to the chosen pattern.
+- E neurons integrate charge over several steps unless max input makes them immediate.
+- Before inhibition settles, several E neurons may spike close together like popcorn.
+- I1 should eventually fire after E activity.
+- After I1 fires, connected E neurons should quiet down in the raster and cool down in the ACCQ heatmap.
+- If E neurons stay hot without firing/resetting, check threshold/reset logic.
+- If E neurons stay cold despite supposed input, check topology and incoming synapses.
+- If max_pass_through causes immediate inhibitory overlearning, compare with random_learned and staged_training.
+
+Please produce the plots in the UI and/or export them as image files after each trial/run so we can show them to the mentor and compare behavior across parameter settings.
+
+
+SHORT SUMMARY TO SAY OUT LOUD
+We need to implement a raster plot and an accumulated-charge heatmap so we can debug the network physically. The raster tells us when every neuron spikes, and the ACCQ heatmap tells us how each neuron is charging, resetting, or being inhibited. We also need to make sure the topology visualization comes from the actual network connections, not a separate drawing. The biggest open question is whether the sensory/input weights are supposed to start pretrained/maxed or random/learned, because the transcript says maxed weights may make inhibition learn too fast and ruin the competition. The safest implementation is to add toggles for both modes and use the plots to compare which one produces the expected winner-take-all behavior.

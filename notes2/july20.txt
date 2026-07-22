@@ -1,0 +1,132 @@
+DAILY RESEARCH SUMMARY - 2026-07-20
+
+Topic: Moving prediction from an additive neuron workaround to explicit basal/apical dendritic coincidence
+
+1. WHERE THE PROJECT STOOD AT THE START OF TODAY
+
+The project has two related but distinct unresolved problems.
+
+First, L2 pattern ownership is unstable. Frozen-weight audits showed that collisions occur before learning, so learning-driven compression is not the initiating cause. Centered/covariance encoding improved the representation and reduced the central-feature artifact, but it still did not produce four stable owners. Paired inhibition reduced some collision measures and increased breadth, but the corrected stable-owner metric found zero four-stable-owner runs. Mismatch-gated adaptation also produced zero four-stable-owner successes. Phase 33's K=20 microstep mechanism failed its ownership gate, while K=1 behaved better in the small test. Therefore, four-pattern ownership remains a dynamical competition problem and is not solved.
+
+Second, the prediction/decoder circuit was trying to obtain coincidence from a conventional additive soma. The feasibility audits showed why this was difficult: at the initial decoder weight, one sensory event plus one feedback event produced only 200 units against a threshold of 500. Raising the decoder toward d_max could make one volley strong enough, but an additive implementation then allowed feedback alone to false-spike. This created a conflict between decoder strength and temporal-AND selectivity.
+
+2. WHAT THE ACTIVE-DENDRITE WORK ALREADY ESTABLISHED
+
+The disposable active-dendrite experiment showed that a genuine same-step coincidence rule is feasible with the existing numerical bounds:
+
+- threshold = 500;
+- decoder initialization = 50;
+- decoder maturity threshold = 350 for the one-volley contract;
+- d_max = 1200;
+- eta = 0.15;
+- d=50 and d=349 do not produce the one-volley dendritic response;
+- d=350 and d=1200 can respond to exact same-step basal/sensory plus feedback coincidence;
+- sensory alone does not fire;
+- feedback alone does not fire, even at d_max;
+- delayed or cross-source sequences do not substitute for a real coincidence;
+- local saturating learning reaches the maturity threshold after about 2946 valid coincidence events;
+- the event that crosses the maturity threshold does not itself fire; the next valid coincidence does.
+
+An exhaustive oracle found no logical counterexamples to the preregistered invariants. Its remaining issue was physical queue carryover: events scheduled before a pattern switch can arrive together after the switch. This must be measured and classified, not erased.
+
+Claude then implemented Phase 34 at local commit d8ce099. The implementation passed isolated logic and delivery gates and showed organic decoder maturation. However, the integrated Gate C result was negative: enabling prediction increased rather than decreased row/column activity in that comparison. The likely problem is that the active condition changed the inhibitory routing relative to the shadow or legacy control, so the result may mix the effect of local prediction with the effect of replacing global regulation. Phase 34 is therefore a partial result, not a promoted full-circuit solution.
+
+3. WHAT TODAY'S LECTURE AND BOARD NOTES ADDED
+
+The lecture gave the intended biological and software abstraction.
+
+A cortical pyramidal neuron has morphologically different dendritic regions. Basal dendrites receive local or within-column input. Apical dendrites receive top-down feedback. Dendritic morphology can change the function of the neuron; the cell is not always well modeled as one undifferentiated summing node.
+
+For a coincidence pyramidal cell, basal activity alone is insufficient and apical feedback alone is insufficient. Both must be present together before the node begins its normal summing and learning process. This is similar to an AND operation, but it should be described as coincidence in a dynamical system rather than a clocked Boolean gate.
+
+The lecture suggested separating a dendrite class from the node/soma class. An ordinary pyramidal cell can continue to use a conventional summing input path. A coincidence pyramidal cell should have two explicitly different connection targets, basal and apical, which meet at a coincidence gate before the soma.
+
+The lecture also emphasized keeping the first implementation simple. Only one branch needs learned weights initially; the other can serve as a binary gate. When an L2 winner sends feedback to all nine prediction cells, only the sensory cells that are concurrently active in the current pattern should learn. For a three-pixel pattern, this means three decoder associations learn and the other six remain unchanged.
+
+There was an open point in the discussion about whether the basal or apical branch should carry the learned synapse. For this project's first implementation, the planned mapping is:
+
+- basal = fixed local sensory eligibility/input for pixel i;
+- apical = L2E_j top-down feedback through learned decoder weight d[j,i];
+- soma = existing threshold, leak, refractory, reset, and spike behavior;
+- output = PC_i drives paired inhibitor I_i, which inhibits explained sensory neuron E_i.
+
+This mapping is chosen because the immediate task is to learn the top-down pattern decoder. It keeps only one learnable branch, as requested, and leaves the basal input as a local gate. The assumption must be documented rather than treated as settled biology.
+
+4. THE NEW IMPLEMENTATION DECISION
+
+The next phase will create an explicit dendritic-compartment abstraction and a coincidence pyramidal cell composed of:
+
+- one basal dendrite;
+- one apical dendrite;
+- one ordinary soma/node;
+- an axonal output.
+
+Connections will target basal or apical compartments explicitly. Dendrites will record physically delivered events for the current timestep, including source, magnitude, delivery time, and origin metadata. The soma will receive charge from this mechanism only when basal and apical events are delivered during the same engine timestep.
+
+The physical firing rule and the learning rule will be kept separate. Residual bounded traces may support local synaptic eligibility, but a residual trace cannot satisfy the physical coincidence gate or fire the prediction neuron. Compartment event state must clear at the correct timestep boundary.
+
+The initial rule will use 0/1 gating. If either input is absent, nothing happens: no dendritic charge, no decoder update, and no prediction spike. We will not use -1 for absence in this phase because that would turn non-coincidence into active depression.
+
+The existing saturating local update form will be preserved. The exact code equation and every local factor will be reported. The decoder value before learning determines whether the current event is mature enough to fire; a weight-crossing event can only affect a later coincidence.
+
+5. HOW THE PHASE 34 CONTROL PROBLEM WILL BE FIXED
+
+The integrated experiment will use an iso-topological active-versus-shadow comparison.
+
+Both engines will have identical learned weights, schedules, random seeds, dendrite objects, local PC_i -> I_i -> E_i topology, and legacy/global-path configuration. They will be independently reconstructed so mutable queues, callbacks, closures, and random generators are not accidentally shared.
+
+The only experimental difference will be physical delivery of the PC_i -> I_i event:
+
+- shadow condition: calculate the coincidence and PC spike telemetry, but do not deliver the PC-to-inhibitor event;
+- active condition: deliver that event normally.
+
+The primary comparison should disable the global prediction-to-L1I route in both conditions, thereby isolating the paired local mechanism. If a global route is tested secondarily, it must be configured identically in both conditions.
+
+6. WHAT SUCCESS ACTUALLY MEANS
+
+The main prediction metric is not total network activity. A local prediction mechanism should suppress activity explained by the learned prediction while preserving unexplained or novel activity.
+
+The primary contract is:
+
+- the active condition delivers more paired inhibitory mass than the shadow;
+- the active condition reduces membrane potential and/or firing of the explained E_i cells;
+- unrelated novel columns are not suppressed by the local path.
+
+If explained pixels are suppressed but total activity rises because novel pixels remain active, that is selective prediction behavior, not automatically a failure.
+
+If a PC spike is scheduled but no paired inhibitory mass is delivered, the problem is event delivery or refractory handling. If inhibitory mass is delivered but the target E_i is not suppressed, the problem is timing, phase, or competing excitation. These cases must be separated.
+
+7. RELATIONSHIP TO FOUR-PATTERN OWNERSHIP
+
+The dendritic work primarily fixes the representational and causal meaning of prediction. It does not automatically fix L2 winner competition.
+
+Only after the isolated class tests, sparse local learning test, and iso-topological suppression test pass should the mechanism be tested against four-pattern ownership. That small follow-up will compare active local prediction against its shadow using the centered encoder, K=1 dynamics, both the standard and shifted pixel-index permutations, and preregistered seeds.
+
+We will only call it an ownership improvement if the stable-owner metric improves reproducibly in both permutations. If local prediction works but ownership remains unchanged, the correct conclusion is that prediction has been repaired while L2 ownership remains a separate research problem.
+
+8. GUARDRAILS
+
+The next implementation must not:
+
+- merge the failed Phase 33 K=20 mechanism;
+- copy the old endofjuly14 implementation;
+- add labels, a global loss, an argmax owner assignment, owner locks, hand-balanced initialization, or nonlocal normalization;
+- count trace overlap as a physical coincidence;
+- delete queued events at pattern switches;
+- compare different inhibitory topologies and call the difference a prediction effect;
+- tune thresholds, delays, leak, eta, or weights after a preregistered gate failure;
+- claim that prediction has solved ownership without the ownership test.
+
+9. IMMEDIATE NEXT ACTION
+
+Claude should branch from Phase 34 commit d8ce099 into phase35-dendrite-morphology, implement the minimal basal/apical dendrite classes and coincidence cell behind a default-off flag, add the full unit/regression contract, then run three gates in order:
+
+Gate A: compartment and exact-timestep coincidence semantics.
+Gate B: one-source, three-pixel sparse decoder learning.
+Gate C: iso-topological active-versus-shadow local suppression.
+
+Only if Gate C passes should Claude run the small four-pattern interaction test. The final output must provide one clear verdict, exact commits and equations, test totals, explained-versus-novel metrics, artifact paths, a verified bundle/checksum, push status, and whether any jobs remain running.
+
+10. BOTTOM LINE
+
+Today's decision is to stop treating coincidence as an additive-neuron parameter problem. The model will now represent the biological distinction directly: local sensory input arrives on basal dendrites, top-down prediction arrives on apical dendrites, and a pyramidal soma becomes active only when the two are physically coincident. This gives prediction a clean local mechanism and a falsifiable control. It may indirectly help ownership, but ownership remains explicitly unsolved until tested.

@@ -1,0 +1,1368 @@
+LPS-3 DETAILED ARCHITECTURE AND ALGORITHM NOTES
+================================================
+
+Purpose
+-------
+
+This project is building a simplified, brain-inspired spiking neural system that can:
+
+1. Receive a spatial pattern through a 3×3 sensory input.
+2. Convert that physical or spatial input into electrical spike events.
+3. Allow neurons to compete to represent the pattern.
+4. Strengthen the connections of the winning neuron through local learning.
+5. Encourage different neurons to represent different patterns.
+6. Use predictive feedback to suppress what the system already understands.
+7. Treat remaining unexplained activity as a residual-error or free-energy signal.
+8. Recruit unused neurons when a genuinely new pattern appears.
+9. Repeat the same basic cortical-column structure at higher layers.
+
+The model is not intended to reproduce the entire brain in biological detail. It is a simplified computational experiment inspired by cortical organization, spiking neurons, synaptic plasticity, inhibition, predictive coding, and self-organization.
+
+
+1. INPUT REPRESENTATION
+-----------------------
+
+The input is a 3×3 spatial grid:
+
+S0  S1  S2
+S3  S4  S5
+S6  S7  S8
+
+Each position corresponds to a sensory unit or lower-layer excitatory neuron.
+
+An example diagonal pattern is:
+
+1 0 0
+0 1 0
+0 0 1
+
+This activates S0, S4, and S8.
+
+The model focuses on eight primary three-cell patterns:
+
+1. Top row
+2. Middle row
+3. Bottom row
+4. Left column
+5. Middle column
+6. Right column
+7. Diagonal down-right
+8. Diagonal down-left
+
+The grid is spatial in meaning even when the first simulation does not yet place every neuron in true physical 3D space. The spatial relationship is encoded through which cells fire together.
+
+Test-only patterns such as Plus, X, L, Frame, Blank, or Full can later be used to see how the trained system responds to unfamiliar, overlapping, or composite inputs.
+
+
+2. PHYSICAL INPUT BECOMES SPIKES
+--------------------------------
+
+A major idea in the discussion is that the cortex does not directly process light, sound, pressure, or other physical quantities. A sensor first converts the physical event into electrical spikes.
+
+Examples:
+
+- Light can be converted into retinal spike activity.
+- Sound pressure waves can be converted into auditory spikes.
+- Touch or pressure can be converted into somatosensory spikes.
+- An infrared sensor could also be used if its measurements are converted into spikes.
+
+Once the physical information is converted into spike events, the same general cortical algorithm can process it.
+
+The important abstraction is:
+
+physical event
+    ↓
+sensor or receptor
+    ↓
+electrical spike pattern
+    ↓
+cortical processing
+
+This is one reason the model may be generalizable across many types of sensors.
+
+
+3. TWO-LAYER ARCHITECTURE
+-------------------------
+
+The intended conceptual model contains at least two interacting layers.
+
+Layer 1
+~~~~~~~
+
+Layer 1 represents the 3×3 sensory pattern.
+
+It contains nine spatial excitatory units corresponding to S0–S8.
+
+The discussion also emphasizes that excitatory neurons should have associated inhibitory circuitry. The exact implementation is still a design decision:
+
+- A biologically richer model may use one inhibitory partner for each excitatory neuron.
+- A simplified implementation may temporarily use one global inhibitory neuron.
+- The transcript suggests that the final architecture should eventually include excitatory/inhibitory pairing more explicitly.
+
+Layer 2
+~~~~~~~
+
+Layer 2 contains eight excitatory pattern-representation neurons because the experiment currently has eight primary patterns.
+
+The number eight is not a universal biological requirement. It is chosen to keep the experiment manageable and to provide enough capacity for one neuron to specialize for each of the eight patterns.
+
+The system could use:
+
+- Four Layer-2 neurons for only four patterns.
+- Eight neurons for the eight current patterns.
+- More neurons if additional representational capacity is desired.
+
+The main goal is to avoid wasting multiple neurons on duplicate representations when a limited number of neurons is available.
+
+
+4. FULL CONNECTIVITY BETWEEN LAYERS
+-----------------------------------
+
+Every Layer-1 excitatory neuron connects to every Layer-2 excitatory neuron.
+
+There are:
+
+9 Layer-1 excitatory units × 8 Layer-2 excitatory units = 72 feedforward connections
+
+Each connection has its own synaptic weight.
+
+The feedback direction is also fully connected in the conceptual architecture:
+
+8 Layer-2 units × 9 Layer-1 targets = 72 feedback connections
+
+Therefore, there are many physical connections even though only a subset is active for a particular pattern.
+
+For example, with a three-cell diagonal:
+
+- All nine Layer-1 units still have physical connections to all eight Layer-2 neurons.
+- Only the three active Layer-1 units are firing at that moment.
+- Each Layer-2 neuron receives those three active spike streams through its own current weights.
+
+This distinction is important:
+
+Physical connection:
+The synapse exists.
+
+Active transmission:
+The presynaptic neuron is currently firing through that connection.
+
+Strong learned connection:
+The synaptic weight has grown because that connection repeatedly participated in successful firing.
+
+
+5. SYNAPSES AND CHARGE
+----------------------
+
+Every connection is represented as a synapse.
+
+A synapse controls how much charge one neuron contributes to another.
+
+Excitatory synapse:
+Adds charge to the target neuron.
+
+Inhibitory synapse:
+Subtracts charge from the target neuron or reduces its ability to fire.
+
+The transcript treats this as a large biological abstraction. Real synapses involve neurotransmitters, receptor types, ion channels, dendritic location, and many other details. In the model, this is simplified to numerical charge addition or subtraction.
+
+The basic mathematical operation is:
+
+target input = source spike × synaptic weight
+
+A target neuron sums the contributions from all currently active incoming synapses.
+
+
+6. LEAKY INTEGRATE-AND-FIRE NEURONS
+-----------------------------------
+
+Each neuron acts like a charge reservoir or bucket.
+
+At each small timestep:
+
+1. Incoming excitatory spikes add charge.
+2. Inhibitory signals subtract charge.
+3. Some accumulated voltage leaks away.
+4. The neuron checks whether it crossed its firing threshold.
+5. If the threshold is crossed, the neuron emits a spike.
+6. Its voltage resets.
+7. It may enter a refractory period.
+
+A simplified voltage update is:
+
+new voltage = old voltage + incoming charge - leak - inhibition
+
+A neuron fires when:
+
+voltage ≥ threshold
+
+The exact values of the threshold, leak, time constant, and reset rule are parameters that affect the dynamics.
+
+
+7. STEP VERSUS TRIAL
+--------------------
+
+A step is one very small moment in simulated neural time.
+
+A trial is one complete presentation of a pattern across many steps.
+
+For example:
+
+1 trial = 80 timesteps
+
+The 80 steps allow:
+
+- Sensory neurons to accumulate charge.
+- Sensory neurons to spike repeatedly.
+- Layer-2 neurons to accumulate evidence.
+- One or more Layer-2 neurons to spike.
+- Refractory effects to occur.
+- Inhibitory neurons to accumulate charge.
+- Delayed inhibition or feedback to arrive.
+- Timing differences to emerge.
+
+Reaching step 80/80 does not mean that the pattern has been completely learned.
+
+It means:
+
+- One pattern presentation is finished.
+- One trial-level learning update may occur.
+- Prediction error or residual activity can be measured.
+- The trial counter increases by one.
+
+Multiple complete trials are usually needed before a neuron strongly represents a pattern.
+
+
+8. RANDOM INITIAL WEIGHTS
+-------------------------
+
+At the beginning, all synaptic weights are random within a selected range.
+
+The random differences give some neurons slightly better initial affinity for a pattern.
+
+For example, if S0, S4, and S8 are active:
+
+- One Layer-2 neuron may happen to have larger weights from S0, S4, and S8.
+- It accumulates charge faster.
+- It reaches threshold earlier.
+- It becomes an early candidate to represent the diagonal.
+
+This initial randomness is intended to break symmetry.
+
+However, the discussion identifies an important scientific concern:
+
+Random weights alone may not be sufficient to produce robust self-organization.
+
+In a real physical brain, neurons are also affected by:
+
+- Distance
+- Axonal and dendritic geometry
+- Conduction delay
+- Resistance
+- Local connectivity
+- Relative spatial position
+
+A neuron physically closer to an input may receive a stronger or earlier influence.
+
+Therefore, if the simulation does not produce stable specialization, the model should investigate spatially dependent influence rather than assuming that random weights alone are enough.
+
+
+9. SPATIAL LOCALITY AND 3D POSITION
+-----------------------------------
+
+The future model may assign each neuron an XYZ coordinate in Euclidean space.
+
+Connection influence could then depend on distance.
+
+A possible concept is:
+
+influence decreases as distance increases
+
+This could be implemented using a distance-decay function.
+
+The transcript discusses the idea that narrower or longer biological structures have greater resistance, so distant signals may exert less influence. The exact biological formula is not yet finalized for this model, but the design principle is clear:
+
+Nearby neurons should generally influence one another more strongly than very distant neurons.
+
+This spatial locality helps partition computation and may improve self-organization.
+
+The current 3×3 pattern encoding already contains spatial information in a simplified form, but explicit 3D position would add another level of realism.
+
+
+10. THE RACE TO FIRE
+--------------------
+
+When a pattern is presented, all eight Layer-2 neurons receive input from the same active Layer-1 cells.
+
+Because their weights differ, they accumulate charge at different rates.
+
+This creates a race.
+
+Example:
+
+- E0 receives a moderately sized charge packet each sensory spike.
+- E1 receives a slightly larger packet.
+- E2 receives a smaller packet.
+- E1 therefore reaches threshold first.
+
+The first neuron to spike has an advantage because its active synapses strengthen.
+
+That makes its future charge packets larger for the same pattern.
+
+Therefore:
+
+slightly better initial affinity
+    ↓
+earlier firing
+    ↓
+Hebbian strengthening
+    ↓
+even faster future firing
+    ↓
+emerging specialization
+
+This is a positive-feedback process.
+
+
+11. RACE CONDITIONS AND TIME GRANULARITY
+----------------------------------------
+
+The discussion raises a serious issue: several neurons may appear to fire during the same timestep.
+
+This can happen because the simulation only checks voltage at discrete time intervals.
+
+Example:
+
+- Neuron A needed only a small additional amount of charge to cross threshold.
+- Neuron B needed more charge.
+- Both receive a large update during the same coarse timestep.
+- Both are recorded as firing together.
+
+In continuous biological time, A may actually have fired first.
+
+Therefore, timestep granularity matters.
+
+Possible ways to distinguish winners include:
+
+1. Compare pre-reset membrane voltages.
+2. Compare how far above threshold each neuron moved.
+3. Use smaller timesteps.
+4. Model within-step event timing.
+5. Use accumulated charge as a tie-breaker.
+6. Let inhibitory timing break the symmetry.
+7. Include distance and conduction delay.
+
+The system should avoid using an arbitrary array order such as always selecting E0 first.
+
+
+12. FIRING IS THE CAUSAL EVENT
+------------------------------
+
+A central learning principle from the discussion is:
+
+Weights should only change when the postsynaptic neuron actually fires.
+
+Receiving input alone is not enough.
+
+The intended causal logic is:
+
+presynaptic neuron fires
+    +
+postsynaptic neuron fires
+    ↓
+the active connection is eligible for strengthening
+
+If the postsynaptic neuron never fires, it does not claim that pattern.
+
+This is important because it keeps learning local to the synapse and grounded in actual firing events.
+
+
+13. HEBBIAN LEARNING
+--------------------
+
+When a Layer-2 neuron fires while a specific set of Layer-1 neurons is active, the synapses from those active neurons strengthen.
+
+For a diagonal pattern:
+
+Active:
+S0, S4, S8
+
+Strengthened:
+S0 → winner
+S4 → winner
+S8 → winner
+
+Not strengthened:
+The other six sensory connections
+
+The intuitive rule is:
+
+Neurons that fire together strengthen their connection.
+
+The increased weight means that the next spike from those sensory neurons deposits more charge into the winner.
+
+This makes the winner respond more quickly and reliably to the same pattern in the future.
+
+The learning rate controls how much a weight changes after a qualifying event.
+
+High learning rate:
+- Faster specialization
+- Greater risk of instability or premature commitment
+
+Low learning rate:
+- Slower learning
+- More gradual and potentially stable organization
+
+
+14. ANTI-HEBBIAN OR COMPETITIVE WEAKENING
+-----------------------------------------
+
+A useful extension is to weaken the winner’s inactive sensory connections.
+
+For the diagonal:
+
+Strengthen S0, S4, S8.
+Weaken S1, S2, S3, S5, S6, S7.
+
+This helps produce a sharper template.
+
+Without weakening or normalization, all weights could gradually become large, causing a neuron to respond to too many patterns.
+
+The combination is:
+
+active inputs → stronger
+inactive inputs → weaker
+
+This is a simplified form of synaptic competition or anti-Hebbian pressure.
+
+
+15. WEIGHT NORMALIZATION
+------------------------
+
+After learning, the model may normalize the neuron’s weight vector.
+
+Normalization prevents total synaptic strength from increasing without limit.
+
+It gives the neuron a limited representational budget.
+
+As important connections strengthen, unimportant connections become relatively less influential.
+
+This encourages a clear pattern-specific receptive field.
+
+
+16. REFRACTORY PERIOD
+---------------------
+
+After firing, a neuron may enter a refractory period.
+
+During this period:
+
+- It cannot immediately fire again.
+- Its voltage may reset to zero or temporarily move below baseline.
+- Other neurons continue accumulating charge.
+
+The refractory period limits maximum firing frequency.
+
+It also affects competition in non-obvious ways.
+
+For example:
+
+1. The leading neuron fires first.
+2. It enters refractory.
+3. Second-place neurons continue charging.
+4. Another neuron may fire before the first neuron recovers.
+
+Therefore, the first neuron to spike once is not automatically guaranteed to dominate the entire trial.
+
+The interaction among:
+
+- Weight differences
+- Refractory periods
+- Input frequency
+- Inhibitory timing
+- Synaptic learning
+
+must be tested experimentally.
+
+The transcript explicitly treats refractory dynamics as a parameter that may or may not be necessary for the first simplified self-organization experiment.
+
+
+17. INHIBITORY CIRCUITRY
+------------------------
+
+The inhibitory pathway is intended to help create competition and suppress duplicate winners.
+
+The conceptual sequence is:
+
+1. Layer-2 excitatory neurons fire.
+2. Their spikes deposit charge into inhibitory neurons.
+3. Inhibitory neurons accumulate charge.
+4. When an inhibitory neuron crosses threshold, it fires.
+5. Its output subtracts charge from competing neurons.
+6. Competitors fire more slowly or stop firing.
+
+The inhibitory neuron is not necessarily triggered by one excitatory spike.
+
+It may need several excitatory events to accumulate enough charge.
+
+Its timing is therefore important.
+
+A possible symmetry-breaking event is:
+
+- Several excitatory neurons are competing.
+- One excitatory spike happens to push the inhibitory neuron over threshold.
+- The inhibitory neuron fires.
+- Competing neurons lose accumulated charge.
+- The neuron associated with that timing gains an advantage.
+
+This means the final winner may be determined not simply by who fired first, but by the coupled timing of excitatory and inhibitory spikes.
+
+
+18. ONE GLOBAL INHIBITOR VERSUS INHIBITORY PARTNERS
+---------------------------------------------------
+
+There is an important architecture issue to resolve.
+
+Simplified visualizer:
+- Often uses one global inhibitory neuron I1.
+
+Richer cortical interpretation:
+- Each excitatory neuron may have an inhibitory partner or associated inhibitory pathway.
+
+The transcript repeatedly says that every excitatory neuron should have inhibitory circuitry associated with it.
+
+A more complete two-layer design may therefore contain:
+
+Layer 1:
+- 9 excitatory neurons
+- 9 inhibitory partners
+
+Layer 2:
+- 8 excitatory pattern neurons
+- 8 inhibitory partners
+
+The exact connection structure still needs to be formalized.
+
+The current global-inhibitor implementation is useful for a manageable experiment, but it should be described as a simplification rather than the final biological architecture.
+
+
+19. WHY ONLY ONE REPRESENTATION PER PATTERN IS DESIRED
+------------------------------------------------------
+
+If several Layer-2 neurons all learn the same pattern, the system wastes representational resources.
+
+Example:
+
+E0 = diagonal
+E1 = diagonal
+E2 = diagonal
+E3 = diagonal
+
+Then only four neurons remain to represent the other seven patterns.
+
+This lowers the network’s information capacity.
+
+The desired result is a diverse set of learned templates:
+
+E0 = top row
+E1 = left column
+E2 = diagonal down-right
+E3 = middle row
+and so on
+
+The goal is to maximize variation or near-orthogonality among the representations.
+
+In simple language:
+
+Each neuron should have a different job.
+
+The model therefore needs mechanisms such as:
+
+- Winner-take-all competition
+- Inhibition
+- Homeostatic penalties
+- Duplicate-specialization prevention
+- Anti-Hebbian weakening
+- Recruitment of unused neurons
+
+
+20. HOMEOSTATIC OR CONSCIENCE MECHANISM
+---------------------------------------
+
+A neuron that wins too often may receive a temporary penalty.
+
+The competition score can be thought of as:
+
+score = input affinity - recent-win penalty
+
+This gives less-used neurons a chance to win and specialize.
+
+The penalty should decay over time.
+
+This mechanism is computationally useful, although its implementation should be clearly distinguished from the lower-level biological inhibitory dynamics.
+
+
+21. SPECIALIZATION
+------------------
+
+A neuron should not be declared specialized based on one strong weight or one lucky spike.
+
+A stronger rule is:
+
+1. Compare the neuron’s full 3×3 weight map with the input pattern.
+2. Require high similarity.
+3. Require repeated successful representations of the same pattern.
+4. Confirm that the representation is stable.
+5. Lock the weights after specialization.
+
+Possible specialization variables include:
+
+- Current pattern being learned
+- Similarity score
+- Stable-win count
+- Total-win count
+- Specialized pattern name
+- Locked template
+- Learning enabled or disabled
+
+After specialization:
+
+- The neuron should no longer learn unrelated patterns.
+- Its weights should remain fixed.
+- It becomes available for recognition and prediction.
+
+
+22. SIMILARITY
+--------------
+
+The model can use cosine similarity to compare:
+
+- The neuron’s 3×3 weight vector
+- The binary 3×3 input pattern
+
+A value near 1 means strong alignment.
+
+A value near 0 means little alignment.
+
+Similarity answers:
+
+Does this neuron’s complete receptive field resemble this pattern?
+
+This is more meaningful than checking whether one weight crossed a threshold.
+
+
+23. RECOGNITION VERSUS LEARNING
+-------------------------------
+
+The system should first ask whether the current input is already represented.
+
+Recognition flow:
+
+1. Compare the current input with all locked specialized templates.
+2. Select the best-matching specialist.
+3. If similarity is above the recognition threshold:
+   - Mark the input as recognized.
+   - Do not change weights.
+   - Use the specialist for predictive feedback.
+
+Learning flow:
+
+1. If no specialist matches, treat the input as unfamiliar.
+2. Allow only unspecialized neurons to compete.
+3. Select one learning winner.
+4. Update only that winner.
+5. Preserve existing specialists.
+
+This separation prevents old knowledge from being overwritten.
+
+
+24. PREDICTIVE FEEDBACK
+-----------------------
+
+Once a Layer-2 neuron has learned a pattern, it can send its model back toward Layer 1.
+
+Example:
+
+A diagonal specialist predicts:
+
+S0 should be active.
+S4 should be active.
+S8 should be active.
+
+The feedback suppresses or slows the sensory activity that the model already explains.
+
+The conceptual calculation is:
+
+residual = actual sensory activity - predicted sensory activity
+
+Expected activity is reduced.
+
+Unexpected activity remains active.
+
+This makes the lower layer function not only as an input layer, but also as an error or residual layer.
+
+
+25. FREE ENERGY / RESIDUAL ERROR
+--------------------------------
+
+In this project, “free energy” should be described carefully.
+
+The model is not necessarily calculating full variational free energy from theoretical neuroscience.
+
+Instead, it uses a practical proxy:
+
+Residual unexplained sensory activity after predictive feedback.
+
+Interpretation:
+
+Low residual free-energy proxy:
+- The current model explains the input well.
+- Expected sensory firing is suppressed.
+- The input is familiar.
+- The system has higher confidence.
+
+High residual free-energy proxy:
+- The prediction does not explain much of the input.
+- Unexpected sensory neurons continue firing.
+- The input may be novel, anomalous, incomplete, or uncertain.
+
+A simple measurement is:
+
+trial residual = sum of residual sensory spikes over the trial
+
+Another measurement is normalized prediction error:
+
+prediction error = difference between the predicted template and actual pattern
+
+These are related but not identical.
+
+Prediction error:
+Template-level difference.
+
+Residual free-energy proxy:
+Unexplained activity remaining during temporal processing.
+
+
+26. WHY FEEDBACK GOES TOWARD THE INPUT
+--------------------------------------
+
+A question raised in the transcript is why the system inhibits the input layer if the external pattern itself does not change.
+
+The answer is that the feedback is not trying to erase reality.
+
+It is separating:
+
+- What the model already explains
+- What remains unexplained
+
+If the learned model predicts the three cells of a diagonal, those expected cells are suppressed.
+
+If an extra corner or leg appears that the model never learned, those cells are not suppressed and continue firing strongly.
+
+This remaining high-frequency activity draws attention to the unexpected part.
+
+
+27. NOVELTY AND ANOMALY DETECTION
+---------------------------------
+
+Suppose the network has learned rows, columns, and diagonals.
+
+Then it sees an X pattern:
+
+1 0 1
+0 1 0
+1 0 1
+
+No single learned three-cell template completely explains it.
+
+Some parts may match known features, but the complete composition is unfamiliar.
+
+Therefore:
+
+- Prediction is incomplete.
+- Residual activity remains high.
+- Free-energy proxy rises.
+- The system indicates uncertainty.
+
+This is different from forcing the input into whichever known category has the highest score.
+
+The model should be able to say, in effect:
+
+“I do not have one model that fully explains this.”
+
+That is an important intended advantage over classifiers that always output their closest known label.
+
+
+28. THE GRIFFIN EXAMPLE
+-----------------------
+
+The transcript uses a griffin as a higher-level analogy.
+
+A griffin contains:
+
+- A lion-like body
+- An eagle-like head
+
+A system may have separate models for lions and eagles, but no model for the combined creature.
+
+It should therefore avoid confidently declaring:
+
+“This is a lion.”
+
+Instead:
+
+- One model explains part of the input.
+- Another model explains another part.
+- No single model explains the complete composition.
+- Residual activity remains.
+- The system represents uncertainty.
+
+This illustrates how predictive feedback and residual signals could support confidence estimation at higher conceptual levels.
+
+
+29. LATENCY
+-----------
+
+Response latency is the number of steps required before a meaningful neuron fires.
+
+Before learning:
+
+- Weights are weak or poorly aligned.
+- More sensory spikes are required.
+- The neuron reaches threshold later.
+
+After learning:
+
+- Relevant weights are stronger.
+- Each sensory spike contributes more charge.
+- The specialist reaches threshold sooner.
+
+Therefore, decreased latency is evidence that the pattern has become familiar.
+
+Latency should be measured within the current trial, not with a global simulation clock.
+
+
+30. NEW-PATTERN RECRUITMENT
+---------------------------
+
+When a new input appears:
+
+1. Existing specialists try to recognize it.
+2. If none matches, the input remains unexplained.
+3. Unspecialized neurons compete.
+4. One unused neuron begins learning the new pattern.
+5. Existing specialists remain locked.
+6. Repeated presentations can create a new specialist.
+
+This allows the system to expand its knowledge without erasing previous patterns.
+
+
+31. AUTOMATIC VERSUS MANUAL TRAINING
+------------------------------------
+
+Manual mode:
+
+- The user selects one pattern.
+- The same pattern is presented across repeated trials.
+- Useful for watching one neuron learn from beginning to specialization.
+
+Automatic mode:
+
+- The program cycles through all eight primary patterns.
+- Each trial contains one pattern.
+- The patterns are shuffled across epochs.
+- Every pattern is learned gradually over repeated appearances.
+
+Important:
+
+80 steps = one trial, not complete training.
+
+In automatic mode, after one 80-step trial, the program moves to a different pattern because it is interleaving training across all eight categories.
+
+This is similar to mixed or shuffled training in machine learning.
+
+A useful additional interface mode would be:
+
+Train Selected Until Specialized
+
+That would repeatedly present one chosen pattern until a neuron locks onto it.
+
+
+32. EVENT TIMING AND DELAYS
+---------------------------
+
+Different signals can have different delays:
+
+- Sensory feedforward spikes
+- Excitatory-to-inhibitory spikes
+- Inhibitory feedback
+- Predictive feedback
+- Refractory recovery
+
+These delays can cause neurons to become synchronized or desynchronized.
+
+The exact timing may determine which neuron eventually dominates.
+
+This is why stepping through the simulation one timestep at a time is valuable.
+
+The dynamics cannot always be inferred from final weights alone.
+
+
+33. SCALING TO HIGHER LAYERS
+----------------------------
+
+The cortical-column structure is intended to repeat.
+
+A learned lower-level column can act like one abstract input unit for the next layer.
+
+Example:
+
+Layer 1:
+Individual spatial edge positions
+
+Layer 2:
+Rows, columns, and diagonals
+
+Layer 3:
+Combinations of those patterns
+
+Higher layers:
+Increasingly complex shapes, objects, or concepts
+
+The proposed scaling principle is:
+
+A complete lower-level cortical module becomes one input element for the next level.
+
+This produces a hierarchical system in which combinations of lower-level patterns become higher-level representations.
+
+
+34. SYMMETRY AND REPEATABILITY
+------------------------------
+
+The proposed architecture is intended to be symmetric and reusable.
+
+The same core processing tile can be replicated:
+
+- Receive spike inputs
+- Accumulate charge
+- Compete
+- Learn local patterns
+- Predict downward
+- Pass abstractions upward
+
+The long-term goal is a fabric of repeated cortical-like modules rather than one task-specific classifier.
+
+
+35. WHAT THE CURRENT VISUALIZER SHOULD SHOW
+-------------------------------------------
+
+The interactive visualizer should help users observe:
+
+1. The active 3×3 pattern.
+2. Sensory spikes at S0–S8.
+3. Voltage accumulation in all candidate neurons.
+4. Which neuron fires first.
+5. Whether later neurons also fire.
+6. Refractory periods.
+7. Excitatory charge entering inhibitory neurons.
+8. Inhibitory spikes and their delayed effects.
+9. Weight changes only after causal firing.
+10. The winner’s 3×3 receptive-field heatmap.
+11. Whether multiple neurons are duplicating a pattern.
+12. Prediction feedback from a specialist.
+13. Residual activity that remains unexplained.
+14. Response latency.
+15. Trial-level free-energy or error measurements.
+
+The display should distinguish:
+
+- Existing connections
+- Currently active feedforward transmission
+- Inhibitory connections
+- Predictive-feedback connections
+- Strong learned weights
+- Locked specialized neurons
+
+
+36. IMPORTANT DIFFERENCE BETWEEN THE CURRENT SIMPLIFIED VISUALIZER AND THE DISCUSSED ARCHITECTURE
+------------------------------------------------------------------------------------------------
+
+The current visualizer has often used:
+
+- Nine sensory neurons
+- Eight excitatory pattern neurons
+- One global inhibitory neuron
+
+The transcript describes a richer architecture in which:
+
+- Excitatory neurons have associated inhibitory circuitry
+- Both layers participate in coupled self-organization
+- Every synapse may have a learnable weight
+- Feedback returns to the lower layer’s inhibitory pathway
+- The topology, timing, and inhibition jointly determine the winner
+
+Therefore, the current visualizer is best understood as a simplified demonstration.
+
+It may need to evolve to include:
+
+- Per-neuron inhibitory partners
+- Learnable inhibitory synapses
+- Explicit Layer 1 and Layer 2 cortical-column pairs
+- Bidirectional 72-connection topology
+- More realistic coupled timing
+- Spatial distance effects
+
+
+37. KEY OPEN QUESTIONS
+----------------------
+
+A. Are random initial weights sufficient?
+-----------------------------------------
+
+Maybe.
+
+If not, add:
+
+- Spatial coordinates
+- Distance-dependent influence
+- Conduction delay
+- Larger random-weight spread
+- More realistic initialization
+
+B. What truly determines the winner?
+------------------------------------
+
+Possibilities include:
+
+- First spike
+- Largest accumulated voltage
+- Largest threshold overshoot
+- First neuron to trigger inhibition
+- Highest firing rate across a time window
+- A combination of timing and inhibitory dynamics
+
+This must be tested rather than assumed.
+
+C. Is a refractory period necessary?
+------------------------------------
+
+It is biologically plausible and limits firing rate, but it may complicate the first self-organization experiment.
+
+Run ablation tests with it on and off.
+
+D. Should inhibition be global or paired?
+-----------------------------------------
+
+A global inhibitor is simpler.
+
+Per-neuron inhibitory partners may better match the intended cortical-column topology.
+
+Both should be tested and clearly labeled.
+
+E. Should inhibitory synapses learn?
+------------------------------------
+
+The transcript suggests that every synapse may have a learnable weight.
+
+This includes excitatory-to-inhibitory and feedback pathways.
+
+The exact learning rules still need to be defined.
+
+F. How should specialization be measured?
+-----------------------------------------
+
+Possible requirements:
+
+- High full-template similarity
+- Stable winner over multiple trials
+- Dominant firing rate in an integration window
+- Locked weights after commitment
+- No duplicate category owner
+
+G. How should free energy be measured?
+--------------------------------------
+
+Possible measurements:
+
+- Residual sensory spike count
+- Residual firing frequency
+- Mean-squared prediction error
+- Weighted temporal residual
+- Energy plus spike-cost term
+
+The chosen metric should be described as a proxy unless a formal variational-free-energy equation is implemented.
+
+
+38. RECOMMENDED EXPERIMENTS
+---------------------------
+
+Experiment 1: Basic spike propagation
+-------------------------------------
+
+Confirm that a three-cell pattern activates the correct sensory neurons and deposits charge into all eight Layer-2 neurons.
+
+Experiment 2: Initial race
+--------------------------
+
+Observe whether random weights create a clear first responder.
+
+Measure:
+
+- First-spike latency
+- Pre-spike voltage
+- Number of simultaneous threshold crossings
+- Winner identity across random seeds
+
+Experiment 3: Hebbian reinforcement
+-----------------------------------
+
+Repeat one pattern.
+
+Check whether:
+
+- Active winner weights increase
+- Inactive weights remain low or decrease
+- Winner latency falls
+- Winner firing rate rises
+
+Experiment 4: Inhibitory symmetry breaking
+------------------------------------------
+
+Measure whether inhibitory timing causes one neuron to dominate.
+
+Compare:
+
+- Inhibition on
+- Inhibition off
+- Global inhibition
+- Paired inhibition
+
+Experiment 5: Refractory ablation
+---------------------------------
+
+Compare behavior with refractory periods enabled and disabled.
+
+Measure:
+
+- Number of spikes
+- Duplicate winners
+- Time to specialization
+- Stability
+
+Experiment 6: Weight-range ablation
+-----------------------------------
+
+Test different random initialization ranges.
+
+Measure whether a larger spread produces cleaner races.
+
+Experiment 7: Spatial-distance model
+------------------------------------
+
+Assign XYZ positions and use distance-decay influence.
+
+Compare specialization with random weights alone.
+
+Experiment 8: Multi-pattern specialization
+------------------------------------------
+
+Interleave all eight primary patterns.
+
+Check whether eight different neurons emerge rather than duplicate specialists.
+
+Experiment 9: Predictive-feedback test
+--------------------------------------
+
+After specialization, replay a familiar pattern.
+
+Check whether predicted sensory activity slows or decreases.
+
+Experiment 10: Novelty test
+---------------------------
+
+Present an X, Plus, corner, or composite pattern.
+
+Check whether residual activity and free-energy proxy increase.
+
+Experiment 11: New-neuron recruitment
+-------------------------------------
+
+Present a new pattern repeatedly.
+
+Check whether an unused neuron begins learning while old specialists remain unchanged.
+
+Experiment 12: Scaling test
+---------------------------
+
+Use outputs from one learned layer as inputs to a higher layer.
+
+Check whether combinations of lower patterns can be learned.
+
+
+39. SIMPLE END-TO-END ALGORITHM
+-------------------------------
+
+The intended high-level algorithm can be summarized as follows.
+
+A. Start a trial
+~~~~~~~~~~~~~~~~
+
+1. Select a pattern.
+2. Activate its corresponding 3×3 sensory neurons.
+3. Reset temporary voltages and event queues while preserving learned weights.
+
+B. Run neural time
+~~~~~~~~~~~~~~~~~~
+
+For each timestep:
+
+1. Deliver any delayed inhibition or predictive feedback.
+2. Add external sensory drive.
+3. Update sensory-neuron voltages.
+4. Emit sensory spikes when thresholds are crossed.
+5. Send sensory spikes through all weighted feedforward synapses.
+6. Update all Layer-2 excitatory voltages.
+7. Record which neurons fire and when.
+8. Send excitatory spikes into inhibitory circuitry.
+9. Update inhibitory voltages.
+10. When inhibition fires, suppress competing activity.
+11. Apply refractory rules.
+12. Continue until the trial ends.
+
+C. Select representation
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+1. Check whether a specialized template recognizes the pattern.
+2. If yes:
+   - Use the specialist.
+   - Do not relearn.
+   - Send predictive feedback.
+3. If no:
+   - Select an eligible unspecialized winner.
+   - Prevent duplicate category ownership.
+
+D. Learn
+~~~~~~~~
+
+If the pattern is unfamiliar and the winner fired causally:
+
+1. Strengthen active sensory-to-winner synapses.
+2. Optionally weaken inactive synapses.
+3. Normalize the weight vector.
+4. Update similarity and stability.
+5. Lock the neuron if specialization criteria are met.
+
+E. Measure
+~~~~~~~~~~
+
+At the end of the trial:
+
+1. Record response latency.
+2. Record firing rates.
+3. Record the winner.
+4. Calculate prediction error.
+5. Count residual sensory activity.
+6. Calculate the residual free-energy proxy.
+7. Record whether the input was learned, recognized, or novel.
+
+F. Continue
+~~~~~~~~~~~
+
+Manual:
+Repeat the chosen pattern.
+
+Automatic:
+Move to the next shuffled pattern.
+
+Novel input:
+Recruit an unused neuron if no existing model explains it.
+
+
+40. SHORT EXPLANATION
+---------------------
+
+The system converts a 3×3 pattern into spikes and sends those spikes through fully connected weighted synapses to a set of competing pattern neurons. Small initial differences in weight, timing, and possibly physical distance cause some neurons to accumulate charge faster. When a neuron fires, the active synapses that caused the firing strengthen, making that neuron respond faster to the same pattern in the future. Inhibitory neurons, refractory periods, and competition help suppress duplicate representations so that different neurons specialize for different patterns. Once a neuron has learned a stable pattern, it sends predictive feedback to suppress the sensory activity it already explains. Any remaining activity represents prediction error or a residual free-energy signal, allowing the system to distinguish familiar inputs from anomalies and recruit unused neurons for new patterns.
+
+
+41. PRESENTATION-SAFE DESCRIPTION
+---------------------------------
+
+This project models a simplified cortical learning circuit using spiking neurons, weighted synapses, local Hebbian plasticity, inhibition, and predictive feedback. A 3×3 sensory pattern is converted into spikes and sent to a fully connected pool of competing neurons. Small differences in weights and timing allow one neuron to respond more strongly, and causal firing strengthens the active synapses so that the neuron gradually specializes for that pattern. Inhibitory and refractory dynamics reduce duplicate winners, while feedback from a learned neuron suppresses expected sensory activity. The remaining unexplained activity acts as a residual prediction-error or free-energy proxy, providing a signal for novelty, uncertainty, and the recruitment of unused neurons.
+
+
+42. KEY TERMS
+-------------
+
+Spike:
+A discrete firing event emitted when a neuron reaches threshold.
+
+Voltage:
+The neuron’s current accumulated electrical state.
+
+Threshold:
+The voltage level required for firing.
+
+Weight:
+The strength of a synaptic connection.
+
+Excitation:
+Input that adds charge.
+
+Inhibition:
+Input that subtracts charge or suppresses firing.
+
+Refractory period:
+A temporary recovery period after firing.
+
+Hebbian learning:
+Strengthening active synapses associated with causal firing.
+
+Anti-Hebbian weakening:
+Reducing inactive or competing connections to sharpen representation.
+
+Winner:
+The neuron that gains responsibility for the current unfamiliar pattern.
+
+Specialist:
+A neuron with a stable locked representation.
+
+Predictive feedback:
+A learned neuron’s signal describing what lower-layer activity it expects.
+
+Prediction error:
+Difference between expected and actual input.
+
+Residual free-energy proxy:
+Unexplained sensory activity that remains after prediction.
+
+Latency:
+Time or number of timesteps before a meaningful response.
+
+Self-organization:
+The emergence of distinct pattern representations without externally assigning neuron identities.
+
+Race condition:
+A situation in which several neurons cross threshold too close together to identify a clear winner.
+
+Orthogonal representations:
+Different neurons learning patterns that overlap as little as possible.
+
+Cortical column:
+A repeated local processing module containing interacting excitatory and inhibitory circuitry.
+
+
+FINAL TAKEAWAY
+--------------
+
+The project is not simply teaching a classifier to attach labels to shapes. It is studying whether a local spiking circuit can organize itself through timing, synaptic weights, inhibition, and prediction.
+
+A successful system should:
+
+- Learn without externally assigning neurons to categories.
+- Produce one clear specialist for each repeated pattern.
+- Respond faster to familiar patterns.
+- Reduce residual activity through predictive feedback.
+- Show high residual activity for unfamiliar combinations.
+- Preserve old representations while recruiting unused neurons.
+- Scale by repeating the same cortical-style module at higher layers.
+
+The most important research questions are whether random initial weights are enough to break symmetry, whether inhibitory and refractory timing produces a single winner, and whether explicit physical space is required for robust self-organization.

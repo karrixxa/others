@@ -1,0 +1,311 @@
+FCSI NEW CONTENT SUMMARY - JULY 21, 2026
+Sources: Pasted text(17).txt lecture transcript and LPS (16).pdf handwritten notes/whiteboard images
+
+PURPOSE OF THIS DOCUMENT
+
+This records the new conceptual direction from the lecture, connects it to the current FCSI simulation work, and separates established decisions from hypotheses that still need validation. It should be used as project context for future reasoning and as a guide for what to test next.
+
+======================================================================
+1. EXECUTIVE SUMMARY
+======================================================================
+
+The new content makes four major points:
+
+1. Initial feedforward weights should be medium rather than tiny.
+   The reason is developmental and dynamical, not merely numerical. If the inhibitory winner-take-all (WTA) circuitry is treated as already prepared or "pre-trained," then the excitatory connections that participated while that inhibitory circuit developed should not still be near zero. Starting all excitatory weights very small forces the first winner to grow far beyond every unused neuron before it can respond strongly. It then becomes a cross-pattern tyrant whenever patterns share even one input. Medium initial weights leave unused neurons close enough to threshold to compete for later patterns.
+
+2. Geometry must still matter.
+   Medium random weights should not erase the inverse-distance-squared spatial bias. The proposed initialization is therefore: draw a medium base weight, multiply it by the geometric influence, and then normalize the relevant incoming set so that a complete preferred pattern supplies slightly more than the postsynaptic threshold. The lecture gives an illustrative threshold of 1000, base weights around 300-500, and a possible normalized total around 1500. Those numbers are examples to test, not yet validated universal constants.
+
+3. FCSI is an asynchronous, event-driven dynamical system and is a poor match for conventional GPU execution.
+   Neurons are autonomous. A spike can immediately change another neuron's state, and causal order matters: the first WTA spike must recruit inhibition before a nominally later rival is allowed to spike. A GPU is strongest when many processors apply the same operation with few conditional dependencies. It may report several threshold crossings from one parallel batch even though, in the intended continuous event sequence, the first crossing should have inhibited the others. For the present work, a CPU/event-queue implementation is more faithful; MPI may offer coarse scaling, while an FPGA or other neuromorphic/event-driven hardware could eventually represent the autonomy more naturally.
+
+4. The longer-term architecture should be a hierarchy of repeated cortical-column units that performs scale normalization before classification.
+   Each local unit combines an OR-like output (something occurred in this receptive field), WTA phase/symbol selection, and predictive feedback. Neighboring units are then composed into the next level. As the hierarchy rises, one phase code represents a larger spatial area, so a large object propagates farther upward before it becomes a single compact response. A small and large version of the same centered object should therefore reach equivalent normalized shape representations at different hierarchy depths. Classification should occur in a separate network after this preprocessing, using preserved spatial/phase information. The edge/prediction hierarchy should not be distorted by training it directly as the shape classifier.
+
+The immediate instruction is not to build the entire hierarchy yet. First validate that the currently working WTA plus prediction simulation is genuinely correct and robust by reading the raster and charge-accumulation plots. Only after that should the team standardize one repeatable cortical-column unit, tile it with nearest-neighbor connections, and test scale invariance. Classification comes afterward.
+
+======================================================================
+2. WHY MEDIUM INITIAL WEIGHTS ARE NOW PART OF THE MODEL
+======================================================================
+
+Earlier approach:
+
+- Feedforward excitatory weights began as small random values.
+- Multiple L2 excitatory neurons accumulated charge and effectively "ran a race."
+- A winner gradually became strong enough to respond rapidly or in one presentation.
+- By then, the winner's weights were much larger than those of neurons that had never won.
+- With overlapping patterns, even one shared input could allow that established winner to capture later patterns.
+
+This is the tyrant problem: a first winner is not only specialized for its original pattern; its large absolute advantage makes it dominate other patterns as well.
+
+The lecture's developmental argument:
+
+- The brain does not begin sensory experience with every relevant local circuit completely unprepared.
+- Spontaneous developmental activity and sleep/maintenance activity can help establish and maintain connectivity and inhibition.
+- If the WTA inhibitory circuit is already mature enough to stop rivals immediately, the excitatory cells and synapses connected to it should also have experienced preparatory activity.
+- It is therefore inconsistent to assume mature inhibition but near-zero excitatory weights.
+- Medium initial excitatory weights represent prepared connectivity while retaining room for local plasticity and specialization.
+
+How medium weights help:
+
+- A new/unused neuron begins within meaningful reach of threshold.
+- When a new pattern arrives, it does not need a long period of growth before it can challenge the established neuron.
+- Pattern-specific potentiation and depression can create specialization without requiring the first winner to become orders of magnitude stronger.
+- The WTA can operate as "first physically valid responder wins," while other neurons remain plausible future winners.
+
+Important caution:
+
+Medium initialization alone does not prove that tyranny is fixed. Prior FCSI experiments established that strict immediate inhibition can turn a small initial latency advantage into permanent first-responder ownership. The new proposal must therefore be tested over multiple seeds and pattern schedules. We need to distinguish healthy pattern-specific early differences from a global physical-order bias.
+
+======================================================================
+3. PROPOSED INITIALIZATION LOGIC
+======================================================================
+
+The lecture and notes suggest the following conceptual construction:
+
+1. Choose a medium random base weight rather than a tiny random weight.
+   Illustrative lecture values: approximately 300-500 when the excitatory threshold is 1000.
+
+2. Preserve the spatial prior.
+   Multiply the base weight by the existing geometric influence, described as an inverse-distance-squared factor. Nearby inputs should retain more influence than distant inputs.
+
+3. Normalize by neuron or relevant receptive-field input set.
+   Scale the geometry-weighted inputs so that presentation of a complete preferred pattern produces total free energy somewhat above threshold. The notes suggest an illustrative total near 1500 for a threshold of 1000.
+
+A schematic expression is:
+
+    raw_w(i,j) = medium_random(i,j) * influence(i,j)
+
+    w(i,j) = raw_w(i,j) * target_total / sum(raw_w(active preferred inputs,j))
+
+This equation is only a summary of the idea. The transcript does not fully specify:
+
+- whether normalization is per neuron, per receptive field, or per candidate pattern;
+- which input set defines the denominator before patterns have been learned;
+- whether target_total should be 1.1, 1.5, or another multiple of threshold;
+- the allowable minimum and maximum individual weights;
+- whether the 300-500 range is sampled before or after geometry scaling;
+- whether all patterns should initially be able to cross threshold in one event/presentation;
+- how noise, leak, delays, and multiple active sensory cells alter the intended margin.
+
+Therefore these values should become an explicit experimental factor, not be silently hard-coded as settled biology.
+
+======================================================================
+4. RELATION TO THE CURRENT FCSI FINDINGS
+======================================================================
+
+This update aligns with the motivation behind the promising endofjuly-style initialization, but it does not automatically validate that implementation.
+
+What it may solve:
+
+- It directly targets the enormous maturity gap between a previously trained winner and unused competitors.
+- It offers a principled alternative to beginning every feedforward weight near zero.
+- It may reduce the number of exposures needed for unused neurons to become viable owners.
+- A positive lower initialization also makes exact-zero disconnection less central at the start.
+
+What it does not solve by itself:
+
+- Same-step or sub-step causal ordering in the WTA.
+- Whether inhibition is delivered through biologically/plausibly timed synaptic events.
+- Whether immediate repeated reset creates first-responder tyranny.
+- Structural broadcasting of prediction through shared sensory inputs.
+- Local credit assignment when a shared inhibitory neuron gates all competitors.
+- Hard zero clipping produced later by depression.
+- Whether feedback prediction and sensory coincidence operate in a realizable time window.
+- Whether the model learns four distinct owners robustly rather than only on selected seeds.
+
+Connection to the earlier endofjuly14 comparison:
+
+- That branch's strong results used high initial readiness (including approximately 0.95-threshold initialization in at least one tested configuration), strict sub-timestep ordering, immediate inhibition/reset behavior, and long phase exposures.
+- The new lecture supports the broad idea of prepared, medium-strength feedforward connectivity.
+- It does not independently approve every timing/reset choice in that branch.
+- We should borrow the initialization principle as a controlled factor while continuing to audit causal WTA behavior, prediction, and local learning separately.
+
+Connection to the exact-zero finding:
+
+- Medium positive initialization reduces the initial distance from threshold but does not prevent later learning from clipping some connections to exactly zero.
+- Previous probes showed that most completed zeroed connections were functionally absorbing because the target could no longer spike and invoke recovery.
+- A positive feedforward floor or a non-destructive bounded depression rule remains worth testing independently; it should not be conflated with the choice of medium initial weights.
+
+======================================================================
+5. COMPUTATION AND HARDWARE IMPLICATIONS
+======================================================================
+
+The intended neural dynamics are both parallel and causally event-driven:
+
+- Every neuron maintains its own state.
+- Inputs arrive as events/spikes.
+- A neuron fires immediately when its state reaches threshold.
+- Its outgoing event can change downstream states immediately.
+- Feedback and recurrent/inhibitory loops create serial causal dependencies inside an otherwise parallel system.
+
+Why naive discrete/GPU batching is dangerous:
+
+- Suppose several excitatory neurons would cross threshold inside one simulation step.
+- A vectorized update can mark all of them as spiking before processing any inhibitory consequence.
+- The intended physical sequence may instead be: neuron A crosses first, A excites I1, inhibition reaches the rivals, and those rivals never cross.
+- If the simulator loses this order, the raster is not merely approximate; it can represent a different learning event and assign the wrong winner.
+
+Practical direction:
+
+- Continue using a faithful CPU-based event-driven or sufficiently fine causal scheduler for core validation.
+- Treat MPI as a possible way to distribute larger regions, with careful management of cross-region event ordering.
+- Consider FPGA/neuromorphic hardware later because it can instantiate many autonomous nodes with local event propagation.
+- Do not interpret GPU speed as evidence that a batched GPU model preserves the algorithm's dynamics.
+
+======================================================================
+6. THE PROPOSED REPEATED CORTICAL-COLUMN UNIT
+======================================================================
+
+The basic learned circuit is supposed to become one reusable unit rather than a one-off 3x3 simulation.
+
+The unit combines:
+
+- local receptive-field/sensory inputs;
+- an OR-like signal indicating that some edge/event occurred locally;
+- a WTA population that selects one phase/pattern/symbol from the local composition;
+- predictive feedback that lowers redundant firing when the input is well predicted;
+- local spatial organization and nearest-neighbor connections.
+
+The lecture sometimes says "cortical column" and the transcript may misrecognize "quarter column." The operative idea is one unique, repeatable column structure containing the OR and WTA/predictive phases. The exact anatomical labeling still needs clarification.
+
+Near-term architectural milestone:
+
+- Define this unit precisely.
+- Demonstrate the same correct local simulation across implementations/front ends.
+- Tile many identical units.
+- Connect nearest neighbors from one hierarchy level to the next.
+- Avoid special-case wiring for each of the current four patterns.
+
+======================================================================
+7. HIERARCHICAL COMPRESSION AND SCALE INVARIANCE
+======================================================================
+
+Core hypothesis:
+
+- A local group of edge/phase responses is composed into a more compact response at the next level.
+- The notes give a conceptual compression example of roughly three local items becoming one output.
+- At higher levels, each phase code covers a larger spatial region.
+- A larger object therefore needs more levels before its distributed responses collapse into a single compact point/dot.
+- A smaller version of the same object becomes compact at a lower level.
+- Once the hierarchy reaches the object's compact level, the model can retrieve or project the associated first-order phase configuration into a common normalized representation.
+- The same classifier can then recognize the object without separately learning every scale.
+
+Input assumption:
+
+- The object is centered in the foveal region through a saccade/attention process.
+- The current milestone can assume centered monochromatic input and ignore color, binocular depth, and full real-world scene parsing.
+- This is a deliberate simplification, not a claim that biological vision lacks those systems.
+
+Why this should remain preprocessing:
+
+- The hierarchy's role is to represent spatiotemporal edges and remove irrelevant scale variation.
+- If object-class learning directly changes these early edge/prediction weights, learning one set of shapes could degrade the general ability to represent other shapes.
+- A separate classifier/binding network should receive the normalized spatial/phase representation.
+- This preserves autonomy and reuse of the early sensory hierarchy.
+
+Longer-term objective:
+
+- Bind "what" (object identity) to "where" (location), potentially through synchronized activity.
+- The current work addresses the "what" preprocessing and normalized shape representation first.
+
+======================================================================
+8. WHAT IS ESTABLISHED VS. WHAT IS STILL A HYPOTHESIS
+======================================================================
+
+More firmly established as design requirements:
+
+- WTA behavior and prediction must both remain active parts of the circuit.
+- Causal event order matters to the correctness of spikes and learning.
+- Tiny initial weights can create a severe mature-winner versus unused-neuron gap.
+- Geometry should influence connectivity/initial strength.
+- Early spatiotemporal feature processing should remain reusable rather than being trained directly as a final classifier.
+- The currently working backend must be validated from raster and charge traces before others build on it.
+
+Promising but not yet validated:
+
+- The exact medium-weight range (for example, 300-500 at threshold 1000).
+- Normalizing a preferred input total to roughly 1500.
+- The proposed developmental/sleep interpretation as the correct mechanistic justification for this precise initialization.
+- The exact compression ratio and tiling geometry.
+- Whether simple nearest-neighbor repeated columns are sufficient for robust scale invariance.
+- Whether the hierarchy should converge upward, reverse/diverge at the classifier interface, or include both compression and expansion.
+- How activity in lower hierarchy levels is suppressed after the correct compact level is reached.
+- How phase information is read back through feedback/thalamic routing.
+- How the circuit chooses which abstraction depth to use.
+- How saccades, attention, and multiple objects are controlled.
+
+======================================================================
+9. RECOMMENDED VALIDATION SEQUENCE
+======================================================================
+
+Stage 1 - Validate the present local circuit before integration
+
+- Freeze a precise code/commit and configuration.
+- Verify WTA physical causality from event traces, not only final ownership scores.
+- Verify prediction changes firing for the intended local pathway rather than suppressing all competitors through a shared broadcast.
+- Inspect raster, charge accumulation, inhibition arrival/delivery, and learning events together.
+- Confirm the result over multiple seeds, presentation orders, and pattern overlaps.
+- Compare medium initialization against the current baseline iso-seeded.
+
+Stage 2 - Isolate the medium-initialization claim
+
+- Sweep initial total drive as a fraction/multiple of threshold, not only individual weights.
+- Keep timing, learning, geometry, inhibition, and schedules identical.
+- Measure time-to-first-spike, owner diversity, cross-pattern tyranny, unused-neuron recruitment, and final selectivity.
+- Check whether physical neuron/index order predicts ownership.
+- Separately test the positive weight floor so the initialization question is not confounded with later exact-zero damage.
+
+Stage 3 - Define one repeatable column
+
+- Specify inputs, OR output, WTA/phase neurons, inhibitory path, prediction path, delays, and local learning ownership.
+- Remove pattern-specific assumptions.
+- Demonstrate that the unit can be tiled without changing its local equations.
+
+Stage 4 - Test scale normalization before classification
+
+- Use one simple centered shape at two or more sizes.
+- Tile repeated columns with nearest-neighbor connections.
+- Measure the hierarchy level at which each size becomes a compact/single response.
+- Decode the retained phase/spatial representation and test whether different sizes yield equivalent normalized descriptions.
+- Do not train a semantic classifier yet.
+
+Stage 5 - Add a separate binding/classifier region
+
+- Only after scale/phase invariance is demonstrated, project the normalized representation into a separate learning network.
+- Begin with a controlled small symbol set (for example, simple fixed-font letters or segmented digits) before a dataset such as MNIST.
+- Preserve the early hierarchy's learned predictive/edge representation while adding categories.
+
+======================================================================
+10. IMMEDIATE PROJECT DECISION
+======================================================================
+
+The correct immediate move is a focused medium-initialization experiment inside the best-understood current simulation, not a wholesale jump to the full hierarchy and not a blind adoption of another implementation.
+
+The experiment should answer:
+
+"When all other dynamics are held fixed, does biologically motivated medium, geometry-scaled, normalized feedforward initialization allow unused neurons to win new overlapping patterns without reintroducing physical first-responder tyranny?"
+
+Success should require all of the following:
+
+- one causal winner per presentation/event as intended;
+- stable distinct owners for the four patterns across multiple seeds and orders;
+- no single neuron winning largely because of index or update order;
+- prediction still functioning locally;
+- no reliance on analytic zero-delay reset that changes the intended synaptic model;
+- weights remaining recoverable and interpretable rather than being destroyed by exact-zero clipping;
+- trace-level evidence that the mechanism, not only the final score, is correct.
+
+Only after this passes should the project lock the local circuit as the repeatable cortical-column building block and move to hierarchical scale invariance.
+
+======================================================================
+11. SHORT VERSION TO REMEMBER
+======================================================================
+
+- Mature inhibition implies prepared excitatory connectivity; do not initialize all feedforward weights near zero.
+- Use medium random weights, preserve inverse-square geometry, and normalize aggregate preferred drive to modestly above threshold.
+- Treat the numerical examples as test values, not settled constants.
+- Medium weights address winner maturity imbalance but do not automatically solve causal timing, prediction locality, or hard-zero damage.
+- FCSI needs causal event ordering; naive GPU batches can generate spikes that should have been prevented.
+- First validate the WTA plus prediction circuit with traces
