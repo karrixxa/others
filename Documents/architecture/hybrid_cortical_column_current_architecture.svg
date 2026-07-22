@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1400" width="1920" height="1400" role="img" aria-labelledby="title desc">
+  <title id="title">Paradigm dual-path architecture — Path H hybrid_cortical_biological Stage 8–10 current</title>
+  <desc id="desc">Authoritative current-state diagram: production nucleus path and isolated hybrid_cortical_biological column (Stages 8–10). Legacy hybrid_cortical is footnote-only.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10z" fill="#8aa0b8"/>
+    </marker>
+    <style>
+      .bg{fill:#0b111a}.panel{fill:#111b28;stroke:#33465b;stroke-width:2}.node{fill:#172536;stroke:#4d6680;stroke-width:2}.store{fill:#1d2330;stroke:#8c78a8;stroke-width:2;stroke-dasharray:8 6}.transient{fill:#172a2d;stroke:#5f9297;stroke-width:2;stroke-dasharray:8 6}.title{fill:#f2f6fa;font:700 32px system-ui,sans-serif}.section{fill:#d9e5ef;font:700 22px system-ui,sans-serif}.head{fill:#f2f6fa;font:700 17px system-ui,sans-serif}.body{fill:#b9c8d6;font:14px system-ui,sans-serif}.small{fill:#9eb0c0;font:12px system-ui,sans-serif}.mono{fill:#c9d7e4;font:13px ui-monospace,monospace}.arrow{fill:none;stroke:#8aa0b8;stroke-width:3;marker-end:url(#arrow)}.feedback{fill:none;stroke:#78a8c8;stroke-width:3;stroke-dasharray:9 6;marker-end:url(#arrow)}.pass{fill:#1f7a4c}.partial{fill:#a86d16}.fail{fill:#a83a3a}.badgeText{fill:#fff;font:700 11px system-ui,sans-serif;text-anchor:middle}.note{fill:#182233;stroke:#53677d;stroke-width:1}.divider{stroke:#33465b;stroke-width:2}.fork{fill:#25445d;stroke:#78a8c8;stroke-width:2}.warning{fill:#332719;stroke:#a86d16;stroke-width:2}.rednote{fill:#321d22;stroke:#a83a3a;stroke-width:2}.legacy{fill:#1a1f28;stroke:#5a6575;stroke-width:1.5;stroke-dasharray:6 4}.bioTag{fill:#1a3a2e;stroke:#2f8f64;stroke-width:2}
+    </style>
+  </defs>
+  <rect class="bg" width="1920" height="1400"/>
+
+  <text class="title" x="60" y="48">Paradigm — dual-path architecture (P + H)</text>
+  <text class="body" x="60" y="74">Path H current truth: hybrid_cortical_biological · Stages 8–10 · T1–T9 PASS · SVG is authority for bio</text>
+  <text class="small" x="60" y="96">Legacy hybrid_cortical (catalog / prior bias / symbolic L5 / 2.0·0.5 gain) is footnote-only — not Path H primary</text>
+
+  <!-- Sensory + fork -->
+  <rect class="node" x="60" y="118" width="250" height="100" rx="10"/>
+  <text class="head" x="82" y="148">3×3 sensory pattern</text>
+  <text class="mono" x="82" y="174">H1 / V1 / D0 / D1</text>
+  <text class="body" x="82" y="198">line_id = metadata only (bio)</text>
+
+  <rect class="fork" x="360" y="118" width="520" height="100" rx="10"/>
+  <text class="head" x="382" y="148">BrainSimulator.stimulate_pattern</text>
+  <text class="body" x="382" y="172">Default: nucleus step(pattern) first → then hybrid process_pattern</text>
+  <text class="body" x="382" y="194">Exception: column_only_stimulate ∧ bio → skip nucleus, column-only result</text>
+  <text class="small" x="382" y="210">Bio process takes Pattern · legacy requires line_id</text>
+  <path class="arrow" d="M310 168 H360"/>
+
+  <!-- PATH P -->
+  <rect class="panel" x="60" y="248" width="1800" height="248" rx="14"/>
+  <text class="section" x="84" y="284">Path P — production nucleus path (always first unless column_only ∧ bio)</text>
+
+  <rect class="node" x="90" y="310" width="250" height="150" rx="10"/>
+  <text class="head" x="112" y="340">Layer1Relay</text>
+  <text class="body" x="112" y="366">9 cells × E / I / E′ relay</text>
+  <text class="body" x="112" y="390">spiking + refractory</text>
+  <text class="body" x="112" y="414">descending inhibition (prior pulse)</text>
+
+  <rect class="node" x="390" y="310" width="280" height="150" rx="10"/>
+  <text class="head" x="412" y="340">NucleusNetwork</text>
+  <text class="body" x="412" y="366">4 excitatory ring competitors</text>
+  <text class="body" x="412" y="390">NUCLEUS_RING_SIZE = len(LINE_IDS) = 4</text>
+  <text class="body" x="412" y="414">WTA + inhibitory flow + local maps</text>
+
+  <rect class="node" x="720" y="310" width="300" height="150" rx="10"/>
+  <text class="head" x="742" y="340">Learning and binding</text>
+  <text class="body" x="742" y="366">conductance / lab plasticity</text>
+  <text class="body" x="742" y="390">NeuronMemory + eligibility traces</text>
+  <text class="body" x="742" y="414">SymbolRegistry 1:1 ownership</text>
+
+  <rect class="node" x="1070" y="310" width="290" height="150" rx="10"/>
+  <text class="head" x="1092" y="340">Production result</text>
+  <text class="body" x="1092" y="366">winner neuron + output symbol</text>
+  <text class="body" x="1092" y="390">events, timing + online learning</text>
+  <text class="body" x="1092" y="414">T1–T8 PASS · T9 PARTIAL</text>
+
+  <rect class="node" x="1410" y="310" width="410" height="150" rx="10"/>
+  <text class="head" x="1432" y="340">DescendingInhibition</text>
+  <text class="body" x="1432" y="366">from current production pulse</text>
+  <text class="body" x="1432" y="390">applies to Layer1Relay next pulse</text>
+  <text class="body" x="1432" y="414">production-only feedback loop</text>
+
+  <path class="arrow" d="M500 218 V285 H215 V310"/>
+  <path class="arrow" d="M340 385 H390"/><path class="arrow" d="M670 385 H720"/>
+  <path class="arrow" d="M1020 385 H1070"/><path class="arrow" d="M1360 385 H1410"/>
+  <path class="feedback" d="M1615 460 V485 H215 V460"/>
+  <text class="small" x="760" y="480">next-pulse production feedback</text>
+
+  <!-- PATH H BIO -->
+  <rect class="panel" x="60" y="522" width="1800" height="618" rx="14"/>
+  <text class="section" x="84" y="556">Path H — BIO HybridCorticalColumn (hybrid_cortical_biological · Stages 8–10)</text>
+  <rect class="rednote" x="1180" y="532" width="645" height="40" rx="8"/>
+  <text class="head" x="1200" y="558">NO SHARED RELAY OR LEARNED STORE WITH PATH P</text>
+
+  <!-- L4 -->
+  <rect class="bioTag" x="90" y="590" width="300" height="268" rx="10"/>
+  <text class="head" x="112" y="618">L4 — Layer4Adapter (BIO)</text>
+  <text class="body" x="112" y="644">Pattern → active indices</text>
+  <text class="body" x="112" y="666">authentic Layer1Relay spikes</text>
+  <text class="body" x="112" y="688">no input-weight fallback</text>
+  <text class="body" x="112" y="710">pending gain on ephemeral edges</text>
+  <text class="body" x="112" y="732">line_id = metadata only</text>
+  <text class="body" x="112" y="754">persistent input weights immutable</text>
+  <g transform="translate(112 780)">
+    <rect class="pass" width="52" height="22" rx="11"/><text class="badgeText" x="26" y="15">T1 ✓</text>
+    <rect class="pass" x="60" width="52" height="22" rx="11"/><text class="badgeText" x="86" y="15">T4 ✓</text>
+    <rect class="pass" x="120" width="52" height="22" rx="11"/><text class="badgeText" x="146" y="15">T5 ✓</text>
+  </g>
+
+  <!-- L2/3 -->
+  <rect class="bioTag" x="420" y="590" width="380" height="268" rx="10"/>
+  <text class="head" x="442" y="618">L2/3 — ContextAssemblyNetwork (BIO)</text>
+  <text class="body" x="442" y="644">4 unbound candidates · emergent N=2 Pattern bind</text>
+  <text class="body" x="442" y="666">full-pop drive + coincidence ON</text>
+  <text class="body" x="442" y="688">mismatch basal ×0.12 · graded E/I 0.90/0.70</text>
+  <text class="body" x="442" y="710">authentic try_spike / plural abstain</text>
+  <text class="body" x="442" y="732">no prior_active_bias · no catalog asm_h*</text>
+  <text class="body" x="442" y="754">DendriticCoincidenceGate = bind eligibility</text>
+  <text class="small" x="442" y="776">somatic amp OFF · not sigma-pi biology</text>
+  <g transform="translate(442 800)">
+    <rect class="pass" width="48" height="22" rx="11"/><text class="badgeText" x="24" y="15">T1 ✓</text>
+    <rect class="pass" x="54" width="48" height="22" rx="11"/><text class="badgeText" x="78" y="15">T2 ✓</text>
+    <rect class="pass" x="108" width="48" height="22" rx="11"/><text class="badgeText" x="132" y="15">T3 ✓</text>
+    <rect class="pass" x="162" width="48" height="22" rx="11"/><text class="badgeText" x="186" y="15">T4 ✓</text>
+    <rect class="pass" x="216" width="48" height="22" rx="11"/><text class="badgeText" x="240" y="15">T5 ✓</text>
+    <rect class="pass" x="270" width="48" height="22" rx="11"/><text class="badgeText" x="294" y="15">T6 ✓</text>
+  </g>
+
+  <!-- L5 -->
+  <rect class="bioTag" x="830" y="590" width="320" height="268" rx="10"/>
+  <text class="head" x="852" y="618">L5 — RecurrentPrediction (BIO)</text>
+  <text class="body" x="852" y="644">local recurrent STDP</text>
+  <text class="body" x="852" y="666">predictive try_spike authority</text>
+  <text class="body" x="852" y="688">END = boundary_end_evidence</text>
+  <text class="body" x="852" y="710">or episodic end_episode</text>
+  <text class="body" x="852" y="732">SequenceTransitionMemory</text>
+  <text class="body" x="852" y="754">= diagnostic / legacy only</text>
+  <text class="small" x="852" y="776">not symbolic frequency authority</text>
+  <g transform="translate(852 800)">
+    <rect class="pass" width="48" height="22" rx="11"/><text class="badgeText" x="24" y="15">T2 ✓</text>
+    <rect class="pass" x="54" width="64" height="22" rx="11"/><text class="badgeText" x="86" y="15">T7 PASS</text>
+    <rect class="pass" x="126" width="48" height="22" rx="11"/><text class="badgeText" x="150" y="15">T8 ✓</text>
+    <rect class="pass" x="182" width="48" height="22" rx="11"/><text class="badgeText" x="206" y="15">T9 ✓</text>
+  </g>
+
+  <!-- L6 -->
+  <rect class="bioTag" x="1180" y="590" width="300" height="268" rx="10"/>
+  <text class="head" x="1202" y="618">L6 — FeedbackGain (BIO)</text>
+  <text class="body" x="1202" y="644">UNITY (BIO)</text>
+  <text class="body" x="1202" y="666">no 2.0 / 0.5 catalog boost</text>
+  <text class="body" x="1202" y="688">pending gain one-shot</text>
+  <text class="body" x="1202" y="710">applies next hybrid tick</text>
+  <text class="body" x="1202" y="732">deterministic scalar path</text>
+  <text class="body" x="1202" y="754">retired under bio unity</text>
+  <g transform="translate(1202 800)">
+    <rect class="pass" width="48" height="22" rx="11"/><text class="badgeText" x="24" y="15">T4 ✓</text>
+    <rect class="pass" x="54" width="48" height="22" rx="11"/><text class="badgeText" x="78" y="15">T8 ✓</text>
+    <rect class="pass" x="108" width="48" height="22" rx="11"/><text class="badgeText" x="132" y="15">T9 ✓</text>
+  </g>
+
+  <!-- Stores -->
+  <rect class="store" x="1510" y="590" width="315" height="130" rx="10"/>
+  <text class="head" x="1530" y="618">Persistent (BIO)</text>
+  <text class="body" x="1530" y="644">local recurrent synapses</text>
+  <text class="body" x="1530" y="666">+ emergent Pattern bindings</text>
+  <text class="small" x="1530" y="690">survive END / silence reset</text>
+
+  <rect class="transient" x="1510" y="738" width="315" height="120" rx="10"/>
+  <text class="head" x="1530" y="766">Transient (BIO)</text>
+  <text class="body" x="1530" y="792">ColumnState / membranes</text>
+  <text class="body" x="1530" y="814">pending gain</text>
+  <text class="small" x="1530" y="838">silence / END clears transient</text>
+
+  <path class="arrow" d="M500 218 V560 H240 V590"/>
+  <path class="arrow" d="M390 724 H420"/><path class="arrow" d="M800 724 H830"/>
+  <path class="arrow" d="M1150 724 H1180"/>
+  <path class="feedback" d="M1330 858 V890 H240 V858"/>
+  <text class="small" x="620" y="882">pending gain applies once on next hybrid tick</text>
+
+  <!-- Path H bio tenant matrix -->
+  <rect class="note" x="90" y="880" width="1390" height="56" rx="8"/>
+  <text class="head" x="112" y="904">Path H BIO tenant matrix (Stage 8 audit)</text>
+  <g transform="translate(112 912)">
+    <rect class="pass" y="8" width="72" height="24" rx="12"/><text class="badgeText" x="36" y="24">T1 PASS</text>
+    <rect class="pass" x="82" y="8" width="72" height="24" rx="12"/><text class="badgeText" x="118" y="24">T2 PASS</text>
+    <rect class="pass" x="164" y="8" width="72" height="24" rx="12"/><text class="badgeText" x="200" y="24">T3 PASS</text>
+    <rect class="pass" x="246" y="8" width="72" height="24" rx="12"/><text class="badgeText" x="282" y="24">T4 PASS</text>
+    <rect class="pass" x="328" y="8" width="72" height="24" rx="12"/><text class="badgeText" x="364" y="24">T5 PASS</text>
+    <rect class="pass" x="410" y="8" width="72" height="24" rx="12"/><text class="badgeText" x="446" y="24">T6 PASS</text>
+    <rect class="pass" x="492" y="8" width="72" height="24" rx="12"/><text class="badgeText" x="528" y="24">T7 PASS</text>
+    <rect class="pass" x="574" y="8" width="72" height="24" rx="12"/><text class="badgeText" x="610" y="24">T8 PASS</text>
+    <rect class="pass" x="656" y="8" width="72" height="24" rx="12"/><text class="badgeText" x="692" y="24">T9 PASS</text>
+  </g>
+  <text class="small" x="900" y="930">All PASS under hybrid_cortical_biological · count tables are not bio authority</text>
+
+  <!-- Keep notes -->
+  <rect class="note" x="90" y="956" width="560" height="72" rx="9"/>
+  <text class="head" x="112" y="980">3×3 catalog grid</text>
+  <text class="mono" x="112" y="1002">0 1 2 / 3 4 5 / 6 7 8</text>
+  <text class="body" x="112" y="1022">H1=3,4,5 | V1=1,4,7 | D0=0,4,8 | D1=2,4,6</text>
+
+  <rect class="warning" x="680" y="956" width="800" height="72" rx="9"/>
+  <text class="head" x="702" y="980">Frontend boundary</text>
+  <text class="body" x="702" y="1002">CorticalColumnScene + ColumnStateModel render serialized backend state.</text>
+  <text class="body" x="702" y="1022">They are read-only presentation adapters, not neural architecture.</text>
+
+  <rect class="note" x="1510" y="880" width="315" height="148" rx="9"/>
+  <text class="head" x="1530" y="908">Do NOT claim</text>
+  <text class="small" x="1530" y="930">· sigma-pi biology</text>
+  <text class="small" x="1530" y="950">· nucleus dendritic coincidence auto-ON</text>
+  <text class="small" x="1530" y="970">· somatic amp ON</text>
+  <text class="small" x="1530" y="990">· bio uses 2.0/0.5 or prior bias</text>
+  <text class="small" x="1530" y="1010">· bio asm_h* preassigned</text>
+
+  <!-- Legacy footnote -->
+  <rect class="legacy" x="60" y="1160" width="1800" height="100" rx="10"/>
+  <text class="head" x="84" y="1188">Legacy footnote — hybrid_cortical (bit-compatible; NOT Path H current)</text>
+  <text class="body" x="84" y="1214">catalog assemblies · prior_active_bias · Vm×0.5 WTA · symbolic L5 frequency tables · L6 predicted 2.0 / others 0.5 · FAIL T3 / T6 / T9</text>
+  <text class="small" x="84" y="1238">Remediation Stages 8–10 live only behind hybrid_cortical_biological + ColumnCausalPolicy.is_biological. See tenant_compliance_remediation_plan.md.</text>
+
+  <line class="divider" x1="60" y1="1280" x2="1860" y2="1280"/>
+  <text class="body" x="70" y="1315">Tenant badges are validation findings, not security vulnerabilities. Path H primary badges above are Stage 8 bio audit (all PASS).</text>
+  <text class="small" x="70" y="1345">Authority: this SVG for hybrid_cortical_biological current truth · companion outline Path H FAIL matrix is legacy hybrid_cortical only</text>
+  <g transform="translate(1280 1295)">
+    <rect class="pass" width="18" height="18" rx="4"/><text class="small" x="26" y="14">PASS</text>
+    <rect class="partial" x="90" width="18" height="18" rx="4"/><text class="small" x="118" y="14">PARTIAL</text>
+    <rect class="fail" x="210" width="18" height="18" rx="4"/><text class="small" x="238" y="14">FAIL</text>
+  </g>
+</svg>

@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "scope": "global",
+  "workflow": "full-pipeline",
+  "activeAgent": "thulle",
+  "pipelineVersion": 2,
+  "locked": true,
+  "initializedAt": "2026-06-10",
+  "notes": "Pipeline v2: Research → OOP Code → Security Validator → Holistic Validation. Project .cursor/triad.json overrides when present."
+}

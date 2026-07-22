@@ -1,0 +1,9 @@
+1. Firing is casual / not firing is not casual (1 vs Z)
+2. Firing together wires together
+3. Each neuron controls learning at the local neuron (only one patern per neuron)
+4. Inhibitory and Excititory weights and connections
+5. Refactory Period
+6. 1:1 Symbol to representation
+7 Continous learning
+8. Prediction
+9. Learning is done in the neuron with the information providedd from the other connections only. Nothing global.

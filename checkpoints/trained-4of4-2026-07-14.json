@@ -1,0 +1,223 @@
+{
+  "version": 1,
+  "timestep": 244,
+  "symbols": {
+    "counter": 4,
+    "bindings": [
+      {
+        "symbol_id": "sigma_0",
+        "neuron_id": "nucleus_e_2",
+        "pattern_edges": [
+          "input_r1_c0",
+          "input_r1_c1",
+          "input_r1_c2"
+        ]
+      },
+      {
+        "symbol_id": "sigma_1",
+        "neuron_id": "nucleus_e_0",
+        "pattern_edges": [
+          "input_r0_c1",
+          "input_r1_c1",
+          "input_r2_c1"
+        ]
+      },
+      {
+        "symbol_id": "sigma_2",
+        "neuron_id": "nucleus_e_3",
+        "pattern_edges": [
+          "input_r0_c0",
+          "input_r1_c1",
+          "input_r2_c2"
+        ]
+      },
+      {
+        "symbol_id": "sigma_3",
+        "neuron_id": "nucleus_e_1",
+        "pattern_edges": [
+          "input_r0_c2",
+          "input_r1_c1",
+          "input_r2_c0"
+        ]
+      }
+    ]
+  },
+  "pattern_owners": {
+    "input_r0_c1,input_r1_c1,input_r2_c1": "nucleus_e_0",
+    "input_r0_c2,input_r1_c1,input_r2_c0": "nucleus_e_1",
+    "input_r1_c0,input_r1_c1,input_r1_c2": "nucleus_e_2",
+    "input_r0_c0,input_r1_c1,input_r2_c2": "nucleus_e_3"
+  },
+  "central": {
+    "membrane": 0.9264357729380078,
+    "refractory_until": 231,
+    "inhibition_channels": [
+      0.9889990412218118,
+      1.0096629204047898,
+      0.9880722027400828,
+      1.0423085083919537
+    ]
+  },
+  "ring": [
+    {
+      "neuron_id": "nucleus_e_0",
+      "ring_index": 0,
+      "membrane": 0.7034332447640012,
+      "refractory_until": 135,
+      "bound_pattern_edges": [
+        "input_r0_c1",
+        "input_r1_c1",
+        "input_r2_c1"
+      ],
+      "bound_symbol": "sigma_1",
+      "prediction_edges": [
+        "input_r0_c1",
+        "input_r1_c1",
+        "input_r2_c1"
+      ],
+      "eligibility_trace": 0.0,
+      "relay_conductances": {
+        "l1_e_0": 0.075,
+        "l1_e_1": 0.4571899379809467,
+        "l1_e_2": 0.075,
+        "l1_e_3": 0.075,
+        "l1_e_4": 0.075,
+        "l1_e_5": 0.075,
+        "l1_e_6": 0.075,
+        "l1_e_7": 0.4571899379809467,
+        "l1_e_8": 0.075
+      },
+      "sensory_conductances": {
+        "input_r0_c0": 0.5461289954928092,
+        "input_r0_c1": 0.6445712450956016,
+        "input_r0_c2": 0.46474974351952225,
+        "input_r1_c0": 0.43371201605624893,
+        "input_r1_c1": 0.5988502133480864,
+        "input_r1_c2": 0.46174735439047954,
+        "input_r2_c0": 0.5344893290946764,
+        "input_r2_c1": 0.5602007529373422,
+        "input_r2_c2": 0.4755066151972523
+      }
+    },
+    {
+      "neuron_id": "nucleus_e_1",
+      "ring_index": 1,
+      "membrane": 0.0,
+      "refractory_until": 246,
+      "bound_pattern_edges": [
+        "input_r0_c2",
+        "input_r1_c1",
+        "input_r2_c0"
+      ],
+      "bound_symbol": "sigma_3",
+      "prediction_edges": [
+        "input_r0_c2",
+        "input_r1_c1",
+        "input_r2_c0"
+      ],
+      "eligibility_trace": 0.0,
+      "relay_conductances": {
+        "l1_e_0": 0.4152535360847118,
+        "l1_e_1": 0.075,
+        "l1_e_2": 0.40028725664303144,
+        "l1_e_3": 0.075,
+        "l1_e_4": 0.075,
+        "l1_e_5": 0.075,
+        "l1_e_6": 0.40028725664303144,
+        "l1_e_7": 0.075,
+        "l1_e_8": 0.4152535360847118
+      },
+      "sensory_conductances": {
+        "input_r0_c0": 0.5858293381495929,
+        "input_r0_c1": 0.4799241727959242,
+        "input_r0_c2": 0.51459464795965,
+        "input_r1_c0": 0.47346261005692303,
+        "input_r1_c1": 0.6588514034205696,
+        "input_r1_c2": 0.568516948910803,
+        "input_r2_c0": 0.6287139786821625,
+        "input_r2_c1": 0.5635259269640531,
+        "input_r2_c2": 0.5854966305176823
+      }
+    },
+    {
+      "neuron_id": "nucleus_e_2",
+      "ring_index": 2,
+      "membrane": 0.7050320491207352,
+      "refractory_until": 51,
+      "bound_pattern_edges": [
+        "input_r1_c0",
+        "input_r1_c1",
+        "input_r1_c2"
+      ],
+      "bound_symbol": "sigma_0",
+      "prediction_edges": [
+        "input_r1_c0",
+        "input_r1_c1",
+        "input_r1_c2"
+      ],
+      "eligibility_trace": 0.0,
+      "relay_conductances": {
+        "l1_e_0": 0.075,
+        "l1_e_1": 0.075,
+        "l1_e_2": 0.075,
+        "l1_e_3": 0.38479621063849173,
+        "l1_e_4": 0.075,
+        "l1_e_5": 0.38479621063849173,
+        "l1_e_6": 0.075,
+        "l1_e_7": 0.075,
+        "l1_e_8": 0.075
+      },
+      "sensory_conductances": {
+        "input_r0_c0": 0.5664830006412334,
+        "input_r0_c1": 0.39796606622977465,
+        "input_r0_c2": 0.5743661650599591,
+        "input_r1_c0": 0.5882322871146002,
+        "input_r1_c1": 0.6130230147550704,
+        "input_r1_c2": 0.601879467955905,
+        "input_r2_c0": 0.4373073415003785,
+        "input_r2_c1": 0.40829816800565416,
+        "input_r2_c2": 0.43255382747817317
+      }
+    },
+    {
+      "neuron_id": "nucleus_e_3",
+      "ring_index": 3,
+      "membrane": 0.6519290432276924,
+      "refractory_until": 207,
+      "bound_pattern_edges": [
+        "input_r0_c0",
+        "input_r1_c1",
+        "input_r2_c2"
+      ],
+      "bound_symbol": "sigma_2",
+      "prediction_edges": [
+        "input_r0_c0",
+        "input_r1_c1",
+        "input_r2_c2"
+      ],
+      "eligibility_trace": 0.0,
+      "relay_conductances": {
+        "l1_e_0": 0.42971396649187915,
+        "l1_e_1": 0.4571899379809467,
+        "l1_e_2": 0.075,
+        "l1_e_3": 0.075,
+        "l1_e_4": 0.075,
+        "l1_e_5": 0.075,
+        "l1_e_6": 0.075,
+        "l1_e_7": 0.4571899379809467,
+        "l1_e_8": 0.42971396649187915
+      },
+      "sensory_conductances": {
+        "input_r0_c0": 0.6557761110418174,
+        "input_r0_c1": 0.5485795642052583,
+        "input_r0_c2": 0.5129531568261816,
+        "input_r1_c0": 0.3871852893394103,
+        "input_r1_c1": 0.6533249114870732,
+        "input_r1_c2": 0.5251436033124914,
+        "input_r2_c0": 0.4206721793087523,
+        "input_r2_c1": 0.6855559569297258,
+        "input_r2_c2": 0.49180007065633086
+      }
+    }
+  ]
+}

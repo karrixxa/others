@@ -1,0 +1,113 @@
+Goal:
+Create a new AI learning paradigm that mimics cortical columns in the brain.
+You have a 3×3 grid with 4 lines (a sequence of 4 inputs).
+Each line should be learned before the next line is presented, with a persistent internal state that carries context forward.
+
+High-level idea:
+Treat each line as a sensory event (input to Layer 4).
+Maintain a ColumnState that acts like Layers 2/3 (context/integration).
+Produce an output/prediction via Layer 5.
+Modulate future input via Layer 6 (feedback/gain control).
+
+Architecture Mapping
+
+Input Layer (L4 – Sensory Input)
+
+Each line in the 3×3 grid is one input event.
+
+Represent each line as a 9-dimensional vector, sparse pattern, or symbolic event.
+
+This is the “thalamic” input to the column.
+
+Integration Layer (L2/3 – Context State)
+
+Maintain a persistent state: ColumnState(t).
+
+After each line, update:
+
+ColumnState(t+1) = f(ColumnState(t), Line_t)
+
+This state encodes what has been learned so far and provides context for the next line.
+
+Output Layer (L5 – Prediction/Action)
+
+From ColumnState, produce an output after each line:
+
+prediction
+
+classification
+
+feature representation
+
+or symbolic update (for 1/Z learning).
+
+Feedback Layer (L6 – Gain Control)
+
+Compute a gain or modulation signal from ColumnState:
+
+Gain(t+1) = g(ColumnState(t))
+
+Apply Gain(t+1) to the next line’s input before it enters L4.
+
+This mimics how Layer 6 modulates thalamic input.
+
+Learning Rules
+
+You can choose any of these styles:
+
+Hebbian + inhibitory balance
+
+STDP (spike-timing dependent plasticity)
+
+Event-driven 1/Z symbolic learning (each line is an event, ColumnState is Z-memory, updates are sparse and symbolic).
+
+Core Processing Loop (Pseudo-code)
+
+Below is a simple, copyable pseudo-code sketch:
+
+python
+# Initialize column state
+ColumnState = initialize_state()
+
+# lines: list of 4 lines, each line is a 3x3 grid or encoded vector
+for line in lines:  # process 4 lines sequentially
+
+    # Encode the line as input to Layer 4
+    L4_input = encode(line)  # e.g., flatten 3x3 to 9-dim vector
+
+    # Layer 6 feedback: modulate input based on current state
+    L4_input = apply_gain(L4_input, ColumnState)
+
+    # Layer 4 processing: local microcircuit transformation
+    L4_output = L4_microcircuit(L4_input)
+
+    # Layer 2/3 integration: update persistent context state
+    ColumnState = update_state(ColumnState, L4_output)
+
+    # Layer 5 output: prediction or learned representation
+    prediction = L5_output(ColumnState)
+
+    # Optionally store or use prediction
+    store(prediction)
+Function Roles (Conceptual)
+
+initialize_state():
+Creates the initial ColumnState (could be zeros, random, or symbolic baseline).
+
+encode(line):
+Converts a 3×3 grid into a vector or symbolic event.
+
+apply_gain(L4_input, ColumnState):
+Uses ColumnState to scale, filter, or transform the input (Layer 6 effect).
+
+L4_microcircuit(L4_input):
+Local transformation of input (could be a small network, rule-based, or symbolic mapping).
+
+update_state(ColumnState, L4_output):
+Core learning step; applies your chosen learning rule (Hebbian, STDP, 1/Z, etc.) to update ColumnState.
+
+L5_output(ColumnState):
+Reads out the current learned representation or prediction from ColumnState.
+
+store(prediction):
+Logs or uses the prediction for evaluation or downstream tasks.

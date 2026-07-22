@@ -1,0 +1,129 @@
+=========================================================
+CORTICAL COLUMN – FORMAL MATHEMATICAL SPECIFICATION (TEXT)
+=========================================================
+SYSTEM OVERVIEW
+The system processes a 3×3 binary input grid x_t, identifies its symbolic pattern s_t, selects a context assembly A_k, learns transitions T_{a→b}, predicts the next symbol, and generates a gain map g_t that multiplicatively modulates the next input. All learning is local, event‑driven, and symbol‑specific.
+
+INPUT
+x_t ∈ {0,1}^9
+Symbol set S = {H1, V1, D0, D1, END}
+
+Symbol mapping:
+H1 = cells {3,4,5}
+V1 = cells {1,4,7}
+D0 = cells {0,4,8}
+D1 = cells {2,4,6}
+
+EVENT‑DRIVEN NEURON MODEL
+Each neuron n has membrane potential V_n(t) and spike y_n(t):
+
+y_n(t) = 1 if V_n(t) ≥ θ_n
+y_n(t) = 0 otherwise
+
+Refractory:
+If (t − t_last_spike(n)) < τ_ref(n), then y_n(t) = 0.
+
+Membrane update:
+If y_n(t) = 1:
+V_n(t+1) = V_reset
+Else:
+V_n(t+1) = α V_n(t) + Σ_m w_mn y_m(t) + I_n(t)
+
+Learning is local: Δw_mn depends only on y_m(t) and y_n(t).
+
+LAYER 4 – SENSORY RELAY
+Gain vector g_t ∈ R^9
+Gain‑modulated input:
+x̃_t = g_t ⊙ x_t
+
+Layer 4 neuron input:
+I_L4_i(t) = x̃_t[i]
+
+Active L4 set:
+A_L4(t) = { i | y_L4_i(t) = 1 }
+
+Symbol identification:
+s_t = f_symbol(A_L4(t))
+
+LAYER 2/3 – CONTEXT ASSEMBLIES
+Assemblies: A_k for k ∈ {H1, V1, D0, D1}
+
+Drive terms:
+D_sens_k(t) = Σ{i ∈ A_L4(t)} w_sens(i,k)
+D_trans_k(t) = w_trans(s{t−1}, k)
+D_prior_k(t) = w_prior(k_prev, k)
+
+Total drive (multiplicative):
+D_k(t) = D_sens_k(t) * D_trans_k(t) * D_prior_k(t)
+
+Winner‑take‑all:
+k* = argmax_k D_k(t)
+A_k*(t) = 1, all others = 0
+
+Local Hebbian learning:
+Δw_sens(i,k) = η_sens * y_L4_i(t) * A_k(t)
+Δw_trans(s_{t−1},k) = η_trans * A_k(t)
+Δw_prior(k_prev,k) = η_prior * A_k(t) * A_k_prev(t−1)
+
+LAYER 5 – TRANSITION MEMORY AND PREDICTION
+Maintain counts:
+C_{a→b} ∈ N
+N_a = Σb C{a→b}
+
+When transition (s_t = a, s_{t+1} = b) occurs:
+C_{a→b} ← C_{a→b} + 1
+
+Prediction distribution:
+P(b | a) = C_{a→b} / N_a
+
+Predicted next symbol:
+ŝ_{t+1} = argmax_b P(b | s_t)
+
+Confidence:
+Conf(s_t) = max_b P(b | s_t)
+
+LAYER 6 – GAIN MAP
+If Conf(s_t) ≥ γ and ŝ{t+1} ≠ END:
+g{t+1,j} = 2.0 if cell j is active in ŝ{t+1}
+g{t+1,j} = 0.5 otherwise
+Else:
+g_{t+1,j} = 1.0 for all j
+
+Next input modulation:
+x̃{t+1} = g{t+1} ⊙ x_{t+1}
+
+COLUMN STATE
+State_t = (episode_id, position, s_{t−1}, A_k(t), ŝ_{t+1}, g_t, silence)
+
+Episode update:
+If ŝ_{t+1} = END or silence ≥ 5000 ms:
+episode_id ← episode_id + 1
+position ← 0
+Else:
+position ← position + 1
+
+Silence update:
+If x_t = 0: silence += Δt
+Else: silence = 0
+
+TENANT COMPLIANCE
+
+Firing is causal: all updates require y_n(t)=1
+
+Firing together wires together: Hebbian rules
+
+Local learning: Δw_mn depends only on local spikes
+
+Inhibitory/excitatory: encoded in w_mn signs and WTA
+
+Refractory: enforced via τ_ref
+
+1:1 symbol mapping: each assembly and transition is unique
+
+Continuous learning: updates occur every timestep
+
+Prediction: Layer 5 produces ŝ_{t+1}
+
+No global learning: no backprop, no global loss
+
+END OF SPECIFICATION
