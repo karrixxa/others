@@ -1,5 +1,8 @@
 # SNN
 
+> For the CIPP-centered technical retrospective, experiment history, agent-workflow
+> lessons, and evidence map, start with [`PROJECT_HISTORY.md`](PROJECT_HISTORY.md).
+
 A small, from-scratch spiking neural network for learning four overlapping 3×3
 line patterns. The model uses NumPy, local plasticity, no gradients, and no global
 error signal. Inhibition is **persistent conductance** (never a hard wipe), every
