@@ -113,3 +113,156 @@ def generate_layout(rng, n_pix: int, n_out: int) -> dict[str, np.ndarray]:
 
     pos['L2I'] = np.array([0.0, 0.0, L2I_Z]) + jitter(0.6, 0.6)
     return pos
+
+
+# --- tiled cortical-column functional layout --------------------------------
+# A SEPARATE, metadata-driven layout path. It never touches the legacy generator above,
+# so adding it consumes no RNG draws in legacy construction and cannot shift any golden.
+# It is parameterized entirely by column metadata + ordinary-E count N: no fixed "8 E",
+# "two layers", or one-character layer-id assumption. Repeated columns reuse one local
+# motif translated to a column center.
+TILE_PX = 2.2             # RGC pixel spacing on the retinal plane
+TILE_PATCH_GAP = 1.7      # extra gap between 3x3 patches (visible patch boundaries)
+TILE_LAYER_DZ = 11.0      # z rise per column layer above the RGC plane
+TILE_COL_SPREAD = 7.5     # column-center spacing within a layer's tile grid
+TILE_E_RING_R = 1.7       # ordinary-E ring radius inside a column
+TILE_ROLE_OFF = 2.9       # Eor/C/I offset from the column center
+_TILE_JITTER = 0.18       # small seeded jitter (reproducible scientific state)
+
+
+def _tile_axis(idx, count, patch, spacing, gap):
+    """Centered coordinate for grid cell ``idx`` of ``count`` with an added ``gap`` every
+    ``patch`` cells (so patch boundaries are visible)."""
+    raw = idx * spacing + (idx // patch) * gap
+    span = (count - 1) * spacing + ((count - 1) // patch) * gap
+    return raw - span / 2.0
+
+
+TILE_FEATURE_DZ = 4.4     # feature relay plane rise above the RGC surface
+TILE_FEATURE_C_OFF = 1.0  # paired feature C offset (feedback side) from its relay
+TILE_FEATURE_I_OFF = 1.0  # paired feature If offset (inhibitory side) from its relay
+
+
+def _place_feature_gates(pos, spec, in_rows, in_cols, p_rows, p_cols, jit) -> None:
+    """Place the feature-gated variant's relays/C/I: each feature relay S sits directly above
+    its paired RGC pixel (one plane up), with its paired C offset to the feedback (+y) side
+    and its paired If to the inhibitory (-z) side, so every relay->C->If->relay loop is
+    visually associated yet separated enough to inspect the paired edges. Derived entirely
+    from node metadata (input_row/input_col + column_role/feature_index), never from ids."""
+    for n in spec['nodes']:
+        role = n.get('column_role')
+        if role not in ('S', 'C', 'If'):
+            continue
+        gr, gc = n.get('input_row'), n.get('input_col')
+        if gr is None or gc is None:
+            # C/If carry no pixel; derive the relay's pixel plane from the paired S below.
+            continue
+        x = _tile_axis(gc, in_cols, p_cols, TILE_PX, TILE_PATCH_GAP)
+        y = -_tile_axis(gr, in_rows, p_rows, TILE_PX, TILE_PATCH_GAP)
+        pos[n['id']] = np.array([x, y, TILE_FEATURE_DZ]) + jit(0.08)
+    # C/If inherit their paired relay S position (by module + feature_index) plus an offset.
+    relay_pos = {}
+    for n in spec['nodes']:
+        if n.get('column_role') == 'S':
+            relay_pos[(n['column_id'], n.get('feature_index'))] = pos[n['id']]
+    for n in spec['nodes']:
+        role = n.get('column_role')
+        if role not in ('C', 'If'):
+            continue
+        base = relay_pos.get((n.get('column_id'), n.get('feature_index')))
+        if base is None:
+            continue
+        off = (np.array([0.0, TILE_FEATURE_C_OFF, 0.6]) if role == 'C'
+               else np.array([0.0, -TILE_FEATURE_I_OFF, -0.6]))
+        pos[n['id']] = base + off + jit(0.08)
+
+
+def generate_tiled_layout(rng, spec) -> dict[str, np.ndarray]:
+    """Deterministic functional coordinates for a tiled cortical-column graph, derived
+    from its ``topology`` metadata and per-node ``column_*`` / ``patch_*`` tags.
+
+    Layout: the RGC surface is one plane (z=0) with visible patch gaps; each column
+    layer rises by ``TILE_LAYER_DZ``; columns sit above their tile coordinates; inside
+    every column the ordinary E form a ring with Eor toward the next layer, C on the
+    feedback side and I on the inhibitory side."""
+    meta = spec['topology']
+    ishape, pshape = meta['input_shape'], meta['patch_shape']
+    in_rows, in_cols = ishape['rows'], ishape['cols']
+    p_rows, p_cols = pshape['rows'], pshape['cols']
+    # layer order (RGC-adjacent first) -> z index used for the column-center height.
+    layer_z = {}
+    for k, layer in enumerate(meta.get('column_layers', [])):
+        layer_z[layer['layer']] = (k + 1) * TILE_LAYER_DZ
+
+    def jit(scale=_TILE_JITTER):
+        return np.array([rng.uniform(-scale, scale) for _ in range(3)])
+
+    pos: dict[str, np.ndarray] = {}
+    node_by_id = {n['id']: n for n in spec['nodes']}
+
+    # RGC plane.
+    for n in spec['nodes']:
+        if n['archetype'] != 'rg_source':
+            continue
+        gr, gc = n['input_row'], n['input_col']
+        x = _tile_axis(gc, in_cols, p_cols, TILE_PX, TILE_PATCH_GAP)
+        y = -_tile_axis(gr, in_rows, p_rows, TILE_PX, TILE_PATCH_GAP)
+        pos[n['id']] = np.array([x, y, 0.0]) + jit(0.05)
+
+    # Feature-gated variant: place the feature relays directly above their paired RGC, with
+    # the paired C/I visibly associated but offset for edge inspection, then the competitor
+    # banks/L2 via the shared column placement below.
+    if meta.get('variant') == 'feature_gated':
+        _place_feature_gates(pos, spec, in_rows, in_cols, p_rows, p_cols, jit)
+
+    # column layout: gather the competitor-bank members per column (E ring + Eor + WTA I).
+    # Feature relays/C/I (roles S/C/If in the feature-gated variant) are placed above by
+    # ``_place_feature_gates`` and skipped here; only the classic single column C (role 'C'
+    # with no feature_index) is placed as a column role below.
+    columns = {c['id']: c for c in meta['columns']}
+    members = {cid: dict(E=[], Eor=None, C=None, I=None) for cid in columns}
+    for n in spec['nodes']:
+        role = n.get('column_role')
+        if role is None or role in ('S', 'If'):
+            continue
+        if role == 'C' and n.get('feature_index') is not None:
+            continue                                  # a feature C, already placed above
+        slot = members[n['column_id']]
+        if role == 'E':
+            slot['E'].append(n['id'])
+        else:
+            slot[role] = n['id']
+
+    # column-layer tile extents, so each layer's columns are centered over the surface.
+    layer_grid = {L['layer']: (L['rows'], L['cols']) for L in meta.get('column_layers', [])}
+    for cid, c in columns.items():
+        layer = c['layer']
+        gr, gc = layer_grid.get(layer, (1, 1))
+        cx = _tile_axis(c['col'], gc, max(gc, 1), TILE_COL_SPREAD, 0.0)
+        cy = -_tile_axis(c['row'], gr, max(gr, 1), TILE_COL_SPREAD, 0.0)
+        cz = layer_z.get(layer, TILE_LAYER_DZ)
+        center = np.array([cx, cy, cz])
+        e_ids = members[cid]['E']
+        n_e = max(len(e_ids), 1)
+        for i, eid in enumerate(e_ids):
+            angle = 2.0 * math.pi * i / n_e
+            pos[eid] = center + np.array([TILE_E_RING_R * math.cos(angle),
+                                          TILE_E_RING_R * math.sin(angle),
+                                          0.0]) + jit()
+        # Eor and I both sit on the ring's central axis (the middle of the ordinary-E
+        # pool) on opposite sides: Eor toward the next layer (+z), I on the far side
+        # (-z). C stays off to the feedback (+y) side. All distinct and non-coincident
+        # with the ring. Display only -- the I neuron has no feedforward edges, so its
+        # position never enters the 1/d^2 learning-rate factor.
+        pos[members[cid]['Eor']] = center + np.array([0.0, 0.0, TILE_ROLE_OFF]) + jit()
+        if members[cid]['C'] is not None:            # classic column C (absent in feature-gated)
+            pos[members[cid]['C']] = center + np.array(
+                [TILE_ROLE_OFF, TILE_ROLE_OFF, 0.9]) + jit()
+        pos[members[cid]['I']] = center + np.array([0.0, 0.0, -TILE_ROLE_OFF]) + jit()
+
+    # Any node the metadata did not place (defensive) gets a deterministic offset rather
+    # than the zero placeholder.
+    for n in spec['nodes']:
+        if n['id'] not in pos:
+            pos[n['id']] = np.array([0.0, 0.0, -3.0]) + jit()
+    return pos

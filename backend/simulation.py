@@ -99,10 +99,14 @@ from snn.neurons import (  # noqa: E402
     I_THRESHOLD,
     E_WEIGHT_CAP,
     leak_to_conductance,
+    _validate_dual_params,
 )
-from backend.layout import generate_layout, grid_dims  # noqa: E402
+from backend.layout import generate_layout, generate_tiled_layout, grid_dims  # noqa: E402
 from backend.network_spec import (  # noqa: E402
     preset_spec, validate_spec, ARCHETYPES, I_THRESHOLD_FRAC,
+    tiled_cc_spec, tiled_cc_feature_gated_spec, rg_direct_cc4_spec,
+    embed_patch_pattern, tiled_input_size,
+    TILED_FAMILY, TILED_CC_DEFAULTS, TILED_PRESETS,
 )
 
 
@@ -119,6 +123,8 @@ PATTERNS = {
 # 3x3 (n_pix=9) demo stimuli; a differently sized engine simply supplies its own input.
 N_PIX = 9
 N_OUT = 8
+# Fixed tiled_cc input surface (9x9 = 81 pixels); its column bank is sized by cc_e_count.
+TILED_CC_INPUT = TILED_CC_DEFAULTS['input_rows'] * TILED_CC_DEFAULTS['input_cols']
 
 # --- Excitatory initialization (production learning rule: linear-bounded) ---
 # Frozen sensory afferent weight = theta/3: a FIXED gain (one sensory afferent delivers a
@@ -137,18 +143,23 @@ LOG_MAX = 400
 SYNAPTIC_DELAY = 1                                 # integer delay on every internal projection
 
 LEAK_DEFAULT = 0.03
-# Shared accumulating-weight cap = theta/2: a FIXED gain (no single afferent may hold more
-# than half of theta), not derived from the input/output counts. Overridable via config.
-E_WEIGHT_CAP_DEFAULT = E_THRESHOLD / 2.0           # 500
+# LEGACY / HEADLESS-ONLY: a per-synapse cap on ordinary-E weights. Production learning is
+# now cap-free (`linear_fe`): the neuron-wide FE budget supplies saturation, so ordinary-E
+# weights have a zero floor and NO individual upper bound (see snn.neurons). This value is
+# retained ONLY as `w_max` for the headless bounded regression modes (linear_bounded /
+# quadratic_bounded); it has NO effect on production init, learning, or /api/weight edits,
+# and is not a dashboard control.
+E_WEIGHT_CAP_DEFAULT = E_THRESHOLD / 2.0           # 500 (legacy; headless bounded modes only)
 DEFAULTS = dict(
     seed=1,
     n_pix=N_PIX,                                   # input count (construction-time; not runtime-editable)
     n_out=N_OUT,                                   # competitor/output count (construction-time)
+    cc_e_count=TILED_CC_DEFAULTS['cc_e_count'],    # tiled_cc: ordinary E per column (>=1)
     e_threshold=E_THRESHOLD,
-    e_weight_cap=E_WEIGHT_CAP_DEFAULT,             # 500 = theta/2 (shared accumulating cap)
+    e_weight_cap=E_WEIGHT_CAP_DEFAULT,             # LEGACY/headless w_max for bounded modes only (no production effect)
     e_weight_floor=0.0,                            # lower clip on learned weights (0 = legacy)
     # --- linear weight-update ablation (headless; defaults reproduce production) ---
-    e_weight_update_mode='linear_bounded',         # PRODUCTION default (promoted); also: quadratic_bounded (historical) | linear_nonnegative (cap-free diagnostic)
+    e_weight_update_mode='linear_fe',              # PRODUCTION default (cap-free FE, floor-only); also: linear_bounded | quadratic_bounded (historical headless, capped)
     c_weight_update_mode='c_linear_bounded',       # PRODUCTION default (multiplier dropped); also: c_quadratic_bounded (historical) | c_linear_nonnegative (cap-free diagnostic)
     # Learning budget target for the E/L2E accumulating rule as a multiple of the firing
     # threshold (>= 1.0). >1.0 gives a matured single-pattern specialist budget headroom so
@@ -163,7 +174,18 @@ DEFAULTS = dict(
     leak_rate=LEAK_DEFAULT,                        # -> baseline leak conductance g_L
     refractory_steps=0,
     input_period=1,
-    topology='pi',                                 # preset selector (see VALID_TOPOLOGIES)
+    topology='rg_coincidence',                     # default preset selector (see VALID_TOPOLOGIES)
+
+    # --- experimental dual node/synapse free-energy learning rule (one dashboard flag) ---
+    # When enabled, BOTH ordinary/latency E feedforward learning (LR=eta) AND coincidence
+    # basal learning (LR=c_eta) switch to the inverse-quadratic dual FE/FES rule; plastic
+    # weights initialize at the FES middle theta/4, floor at the raw wte, and have NO upper
+    # cap. Off = the production budget-FE rule, byte-identical. e/wte/B stay validated
+    # engine/headless parameters (NOT extra dashboard sliders) for declared sensitivity runs.
+    dual_fe_fes=False,                             # THE experimental toggle (rebuild wipes learned state)
+    dual_fe_e=0.001,                               # FE floor e (0 < e <= 1)
+    dual_fe_wte=0.001,                             # FES floor / weight floor wte (0 < wte <= 1)
+    dual_fe_B=5.0,                                 # inverse-quadratic sharpness B (finite, >= 0)
 
     # --- conductance / trace (membrane) ---
     # Inhibitory-conductance retention is deliberately SPLIT by target population so
@@ -234,21 +256,18 @@ DEFAULTS = dict(
     pretrained_exc_margin=1.05,                    # RG->L1E fixed packet / (theta/kappa)
     crossing_time_tolerance=1e-12,                 # fixed numeric tie tolerance (not a control)
 )
-# Keys a browser/experiment config-apply may change. Everything else is derived.
+# Keys the browser/dashboard config-apply may change. Exactly the retained dashboard
+# controls that affect at least one of the three current presets. Every other DEFAULTS
+# key stays a construction-time / headless-only parameter (settable via the constructor
+# for experiments and low-level tests, but NOT accepted from the browser apply path):
+# the dashboard cannot spin up PI/SwitchI/residual/encoder/legacy-conductance behavior or
+# extra population-size variants (cc_e_count) -- the two tiled presets fix those sizes.
 EDITABLE_KEYS = {
-    'eta', 'leak_rate', 'refractory_steps', 'e_weight_cap', 'input_period',
-    'topology', 'alpha_inh', 'alpha_inh_l1', 'alpha_a', 'beta_v', 'beta_s',
-    'a_max', 'e_inh', 'pi_eta', 'pi_w_max', 'pi_lt_decay', 'pi_g_scale',
-    'pi_conductance_enabled', 'pi_plasticity_enabled', 'l2i_g_scale',
-    'enc_plasticity_enabled', 'enc_init_jitter', 'enc_w_init',
-    'residual_exc_scale', 'switch_trace_decay', 'switch_trace_threshold',
-    'switch_residual_charge_frac', 'switch_trace_charge_frac',
-    'switch_g_scale', 'switch_conductance_enabled',
-    'c_eta', 'c_fe_enabled', 'l2_init_total_frac', 'e_weight_floor',
-    'e_weight_update_mode', 'c_weight_update_mode', 'e_maturity_budget_frac',
-    'c_maturity_budget_frac',
+    'topology', 'leak_rate', 'refractory_steps', 'eta', 'c_eta', 'l2_init_total_frac',
+    'dual_fe_fes',
 }
-VALID_TOPOLOGIES = ('pi', 'old', 'rg', 'rg_residual', 'rg_coincidence')
+VALID_TOPOLOGIES = ('rg_coincidence', 'tiled_cc', 'tiled_cc_l1_4', 'tiled_cc_feature_gated',
+                    'rg_direct_cc4')
 
 
 class BoundaryEventScheduler:
@@ -323,26 +342,50 @@ class SimulationEngine:
             raise ValueError('l2_init_total_frac must satisfy 0 < rho < 1')
         if params['c_eta'] is not None and float(params['c_eta']) < 0.0:
             raise ValueError('c_eta must be non-negative or None')
+        # Validate the experimental dual FE/FES parameters up front (also enforced in the
+        # neuron constructors) so a bad e/wte/B fails at construction, not mid-run.
+        _validate_dual_params(params['dual_fe_e'], params['dual_fe_wte'], params['dual_fe_B'])
+        params['dual_fe_fes'] = bool(params['dual_fe_fes'])
         params['n_pix'] = int(params['n_pix'])
         params['n_out'] = int(params['n_out'])
+        params['cc_e_count'] = int(params['cc_e_count'])
         if params['n_pix'] < 1 or params['n_out'] < 1:
             raise ValueError('n_pix and n_out must both be >= 1')
-        # Construction-time counts (not in EDITABLE_KEYS): a rebuild reads these from params.
-        self.n_pix = params['n_pix']
-        self.n_out = params['n_out']
+        if params['cc_e_count'] < 1:
+            raise ValueError('cc_e_count must be >= 1')
+        # The base legacy construction dims a rebuild resolves back to whenever a legacy
+        # preset is active. The tiled_cc preset overrides these to its fixed 81-input
+        # surface (see _resolve_dims); its column bank is sized by cc_e_count, not n_out.
+        self._base_n_pix = params['n_pix']
+        self._base_n_out = params['n_out']
+        # The canonical tiled input surface is fixed; a headless n_pix override that
+        # disagrees with 81 must fail loudly rather than build a partly tiled graph.
+        if params['topology'] in TILED_PRESETS and 'n_pix' in overrides \
+                and self._base_n_pix != TILED_CC_INPUT:
+            raise ValueError(
+                f'{params["topology"]} has a fixed {TILED_CC_DEFAULTS["input_rows"]}x'
+                f'{TILED_CC_DEFAULTS["input_cols"]} ({TILED_CC_INPUT}) input surface; '
+                f'do not override n_pix (got {self._base_n_pix}). Use cc_e_count to size '
+                f'the columns, or a custom tiled spec for other shapes.')
         self.params = params
         self._custom_spec = None       # a user/editor NetworkSpec overrides the preset when set
+        self._patch = None             # tiled: selected (row,col) patch for local patterns
         self._build()
 
     # ================================================================ build
     def _mkE(self, nid, role, acc_weights, acc_distance_factor, *, learn, alpha_inh):
         p = self.params
+        # The single dual FE/FES flag switches the ordinary/latency-E learning family; off =
+        # the configured production/headless mode, byte-identical.
+        update_mode = 'dual_fe_fes' if p['dual_fe_fes'] else str(p['e_weight_update_mode'])
         return ExcitatoryNeuron(
             nid, role, acc_weights=acc_weights, acc_distance_factor=acc_distance_factor,
             threshold=float(p['e_threshold']), w_max=float(p['e_weight_cap']),
             w_floor=float(p['e_weight_floor']),
-            update_mode=str(p['e_weight_update_mode']),
+            update_mode=update_mode,
             maturity_budget_frac=float(p['e_maturity_budget_frac']),
+            dual_e=float(p['dual_fe_e']), dual_wte=float(p['dual_fe_wte']),
+            dual_B=float(p['dual_fe_B']),
             leak_rate=float(p['leak_rate']), refractory_steps=int(p['refractory_steps']),
             eta=float(p['eta']), learn=learn,
             e_inh=float(p['e_inh']), alpha_inh=float(alpha_inh),
@@ -376,11 +419,21 @@ class SimulationEngine:
             raise ValueError(f'c_basal_window_steps must be >= 1, got {T}')
         w2 = theta / (kappa * (1.0 + r ** T))
         w1 = theta / kappa
-        c_init = (1.01 * w2 if p['c_basal_weight_init'] is None
-                  else float(p['c_basal_weight_init']))
+        # Dual FE/FES: the plastic basal weight initializes at the FES maximum-plasticity
+        # middle theta/4 (same as ordinary E). The learning update is cap-free (floor wte);
+        # c_max is retained only as the manual-edit clip and is set well above the middle so
+        # it never binds during learning.
+        dual = bool(p['dual_fe_fes'])
+        if dual and p['c_basal_weight_init'] is None:
+            c_init = 0.25 * theta
+        else:
+            c_init = (1.01 * w2 if p['c_basal_weight_init'] is None
+                      else float(p['c_basal_weight_init']))
         c_frac = float(p['c_maturity_budget_frac'])
         c_max = (c_frac * w1 if p['c_basal_weight_max'] is None
                  else float(p['c_basal_weight_max']))
+        if dual:
+            c_max = max(c_max, 4.0 * theta)        # non-binding edit clip; dual learning has no cap
         if c_init > c_max:
             raise ValueError(
                 f'c_basal_weight_init ({c_init:.4f}) must be <= c_basal_weight_max '
@@ -390,17 +443,41 @@ class SimulationEngine:
         return dict(w1=w1, w2=w2, kappa=kappa, c_init=c_init, c_max=c_max,
                     c_eta=c_eta, q_pretrained=q_pretrained)
 
+    def _resolve_dims(self):
+        """Centralized construction-dimension resolution (the ONLY place preset-name /
+        family branching for size is allowed). Legacy presets resolve to their base
+        n_pix/n_out; tiled_cc resolves to the fixed 81-input surface and sizes its
+        columns from cc_e_count; a tiled custom spec derives n_pix from its declared
+        input_shape."""
+        p = self.params
+        cc = int(p['cc_e_count'])
+        if cc < 1:
+            raise ValueError('cc_e_count must be >= 1')
+        self.cc_e_count = cc
+        self.n_out = self._base_n_out
+        custom = self._custom_spec
+        if custom is not None:
+            meta = custom.get('topology')
+            if isinstance(meta, dict) and meta.get('family') == TILED_FAMILY:
+                ishape = meta['input_shape']
+                self.n_pix = int(ishape['rows']) * int(ishape['cols'])
+            else:
+                self.n_pix = self._base_n_pix
+        elif p['topology'] in TILED_PRESETS:
+            self.n_pix = TILED_CC_INPUT
+        else:
+            self.n_pix = self._base_n_pix
+
     def _build(self):
         p = self.params
+        self._resolve_dims()                          # -> self.n_pix, self.n_out, self.cc_e_count
         rng = np.random.default_rng(p['seed'])
-        self.n_pix = int(p['n_pix'])
-        self.n_out = int(p['n_out'])
         # Per-afferent feedforward init scale derived from THIS engine's input count, so
         # the initial row total is FF_INIT_TOTAL_FRAC*theta for any n_pix (= FF_INIT_MEAN
-        # at the default n_pix=9).
+        # at the default n_pix=9). For tiled event-plastic E rows this only sets the
+        # jitter direction; the row is then normalized per its own fan-in.
         self.ff_init_mean = FF_INIT_TOTAL_FRAC * float(p['e_threshold']) / self.n_pix
 
-        self.pos = generate_layout(rng, self.n_pix, self.n_out)  # full functional layout (preset ids)
         thr = float(p['e_threshold'])
         cap = float(p['e_weight_cap'])
 
@@ -408,25 +485,79 @@ class SimulationEngine:
         if self._custom_spec is not None:
             spec = validate_spec(self._custom_spec, self.n_pix)
             self.mode = spec.get('name') or 'custom'
+        elif p['topology'] == 'tiled_cc':
+            self.mode = 'tiled_cc'
+            spec = validate_spec(tiled_cc_spec(cc_e_count=self.cc_e_count), self.n_pix)
+        elif p['topology'] == 'tiled_cc_l1_4':
+            # Fixed-shape tiled variant (L1=4, L2=8); does not read cc_e_count.
+            self.mode = 'tiled_cc_l1_4'
+            spec = validate_spec(preset_spec('tiled_cc_l1_4', self.n_pix, self.n_out),
+                                 self.n_pix)
+        elif p['topology'] == 'tiled_cc_feature_gated':
+            # Fixed-shape feature-gated variant (L1=8, L2=8, nine feature C/I gates per
+            # 3x3 RF + a separate WTA I); does not read cc_e_count.
+            self.mode = 'tiled_cc_feature_gated'
+            spec = validate_spec(tiled_cc_feature_gated_spec(), self.n_pix)
+        elif p['topology'] == 'rg_direct_cc4':
+            # Direct 3x3 RGC -> four ordinary E + one central WTA I (dual FE/FES experiment).
+            self.mode = 'rg_direct_cc4'
+            spec = validate_spec(rg_direct_cc4_spec(n_pix=self.n_pix), self.n_pix)
         else:
-            self.mode = str(p['topology'])             # 'pi' | 'old'
+            self.mode = str(p['topology'])             # 'pi' | 'old' | 'rg' | ...
             spec = preset_spec(self.mode, self.n_pix, self.n_out)
         self.spec = spec
+        # Tiled topology metadata drives layout, per-target distance scope, column
+        # diagnostics and dimension serialization -- keyed on metadata, never the name.
+        self.tiled_meta = (spec.get('topology')
+                           if isinstance(spec.get('topology'), dict)
+                           and spec['topology'].get('family') == TILED_FAMILY else None)
+        # Functional layout: metadata-driven tiled path vs the legacy seeded generator.
+        if self.tiled_meta is not None:
+            self.pos = generate_tiled_layout(rng, spec)
+        else:
+            self.pos = generate_layout(rng, self.n_pix, self.n_out)
         self._build_from_spec(spec, rng, thr, cap)
 
         # ---- runtime state ----
         self.timestep = 0
         self.winner = None
+        # Resolve the tiled patch selector (default the center patch) so the active
+        # pattern bank is topology-sized. Kept stable across rebuilds when still valid.
+        if self.tiled_meta is not None:
+            grows = self.tiled_meta.get('grid_shape', {}).get('rows', 1)
+            gcols = self.tiled_meta.get('grid_shape', {}).get('cols', 1)
+            if (self._patch is None
+                    or not (0 <= self._patch[0] < grows and 0 <= self._patch[1] < gcols)):
+                self._patch = (grows // 2, gcols // 2)
+        else:
+            self._patch = None
+        # Per-patch pattern assignments (tiled composition): {(patch_row, patch_col): name}.
+        # A fresh build starts blank; drop any stale patches outside the new grid.
+        prev = getattr(self, '_patch_patterns', {})
+        if self.tiled_meta is not None:
+            self._patch_patterns = {
+                (pr, pc): n for (pr, pc), n in prev.items()
+                if 0 <= pr < self.tiled_meta['grid_shape']['rows']
+                and 0 <= pc < self.tiled_meta['grid_shape']['cols']}
+        else:
+            self._patch_patterns = {}
         # The built-in PATTERNS are the 3x3 (9-pixel) demo stimuli. Use one as the initial
         # input only when it fits this engine's input count (preserves the 9/8 goldens);
-        # any other size boots to a blank input the caller fills via set_input.
-        first = next(iter(PATTERNS))
-        if len(PATTERNS[first]) == self.n_pix:
+        # any other size (tiled 81-input included) boots blank, filled via set_input /
+        # a topology-sized pattern.
+        bank = self._active_patterns()
+        first = next(iter(bank)) if bank else None
+        if first is not None and len(bank[first]) == self.n_pix \
+                and self.tiled_meta is None:
             self.current_pattern = first
-            self.input_vec = np.array(PATTERNS[first], dtype=float)
+            self.input_vec = np.array(bank[first], dtype=float)
         else:
             self.current_pattern = None
             self.input_vec = np.zeros(self.n_pix)
+        # A tiled rebuild that carried per-patch assignments re-drives them, so an apply
+        # (e.g. toggling the dual rule) keeps the composed stimulus while wiping learned state.
+        if self.tiled_meta is not None and self._patch_patterns:
+            self._rebuild_patch_input()
         self.spiked = {nid: False for nid in self.neurons}
         self._spike_hist = {nid: deque(maxlen=FREQ_WINDOW) for nid in self.neurons}
         self.changed_synapses = []
@@ -452,6 +583,9 @@ class SimulationEngine:
         # Event-path per-boundary diagnostics (exposed via dynamic state in Phase 6).
         self.hard_reset_events = []
         self.latency_ties = []
+        # Per-column ordinary-E winners this boundary: column_id -> {id, tau}. Ten
+        # independent local WTAs cannot be described by the single legacy ``winner``.
+        self.column_winners = {}
         self._crossing_capture = None       # opt-in counterfactual-crossing snapshot sink
 
     def _distance_factors(self, sources, targets):
@@ -516,62 +650,76 @@ class SimulationEngine:
         # pi/old are untouched; with two hops it stops the short RG->L1E projection from
         # rescaling every L1E->L2E factor, which would silently make `rg`'s L2 learning
         # non-comparable to `old`'s.
-        ff_dists, ff_tgt_arch = {}, {}
+        ff_dists, ff_tgt_arch, ff_tgt_id = {}, {}, {}
         for e in dedges:
             if e['kind'] != 'feedforward':
                 continue
             ff_dists[e['id']] = float(np.linalg.norm(pos[e['source']] - pos[e['target']]))
             ff_tgt_arch[e['id']] = node_by_id[e['target']]['archetype']
+            ff_tgt_id[e['id']] = e['target']
         d_ref_by_arch = {}
         for eid, d in ff_dists.items():
             if d > 0:
                 a = ff_tgt_arch[eid]
                 d_ref_by_arch[a] = min(d_ref_by_arch.get(a, d), d)
+        # Per-TARGET reference for the tiled family: each plastic target's closest positive
+        # incoming feedforward distance scores 1.0, so a short within-column edge can never
+        # rescale a long inter-layer projection's learning rate (and vice versa). Gated on
+        # validated tiled metadata; legacy presets keep the per-archetype reference verbatim.
+        tiled_dist_scope = self.tiled_meta is not None
+        d_ref_by_tgt = {}
+        if tiled_dist_scope:
+            for eid, d in ff_dists.items():
+                if d > 0:
+                    t = ff_tgt_id[eid]
+                    d_ref_by_tgt[t] = min(d_ref_by_tgt.get(t, d), d)
 
         def ff_factor(eid):
-            d_ref = d_ref_by_arch.get(ff_tgt_arch[eid], 1.0)
+            if tiled_dist_scope:
+                d_ref = d_ref_by_tgt.get(ff_tgt_id[eid], 1.0)
+            else:
+                d_ref = d_ref_by_arch.get(ff_tgt_arch[eid], 1.0)
             return (d_ref / max(ff_dists[eid], d_ref)) ** DISTANCE_POWER
 
         # ---- construct neurons per archetype (plastic cells draw jitter in node order) ----
+        # Ordinary-E init is cap-free: floor at 0 only, never clipped to a per-synapse
+        # ceiling (production learning is likewise cap-free; the FE budget saturates totals).
         def jitter(mean, size):
             j = rng.uniform(1.0 - INIT_JITTER_FRAC, 1.0 + INIT_JITTER_FRAC, size=size)
-            return np.clip(mean * j, 0.0, cap)
+            return np.maximum(mean * j, 0.0)
 
         def normalized_latency_row(raw):
-            """Preserve seeded direction while setting a common latency-WTA total.
+            """Preserve seeded direction while setting a common latency-WTA row total.
 
-            A full coincidence bank has nine afferents and reaches exactly
-            ``l2_init_total_frac * theta``. A smaller custom bank cannot exceed its
-            physical ``n_afferents * cap`` capacity; the bounded proportional fill
-            handles that case without making valid editor graphs unbuildable.
+            Each row is scaled so its afferents sum to exactly ``l2_init_total_frac * theta``
+            (equal initial free energy), preserving the seeded within-row jitter direction.
+            No per-synapse cap and no water-filling: an individual seeded weight may take any
+            nonnegative value, and the neuron-wide FE budget -- not a ceiling -- bounds totals.
             """
-            raw = np.asarray(raw, dtype=float)
+            raw = np.maximum(np.asarray(raw, dtype=float), 0.0)
             if raw.size == 0:
                 return raw
-            target = min(float(p['l2_init_total_frac']) * thr, raw.size * cap)
-            out = np.zeros_like(raw)
-            active = np.ones(raw.size, dtype=bool)
-            remaining = target
-            while np.any(active):
-                active_sum = float(raw[active].sum())
-                if active_sum <= 0.0:
-                    out[active] = remaining / int(active.sum())
-                    break
-                proposal = raw[active] * (remaining / active_sum)
-                over = proposal > cap
-                if not np.any(over):
-                    out[active] = proposal
-                    break
-                active_idx = np.flatnonzero(active)
-                capped_idx = active_idx[over]
-                out[capped_idx] = cap
-                remaining -= cap * len(capped_idx)
-                active[capped_idx] = False
-            return out
+            target = float(p['l2_init_total_frac']) * thr
+            s = float(raw.sum())
+            if s <= 0.0:
+                return np.full(raw.size, target / raw.size)
+            return raw * (target / s)
 
         ff_mean = self.ff_init_mean                    # per-afferent init, derived from n_pix
         enc_mean = ff_mean if p['enc_w_init'] is None else float(p['enc_w_init'])
         enc_jitter = bool(p['enc_init_jitter'])
+
+        # Dual FE/FES init: every plastic feedforward weight starts at the FES
+        # maximum-plasticity middle theta/4, with only the existing deterministic seeded
+        # jitter to break exact ties, floored at the raw wte and NOT row-normalized (there
+        # is no cap and no FE budget to normalize against in this mode).
+        dual = bool(p['dual_fe_fes'])
+        dual_mean = 0.25 * thr
+        dual_wte = float(p['dual_fe_wte'])
+
+        def dual_row(size):
+            return np.maximum(dual_mean * rng.uniform(
+                1.0 - INIT_JITTER_FRAC, 1.0 + INIT_JITTER_FRAC, size=size), dual_wte)
 
         # ---- plastic feedforward initialization, drawn up front -------------------
         # Ordinary competitors and encoders retain the historical per-afferent scale.
@@ -599,15 +747,19 @@ class SimulationEngine:
                 if not srcs:
                     ff_w[n['id']] = np.zeros(0)
                     continue
-                if arch_pass == 'e_competitor':
+                if dual:
+                    # One draw per row in the same by-archetype order, so toggling the flag
+                    # changes only the init values, never the RNG cursor for other cells.
+                    ff_w[n['id']] = dual_row(len(srcs))
+                elif arch_pass == 'e_competitor':
                     ff_w[n['id']] = jitter(ff_mean, len(srcs))
                 elif arch_pass == 'e_latency_competitor':
                     ff_w[n['id']] = normalized_latency_row(
                         jitter(ff_mean, len(srcs)))
                 else:
                     j = jitter(enc_mean, len(srcs))
-                    ff_w[n['id']] = j if enc_jitter else np.clip(
-                        np.full(len(srcs), enc_mean), 0.0, cap)
+                    ff_w[n['id']] = j if enc_jitter else np.maximum(
+                        np.full(len(srcs), enc_mean), 0.0)   # cap-free ordinary-E init
 
         # ---- coincidence dendrite wiring: one basal + >=1 apical afferent per C cell.
         # d_ref for the basal distance influence is the smallest positive basal-edge
@@ -628,10 +780,17 @@ class SimulationEngine:
                         f'duplicate parallel apical edge {e["source"]!r}->{e["target"]!r}')
                 apical_pairs.add(pair)
                 apical_in_map.setdefault(e['target'], []).append((e['source'], e['id']))
-        _basal_positive = [d for d in basal_dist.values() if d > 0]
-        d_ref_basal = min(_basal_positive) if _basal_positive else 1.0
-        basal_phi = {t: (d_ref_basal / max(d, d_ref_basal)) ** DISTANCE_POWER
-                     for t, d in basal_dist.items()}
+        if tiled_dist_scope:
+            # Per-target basal reference: every C's own single Eor->C basal edge is its
+            # reference, so one spatially distant column never loses learning merely
+            # because another column's Eor/C happen to sit closer. Delivered charge is
+            # unaffected -- geometry changes the C basal learning rate only.
+            basal_phi = {t: 1.0 for t in basal_dist}
+        else:
+            _basal_positive = [d for d in basal_dist.values() if d > 0]
+            d_ref_basal = min(_basal_positive) if _basal_positive else 1.0
+            basal_phi = {t: (d_ref_basal / max(d, d_ref_basal)) ** DISTANCE_POWER
+                         for t, d in basal_dist.items()}
 
         # Resolve C basal weight scale + pretrained packet only when this graph uses
         # them; a legacy graph never pays the cost and never risks the invariant check.
@@ -716,8 +875,11 @@ class SimulationEngine:
                     basal_weight=cpar['c_init'], basal_distance_factor=basal_phi.get(nid, 1.0),
                     w_max=cpar['c_max'], eta_c=cpar['c_eta'], learn=True,
                     use_fe=bool(p['c_fe_enabled']),
-                    update_mode=str(p['c_weight_update_mode']),
+                    update_mode=('c_dual_fe_fes' if p['dual_fe_fes']
+                                 else str(p['c_weight_update_mode'])),
                     maturity_budget_frac=float(p['c_maturity_budget_frac']),
+                    dual_e=float(p['dual_fe_e']), dual_wte=float(p['dual_fe_wte']),
+                    dual_B=float(p['dual_fe_B']),
                     threshold=thr, leak_rate=float(p['leak_rate']),
                     refractory_steps=int(p['refractory_steps']),
                     e_inh=float(p['e_inh']), alpha_inh=alpha_l1,
@@ -851,10 +1013,19 @@ class SimulationEngine:
                 m['pixel'] = int(gridcell)
             if n.get('pixel') is not None:
                 m['owns_input'] = True             # this cell is the external input sink
+            # Carry recognized tiled node metadata into the serialized meta so the
+            # dashboard groups/labels by column and role WITHOUT parsing ids.
+            for f in ('column_id', 'column_role', 'column_index', 'column_row',
+                      'column_col', 'patch', 'patch_id', 'patch_row', 'patch_col',
+                      'patch_local_row', 'patch_local_col', 'input_row', 'input_col',
+                      'feature_index', 'has_parent'):
+                if n.get(f) is not None:
+                    m[f] = n[f]
             meta[n['id']] = m
         self.meta = meta
         self.synapses = [dict(id=e['id'], source=e['source'], target=e['target'],
                               kind=e['kind'], **({'sign': e['sign']} if 'sign' in e else {}),
+                              **({'projection': e['projection']} if e.get('projection') else {}),
                               **({'directed': False} if not e.get('directed', True) else {}))
                          for e in edges]
         # weight lookups for serialization: edge_id -> (cell, weight_index)
@@ -878,7 +1049,15 @@ class SimulationEngine:
             for widx, src in enumerate(cell.ff_src):
                 self._ff_out.setdefault(src, []).append(
                     (cell.id, widx, cell.ff_edge_ids[widx]))
+        # Event-resolved plastic-E ids that LEARN on their own firing (not just latency
+        # competitors: every event-resolved plastic E, incl. every tiled ordinary E and
+        # Eor). Derived from archetype capability, never an id/layer/"L2 competitor" list.
         self._latency_ids = {c.id for c in self.latency_competitors}
+        # Column metadata maps (tiled diagnostics + column-winner recording). Simulation
+        # reads these, never the node ids. Empty for non-tiled graphs.
+        self._column_of = {n['id']: n.get('column_id') for n in nodes}
+        self._role_of = {n['id']: n.get('column_role') for n in nodes}
+        self._ordinary_e_ids = {nid for nid, r in self._role_of.items() if r == 'E'}
 
     # ============================================================== stepping
     def _begin_step(self):
@@ -1188,6 +1367,7 @@ class SimulationEngine:
         self.inhibitory_pulses = []
         self.hard_reset_events = []
         self.latency_ties = []
+        self.column_winners = {}
         self.winner = None
 
     def _fire_event_cell(self, cell, tau):
@@ -1201,10 +1381,19 @@ class SimulationEngine:
             self.changed_synapses.append(
                 dict(id=cell.basal.edge_ids[0], weight=round(float(cell.basal_weight), 6)))
         elif cell.id in self._latency_ids:
+            # Every fired event-resolved plastic E learns its own delivered volley -- this
+            # covers every tiled ordinary E AND every Eor, keyed on the plastic archetype
+            # (via _latency_ids), never on an id prefix, layer, or "L2 competitor" list.
             cell.update_acc_weights(self._participation(cell))
             self._emit_ff_weight_changes(cell)
             if self.winner is None:                  # report-only first latency spike
                 self.winner = cell.id
+            # Per-column winner: the first ORDINARY-E (role 'E', never Eor/C) spike in a
+            # column this boundary. Independent columns may each record one.
+            cid = self._column_of.get(cell.id)
+            if (cid is not None and self._role_of.get(cell.id) == 'E'
+                    and cid not in self.column_winners):
+                self.column_winners[cid] = dict(id=cell.id, tau=round(float(tau), 9))
         self._emit_event_outputs(cell.id)
         self._drive_event_apical(cell.id, tau)
         self._drive_event_relays(cell.id, tau)
@@ -1388,28 +1577,114 @@ class SimulationEngine:
         return sum(h) / len(h) if h else 0.0
 
     # ================================================================ control
+    def _active_patterns(self) -> dict:
+        """The active topology-sized pattern bank. Legacy 9-pixel presets keep the four
+        3x3 stimuli verbatim; tiled_cc embeds each into the selected patch as a full
+        81-length vector, so the bank never advertises a 9-length vector to an 81-input
+        engine. ``set_pattern`` / ``topology()`` resolve against this bank."""
+        if self.tiled_meta is None:
+            return {k: list(map(int, v)) for k, v in PATTERNS.items()}
+        ishape, pshape = self.tiled_meta['input_shape'], self.tiled_meta['patch_shape']
+        patch = self._patch or (0, 0)
+        return {name: embed_patch_pattern((ishape['rows'], ishape['cols']),
+                                          (pshape['rows'], pshape['cols']), patch, vec)
+                for name, vec in PATTERNS.items()}
+
+    def set_patch(self, row, col):
+        """Select the tiled patch local pattern buttons embed into. Validates bounds;
+        raises if the engine is not tiled. Re-resolves any active named pattern."""
+        if self.tiled_meta is None:
+            raise ValueError('patch selection requires a tiled topology')
+        g = self.tiled_meta.get('grid_shape', {})
+        gr, gc = int(g.get('rows', 1)), int(g.get('cols', 1))
+        row, col = int(row), int(col)
+        if not (0 <= row < gr and 0 <= col < gc):
+            raise ValueError(f'patch ({row},{col}) out of bounds for {gr}x{gc} patch grid')
+        self._patch = (row, col)
+        if self.current_pattern is not None and self.current_pattern in PATTERNS:
+            self.set_pattern(self.current_pattern)      # re-embed into the new patch
+        return self._patch
+
     def set_pattern(self, name: str):
-        if name not in PATTERNS:
+        bank = self._active_patterns()
+        if name not in bank:
             raise KeyError(name)
-        vec = PATTERNS[name]
+        vec = bank[name]
         if len(vec) != self.n_pix:
             raise ValueError(
-                f'pattern {name!r} has {len(vec)} pixels but this engine has '
-                f'n_pix={self.n_pix}; the built-in patterns are 3x3 (9-pixel) only')
+                f'pattern {name!r} resolves to {len(vec)} pixels but this engine has '
+                f'n_pix={self.n_pix}')
         self.current_pattern = name
         self.input_vec = np.array(vec, dtype=float)
+        # On a tiled graph, a single named pattern is the current patch alone; mirror it
+        # into the per-patch map so the compositional view (which patch holds which pattern)
+        # stays consistent with what is actually driving the input.
+        if self.tiled_meta is not None and self._patch is not None:
+            self._patch_patterns = {tuple(self._patch): name}
+
+    # ------------------------------------------------- per-patch composition
+    def _rebuild_patch_input(self):
+        """Set ``input_vec`` to the pixel-wise union (OR) of every assigned patch pattern.
+        Empty map -> a blank surface. Tiled graphs only."""
+        ishape, pshape = self.tiled_meta['input_shape'], self.tiled_meta['patch_shape']
+        vec = np.zeros(self.n_pix)
+        for (pr, pc), name in self._patch_patterns.items():
+            emb = embed_patch_pattern((ishape['rows'], ishape['cols']),
+                                      (pshape['rows'], pshape['cols']), (pr, pc),
+                                      PATTERNS[name])
+            vec = np.maximum(vec, np.asarray(emb, dtype=float))
+        self.input_vec = vec
+        return vec
+
+    def set_patch_pattern(self, row, col, name):
+        """Assign ``name`` (or ``None`` to clear) to patch ``(row, col)`` and rebuild the
+        input as the union of ALL assigned patches -- so different 3x3 patches can be driven
+        by different patterns at once and changed independently while learning continues.
+        Tiled graphs only; validates patch bounds and pattern name."""
+        if self.tiled_meta is None:
+            raise ValueError('per-patch patterns require a tiled topology')
+        g = self.tiled_meta.get('grid_shape', {})
+        gr, gc = int(g.get('rows', 1)), int(g.get('cols', 1))
+        row, col = int(row), int(col)
+        if not (0 <= row < gr and 0 <= col < gc):
+            raise ValueError(f'patch ({row},{col}) out of bounds for {gr}x{gc} patch grid')
+        if name is None:
+            self._patch_patterns.pop((row, col), None)
+        else:
+            if name not in PATTERNS:
+                raise KeyError(name)
+            self._patch_patterns[(row, col)] = name
+        self.current_pattern = None            # a composition is not one single named pattern
+        return self._rebuild_patch_input()
+
+    def clear_patch_patterns(self):
+        """Clear every per-patch assignment and blank the input surface (tiled only)."""
+        self._patch_patterns = {}
+        self.current_pattern = None
+        if self.tiled_meta is not None:
+            self.input_vec = np.zeros(self.n_pix)
+        return self.input_vec
+
+    def patch_pattern_map(self):
+        """Serializable list of current per-patch assignments (tiled display state)."""
+        return [dict(row=int(pr), col=int(pc), name=name)
+                for (pr, pc), name in sorted(self._patch_patterns.items())]
 
     def set_input(self, vec):
         self.input_vec = np.array(vec, dtype=float).reshape(self.n_pix)
+        self._patch_patterns = {}              # manual override drops the patch composition
 
     def toggle_pixel(self, i: int):
         self.input_vec[i] = 0.0 if self.input_vec[i] > 0.5 else 1.0
+        self._patch_patterns = {}              # manual edit no longer matches a patch map
 
     def clear_input(self):
         self.input_vec = np.zeros(self.n_pix)
+        self._patch_patterns = {}
 
     def random_pattern(self):
         self.input_vec = (np.random.default_rng().random(self.n_pix) > 0.5).astype(float)
+        self._patch_patterns = {}
 
     def inject_noise(self, prob: float = 0.15):
         flip = np.random.default_rng().random(self.n_pix) < prob
@@ -1434,22 +1709,30 @@ class SimulationEngine:
         else:
             self._sched_exc(neuron_id, charge)           # lands next boundary
 
+    def _floor_ordinary_ff(self, weight: float) -> float:
+        """Ordinary feedforward weights are cap-free: accept any finite nonnegative value
+        (zero floor, NO upper cap). Non-finite input is rejected."""
+        w = float(weight)
+        if not math.isfinite(w):
+            raise ValueError(f'weight must be finite, got {weight!r}')
+        return max(0.0, w)
+
     def set_feedforward_weight(self, j: int, i: int, weight: float) -> float:
         if not (0 <= j < len(self.l2e) and 0 <= i < len(self.l2e[j].acc_weights)):
             raise IndexError(f'feedforward index out of range: j={j}, i={i}')
-        w = float(np.clip(weight, 0.0, self.params['e_weight_cap']))
+        w = self._floor_ordinary_ff(weight)
         self.l2e[j].acc_weights[i] = w
         return w
 
     def set_synapse_weight(self, edge_id: str, weight: float) -> float:
         """Hand-set any plastic synapse weight by its edge id (topology-agnostic):
-        feedforward -> competitor.acc_weights (clip [0, e_weight_cap]); predictive
-        -> predictor.w (clip [0, pi_w_max]). Raises KeyError for a non-plastic/unknown
-        edge. Best used while paused."""
+        ordinary feedforward -> competitor.acc_weights (floor 0, cap-free); predictive
+        -> predictor.w (clip [0, pi_w_max]); C basal -> C-specific cap. Raises KeyError for
+        a non-plastic/unknown edge. Best used while paused."""
         ref = self._ff_weight_ref.get(edge_id)
         if ref is not None:
             cell, widx = ref
-            w = float(np.clip(weight, 0.0, self.params['e_weight_cap']))
+            w = self._floor_ordinary_ff(weight)
             cell.acc_weights[widx] = w
             return w
         ref = self._pred_weight_ref.get(edge_id)
@@ -1477,6 +1760,8 @@ class SimulationEngine:
                 raise ValueError('l2_init_total_frac must satisfy 0 < rho < 1')
             if k == 'c_eta' and v is not None and float(v) < 0.0:
                 raise ValueError('c_eta must be non-negative or None')
+            if k == 'dual_fe_fes':
+                v = bool(v)
             self.params[k] = v
             applied.append(k)
         # Selecting a named preset topology discards any applied custom graph.
@@ -1493,27 +1778,36 @@ class SimulationEngine:
         loads. Weights are NOT included; live weights come from ``topology()``."""
         nodes = []
         for n in self.spec['nodes']:
+            # Preserve every recognized structural field (pixel/grid input+display tags,
+            # and all tiled column_*/patch_*/has_parent metadata) so the editor round-trip
+            # never destroys tiling metadata; resolve display layer/label/pos from meta.
+            node = dict(n)
             m = self.meta[n['id']]
-            node = dict(id=n['id'], archetype=n['archetype'], layer=m['layer'],
-                        label=m['label'], pos=list(m['pos']))
-            # Both tags must survive the editor round-trip: 'pixel' is input ownership,
-            # 'grid' is the display/receptive-field cell. Dropping 'grid' here would
-            # silently unmap a saved rg graph's L1E cells from the RF view.
-            if n.get('pixel') is not None:
-                node['pixel'] = n['pixel']
-            if n.get('grid') is not None:
-                node['grid'] = n['grid']
+            node['layer'] = m['layer']
+            node['label'] = m['label']
+            node['pos'] = list(m['pos'])
             nodes.append(node)
+        # Edges are copied verbatim (incl. the projection-family metadata).
         edges = [dict(e) for e in self.spec['edges']]
-        return dict(name=self.mode, nodes=nodes, edges=edges,
-                    is_custom=self._custom_spec is not None)
+        out = dict(name=self.mode, nodes=nodes, edges=edges,
+                   is_custom=self._custom_spec is not None)
+        # Top-level tiling metadata survives export so a saved tiled preset reloads with
+        # its input dimensions and column membership intact.
+        if isinstance(self.spec.get('topology'), dict):
+            out['topology'] = self.spec['topology']
+        return out
 
     def apply_topology(self, spec: dict):
         """Validate and install a custom NetworkSpec, then rebuild. Raises SpecError
-        (a ValueError) if the graph is structurally invalid. Learned state is reset."""
-        norm = validate_spec(spec, self.n_pix)
+        (a ValueError) if the graph is structurally invalid. Learned state is reset.
+
+        A tiled spec is validated (and the engine rebuilt) at its OWN declared input
+        size, so loading an 81-input tiled graph while a 9-input legacy preset is active
+        resizes the engine input safely instead of failing a stale range check."""
+        n_pix = tiled_input_size(spec) or self.n_pix
+        norm = validate_spec(spec, n_pix)
         self._custom_spec = norm
-        self._build()
+        self._build()               # _resolve_dims re-derives n_pix from the tiled metadata
         self._log('topology', f"applied topology '{self.mode}': "
                               f"{len(norm['nodes'])} nodes, {len(norm['edges'])} edges")
         return self.current_spec()
@@ -1558,19 +1852,47 @@ class SimulationEngine:
             synapses.append(dict(**e, weight=(None if w is None else round(w, 6))))
         # Layers in upstream->downstream order, restricted to those the active graph
         # actually has (so 'rg' reports the RG source layer and pi/old do not).
-        layers = [L for L in ('RG', 'L1', 'ERR', 'L2')
+        layers = [L for L in ('RGC', 'RG', 'L1', 'ERR', 'L2')
                   if any(m['layer'] == L for m in self.meta.values())]
         layers += sorted({m['layer'] for m in self.meta.values()} - set(layers))
-        cols, rows = grid_dims(self.n_pix)             # display sheet (3x3 at n_pix=9)
-        return dict(neurons=neurons, synapses=synapses, layers=layers,
-                    patterns=list(PATTERNS.keys()),
-                    pattern_vectors={k: list(map(int, v)) for k, v in PATTERNS.items()},
-                    grid=dict(rows=rows, cols=cols), params=self._public_params())
+        bank = self._active_patterns()                 # topology-sized pattern bank
+        if self.tiled_meta is not None:
+            rows, cols = (self.tiled_meta['input_shape']['rows'],
+                          self.tiled_meta['input_shape']['cols'])
+        else:
+            cols, rows = grid_dims(self.n_pix)         # display sheet (3x3 at n_pix=9)
+        out = dict(neurons=neurons, synapses=synapses, layers=layers,
+                   patterns=list(bank.keys()),
+                   pattern_vectors=bank,
+                   grid=dict(rows=rows, cols=cols), params=self._public_params())
+        # Additive tiled metadata block (single source of truth for the dashboard's
+        # column grouping, 9x9 input grid and patch separators). Absent for legacy graphs.
+        if self.tiled_meta is not None:
+            out['tiling'] = dict(
+                family=self.tiled_meta['family'],
+                variant=self.tiled_meta.get('variant'),
+                input_shape=self.tiled_meta['input_shape'],
+                patch_shape=self.tiled_meta['patch_shape'],
+                grid_shape=self.tiled_meta.get('grid_shape'),
+                column_layers=self.tiled_meta.get('column_layers'),
+                columns=self.tiled_meta['columns'],
+                cc_e_count=self.tiled_meta.get('cc_e_count'),
+                selected_patch=list(self._patch) if self._patch is not None else None,
+                patch_patterns=self.patch_pattern_map())
+        return out
 
     def _public_params(self):
         p = self.params
         thr = float(p['e_threshold'])
+        # e_maturity_budget = the neuron-wide FE budget B = maturity_budget_frac*theta.
+        # This is the natural display reference for ordinary-E weights (there is NO hard
+        # per-synapse cap): a matured one-afferent specialist approaches B. e_weight_cap is
+        # reported for legacy/headless bounded modes only and must not be read as a production
+        # ceiling.
+        e_budget_frac = float(p['e_maturity_budget_frac'])
         out = dict(seed=p['seed'], e_threshold=thr, e_weight_cap=float(p['e_weight_cap']),
+                   e_maturity_budget_frac=e_budget_frac,
+                   e_maturity_budget=e_budget_frac * thr,
                    eta=float(p['eta']), leak_rate=float(p['leak_rate']),
                    refractory_steps=int(p['refractory_steps']),
                    input_period=int(p['input_period']),
@@ -1599,12 +1921,27 @@ class SimulationEngine:
                    switch_conductance_enabled=bool(p['switch_conductance_enabled']),
                    c_eta=(float(p['eta']) if p['c_eta'] is None else float(p['c_eta'])),
                    l2_init_total_frac=float(p['l2_init_total_frac']),
+                   # Experimental dual FE/FES rule: the active flag plus its three validated
+                   # parameters (so a replay/serialized state records whether it was on).
+                   dual_fe_fes=bool(p['dual_fe_fes']),
+                   dual_fe_e=float(p['dual_fe_e']),
+                   dual_fe_wte=float(p['dual_fe_wte']),
+                   dual_fe_B=float(p['dual_fe_B']),
                    n_pix=int(self.n_pix), n_out=int(self.n_out),
                    ff_init_mean=float(self.ff_init_mean),
                    synaptic_delay=SYNAPTIC_DELAY,
                    i_threshold=round(thr * I_THRESHOLD_FRAC, 4),
                    threshold_l2=thr,
                    l2e_weight_cap_frac=float(p['e_weight_cap']) / thr if thr else 1.0)
+        # Tiled construction dimensions are public topology parameters. cc_e_count is
+        # always reported; input/patch/column shape only when a tiled graph is active.
+        out['cc_e_count'] = int(self.cc_e_count)
+        if self.tiled_meta is not None:
+            out['tiled_family'] = self.tiled_meta['family']
+            out['input_shape'] = dict(self.tiled_meta['input_shape'])
+            out['patch_shape'] = dict(self.tiled_meta['patch_shape'])
+            out['column_count'] = len(self.tiled_meta['columns'])
+            out['selected_patch'] = list(self._patch) if self._patch is not None else None
         return out
 
     def dynamic_state(self) -> dict:
@@ -1662,6 +1999,9 @@ class SimulationEngine:
                     # tolerance ties are auditable. Empty on legacy graphs.
                     hard_reset_events=list(self.hard_reset_events),
                     latency_ties=list(self.latency_ties),
+                    # Per-column ordinary-E winners (tiled). Additive: empty for legacy
+                    # graphs, which keep the single ``winner`` highlight below.
+                    column_winners={cid: dict(w) for cid, w in self.column_winners.items()},
                     input=self.input_vec.astype(int).tolist(),
                     winner=self.winner,
                     stats=self.stats(), log=list(self.event_log)[-12:])
