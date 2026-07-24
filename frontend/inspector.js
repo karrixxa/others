@@ -29,6 +29,15 @@ export class Inspector {
 
   refresh() { if (this.id) this.render(); }
 
+  // Clear the current selection and show the empty placeholder. Called when a new
+  // topology is applied (live editor apply, or entering/leaving replay) so the
+  // panel never references a neuron id that no longer exists.
+  reset() {
+    this.id = null;
+    if (this.empty) this.empty.hidden = false;
+    if (this.body) { this.body.hidden = true; this.body.innerHTML = ''; }
+  }
+
   render() {
     const s = this.store;
     const meta = s.meta.get(this.id);
@@ -48,6 +57,10 @@ export class Inspector {
       if (syn.source === this.id) outgoing.push({ ...syn, w, conf, other: syn.target });
     }
     const strongest = [...incoming, ...outgoing].sort((a, b) => Math.abs(b.w) - Math.abs(a.w)).slice(0, 4);
+    // Cap-free ordinary-E display reference: the neuron-wide maturity budget
+    // B = e_maturity_budget_frac * theta (no hard per-synapse cap).
+    const wref = (s.topology?.params?.e_maturity_budget)
+      ?? ((meta.threshold || 1000) * (s.topology?.params?.e_maturity_budget_frac ?? 1.1));
     // 'S' is the exogenous RG source: neither excitatory-integrator nor inhibitory.
     const col = meta.type === 'E' ? 'var(--exc)' : meta.type === 'S' ? 'var(--rg)' : 'var(--inh)';
     const typeLabel = meta.type === 'E' ? 'excitatory'
@@ -63,6 +76,10 @@ export class Inspector {
             <span class="tag">${meta.layer}</span>
             <span class="tag">${typeLabel}</span>
             <span class="tag">${meta.role}</span>
+            ${meta.column_id ? `<span class="tag" title="cortical column">${meta.column_id}</span>` : ''}
+            ${meta.column_role ? `<span class="tag" title="role within its column">${meta.column_role}${meta.column_index != null ? ' ' + meta.column_index : ''}</span>` : ''}
+            ${meta.column_row != null ? `<span class="tag" title="tile position (row,col)">tile ${meta.column_row},${meta.column_col}</span>` : ''}
+            ${meta.column_role === 'C' && meta.has_parent === false ? `<span class="tag" style="color:var(--txt-2)" title="top column has no parent: this C receives no apical permission and stays dormant">dormant top C</span>` : ''}
             ${state.assembly ? `<span class="tag" style="color:var(--win)">assembly</span>` : ''}
           </div>
         </div>
@@ -136,9 +153,9 @@ export class Inspector {
               <div style="height:100%;width:${Math.max(0, Math.min(1, state.trace_charge / meta.threshold)) * 100}%;background:#f59e0b;border-radius:3px"></div>
             </div>
           </div>`) : ''}
-        ${synCard('Strongest connections', strongest, this.id)}
-        ${synCard(`Incoming (${incoming.length})`, incoming, this.id)}
-        ${synCard(`Outgoing (${outgoing.length})`, outgoing, this.id)}
+        ${synCard('Strongest connections', strongest, this.id, wref)}
+        ${synCard(`Incoming (${incoming.length})`, incoming, this.id, wref)}
+        ${synCard(`Outgoing (${outgoing.length})`, outgoing, this.id, wref)}
       </div>`;
   }
 }
@@ -152,7 +169,7 @@ function bar(x) {
   const pct = Math.max(0, Math.min(1, x)) * 100;
   return `<div class="bar"><i style="width:${pct}%"></i></div>`;
 }
-function synCard(title, list, self) {
+function synCard(title, list, self, wref = 1000) {
   if (!list.length) return `<div class="icard full"><div class="lbl">${title}</div><div class="val sm" style="color:var(--txt-2)">none</div></div>`;
   // Render every synapse in the list. Callers that want a summary (e.g. the
   // "Strongest connections" card) pre-slice their list; the Incoming/Outgoing
@@ -181,7 +198,7 @@ function synCard(title, list, self) {
     if (sy.kind === 'coincidence_local') {
       return `<div class="syn-row">
         <span class="name">${sy.other}</span>
-        <span class="wbar"><i style="left:50%;width:${(Math.min(1, Math.abs(sy.w) / 500) * 50).toFixed(0)}%;background:#9be15d"></i></span>
+        <span class="wbar"><i style="left:50%;width:${(Math.min(1, Math.abs(sy.w) / wref) * 50).toFixed(0)}%;background:#9be15d"></i></span>
         <span class="wv" title="paired local sensory afferent (coincidence input)">local ${sy.w.toFixed(0)}</span></div>`;
     }
     // L2I_WTA / legacy L1I inhibition (I->E): a persistent inhibitory CONDUCTANCE

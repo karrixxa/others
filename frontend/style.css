@@ -13,6 +13,8 @@
   --exc: #5eead4;           /* excitatory */
   --inh: #f0788c;           /* inhibitory */
   --rg: #fbbf24;            /* exogenous retinal-ganglion source layer */
+  --coin: #38bdf8;          /* coincidence-detector neuron body */
+  --eor: #a855f7;           /* ordinary-readout Eor neuron body */
   --win: #ffce5c;           /* winner */
   --ff: #4cc38a;            /* feedforward edge */
   --in: #f0788c;            /* inhibition edge */
@@ -138,16 +140,40 @@ input[type="range"] { accent-color: var(--accent); height: 4px; }
 
 /* Pixel grid (pattern input) */
 .pixel-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+/* Tiled 9x9 surface: tighter gap/radius so 81 cells fit the panel. */
+.pixel-grid.patched { gap: 2px; }
 .pixel {
   aspect-ratio: 1; border-radius: 8px; background: var(--bg-3);
   border: 1px solid var(--line); cursor: pointer; transition: all .12s;
   display: flex; align-items: center; justify-content: center;
 }
+.pixel-grid.patched .pixel { border-radius: 3px; }
 .pixel:hover { border-color: var(--accent-2); }
 .pixel.on { background: radial-gradient(circle at 40% 35%, var(--accent), #1c8076);
   border-color: var(--accent); box-shadow: 0 0 10px rgba(94,234,212,.35); }
 .pixel.fire { animation: pop .35s ease; }
+/* Strong boundaries between the nine 3x3 patches of the tiled input surface. */
+.pixel.patch-r { margin-right: 3px; box-shadow: 3px 0 0 -1px var(--accent-2); }
+.pixel.patch-b { margin-bottom: 3px; box-shadow: 0 3px 0 -1px var(--accent-2); }
+.pixel.patch-r.patch-b { box-shadow: 3px 0 0 -1px var(--accent-2), 0 3px 0 -1px var(--accent-2); }
+/* Cells of the currently selected local-pattern patch. */
+.pixel.in-patch { outline: 1px solid var(--accent-2); outline-offset: -1px; }
 @keyframes pop { 0%{transform:scale(.8)} 50%{transform:scale(1.12)} 100%{transform:scale(1)} }
+
+/* Local-pattern patch selector (tiled_cc only). */
+.patch-select { margin: 8px 0; }
+.patch-label { display: block; font-size: 10px; color: var(--txt-2); margin-bottom: 4px; }
+.patch-grid { display: grid; gap: 4px; }
+.patch-btn {
+  aspect-ratio: 1.6; background: var(--bg-2); border: 1px solid var(--line);
+  border-radius: 5px; color: var(--txt-1); font-size: 10px; cursor: pointer; transition: all .14s;
+}
+.patch-btn:hover { border-color: var(--accent-2); color: var(--txt-0); }
+/* a patch that currently has a pattern assigned (composition view) */
+.patch-btn.assigned { color: var(--accent-2); border-color: var(--accent-2);
+  background: color-mix(in srgb, var(--accent-2) 14%, var(--bg-2)); font-weight: 600; }
+/* the selected patch wins the styling cascade so it stays obviously highlighted */
+.patch-btn.active { color: #0a1410; background: var(--accent); border-color: var(--accent); font-weight: 650; }
 
 .pattern-buttons { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
 .pat-btn {
@@ -169,6 +195,7 @@ input[type="range"] { accent-color: var(--accent); height: 4px; }
 .sw { width: 11px; height: 11px; border-radius: 50%; }
 .sw.exc { background: var(--exc); } .sw.inh { background: var(--inh); } .sw.win { background: var(--win); }
 .sw.rg { background: var(--rg); }
+.sw.coin { background: var(--coin); } .sw.eor { background: var(--eor); }
 .ln { width: 16px; height: 2px; border-radius: 2px; }
 .ln.ff { background: var(--ff); } .ln.in { background: var(--in); } .ln.ex { background: var(--ex); }
 .ln.pi { background: #e066c0; }
@@ -303,6 +330,9 @@ canvas.chart, #histogram { width: 100%; display: block; }
 .viz-bar { flex: none; height: 46px; display: flex; align-items: center; gap: 16px; padding: 0 14px; background: var(--bg-2); border-bottom: 1px solid var(--line); }
 .viz-title { font-weight: 600; color: var(--txt-0); }
 .viz-bar .check { margin: 0; }
+.viz-column { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--txt-1); }
+.viz-column[hidden] { display: none; }
+.viz-column select { padding: 4px 7px; font-size: 12px; }
 .viz-zoom { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--txt-2); }
 .viz-legend { font-size: 11px; color: var(--txt-2); display: flex; align-items: center; gap: 6px; }
 .viz-legend .sw { display: inline-block; width: 10px; height: 10px; border-radius: 2px; vertical-align: middle; }
@@ -359,3 +389,64 @@ canvas.chart, #histogram { width: 100%; display: block; }
 .rf-overlay .rf-edit-hint.is-active { color: var(--ok, #5eead4); }
 .rf-cell.rf-blank { opacity: 0.3; border: 1px dashed var(--line); background: transparent !important; cursor: default; }
 .rf-overlay .viz-transport { margin-left: auto; }
+
+/* ───────────────────────── Read-only replay player ──────────────────────── */
+/* Fixed strip below the top bar; shown only while a recorded replay owns the
+   display. position:fixed keeps it out of the body grid so toggling it never
+   reflows the main layout. */
+.replay-bar {
+  position: fixed; top: 56px; left: 0; right: 0; z-index: 30;
+  display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  padding: 7px 14px;
+  background: linear-gradient(180deg, #241b0e, #1a140b);
+  border-bottom: 1px solid #5a4413;
+  font-size: 12px; color: var(--txt-0);
+}
+.replay-bar[hidden] { display: none; }
+body.replay-mode main.layout { padding-top: 46px; box-sizing: border-box; }
+
+.rp-badge {
+  font-weight: 700; letter-spacing: 1.2px; font-size: 11px;
+  color: #14100a; background: var(--rg); padding: 3px 8px; border-radius: 5px;
+}
+.rp-info { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.rp-info.dim { color: var(--txt-1); }
+.rp-transport { display: inline-flex; gap: 5px; }
+.rp-speed-wrap { display: inline-flex; align-items: center; gap: 5px; color: var(--txt-1); }
+.rp-speed, .rp-marker-select {
+  background: var(--bg-3); color: var(--txt-0); border: 1px solid var(--line);
+  border-radius: 6px; padding: 4px 6px; font-size: 12px;
+}
+
+/* Timeline: a slider with absolutely-positioned marker ticks above the track. */
+.rp-timeline { position: relative; flex: 1 1 220px; min-width: 180px; height: 22px; display: flex; align-items: center; }
+.rp-slider { width: 100%; margin: 0; accent-color: var(--rg); }
+.rp-ticks { position: absolute; left: 0; right: 0; top: 0; height: 8px; pointer-events: none; }
+.rp-tick {
+  position: absolute; top: 0; width: 2px; height: 8px; margin-left: -1px;
+  background: var(--accent-2); border-radius: 1px; pointer-events: auto; cursor: pointer;
+}
+.rp-tick:hover { background: #fff; }
+.rp-markers { display: inline-flex; align-items: center; gap: 5px; }
+.rp-error { color: #ffd7dc; font-size: 12px; }
+.rp-error[hidden] { display: none; }
+
+/* Load/parse errors surface here without entering replay. */
+.replay-toast {
+  position: fixed; top: 64px; left: 50%; transform: translateX(-50%); z-index: 60;
+  max-width: 620px; padding: 10px 16px;
+  background: #2a1a20; border: 1px solid #5a2a33; border-radius: 8px;
+  color: #ffd7dc; font-size: 13px; box-shadow: 0 8px 28px rgba(0,0,0,.5);
+}
+.replay-toast[hidden] { display: none; }
+
+/* Guard live-mutation affordances while replay owns the display. The api guard in
+   app.js is the real safety net; these just make the controls read as inert. */
+.btn:disabled { opacity: .4; cursor: not-allowed; }
+.btn:disabled:hover { background: var(--bg-3); border-color: var(--line); }
+body.replay-mode #pixel-grid,
+body.replay-mode #patch-grid,
+body.replay-mode #patch-select,
+body.replay-mode #pattern-buttons,
+body.replay-mode #config-controls,
+body.replay-mode .rf-grid { pointer-events: none; opacity: .5; }

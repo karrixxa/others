@@ -12,6 +12,13 @@ from snn.neurons import (ExcitatoryNeuron, CoincidencePyramidalNeuron,
                          E_UPDATE_MODES, C_UPDATE_MODES, leak_to_conductance)
 from backend.simulation import SimulationEngine
 
+# The dual FE/FES modes are a DIFFERENT rule (inverse-quadratic node/synapse factors,
+# Iaccq-driven FE, a wte floor and no budget), so the budget-FE-family algebra below
+# (zero/negative budget-FE behavior, the zero floor) excludes them; their own algebra is
+# covered by test_dual_fe_fes.py.
+BUDGET_E_MODES = tuple(m for m in E_UPDATE_MODES if m != 'dual_fe_fes')
+BUDGET_C_MODES = tuple(m for m in C_UPDATE_MODES if m != 'c_dual_fe_fes')
+
 
 # ------------------------------------------------------------------ E helpers
 def make_e(w, *, dist=None, mode='quadratic_bounded', eta=0.01, w_max=500.0,
@@ -57,7 +64,7 @@ def test_quadratic_delta_includes_the_multiplier():
 
 
 def test_zero_fe_produces_zero_delta_all_modes():
-    for mode in E_UPDATE_MODES:
+    for mode in BUDGET_E_MODES:
         # Zero FE now means sum(w) == the budget target (1.10*theta), not theta.
         n = make_e([550., 550.], mode=mode, eta=0.1, w_max=1000., threshold=1000.)
         before = n.acc_weights.copy()
@@ -66,7 +73,7 @@ def test_zero_fe_produces_zero_delta_all_modes():
 
 
 def test_negative_fe_reverses_direction():
-    for mode in E_UPDATE_MODES:
+    for mode in BUDGET_E_MODES:
         n = make_e([600., 600.], mode=mode, eta=0.001, w_max=1000., threshold=1000.)
         after = learn(n, [True, False])                          # sum=1200 -> FE=-200
         assert after[0] < 600.0                                  # participating DECREASES
@@ -94,7 +101,7 @@ def test_only_bounded_modes_clip_at_w_max():
 
 
 def test_every_mode_retains_the_zero_floor():
-    for mode in E_UPDATE_MODES:
+    for mode in BUDGET_E_MODES:
         n = make_e([5., 600.], mode=mode, eta=5.0, w_max=1000., threshold=1000.)
         after = learn(n, [False, True])                          # afferent 0 depressed hard
         assert after[0] == pytest.approx(0.0) and after[0] >= 0.0
@@ -164,16 +171,17 @@ def test_c_default_mode_is_production_quadratic():
 
 # ===================================================== integration / regression
 def test_default_modes_are_production():
-    # PROMOTED production defaults: linear-bounded E and linear-bounded C (multiplier
-    # dropped on both; the historical quadratic rules remain as headless modes).
+    # Production defaults: cap-free linear_fe E (FE budget supplies saturation, no per-synapse
+    # cap) and linear-bounded C (C keeps its own mechanism-specific cap). The historical
+    # bounded/quadratic E rules remain as headless-only modes.
     e = SimulationEngine(seed=1, topology='rg_coincidence')
-    assert e.latency_competitors[0].update_mode == 'linear_bounded'
+    assert e.latency_competitors[0].update_mode == 'linear_fe'
     assert e.coincidence[0].update_mode == 'c_linear_bounded'
 
 
-def test_engine_default_e_equals_explicit_linear_bounded():
-    # The engine default must be identical to an explicit linear_bounded request, and
-    # DIFFERENT from the historical quadratic mode (over a real learning trajectory).
+def test_engine_default_e_equals_explicit_linear_fe():
+    # The engine default must be identical to an explicit linear_fe request, and DIFFERENT
+    # from the historical quadratic mode (over a real learning trajectory).
     def sums(mode):
         kw = {} if mode is None else dict(e_weight_update_mode=mode)
         e = SimulationEngine(seed=1, topology='rg_coincidence', **kw)
@@ -181,7 +189,7 @@ def test_engine_default_e_equals_explicit_linear_bounded():
         for _ in range(80):
             e.step()
         return [round(float(c.acc_weights.sum()), 9) for c in e.latency_competitors]
-    assert sums(None) == sums('linear_bounded')          # default == explicit linear
+    assert sums(None) == sums('linear_fe')               # default == explicit cap-free
     assert sums(None) != sums('quadratic_bounded')       # and differs from historical
 
 

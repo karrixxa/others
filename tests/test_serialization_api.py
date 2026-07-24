@@ -31,15 +31,15 @@ def test_topology_payload_shape(engine):
 
 
 def test_new_population_ids_and_roles(engine):
-    # Default topology is 'pi': 9 L1E_s sources, 8 L2E competitors, 8 PI, 1 L2I.
+    # Default topology is 'rg_coincidence': 9 RG sources, 9 pretrained L1E, 9 coincidence
+    # L1C, 8 L2E competitors, hard-reset relays.
     ids = {n['id'] for n in engine.topology()['neurons']}
-    assert {f'L1E{i}' for i in range(9)} <= ids          # sources (controls.js flashes these)
-    assert {f'PI{j}' for j in range(8)} <= ids           # predictive interneurons
-    assert {f'L2E{j}' for j in range(8)} <= ids
+    assert {f'RG{i}' for i in range(9)} <= ids            # exogenous RG sources
+    assert {f'L1E{i}' for i in range(9)} <= ids           # L1 feature cells
+    assert {f'L2E{j}' for j in range(8)} <= ids           # L2 competitors
     assert 'L2I' in ids
-    assert not any(i.startswith('L1Enew') for i in ids)  # coincidence topology removed
     ff_ids = {s['id'] for s in engine.topology()['synapses'] if s['kind'] == 'feedforward'}
-    assert 'ff0->0' in ff_ids and 'ff8->7' in ff_ids     # weights.js/receptive.js id scheme
+    assert 'ff0->0' in ff_ids and 'ff8->7' in ff_ids      # weights.js/receptive.js id scheme
 
 
 def test_dynamic_payload_shape(engine):
@@ -58,25 +58,6 @@ def test_dynamic_payload_shape(engine):
     assert len(d['input']) == 9
 
 
-def test_inhibitory_pulse_schema():
-    # A PI (direct-topology) inhibitory pulse carries conductance-pulse fields and
-    # never serializes a 'charge_removed'.
-    e = SimulationEngine(seed=1, topology='pi')
-    e.set_pattern('row 1')
-    pulse = None
-    for _ in range(400):
-        d = e.step()
-        preds = [p for p in d['inhibitory_pulses'] if p['kind'] == 'predictive']
-        if preds:
-            pulse = preds[0]
-            break
-    assert pulse is not None
-    assert set(pulse) == {'source', 'target', 'kind', 'synaptic_weight',
-                          'conductance_increment', 'g_inh_before', 'g_inh_after', 'boundary'}
-    assert 'charge_removed' not in pulse
-    assert pulse['g_inh_after'] >= pulse['g_inh_before']
-
-
 def test_config_rejects_deleted_keys(engine):
     applied = engine.apply_config({'confidence_consolidation': True,
                                    'l2_charge_chunks': 20,
@@ -90,23 +71,13 @@ def test_config_accepts_editable_keys(engine):
     applied = engine.apply_config({'leak_rate': 0.1, 'refractory_steps': 2})
     assert set(applied) == {'leak_rate', 'refractory_steps'}
     assert engine.params['leak_rate'] == 0.1
-    assert engine.l2e[0].leak_rate == 0.1                # rebuild propagated it
-    # The control surface matches config_values and exposes the separated
-    # predictive-inhibition timescales plus the two ablation toggles.
+    assert engine.latency_competitors[0].leak_rate == 0.1    # rebuild propagated it
+    # The dashboard control surface is exactly the retained controls plus the one new
+    # experimental dual FE/FES toggle.
     keys = {c['key'] for c in CONFIG_SPEC}
     assert keys == set(config_values(engine.params))
-    assert keys == {'leak_rate', 'refractory_steps', 'eta', 'c_eta',
-                    'l2_init_total_frac', 'e_weight_cap', 'topology',
-                    'alpha_inh', 'alpha_inh_l1', 'alpha_a', 'pi_eta', 'pi_g_scale',
-                    'l2i_g_scale', 'pi_conductance_enabled', 'pi_plasticity_enabled',
-                    # 'rg' topology controls: the RG->L1E projection's ablation toggle
-                    # and its initialization-jitter control.
-                    'enc_plasticity_enabled', 'enc_init_jitter',
-                    # residual topology timing/expression controls
-                    'residual_exc_scale', 'switch_trace_decay',
-                    'switch_trace_threshold', 'switch_residual_charge_frac',
-                    'switch_trace_charge_frac', 'switch_g_scale',
-                    'switch_conductance_enabled'}
+    assert keys == {'topology', 'leak_rate', 'refractory_steps', 'eta', 'c_eta',
+                    'l2_init_total_frac', 'dual_fe_fes'}
 
 
 def test_reset_and_reseed_cycle(engine):
@@ -131,6 +102,21 @@ def test_api_module_imports_and_builds():
     from backend.dashboard_config import DASHBOARD_OVERRIDES
 
     assert api.engine is not None
+    # The dashboard now STARTS on the dual FE/FES rule running on the 9x9 tiled hierarchy at
+    # its confirmation parameters (tiled_cc, dual on, eta=1.0, c_eta=0.5), so 3x3 patches can be
+    # composed. The engine's general-purpose default stays rg_coincidence with the production
+    # rule (see the registry contract).
+    from backend.dashboard_config import DASHBOARD_STARTUP_PATCH_PATTERNS
     startup = SimulationEngine(seed=1, **DASHBOARD_OVERRIDES)
-    assert startup.params['topology'] == 'rg_coincidence'
-    assert len(startup.topology()['neurons']) == 45
+    assert startup.params['topology'] == 'tiled_cc'
+    assert startup.params['dual_fe_fes'] is True
+    assert startup.latency_competitors[0].update_mode == 'dual_fe_fes'
+    assert len(startup.topology()['neurons']) == 191
+    # the startup preload composes two 3x3 patches so Play shows per-patch learning (asserted
+    # on a fresh engine -- api.engine is shared global state other tests may have cycled).
+    for pr, pc, name in DASHBOARD_STARTUP_PATCH_PATTERNS:
+        startup.set_patch_pattern(pr, pc, name)
+    assert len(startup.patch_pattern_map()) == len(DASHBOARD_STARTUP_PATCH_PATTERNS) >= 2
+    # SimulationEngine's own default is unchanged (production rule, coincidence preset).
+    assert SimulationEngine().params['topology'] == 'rg_coincidence'
+    assert SimulationEngine().params['dual_fe_fes'] is False
